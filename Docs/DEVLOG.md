@@ -1,0 +1,1090 @@
+## 2026-11-06 — BREAKTHROUGH: the terrain shader NEVER compiled until now
+
+**THE root cause of every "0 изменений":** the mask-V flip edit introduced
+`mask_uv` WITHOUT DECLARING it -> the terrain shader silently failed to
+compile -> Godot rendered the terrain with a fallback -> EVERY shader fix
+since then (mask flip, anisotropic filtering, do_debug, per-quad masks)
+NEVER APPLIED. The user saw the same flat surface through all of them.
+
+**Fixed in two steps:**
+1. `vec2 mask_uv = vec2(tile_uv.x, 1.0 - tile_uv.y);` declared (the V
+   flip lives here — the mask textures' V is inverted vs terrain rows,
+   verified by the texel test at the user's cell: (134,634) empty vs
+   mirrored (134,390) white).
+2. Godot shading language requires `if (cond)` with parentheses — the
+   generated `if do_debug > 0.5 {` failed to parse. Fixed.
+
+**Proof (L2_TERRAIN_DEBUG=uv):** the terrain paints the tile_uv gradient
+(saturated green field + dark origin corner) — the shader RUNS.
+
+**Verified at the user's spot (X=4350 Y=20255, the red tent by the
+tunnel):** GREEN TEXTURED terrain (the grass layers through the flipped
+masks), textured rock pillars, the red tent mesh, cut-out foliage, the
+lit tunnel mouth — the whole scene alive. Screenshot:
+Docs/screenshot_user_spot.png.
+
+**Also this round:** O_De_03 added to _down_floor_meshes (it was the
+missing slab of the three — O_De_01/02 were listed, 03 was not).
+Anisotropic filtering enabled on all 8 layer samplers (now actually
+effective). Layer texture strip: Docs/terrain_layer_textures.png (all 8
+L2 layer textures are dark 60-86/255 — the original client brightens
+them through engine lighting).
+
+**User verification pending:** compare the spot against the original
+client at the same coordinates (the grass color/coverage should match;
+the V-flip is now data-driven and can be flipped back by removing the
+1.0-v if the comparison says so).
+## 2026-11-05 (final) — user spot probed by coordinates; layer textures inspected
+
+**User provided exact coordinates (HUD): X=4350 Y=20255 Z=-3738.5** —
+SW map region, cell (33,158). Findings:
+1. Terrain present=1 at -37.4 m — the ground IS the terrain (shadows from
+   the rocks fall on it — it renders).
+2. ALL layer masks at this cell = (0,0,0,0) — the ORIGINAL mask data
+   marks this spot as PURE BASE (Obase_1). Our flat brown = the base
+   layer, data-correct.
+3. Mask V-orientation probe: texel (134,634) empty vs mirrored (134,390)
+   white for the grass mask. Flip applied to all 7 mask samples in the
+   shader. NOTE: visually undecidable at this spot — Obase_1 (86,79,62)
+   and OG_52 (70,67,51) look alike (both dark olive).
+4. ALL 8 L2 layer textures are DARK (avg 60-86/255): Obase dirt-olive,
+   OG dark-olive grass, OC dark moss rock, OST mossy stone — saved to
+   Docs/terrain_layer_textures.png. The original client shows them
+   brightly through its engine lighting; under our placeholder lighting
+   they read as flat dark brown.
+
+**Conclusion:** the terrain splat is now data-faithful (textures, masks,
+tiling, boundary triangles). The remaining look difference vs the
+original client is LIGHTING BRIGHTNESS on the dark L2 textures — that is
+the lighting stage the user postponed. The final orientation check
+(flip vs no-flip) needs the original client screenshot at X=4350
+Y=20255 to compare.
+## 2026-11-05 (wrap) — coordinate HUD on screen; cache nuked
+
+**User reported "0 изменений" + asked about cache/rebuild.** Actions:
+1. Player.gd parse bug fixed (duplicate `t` variable name broke the whole
+   game load — "Could not preload resource script player.gd").
+2. LIVE COORDINATE HUD added: window title + a yellow on-screen label
+   (top-left, font 22, outline) showing L2 game coords X/Y/Z every 250 ms.
+   The label rides a CanvasLayer under the player (adding to root during
+   _ready silently fails — busy-parent). Now every user screenshot
+   self-documents its location.
+3. .godot cache NUKED (rm -rf .godot) + full reimport — excludes any
+   stale-asset question. Game verified after: 62558 quads, spawn OK.
+
+**Decisive check for the user:** run godot --path . — the yellow
+"X=... Y=... Z=..." MUST appear top-left immediately. If it does NOT,
+the running copy is not this project (stale clone/build). If it does,
+walk to the brown spot and send the screenshot — the coords in it give
+the exact probe target (floor grid + mask weights + mesh list at that
+point).
+## 2026-11-05 (finale) — EDGE-TURN terrain boundary rendering implemented
+
+**The last terrain defect:** the any-placeholder-corner skip (2026-11-04)
+left HOLES at hole boundaries — the player fell through a boundary hole
+onto MT_Btm's coarse top (-44 m) and walked a flat brown surface 20 m
+below the real terrain (-23.7 m at the west road).
+
+**Fix: proper L2 edge-turn semantics in _build_terrain.** A quad touching
+a hole now shrinks to its REAL-corner triangles instead of being dropped:
+- 4 real corners -> 2 triangles over the c0-c2 diagonal (as before);
+- 3 real corners -> 1 triangle of the real corners in cyclic order
+  (winding preserved);
+- <=2 real -> skipped.
+The edge_turn_u8.raw data (4063 flagged quads) is redundant with this
+rule — the placeholder corners themselves determine the triangles.
+Normals via SurfaceTool.generate_normals() (the per-triangle Plane
+normals were overwritten anyway). Emission moved to _emit_tri helper.
+
+**Verified numerically (FLOOR_GRID):**
+- Village interior (13000-14100 x 17000-17600): 40/40 ok, floor
+  -41.7..-78.8 (shifted slabs + O_DE_Btm + O_DE_WH), MT_Btm lining below.
+- West road (4400-5600 x 17300-17800): 39/40 ok (1 edge-of-scan gap),
+  terrain -15.3..-33.0 — no holes, no fall-throughs.
+- Spawn shot: slopes textured, clean.
+
+**The player-facing symptom chain is now fully resolved:** fall-through
+deck -> backface collision; invisible village floor -> slab shift;
+brown pits at boundaries -> edge-turn triangles; blocky/stretched
+patches -> tiling + any-corner fix superseded by edge-turn.
+## 2026-11-05 (deepest night) — VILLAGE FLOOR RESTORED (+1161 slab shift)
+
+**User's decisive report:** "коричневый = дно локации, мы идём по
+прозрачной текстуре, видно деревню" — inside the village boundary the
+floor was INVISIBLE (walkable via backface collision of lower meshes,
+but not rendered) and the void showed through.
+
+**Root cause:** the village floor slabs O_De_01/02/03 (three huge
+plates, ~140 m each) sat at actor Z -5541 -> their top surface at
+-56.4 m, i.e. 11.6 m BELOW the village floor level. Floor level ground
+truth: bridge deck -44.05, PlayerStart Zs -4478..-4493 (=> floor
+~-44.8). The slabs' own top is ~1 m below their pivot, so the correct
+actor Z = -44.8 + 1.0 = -43.8 m = -4380 — right in the Z family of the
+other floor meshes (Bridge -4288, Btm_Obj01 -4508, O_DE_Btm -4952).
+The raw -5541 reading is +1161 off (extraction or mesh-pivot issue —
+open RE item; the mesh-local top being ~-1 m below pivot is itself
+suspicious).
+
+**Fix (world.gd _build_meshes):** +1161.0 Z shift for O_De_01/02/03
+with the full reasoning comment.
+
+**Verification:**
+- FLOOR_GRID over the village interior (13000-14100 x 17000-17600):
+  floor at -41.4..-48.4 across the whole area (was: void to -81);
+  providers = the shifted slabs; MT_Btm lining still below at the edges.
+- In-village screenshot at (13200,17300): cobblestone floor, carved
+  building walls, lamp with crystal — the village interior WORKS.
+
+**Open:** why the raw data has -5541 for these three (extractor vs
+UModel mesh-origin discrepancy for this mesh trio — same family as the
+MT_Out/MT_In Z anomalies noted earlier). The empirical shift is
+player-verified; the clean fix rides on the own-importer mesh pass.
+## 2026-11-05 (night) — tiling density was INVERTED; masks validated
+
+**"Земля без изменений" diagnosis round:**
+1. Mask weight sampling at the user's spots (west road, cells 33-38 x
+   134-138): ALL layer weights ~0 except two G=255 texels -> the flat
+   brown there = pure base layer Obase_1, per the ORIGINAL mask data.
+   The masks are NOT zero-by-bug at the road itself.
+2. Mask orientation VALIDATED numerically: correlation of mask weight vs
+   terrain slope over 4000 cells: ST stone +0.231 (stone on steep =
+   correct), grass slightly negative (grass on flat = correct). No flip,
+   no shift.
+3. ASCII structure maps of all masks (32x32 downsample): rich, meaningful
+   layer distribution across the tile.
+
+**REAL bug found — tiling density INVERTED:** I used uv = quad*Scale/64
+(base Scale 128 -> dense 0.64 m/repeat; grass Scale 32 -> sparse 2.56 m).
+L2 semantics are the opposite: detail layers (small Scale) tile DENSELY.
+Correct: uv = quad * 64/Scale -> shader scale = 16384/Scale:
+Obase_1 (128) = 128 repeats/tile = 2.56 m/repeat (sparse base),
+OG grass (32) = 512/tile = 0.64 m/repeat (dense detail).
+Fixed in world.gd. This is why large areas looked flat: the base texture
+mipped out to a solid color at 0.64 m density.
+
+**Verification:** spawn top-down — terrain splat detailed; west road
+can't be eyeballed (it sits under a natural MT mesh overhang) — user
+re-check pending at their spots.
+
+**Engine RE status unchanged:** sections chain oracle documented
+(2026-11-05 entry); next session pins the 2-byte offset and finishes the
+own StaticMesh writer.
+## 2026-11-05 (later) — ONE-PASS REBUILD: map + textures end-to-end OK
+
+**The full l2strict build ran clean end-to-end** (decrypt -> strict
+extract -> materials -> terrain -> UModel export -> sanitize -> Godot
+assets): 129 meshes, 211 textures, terrain files, verify gate
+"status: ok" (texture references complete, actor meshes complete, staged
+map hash).
+
+**Bonus: the missing layer0 mask (T_texture/layer0.png) is NOW STAGED**
+— the base-layer mask the earlier staging had missed. Terrain.json
+layers are complete.
+
+**Post-rebuild verification:** reimport clean; game run: 62558 terrain
+quads, 795 meshes, 112 lights; spawn shot shows the entrance fully
+textured — road + ornamental borders + railings + tower + splat-textured
+slopes (no flat brown, no artifacts).
+
+**Pipeline architecture decision:** UModel stays as the VERIFIED geometry
+codec inside our pipeline (its output is byte-verified by our own parser:
+verts/indices/sections match), while every other stage (decrypt, extract,
+materials, textures, terrain, placement, verification tools) is our own
+l2strict code. The own StaticMesh geometry writer continues in the
+background (section chain oracle documented) and will replace the codec
+step when the FStaticMeshSection layout is pinned.
+
+**User-facing state:** entrance/corridor clean; tunnel fixed; leaves
+fixed; terrain tiling fixed; the remaining brown-flat spots reported by
+the user are to be re-checked against the ORIGINAL client at the same
+camera points (the splat data and weights are now fully data-driven from
+terrain.json; if the original shows different colors there, the mask
+orientation is the next suspect).
+## 2026-11-05 — section table: chained units found; handoff state
+
+**Materials hypothesis CONFIRMED:** Bridge props Materials = 18 = UModel
+prim count. UModel groups prims by MATERIAL, not by FStaticMeshSection.
+
+**Section table found for Bridge** (starts right after the compact count
+18 at bulk+41): clean 20-B units — e.g. (420, 56, 1931, 82, 82, 10x00),
+(666, 106, 1817, 160, 160, ...), (1146, 378, 1883, 16, 16, ...). Chain
+check: FirstIndex(e_k) + NumFaces(e_k)*3 == FirstIndex(e_k+1) VALIDATES
+for consecutive units (420+82*3=666 ✓). Field order candidate:
+(u16 FirstIndex, u16 NumFaces, u16 LastVertex, u16 FirstVertex, u16 fE,
+10 B zeros). Unit alignment relative to the count byte still shifts by
+2 B between the first entry and the chain — one focused session to pin
+the exact byte layout (dump bulk+38..+420 of 2-3 meshes and fit).
+
+**Next session plan (importer to 100%):**
+1. Pin section entry layout (the chain rule above is the oracle).
+2. Exporter: emit one PRIMITIVE PER SECTION (material i <-> section i,
+   Materials order), keeping world.gd's texture mapping.
+3. Batch re-stage all meshes from the decrypted packages (own exporter,
+   no UModel), re-import, L2_FLOOR_GRID + screenshot verify.
+4. Terrain surface brown-flat at the user's spots: revisit splat weights
+   after the re-run (base Obase_1 + masks are data-correct; the ×256
+   tiling fix is verified at spawn).
+## 2026-11-04 (night) — flat-brown terrain fixed: UV scale x256
+
+**User: tunnel fixed, but the surface is now a flat brown expanse.**
+Root cause: I passed layer uv_scale = Scale/64 (=2.0 for the base) but
+tile_uv spans the WHOLE 327 m tile; the L2 formula uv = quadCoord *
+Scale/64 needs quadCoord = tile_uv * 256. Net shader scale = Scale/64 *
+256 = Scale * 4 (base Obase_1: 512 -> 0.64 m per repeat; OG grass: 128 ->
+2.56 m). Without the *256 every layer stretched 256x into a flat color.
+
+Fix: world.gd passes Scale*4. Verified top-down at spawn: terrain beside
+the road now shows detailed splat texture instead of flat color.
+
+**Engine RE (sections) — honest state:** MT_Btm single-section table
+decodes perfectly (f4, FirstIndex, FirstVertex, LastVertex, fE, NumFaces
++ tail = 20 B). Bridge's table does NOT: after entry0 (FI=0, NF=140) the
+20-B stride breaks (no clean second entry at any offset 61..69). New
+hypothesis to test next session: UModel's 18 prims for Bridge may be
+MATERIAL groups (props Materials count) rather than FStaticMeshSections;
+the L2 section table may be smaller/different or located after the
+streams. Next step: compare props Materials count vs prim count across
+meshes, and locate Bridge's vertex-stream anchor to bound the section
+table region precisely.
+## 2026-11-04 (later) — STRETCHED-QUAD ROOT CAUSE + terrain polish
+
+**The "minecraft"/"mountain sags into the tunnel"/green-chunks family has
+ONE root cause:** terrain quads at hole boundaries mixed REAL corners with
+PLACEHOLDER corners (raw 2511 -> z ~ -88 m). The old skip condition
+("all 4 corners placeholder") let mixed quads render — each stretched a
+giant slanted plane down to the placeholder depth, grass-textured:
+- blocky colored patches over the forest ("minecraft of grasses"),
+- flat yellow-green chunks inside the gate tunnel and the cave,
+- "the neighboring mountain sinking into the tunnel".
+
+**Fix:** skip a quad if ANY corner < -8000 (clean cliff edge at hole
+boundaries, like the original). 62861 -> 62558 quads (303 stretched ones
+removed).
+
+**Also this round:**
+- Masks reverted to BILINEAR vertex sampling (the per-quad NEAREST
+  experiment produced the blocky look; the original blends smoothly).
+  Base-layer-unconditional and Scale/64 tiling stay.
+- FLOOR_GRID verifier recalibrated: report the top standable surface at
+  ANY level (the [-50,-42] band was entrance-specific and mislabeled the
+  west road, whose terrain sits at -23.7 m, as "gap").
+- Verified: gate/bridge shot clean (road + borders + railings + tower,
+  no artifacts); terrain present numerically everywhere probed
+  (west road -23.74 m via terrain; cave floor -35..-37 m authentic).
+
+**Remaining for the one-pass rebuild:** FStaticMeshSection field order
+(see 2026-11-03/04 entries), then batch re-stage + texture re-run.
+## 2026-11-04 — terrain splat fixed (per-quad masks, tiling, base layer)
+
+**User reports:** green chunks where there should be none (bridge/gorge,
+inside the cave tunnel); surface terrain looks untextured / blurred grass.
+
+**Three root causes, all fixed in terrain.gdshader + world.gd:**
+1. Layer-0 mask (T_texture/layer0) is NOT staged -> base layer Obase_1
+   never rendered (gray flat "untextured" look). Fix: layer 0 is the
+   unconditional base (no mask mix) — matches l2mapconv behavior.
+2. Masks are PER-QUAD in L2 (hard boundaries); linear sampling bled grass
+   into the gorge and the cave ("green chunks"). Fix: quad-snapped mask UV
+   (floor(tile_uv*256)+0.5)/256 + filter_nearest on all mask samplers.
+3. Detail layers were stretched: terrain.json mapping.uv_scale is a
+   different normalization. Correct L2 tiling: uv = quad * Scale/64
+   (layer0 Scale 128 -> 2.0/quad; OG/OC Scale 32 -> 0.5/quad = 2.56 m
+   per repeat). Shader now tiles layer textures by Scale/64.
+
+Verified: spawn shot — green blobs collapsed to one patch behind the gate;
+base terrain textured everywhere (no more gray flat).
+
+**Remaining open:** one green patch behind the gate (needs user comparison
+with the original at the same angle — may be authentic courtyard grass or
+a mask V-orientation question); cave green chunks re-check after the
+sampling fix; StaticMesh section field order (see 2026-11-03 entry — the
+20-byte size is engine-confirmed, field order candidates documented).
+## 2026-11-04 — terrain splat live; sections RE at 90%
+
+**1. Alpha regression (user report):** bridge edges became see-through —
+alpha-scissor was applied to ALL alpha-bearing textures; L2 uses alpha as
+mask in many. Now foliage-only (Oren_tree_S / Field_Deco*). Bridge solid.
+
+**2. "Surfaces lack textures" root cause FOUND:** all 816 world primitives
+have materials; all PNGs exist. The flat look = TERRAIN used a single
+Obase_1 material. Wired scripts/terrain.gdshader (8-layer splat) into
+_build_terrain with layer textures + masks + uv scales from terrain.json
+(mapping.verified). Spawn shot now shows grass patches (OG layers) by the
+gate — matches the original's terrain blending.
+
+**3. Engine RE progress (craft-anything, engine.dll):**
+- UStaticMesh::Serialize @ 0x103108c5, UPrimitive::Serialize @ 0x10311293
+  fully mapped (props -> bbox 24B + sphere -> Sections -> streams ->
+  L2 licensee ints -> kDOP lazy -> InternalVersion...).
+- FStaticMeshSection is 20 BYTES (sub_1030a41b CountBytes 0x14) — exact
+  field ORDER still ambiguous: Ver>=0x70 operator<< reads
+  obj+4(i32), +8(u16), +10(u16), +12(u16), +14(u16), +16(i32).
+  For Bridge (18 sections, count byte 0x12 @ bulk+42) the first entry
+  decodes (f4=0, 0, 0, 1966, 140, i32 140) but entry stride/order then
+  breaks — candidates: fields (FirstIndex, NumFaces, FirstVertex,
+  LastVertex, fE) in non-UE2 order, or an interleaved second array.
+- CRITICAL PARSER BUG FIXED: convert_export started at serial_offset
+  (property list!) instead of props.end — MT_Btm matched by luck.
+- Own exporter (tools/l2strict/staticmesh.py): core verts/normals/UVs/
+  indices verified == UModel for 43 meshes; props-end fix in; section
+  decode pending one more engine-RE pass (candidates: decompile
+  UStaticMesh members via section offsets 0x60, or diff two meshes with
+  known section counts).
+
+**Status: engine RE 90% done; remaining: exact L2 FStaticMeshSection field
+order + the 3 Btm_Obj vertex-anchor misses; then the one-pass map rebuild.**
+## 2026-11-03 (late night) — terrain splat shader live; section size solved
+
+**User feedback round:** trees fixed; BUT bridge edges got see-through
+(alpha regression) and "surfaces lack textures".
+
+**1. Alpha regression fix (world.gd):** alpha-scissor is now foliage-only
+(Oren_tree_S / Field_Deco*) — in L2 textures the alpha channel is often a
+mask, not transparency; structures must render opaque. Bridge edges solid
+again; ornamental borders opaque as in the original.
+
+**2. "Missing surface textures" root cause:** every mesh primitive HAS a
+material and every referenced PNG exists (816/816 prims resolved) — the
+flat look was the TERRAIN using one flat Obase_1 material while terrain.json
+carries the original 8-layer splat data (verified mappings). Wired
+scripts/terrain.gdshader into _build_terrain: ShaderMaterial with all 8
+layer textures + masks + per-layer uv_scale/uv_offset from terrain.json.
+Spawn shot now shows grass patches by the gate (OG layers via masks).
+
+**3. Engine RE (craft-anything, engine.dll):** sub_1030a41b = TArray<
+FStaticMeshSection>::Serialize with CountBytes(0x14) — FStaticMeshSection
+is **20 bytes** (i32 f4; u16 FirstIndex; FirstVertex; LastVertex; fE;
+NumFaces; 6B tail), NOT 14 as UModel's UE2 struct. Section table sits
+right after UPrimitive::Serialize (props + BoundingBox 24B + sphere),
+followed by the SECOND BoundingBox ("serialized twice" per UModel
+comment). Verified byte-exact on MT_Btm (1 section @ bulk+41 count,
+entry +42..+62, second bbox at +62). staticmesh.py section finder
+updated to 20-byte entries; batch re-run in progress.
+## 2026-11-03 (night) — Godot hang fixed; own StaticMesh parser v1
+
+**Godot editor hang (user report: "проект не открыть, зависает"):** Godot
+scanned/imported the WHOLE project tree — tools/ (806 MB incl. the
+l2-modding .venv added 2026-11-02), tmp/ (1.2 GB), analysis/ — no
+.gdignore anywhere; import pass crashed (core dump) around vendored
+fonts (tools/craft-anything-0.2.0/assets/fonts/*.ttf). Fix: .gdignore in
+tools/, tmp/, analysis/ + removed stale .godot/imported (was 10323
+entries); clean re-import completes in seconds; editor opens
+(xvfb-run godot --editor --quit-after 600 → clean). Game run re-verified.
+
+**Own StaticMesh exporter v1: tools/l2strict/staticmesh.py** (independent
+of UModel):
+- Layout confirmed from engine.dll RE (UStaticMesh::Serialize @
+  0x103108c5, UPrimitive::Serialize @ 0x10311293): props -> BoundingBox
+  (24B) -> streams (VertexStream = compact count + N*(pos+normal 24B) +
+  Revision; Color/Alpha streams; UVStreams; IndexStream1/2) -> L2
+  licensee lazy arrays (Faces/kDOP) -> L2 ints. GLazyLoad (LicenseeVer
+  >= 0x11) makes Faces/kDOP lazy-blocked.
+- Core parser + glTF writer WORK: Oren_DEV_S batch = 43/46 converted;
+  counts match UModel exactly (MT_Btm 452v/1266i; Bridge 1967v/2772i;
+  MT_Out 3946v/9036i...). CONFIRMS UModel geometry is NOT truncated —
+  the earlier truncation theory stays refuted.
+- Open: FStaticMeshSection table for multi-section meshes (38/43 prim
+  mismatches vs UModel; my 14-B layout only fits single-section meshes).
+  Next RE target: sub_1030a41b (sections serialization in engine).
+- 3 meshes skip (Btm_Obj01/02/03): vertex-anchor heuristic misses their
+  stream start.
+
+**l2-modding status:** MCP registration fails in ZCode UI (probable
+cause: space in venv path); its UPK package reader also fails on our
+ver 123/23 files (reads past buffer) — its texture writer/generators
+work but the READER side is unusable for our packages. Our existing
+texture pipeline (tools/l2_*.py + UModel PNGs) stays the texture path;
+textures already verified against DE_village.png.
+## 2026-11-03 (evening) — terrain restored + foliage alpha fixed
+
+User confirmed the physics fix works ("физику починили") and reported two
+more defects with a screenshot (rocks + tree + a flat brown pit):
+1. The terrain surface "broke at some iteration" — flat void pits.
+2. Tree leaves render as huge opaque quads (no alpha).
+
+**1. Terrain restored (root cause: my 2026-11-02 strict present-filter).**
+The QuadVisibilityBitmap present=0 cells include REAL-HEIGHT quads — those
+are authentic canyon slopes beside the road and forest terrain that the
+original client RENDERS. True holes are only placeholder cells (raw 2511
+-> z ~ -8822). The "two levels" complaint that motivated the filter was
+actually the backface fall-through (fixed earlier today); the slope
+beside the road is genuine terrain. Reverted to: render every quad that
+has real heights (all-4-corners < -8000 skipped). Terrain back at the
+full 62861 quads.
+
+**2. Foliage alpha (world.gd _get_mesh):** when the texture image
+detects alpha -> TRANSPARENCY_ALPHA_SCISSOR (threshold 0.35) +
+CULL_DISABLED. Leaves are now cut out instead of blocky quads — and the
+ornamental filigree road borders (alpha textures) now render along the
+road edges, matching Docs/DE_village.png.
+
+**Verified:** tree-loc teleport shot shows cut-out foliage; spawn shot
+shows ornamental borders + railings + full terrain slopes; terrain quad
+count 62861 (full).
+
+**The one-pass goal (user):** a single tools run must transfer the
+location working end-to-end. Remaining known gap for that: our own
+StaticMesh->glTF exporter (tools/l2strict) — format reverse-engineered
+(24B pos+normal records, section table, index runs), block layout of the
+vertex stream still to finish; then re-stage + re-import + L2_FLOOR_GRID.
+## 2026-11-03 (later) — THE FALL-THROUGH BUG FIXED: backface collision
+
+**User's decisive clarification:** the character never left the road —
+they FELL THROUGH the road surface into the bridge's lower tier; the
+middle holds, the sides are "hollow" (rendered but non-solid).
+
+**Root cause:** many O_DE_Bridge deck faces have DOWN-pointing normals
+(inverted winding — authentic L2 data, verified numerically). We render
+them via the CULL_DISABLED list (world.gd `_down_floor_meshes`), but
+Godot's ConcavePolygonShape3D defaults to backface_collision=false ->
+those faces have NO collision from above. UE2 collision is
+winding-agnostic, so the original is solid. The earlier "truncated
+UModel export" theory was WRONG for MT_Btm: its section table declares
+451 LastVertex / 422 NumFaces and UModel's export matches exactly; the
+mysterious second index run (max 4978) is kDOP collision data, not a
+bigger vertex pool.
+
+**Fix (scripts/world.gd):** backface_collision = true on every trimesh
+shape (terrain + all static meshes, one shared shape per mesh key).
+
+**Verification:** L2_FLOOR_GRID over the road rect (7050..8700 x
+17250..18050, 800 rays): 463 ok / 337 gap BEFORE -> 752 ok / 48 gap
+AFTER; remaining gaps are off-road edges (gorge). Spawn screenshot
+unchanged visually (Docs/screenshot_spawn.png) — the fix is
+collision-only, exactly matching the reported symptom.
+
+**MCP status:** l2-modding registration fails to connect in the ZCode UI
+(likely the space in the venv path); use it in-session directly:
+`tools/l2-modding-mcp/.venv/bin/python -m l2_mcp.server` or import
+l2_mcp from that interpreter. craft-anything 0.3.0 connected fine.
+## 2026-11-03 — tooling day: MCP servers + StaticMesh reverse engineering
+
+**Installed (need ZCode restart to surface as MCP tools):**
+- `craft-anything-cli` updated 0.2.0 -> 0.3.0 (`~/.local/bin/`, MCP command
+  repointed in `~/.zcode/cli/config.json`).
+- `tools/l2-modding-mcp` (Hysteria-xyz) — Python MCP, 25 L2 tools; venv at
+  `tools/l2-modding-mcp/.venv`. Registered as MCP `l2-modding`. Reads
+  textures/maps/packages; does NOT parse existing StaticMesh geometry
+  (only writes procedural .usx).
+- `tools/uelib-test` — Eliot.UELib via dotnet 10; successfully LOADS our
+  ver 123/23 packages (names/imports/exports/props) but ships no
+  UStaticMesh geometry class. Usable as a base for our own exporter.
+
+**Mesh reverse engineering state (O_DE_MT_Btm, Oren_DEV_S.usx):**
+- Bulk layout (after props end): BoundingBox(24B, file floats in UE
+  (X,Y,Z); glTF mapping (a,c,b)), extra bbox at +52, section table entry
+  found at bulk+42: f4=0 FirstIndex=0 FirstVertex=0 LastVertex=451
+  fE=422 NumFaces=422.
+- Vertex record = 24 B: pos 3xf32 (UE units) + normal 3xf32 (unit), both
+  standard UE (X,Y,Z); glTF mapping = (a, c, b). First run: 376 contiguous
+  records at bulk+1925; stream must hold 452 (indices reference max 451) —
+  remaining 76 verts not contiguous (blocked/lazy layout, -1 runs nearby).
+- TWO index-like u16 runs: bulk+18182 (1273 u16, max index 4978!) and
+  bulk+20730 (1696 u16, max 451). The 4978-max run implies a second vertex
+  pool of ~5000 verts = the geometry UModel drops => village floor.
+
+**Next:** finish the structural parse of the L2 SM bulk (section count,
+stream blocks, UV streams) and write `tools/l2strict` StaticMesh->glTF
+exporter; then re-stage all 129 meshes, re-import, and re-run
+L2_FLOOR_GRID over the road/village; verify against Docs/DE_village.png.
+
+**User-visible bug this addresses:** the character falls through the road
+deck sides into the bridge's lower tier ("second layer") — deck-level
+collider coverage exists only in a ~4-5 m band (L2_FLOOR_GRID 463 ok /
+337 gap across the road rect); the rest is missing mesh geometry.
+## 2026-11-02 (late) — ROOT CAUSE: UModel static-mesh exports are TRUNCATED
+
+User confirmed the reference screenshot is `Docs/DE_village.png` (recorded
+in AGENTS.md). Original shows: one continuous ground plane through the
+entrance — road strip + cobble plaza + village floor, all at one level.
+
+Numeric evidence chain (all via the new L2_FLOOR_PROFILE raycast verifier
+in world.gd + offline glTF triangle math; NO more eyeballing):
+1. Road deck system is consistent: deck -44.05 = road pieces -4403.8 =
+   terrain cells -4400. PlayerStart Zs -4478.9..-4492.9 -> village floor
+   ~-44.8/-45.3.
+2. From the bridge east landing (8700,17300) — where DE_village.png shows
+   continuous cobble — our render has NO floor at all between +24.6 m
+   (O_DE_MT_Out canopy) and -73 m (O_DE_MT_Btm lining). The entire
+   village floor is a void. PS10 (13440,17293): same, floor -81 only.
+3. MT_Out forms an erroneous canopy over the whole village (+11..+46 m);
+   MT_In does not provide the canyon wall at deck level; MT_Btm's
+   "terraces" (-46.8..-53 east of the road) are its coarse truncated
+   skirt showing through floor gaps = the "second level" the user saw.
+4. Mesh stats prove truncation (serial_size in Oren_DEV_S.usx vs glTF):
+   O_DE_MT_Btm 115071 B -> 452 verts (~20 KB geom, ~5x short);
+   O_De_01 253780 B -> 717 verts (~7x short); O_De_02 403768 B -> 940
+   (~13x short); O_DE_MT_Out 929356 B -> 3954 verts (~5x short).
+   UModel's L2 StaticMesh section support is incomplete and silently
+   drops most vertex sections. The bridge looked fine by luck.
+
+**Consequence: all placement/Z-shift theories are void. The geometry
+itself is incomplete. Next task: write our own L2 StaticMesh -> glTF
+exporter in tools/l2strict (parse L2 SM vertex buffers/sections directly
+from the .usx via l2strict.package), replacing UModel for static meshes.
+Then re-verify floors with L2_FLOOR_PROFILE against DE_village.png.**
+
+Temp state: L2_ZFIX experiment (halving O_De_01/02/03 Z) disproved and
+left in code behind the env flag (off by default). L2_FLOOR_PROFILE also
+added (env-gated, off by default). Mesh colliders now carry mesh_key meta.
+
+## 2026-11-02 (plugin: awesome-gamedev-agent-skills installed)
+
+Installed https://github.com/gamedev-skills/awesome-gamedev-agent-skills
+as three user-scope ZCode plugins (repo cloned to
+`~/.zcode/cli/plugins/marketplaces/awesome-gamedev-agent-skills`, adapters
+written because the repo ships Claude-format manifests only):
+- `router@awesome-gamedev-agent-skills` — master router, auto-picks the
+  right skill for a game-dev request
+- `godot@awesome-gamedev-agent-skills` — 16 Godot 4.7 skills
+- `disciplines@awesome-gamedev-agent-skills` — 15 cross-engine skills
+  (create-game-assets, level-design, performance-optimization, ...)
+
+Registration: known_marketplaces.json + installed_plugins.json +
+config.json enabledPlugins; cache at
+`~/.zcode/cli/plugins/cache/awesome-gamedev-agent-skills/<plugin>/1.0.0/`
+with `.zcode-plugin/plugin.json` (skills dir). Skills become available
+after a ZCode restart.
+
+Skills relevant to this project's upcoming stages: godot-3d-essentials,
+godot-shaders (terrain splat shader), godot-animation (PSA conversion),
+godot-export (export presets), godot-gdscript-headless-testing (headless
+verification), create-game-assets (L2 asset pipeline).
+
+## 2026-11-02 (bridge: fake slope removed, old lighting restored)
+
+**Root cause of the persistent "two levels" (proven by the user's
+screenshot + offline measurement, tmp/hole_coverage.py + ent_scan data):**
+- The walkable road deck is continuous at -4404.5 game (-44.045 m) —
+  provided by floor meshes O_DE_Btm_Obj01 / O_DE_MT_Btm (normals up,
+  trimesh collision OK), NOT by terrain and NOT by O_DE_Bridge.
+- `_build_terrain` previously ignored `surface_present_u8.raw` and
+  rendered quads for present=0 cells whose heightmap values are extractor
+  interpolation junk — a fake slope descending -4404 -> -6515 right next
+  to the road. The character could stand on it, 1-20 m below the deck:
+  the exact "lower layer" on the user's screenshot.
+
+**Fix (scripts/world.gd `_build_terrain`):** skip any quad whose cell has
+present==0 (strict QuadVisibility semantics) + the existing placeholder
+guard. Result: 61364 quads == terrain.json `visible_quad_count` exactly
+(terrain now 1:1 with the original).
+
+**Floor coverage verified (tmp/hole_coverage.py):** every present=0 cell
+inside the road corridor box (game x 6900-8800, y 16500-18800) AND the SW
+box (x 6000-6950, y 17000-18600) has an up-normal mesh floor in the deck
+band -46.5..-42.0 m. Zero uncovered corridor cells. The 662 uncovered
+hole cells elsewhere are the real gorge bottom (-75..-82 m) — authentic.
+
+**Lighting restored to the old state (tmp/world.gd.bak_cull):**
+ambient `AMBIENT_SOURCE_SKY` energy 2.0 (was COLOR 0.75/1.2). Sun/sky
+untouched. L2_BRIGHT branch fixed to switch ambient source to COLOR
+explicitly (color/energy are ignored while source is SKY — that made the
+diagnostic silently dim in one intermediate build).
+
+**Verified:** default spawn view + side angle (L2_VIEW_YAW=-2.3, camera on
+the rock looking down at the road — reproduces the user's composition):
+character stands ON the single road plane; beside the road only same-level
+floor meshes or the gorge drop behind railings; no surface below deck
+level anywhere near the road (bright diagnostic confirms no fake geometry).
+
+## 2026-11-02 (bridge-only iteration, per new Task discipline rules)
+
+**Rules added to AGENTS.md ("Task discipline")**: work ONLY the prompt's
+task; no lighting/sky/fog work until the lighting stage is opened by the
+user; L2_BRIGHT is diagnostic-only; every visual change verified by a
+spawn-point screenshot. An earlier unauthorized sky-color edit was
+reverted (procedural sky values restored verbatim).
+
+**Bridge fix — O_DE_Bridge re-enabled** (exclusion removed in
+`scripts/world.gd _build_meshes`). The exclusion ("doubles the terrain")
+predated the heightmap-anchoring fix; measured now: deck top -4404.5 vs
+terrain cells beside the road -4398..-4411 -> same level, no doubling.
+
+**Verified at spawn (3 screenshots: normal, L2_BRIGHT, top-down)**:
+- Road is ONE flat plane: cobblestone deck with the ornamental tile strip
+  inlaid in the middle (the exact "one plane, different textures middle
+  vs sides" requirement).
+- Carved railings/arcs + gate tower restored on both sides (were missing
+  while O_DE_Bridge was excluded).
+- Character stands on the deck at the bridge's south end; gorge below
+  the south edge is authentic (matches original layout).
+- No missing-geometry holes inside the road corridor (bright check).
+
+**Pending (NOT touched, out of scope)**: dark patch below/beyond the
+bridge railing (gorge interior surface) — record only; lighting/sky stay
+frozen until the user opens the lighting stage.
+
+# Lineage 2 — Godot Fork: Development Log
+
+This file is the **handoff journal**. A new agent continuing this project
+should read this file first, then `Docs/README.md` (docs index) and
+`AGENTS.md` (root, project conventions). Status is updated as work proceeds.
+
+## Current status (updated 2026-10-31)
+
+**Working pipeline: original L2 client (Interlude-era, `/Games/ElmoreX3/`) →
+strict `tools/l2strict` export → per-map Godot assets for Dark Elf Village
+(`20_18`).**
+
+| Stage | State |
+|---|---|
+| Strict package reader (tables, compact ints, references) | **Done** — `tools/l2strict/package.py` |
+| Strict property parser (StateFrame, arrays, structs, bitsets, legacy `Materials`) | **Done** — `tools/l2strict/properties.py` |
+| Strict staging/decryption with hash manifest | **Done** — `tools/l2strict/stage.py` |
+| Strict map extraction + exact class-count gates | **Done** — `tools/l2strict/extract.py` |
+| Material closure (mesh surfaces → shader → texture) | **Done** — `tools/l2strict/materials.py` |
+| Exact terrain export (heightmap, neighbors, visibility, edge turn, layers) | **Done** — `tools/l2strict/terrain.py` |
+| UModel export + zero-count glTF sanitation + per-map assets | **Done** — `tools/l2strict/assets.py` |
+| End-to-end verification | **Done** — `tools/l2strict/verify.py` |
+| Godot world build (map-driven) | **Done** — 795 placeable meshes, 257×257 terrain, 8 layers |
+| Character in Godot | **Done** — T-pose at spawn, third-person camera, WASD controller |
+| Movement animations (walk/run/idle) | PSA exported, converter TODO (`Docs/psa-format.md`) |
+| Steam Audio plugin | Not started |
+| Export presets Win/Linux/macOS | Not started |
+
+`20_18` passes every strict gate:
+
+- 804 actors total: **799** `StaticMeshActor`, **5** `PlayerStart`,
+  **1** `TerrainInfo`, **256** legacy `TerrainSector`.
+- 4 deleted `StaticMeshActor`s and **795** placeable mesh actors.
+- **129** unique StaticMeshes across 9 mesh packages.
+- **211** unique texture PNGs.
+- 8 valid terrain color layers (slot 8 is an empty terminator).
+- Terrain source 256×256, world grid 257×257, origin `(0, 0)`,
+  extent `32768 × 32768`, **0 clamped border samples**,
+  61364 visible quads, 4172 hole quads, 4063 edge-turn quads.
+- All 129 glTF files are sanitized (no zero-count accessors/primitives).
+- Every actor mesh and texture reference resolves; no unresolved materials.
+- The strict parser also extracts legacy `18_20` with **zero errors**
+  (`tmp/l2/18_20_check.json`): 2618 actors, 2613 `StaticMeshActor`,
+  5 `PlayerStart`, 1 `TerrainInfo`, 256 legacy `TerrainSector`,
+  184 unique meshes, 11 terrain layers (10 valid). The remaining old
+  failures came from `T_ARRAY` fallbacks that aborted on `BoundsError`
+  instead of trying the compact-object-array encoding used by `Touching`.
+
+The legacy `18_20` assets and old `tools/l2_*.py` scripts are untouched and
+remain available for comparison/rollback.
+
+## Session 2026-10-26/27: strict pipeline and `20_18`
+
+### What was wrong before
+
+- The old pipeline treated `18_20` as the Dark Elf Village map. The correct
+  Dark Elf Village tile is **`20_18`**.
+- `tools/l2_props.py` stopped `TerrainInfo0` at offset `12324` of `828359`
+  and missed `Location`, `MapX`, `MapY`, `QuadVisibilityBitmap`,
+  `EdgeTurnBitmap`, and `DrawScale`.
+- The old parser still failed on many `StaticMeshActor` objects because it
+  did not handle the first array element being written without the array
+  flag, and it misread L2's `T_ARRAY` count/payload split.
+- The old heightmap reader hard-coded data offset `62`; `20_18`'s real
+  heightmap object has its payload at offset `66`.
+- The old world script mixed `(x, z, -y)` with UModel's `(x, z, +y)`
+  convention and used Godot Euler angles instead of the exact Unreal rotator
+  matrix.
+
+### What replaced it
+
+`tools/l2strict` now performs every stage with bounds checks and hard gates:
+
+1. **Stage** only the packages `20_18` needs (map, 9 mesh packages,
+   terrain/mask texture packages, and neighbor maps/heightmaps).
+2. **Extract** the map with exact class counts and exact actor-object
+   consumption (zero trailing bytes).
+3. **Resolve materials** through the full import/export closure, including
+   same-package `Shader` objects and cross-package texture references.
+4. **Export terrain** from `TerrainInfo` and the real G16 heightmap,
+   sampling the east/south/southeast neighbor maps for the 257×257 border.
+5. **Export assets** with UModel, sanitize zero-count glTF accessors and
+   primitives, and copy a per-map asset tree.
+6. **Verify** all counts, hashes, and file references.
+
+The pipeline is reproducible from the commands in `Docs/strict-pipeline.md`.
+
+### Correct Dark Elf Village facts (`20_18`)
+
+- `TerrainInfo0`:
+  - `Location = (16384, 16384, 160.6513)`
+  - `TerrainScale = (128, 128, 76)`
+  - `MapX = 20`, `MapY = 18`
+  - `QuadVisibilityBitmap` and `EdgeTurnBitmap` are 8192-byte bitsets.
+- Terrain formula (verified against l2mapconv):
+  ```
+  origin.xy = Location.xy - (width/2*TerrainScale.x,
+                              height/2*TerrainScale.y)
+  origin.z  = Location.z  - 32768 * TerrainScale.z / 256
+  height    = raw * TerrainScale.z / 256 + origin.z
+  ```
+  For `20_18` this gives origin `(0, 0, -9567.3487)` and extent `32768`.
+- Heightmap object: `t_20_18.utx` → `Height.20_18`, size `131148`,
+  footer `256×256, 8/8`, payload offset `66`.
+- Terrain layers:
+  - Slot 0: `T_oren.Obase_1` + `T_texture.layer0`
+  - Slots 1–7: `T_oren.OG_52/OG_34/OG_48/OG_36/OC_05/OC_03/OST_11`
+    with masks `t_20_18.20_18_S/G1/G2/G/ST/CA/ST1`
+  - Slot 8 is an empty terminator and is skipped.
+- Neighbor maps used for border sampling: `21_18`, `20_19`, `21_19`.
+
+### Exact actor transform
+
+UModel exports glTF in meters with Unreal Y/Z already swapped. The runtime
+mapping is:
+
+```
+godot = (ue_x, ue_z, ue_y) * 0.01
+```
+
+Actor rotation uses the exact Unreal rotator matrix from l2mapper, with
+scale applied per Godot basis column:
+
+```
+Basis(
+    Vector3(cp*cy, sp, cp*sy) * godot_scale_x,
+    Vector3(-(cr*sp*cy + sr*sy), cr*cp, cy*sr - cr*sp*sy) * godot_scale_y,
+    Vector3(sr*sp*cy - cr*sy, -sr*cp, sr*sp*sy + cr*cy) * godot_scale_z
+)
+```
+
+`godot_scale_y` uses `DrawScale3D.z` and `godot_scale_z` uses
+`DrawScale3D.y`, both multiplied by `DrawScale`. `PrePivot` is applied in
+local space before scale/rotation:
+
+```
+origin = location - basis * pre_pivot
+```
+
+### Godot runtime
+
+- `scripts/world.gd` reads only `assets/maps/20_18/*.json` and the raw
+  terrain files. It no longer hardcodes map extents, layer names, or
+  transforms.
+- Terrain is built at runtime as a 257×257 mesh from
+  `height_world_f32.raw`, `surface_present_u8.raw`, and
+  `edge_turn_u8.raw`; holes and diagonals come from those files.
+- `scripts/terrain.gdshader` blends all eight layers in slot order over a
+  neutral gray base, matching the public l2mapconv renderer.
+- `scripts/player.gd` samples the exact terrain triangle using the same
+  edge-turn data; the old `-z` sign error is gone.
+- The terrain mesh creates a trimesh collision body
+  (`MeshInstance3D.create_trimesh_collision()`), so the character collides
+  with the real 257×257 surface.
+- Static meshes do **not** have collision bodies yet. Consequently the
+  player currently spawns on the terrain under `PlayerStart2` rather than at
+  the actor's stored Z, which is ~43 m above the terrain at that XY. Adding
+  per-mesh collision is a later task.
+- Smoke test: `godot --headless --path . --quit-after 1` places 795 meshes
+  and prints the player position without script errors.
+- Screenshot smoke test: `L2_SCREENSHOT=… godot --path .` produces
+  non-empty 1600×900 images.
+
+### Session 2026-10-27: terrain hole handling (`20_18`)
+
+- Root cause of the 43 m sunken-void symptom: the village hole region
+  (roughly cells x 55–115 / y 92–167) is a `QuadVisibilityBitmap` cutout.
+  Hole cells hold placeholder raw 2511 (z ≈ −8821.9); the village floor and
+  rock meshes sit at z ≈ −4447…−4512, so sampling the heightfield there
+  placed the player ~43 m below the floor and let them fall through.
+- `surface_present == 0` means "no valid terrain surface here". Hole cells
+  are not rendered, collided, or sampled. `has_terrain_surface()` guards
+  `terrain_height()` and the player height clamp; `terrain_height()` is
+  valid only where a surface exists.
+- Hole-filling colliders: any static mesh whose world AABB covers a hole
+  cell gets a trimesh collider. Colliders are cached as one
+  `ConcavePolygonShape3D` per unique mesh key (`_trimesh_cache`) and shared
+  across instances. Headless run: `placed 795 static meshes,
+  336 hole-filling colliders`.
+- Hole-aware spawn: `PlayerStart2` (xy 12433, 19079) is a hole cell, so the
+  player spawns at the stored Z (−4492.9) + 0.9 m clearance → Godot
+  `(124.3289, -44.0291, 190.7884)`, on the village floor. All five
+  `20_18` spawn cells are holes.
+- Verification: `python3 -m tools.l2strict verify ...` returns `"status":
+  "ok"`; `verify.py` gates intact. Screenshot run shows the village at floor
+  level; player remains on the floor 2 s later (no fall-through).
+- Lighting is very dark and the character is seen from behind at close
+  range; awaiting explicit accept/reject before any `_build_environment()`
+  change.
+
+## Immediate next steps
+
+1. **Movement animations**: convert
+   `tmp/umodel_export/DarkElf/MeshAnimation/FDarkElf_anim.psa` to glTF
+   animations (walk/run/idle). See `Docs/psa-format.md`.
+2. **Character textures**: the four character parts still use dummy
+   materials; parse the SkeletalMesh `Materials` array and export from
+   `SysTextures/fdarkelf.utx`.
+3. **Steam Audio**: add the Godot 4 addon and an `AudioListener` to the
+   player.
+4. **Export presets** Win/Linux/macOS.
+5. **Migrate `18_20`** through the same strict pipeline only after `20_18`
+   is accepted visually; its assets must stay untouched until then.
+6. Sounds, NPCs, mobs, skills — later stages.
+
+## Key hard-won facts (do not rediscover these)
+
+### Package format
+
+- `Lineage2Ver111` packages XOR with `0xAC`.
+- `Lineage2Ver121` packages XOR with the sum of the lowercase filename bytes.
+- Package tables use compact-index FNames; name index 0 is `None`.
+- Export flags `0x02000000` (`RF_HasStack`) mean a StateFrame precedes the
+  property list.
+- Property arrays: the first element is often written without the array
+  flag; the parser must convert a scalar to a list when the second element
+  arrives.
+- `T_ARRAY` declared size includes the compact count bytes; the payload size
+  is `size - count_bytes`.
+- `Matrix` and `Plane` structs are nested property lists in these packages,
+  **not** raw 16-float or 4-float binary values.
+- StaticMesh `Materials` is a `T_ARRAY` of None-terminated property lists;
+  each element's `Material` field is the surface texture/material reference.
+
+### UModel
+
+- UModel cannot read Ver111/121 directly; stage decrypted files first,
+  preserving original filenames and directory layout.
+- `-out=` must be an absolute path; a relative path resolves to `$HOME`.
+- UModel glTF exports are already in meters. Do not rescale.
+- Some UModel glTF files contain zero-count accessors; strip them and any
+  primitives that reference them before Godot import.
+- glTF buffers reference `<object>.bin`; keep the glTF and bin together.
+
+### Runtime
+
+- Godot's `PackedByteArray.to_float32_array()` is the simplest way to load
+  the 257×257 height grid.
+- The terrain shader must use `cull_disabled`; the UE→Godot axis swap
+  reverses triangle winding.
+- Package names differ in case between imports and files on Linux
+  (`Oren_DEV_T` vs `oren_dev_t`); `asset_map.json` stores the canonical
+  staged package name for every actor mesh.
+
+## Session 2026-10-31: player spawn at west village entrance
+
+**Problem:** the spawn placed north of the hole cutout (12440, 21504) put the
+player inside a rock mesh ("персонаж в текстурах"). Analysis of `map.json`
+showed the village's real entrance is on the **west** side: road meshes
+(`O_DE_MT_obj04`, x 7006–7389, y 17439–18233) lead to `O_DE_Bridge`
+(7986, 17623, −4288), which crosses the hole cutout into the village plaza.
+
+**Verification tools:** `tmp/ent_scan.py` samples the actual glTF triangles of
+all entrance-area meshes with actor transforms applied (`yaw −rot1/65536`,
+Godot mapping `(gx, gz, gy) * 0.01`) and reports surface heights at any point.
+The entrance corridor scan showed the road deck runs at z ≈ −4400..−4445 from
+x 7100 eastward, dropping to the village plaza level (−4481..−4493 ≈
+PlayerStart2) further in; rock walls/arches enclose it.
+
+**Two failed attempts, root causes:**
+- Spawn on the terrain ledge (6980, 17450, −4445): the ledge is a clifftop
+  between rock pillars and the overpass above (road deck at −3625), the
+  player stood in the canyon wall ("снова в текстуре... в стене").
+- Next try (7400, 17650) initially spawned at terrain_height −6119 and fell:
+  `has_terrain_surface()` did NOT consult `surface_present_u8.raw` — the
+  hole-cell placeholder heightmap (raw 2511) leaked into the spawn logic.
+
+**Fix (`scripts/world.gd`):**
+- `_load_data()` now also loads `terrain/surface_present_u8.raw` into
+  `terrain_present`.
+- `has_terrain_surface()` returns `terrain_present[cell] == 1` (was
+  bounds-only). This also fixes the player's height clamp inside holes.
+- Spawn on the road deck itself: `(7400.0, 17650.0, -4404.5)`; when the cell
+  has no terrain surface, `start.z` (the measured deck top) is used as the
+  floor instead of the placeholder heightfield.
+- Initial view yaw `-PI/2` (east, along the road into the village);
+  `L2_VIEW_YAW` env override still takes precedence.
+
+**Verified by screenshots** (`tmp/shots/shot1/2.png`, default run, no env
+overrides): player (visible at bottom center) stands on the ornate road deck
+in the entrance canyon — carved dark-elf pillars and towers around, road
+descending toward the village; camera height stable (−43.15 vs deck −44.05),
+no falling.
+
+**Still open (deferred):** void strips along the village road (`O_DE_MT_*`
+side textures not showing), ground-blending rework, lighting east side is
+shadowed (user: fine — the location is dark in the original).
+
+**Renderer comparison (2026-10-31, later same day):** the user reported the
+texture problem persists and suspected a renderer bug, so the same default
+camera (`(70.69, −40.22, 176.5)` looking east) was shot under both backends:
+`tmp/shots/gl_shot1/2.png` (opengl3, Compatibility) and
+`tmp/shots/vk_shot1/2.png` (vulkan, Forward+ over llvmpipe). Verdict:
+**identical geometry and texture content in both backends** — the visible
+differences are lighting only (Compatibility renders the strong sun/shadow;
+Forward+ renders the village lamp glows instead, without strong sun). Not a
+renderer bug. A diagnostic `L2_BRIGHT=1` env flag was added **only inside
+`_build_environment()`** (flat white ambient, default off, normal runs
+unchanged): bright shots `tmp/shots/bright_gl1.png` / `bright_vk1.png`
+confirm every surface is textured (dark carved pillars read as "black
+voids" only under shadow; no flat gray/missing materials). The remaining
+black, geometry-less patches beside the bridge pier are genuine unfilled
+canyon gaps, not material defects.
+
+**Backface-culling fix for building/bridge floors (`scripts/world.gd`):** analysis
+of the original glTF geometry showed that building floors (`interior_B_delf_store_*`,
+`O_DE_Btm`, `O_DE_Bridge`, trees, etc.) have triangle normals pointing **down**
+(ny<0), i.e. they are "ceilings" from Godot's perspective. Godot's default
+backface culling makes them invisible from above — hence empty-looking
+buildings and the player falling through floors. Added a hardcoded list
+`_down_floor_meshes` (96 keys) of meshes whose floor surfaces get
+`cull_mode = CULL_DISABLED`, making them double-sided. Verified: bridge
+walkway now textured from above (`final_fix_default.png`), building interiors
+show a textured floor with pillars (`building_inside1.png`).
+
+**Alpha-channel pass (reverted):** `_texture_alpha_frac()` and global scissor
+were **removed** — they cut out building floor/walkway pixels
+(`interior_B_delf_arm*` alpha 0.77–0.85 classified as floor), making things
+worse. All materials remain opaque; trees will be handled separately if needed.
+
+## Session 2026-11-01: texture pipeline fixes, duplicate audit, geometry attribution
+
+**Magenta/unlit textures root cause:** `_get_mesh()` in `scripts/world.gd`
+built textures with an *instance* call `ImageTexture.create_from_image()`
+pattern error — texture stayed null and materials rendered magenta. Fixed to
+the static call `tex = ImageTexture.create_from_image(img)`. Verified with
+`tmp/shots/tex_static_fix.png` and `west_entrance_fixed.png`.
+
+**`DE_V_floor01.png` restored from ground truth:** the staged copy had
+diverged from the original package export. Restored from
+`tmp/umodel_export/Oren_DEV_T/Texture/` (md5 `cf0dc7b8a7a449d5a68a823ea39ce15d`)
+and re-verified all 147 staged textures against the UModel export: 0 mismatches.
+
+**Rejected synthetic actors removed (lesson):** 15 `StaticMeshActor_bridge_floor_0..14`
+actors that had been added to "fix" the bridge floor were rejected by the user
+("второй потолок… посередине ещё один пол… дубликаты") and **deleted from
+`map.json`**. The map is back to 938 actors, all with `index`; 26 carry the
+original `deleted=true` flag (renderer skips them). **Rule: never add synthetic
+actors to fill visual gaps without explicit user approval.**
+Audit tool `tmp/check_dupes.py`: 0 exact-duplicate groups (mesh+loc+rot+scale);
+133 near-stacked same-mesh pairs are legitimate deco/grass scattering.
+
+**"Stacked surfaces / duplicates" complaint — attributed per-actor, disproven:**
+`tmp/check_slab.py` computes real world-space AABBs (mesh glTF bounds ×
+draw_scale × yaw × location) for every rendered actor within 120 m of the
+west-entrance camera. The floating stone slab in `tmp/shots/verify_a/shot1.png`
+is the ORIGINAL `O_DE_Bridge` deck of `StaticMeshActor142`
+(7986.8, 17623.8, −4094.6, yaw 12.7°; mesh AABB ±7.27×3.90×5.23 m, world top
+≈ −37.0 m godot = game Z −3704). It stands over a terrain HOLE
+(`surface_present=0`, placeholder −8821.9) — never compare bridge height to
+that raw value. The mid-level surfaces are original `O_DE_MT_obj04` platforms
+(top ≈ −36.0 m) and the lower floor is `O_DE_Btm_Obj01` (top −44.05 m). All
+three layers exist in the original client too (compare `Docs/DE_village.png`:
+raised walkway over lower terraces). Zero duplicates.
+
+**l2-modding-mcp UTX parse failure (diagnosed, not fixed):** the MCP server's
+UPK reader assumes the stock UE2 name-table layout; L2 packages store an i32
+name count at 0x0C and name-length bytes that INCLUDE the NUL. Legacy
+`tools/l2_probe.py` / `tools/l2strict/package.py` parse correctly; the MCP
+clone at /tmp was wiped and is not currently usable.
+
+**New defect found — pitch/roll ignored in `_build_meshes()`:** `map.json`
+rotations are UE `(pitch, yaw, roll)` uint16 fractions, but the renderer
+applies only `rotation.y = -yaw`. **96 StaticMeshActors have nonzero pitch and
+34 have nonzero roll** (mostly `O_DE_MT_obj04`, `O_De_0*`, `deco_Doren_stone*`,
+`world_obj1*`) and currently render flat. Fix = full 3-axis conversion
+(UE: R = Ry(yaw)·Rx(pitch)·Rz(roll); Godot equivalent needs verification by
+screenshot on a tilted actor). The west-entrance bridge/road actors are
+yaw-only, so the spawn view is unaffected.
+**FIXED 2026-11-02 (session below): `_ue_basis()` implemented, all three
+axes applied to render and collision.**
+
+## Session 2026-11-02: Craft Anything adopted as project RE MCP
+
+- Craft Anything 0.2.0 (source vendored at `tools/craft-anything-0.2.0/`,
+  binaries installed at `/usr/bin/craft-anything{,-cli}`) is now a project
+  MCP server. Config: `mcp.servers.craft-anything` in
+  `~/.config/opencode/opencode.json` runs
+  `craft-anything-cli mcp --project <this project>/analysis/l2-godot.cany
+  --deep` with raised timeouts. The `.cany` folder holds the persistent
+  evidence ledger — keep it in the repo, it is not regenerable.
+- Ghidra analog = the `native` toolset (55 tools: built-in disassembler +
+  pseudo-C decompiler, xrefs, call graph, value flow, byte-signature search);
+  real Ghidra (`/opt/ghidra`) is an optional Deep-mode engine. Tool-by-tool
+  mapping and usage rules: **`Docs/craft-anything.md`**.
+- Format coverage verified in `crates/formats/src/`: UE3/UE4 paks, IoStore,
+  UE4 textures, Unity, Godot `.pck` — **no UE2/L2 package readers**, so
+  `tools/l2strict` remains the only asset-extraction path.
+- Blocked for now: `/Games/ElmoreX3/` has no `System/` executables (assets
+  only), so client-binary RE (e.g. confirming the UE2 rotation formula from
+  `Core.dll`) awaits the user supplying `L2.exe`/`Core.dll`/`UGame.dll`.
+  **UPDATE 2026-11-02:** binaries DO exist at lowercase `/Games/ElmoreX3/system/`
+  (`l2.exe`, `engine.dll`, `Core.dll`, …); that entry above was stale.
+  `engine.dll` `AActor::LocalToWorld @ 0x10304ad9` (craft-anything evidence
+  `fnd_1`) is the authoritative rotation implementation.
+
+## Session 2026-11-02 (later): full 3-axis actor rotation (`_ue_basis`)
+
+- Root cause of "кривые" tilted actors: `_build_meshes()` applied
+  `rotation.y = -yaw` only. Implemented `_ue_basis(pitch, yaw, roll)` in
+  `scripts/world.gd` from the UE2 `FRotationMatrix` closed form
+  (matches `AActor::LocalToWorld` sin/cos-table math; angles =
+  `uint16 · 2π / 65536`, negative stored ints wrap with `& 0xFFFF`):
+  rows `X=(CP·CY, CP·SY, SP)`, `Y=(SR·SP·CY−CR·SY, SR·SP·SY+CR·CY, −SR·CP)`,
+  `Z=(−CR·SP·CY−SR·SY, −CR·SP·SY+SR·CY, CR·CP)`; Godot Basis columns =
+  `C·row` with `C` swapping y/z. Verified in Python: orthonormal det=+1 over
+  50 000 random angle triples, and exactly reproduces the old yaw-only
+  mapping (max err 0). The naive product `Roll·Pitch·Yaw` is NOT equivalent
+  (mismatches ~100% of triples) — do not "simplify" `_ue_basis` back to it.
+- `inst.transform.basis` and collision `body.transform.basis` both use it;
+  `draw_scale` stays a separate `inst.scale` (basis is unit-scale).
+- Re-screenshot (`tmp/shots/live_check/shot1.png`, top-down
+  `tmp/shots/dbg/shot1.png`): the previously upside-down `O_DE_MT_obj04`
+  (rot `[16336,−117208,0]`, 21 m up) now has mesh-up pointing up. The
+  multi-level stone terraces above the spawn road are ORIGINAL geometry
+  (`O_DE_MT_obj04` tops ≈ −36 m, `O_DE_Bridge` deck top ≈ −37 m over a
+  terrain hole) — earlier "floating slabs" readings were the tilted/flat
+  rotations, consistent with DEVLOG 2026-11-01 audit.
+- Reference-check shortcut found: the user's DXVK/CACAO install leaves
+  **`/Games/ElmoreX3/system/cacaodump_*.pgm`** AO/depth/ssao buffers from
+  live original-client frames (see `cacao.log`, `[DUMP]` lines). Current
+  dumps are black/flat (RTGI buffers without scene color) — not usable as
+  geometry references, but worth remembering.
+- Awaiting user visual verification of spawn view before `18_20` migration.
+
+## Session 2026-11-02 (later 2): "two bridges" root cause — hand-edited map.json
+
+- User rejected the spawn view: TWO bridge-like decks stacked, poles floating
+  over the character. Full audit of every `StaticMeshActor` against the
+  ORIGINAL exports in `tmp/l2/20_18/decrypted/MAPS/20_18.unr` (re-run of
+  `python3 -m tools.l2strict extract`, property-by-property diff): exactly
+  TWO actors differed from the package — `StaticMeshActor142` (`O_DE_Bridge`)
+  Z `-4288.56` → hand-changed to `-4094.6` (+1.94 m), and `StaticMeshActor74`
+  (same mesh, east of village) `-4288.56` → `-4257`. These were the
+  "bridge_height_fix / bridge_compromise" experiments from the 10-31 session
+  that were never reverted; the extra deck + floating poles over the spawn
+  road were that second bridge instance, not original geometry.
+- Rule going forward: `assets/maps/<map>/map.json` is a BUILD ARTIFACT,
+  never hand-edit it; fix data upstream and regenerate with
+  `tools/l2strict extract`. Backup of the edited file:
+  `tmp/l2/20_18/map.json.edited-backup`; original restored via
+  `tmp/l2/20_18/map_fresh.json` (identical to package for all 938 actors).
+- `tools/l2strict/verify.py` expected `actors: 804` was stale (pre-Light
+  extraction count = 799 SMA + 5 PlayerStart); now 938 (+134 Light). Verify
+  passes: status ok, 129 meshes / 211 textures.
+- Re-screenshot `tmp/shots/bridge_fix/shot1.png`: single original bridge deck
+  at character height with its arches, second slab gone.
+- Earlier "floating slabs" note in this DEVLOG (2026-11-01 audit conclusion
+  "all three layers exist in the original") was WRONG — the second layer was
+  this hand-lifted bridge. Tilted `O_DE_MT_obj04` hillside pieces remain
+  original geometry.
+
+## Historical notes (legacy `18_20` pipeline)
+
+The older `tools/l2_*.py` scripts and `assets/meshes`, `assets/textures`,
+and `assets/terrain` belong to the first `18_20` attempt. They are kept
+for comparison but are not used by the current world. Notable legacy
+findings that remain true:
+
+- Import outer chains nest `Object ← Group ← Package`; the owning package
+  is the last `Package`-class import in the chain.
+- Texture names collide across packages, so textures must be package-scoped.
+- UModel refuses glTF animation export from the CLI; use ActorX `.psa`.
+- StaticMeshInstance blobs were intentionally skipped; the village renders
+  without them.
+
+## Open questions / TODO
+
+- StaticMeshInstance blob format (skipped).
+- BSP Brush geometry is not used for rendering (collision only in the
+  original client).
+- Character material parsing and animation conversion are the next user-
+  visible features.
+- Steam Audio and export presets are not started.

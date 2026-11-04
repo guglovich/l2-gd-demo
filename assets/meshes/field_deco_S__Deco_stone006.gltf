@@ -1,0 +1,112 @@
+{
+  "asset" : {
+    "generator" : "UE Viewer (umodel) build 1573",
+    "version" : "2.0"
+  },
+  "scene" : 0,
+  "scenes" : [
+    {
+      "nodes" : [ 0 ]
+    }
+  ],
+  "nodes" : [
+    {
+      "name" : "Deco_stone006",
+      "mesh" : 0
+    }
+  ],
+  "materials" : [
+    {
+      "name" : "Decostone01",
+      "pbrMetallicRoughness" : {
+        "baseColorFactor" : [ 0.3, 0.3, 0.3, 1.0 ],
+        "metallicFactor" : 0.1,
+        "roughnessFactor" : 0.5
+      }
+    }
+  ],
+  "meshes" : [
+    {
+      "primitives" : [
+        {
+          "attributes" : {
+            "POSITION" : 1,
+            "NORMAL" : 2,
+            "TANGENT" : 3,
+            "TEXCOORD_0" : 4
+          },
+          "indices" : 0,
+          "material" : 0
+        }
+      ],
+      "name" : "Deco_stone006"
+    }
+  ],
+  "buffers" : [
+    {
+      "uri" : "Deco_stone006.bin",
+      "byteLength" : 4860
+    }
+  ],
+  "bufferViews" : [
+    {
+      "buffer" : 0,
+      "byteOffset" : 0,
+      "byteLength" : 492
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 492,
+      "byteLength" : 1092
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 1584,
+      "byteLength" : 1092
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 2676,
+      "byteLength" : 1456
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 4132,
+      "byteLength" : 728
+    }
+  ],
+  "accessors" : [
+    {
+      "bufferView" : 0,
+      "componentType" : 5123,
+      "count" : 246,
+      "type" : "SCALAR"
+    },
+    {
+      "bufferView" : 1,
+      "min" : [ -0.250259, -0.049394, -0.250667 ],
+      "max" : [ 0.294409, 0.269071, 0.216483 ],
+      "componentType" : 5126,
+      "count" : 91,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 2,
+      "componentType" : 5126,
+      "count" : 91,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 3,
+      "componentType" : 5126,
+      "count" : 91,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 4,
+      "componentType" : 5126,
+      "count" : 91,
+      "type" : "VEC2"
+    }
+  ]
+}

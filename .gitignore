@@ -1,0 +1,8 @@
+.godot/
+tmp/
+analysis/
+tools/l2-modding-mcp/
+tools/uelib-test/
+tools/UEViewer* 
+*.import
+Docs/*.import
