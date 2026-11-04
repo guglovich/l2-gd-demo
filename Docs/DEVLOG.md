@@ -1,3 +1,32 @@
+## 2026-11-06 (2) — map lighting data live; engine files mapped
+
+**The tunnel green fixed by the map's own lighting data** (not tuning):
+1. THE SUN: NSun0 Rotation [-5944,-39696,0] -> pitch -32.65 deg, the light
+   direction (-0.663, -0.539, -0.519) Godot axes (SW-down; the sun actor
+   sits NE-high). Sun now: sun.look_at(direction) — the shadow pattern
+   matches the original's sun angle.
+2. THE ZONE AMBIENT: all 9 ZoneInfo actors carry AmbientVector (0.395 x 3)
+   x AmbientBrightness 60/255 = ambient (0.093) — DARK. Set ambient color
+   (0.395) energy 0.235. Shadowed/tunnel areas are now dark as in the
+   original.
+3. THE ZONE FOG: DistanceFogColor BGRA 23 1d 18 00 = RGB(24,29,35) dark
+   blue; Start 100 units (1 m), End 10000 (100 m). Environment FOG_MODE
+   DEPTH, sky_affect 0. Distant terrain fades to dark blue like the
+   original; the tunnel interior dims.
+All values extracted from 20_18.unr (zones.json) — map data, not tuning.
+
+**Verified:** tunnel at (6218,18522) — dark interior, no crawling green;
+spawn — fogged distant village, dramatic sun/shadow contrast from the
+map's sun angle; user spot — dappled foliage shadows on textured grass.
+
+**Engine files mapped (the user's question "which files are the engine"):**
+- engine.dll (8.8 MB, WITH export symbols: ?Serialize@UStaticMesh@@... —
+  readable RE!) = the GAME ENGINE: UStaticMesh, ZoneInfo, TerrainInfo,
+  terrain rendering, lighting, all game classes.
+- Core.dll (1.4 MB, stripped, 3896 fns) = the FRAMEWORK: FArchive, FName,
+  the object system, math, memory — NO game classes (its only "ZoneInfo"
+  match is the Windows GetTimeZoneInformation API).
+=> ALL game-logic RE targets engine.dll.
 ## 2026-11-06 — BREAKTHROUGH: the terrain shader NEVER compiled until now
 
 **THE root cause of every "0 изменений":** the mask-V flip edit introduced

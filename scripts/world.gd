@@ -549,10 +549,15 @@ func _build_lights() -> void:
 func _build_environment() -> void:
 	var bright := OS.get_environment("L2_BRIGHT") != ""
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-55, 200, 0)
+	# THE MAP'S OWN SUN (NSun0: Rotation [-5944,-39696,0], placed NE-high at
+	# (242, 264343, 24510)): the UE forward row_x maps to the Godot direction
+	# (-0.663, -0.539, -0.519) — the light travels SW-down, exactly opposite
+	# the sun actor's NE-high placement. Verified: sun.look_at(direction).
+	sun.position = Vector3.ZERO
+	add_child(sun)
+	sun.look_at(Vector3(-0.663, -0.539, -0.519), Vector3.UP)
 	sun.light_energy = 5.0
 	sun.shadow_enabled = true
-	add_child(sun)
 	var env := Environment.new()
 	env.background_mode = Environment.BG_SKY
 	var sky := Sky.new()
@@ -576,6 +581,21 @@ func _build_environment() -> void:
 		sun.light_energy = 0.6
 		sun.shadow_enabled = false
 	env.fog_enabled = false
+	# Zone lighting/fog from the map data (all 9 ZoneInfo actors carry the
+	# same values; see assets/maps/20_18/zones.json):
+	#   AmbientVector (0.395) x AmbientBrightness (60/255) = dark ambient
+	#   DistanceFogColor BGRA 23 1d 18 00 = RGB(24, 29, 35) dark blue
+	#   DistanceFogStart 100 units (1 m) / End 10000 units (100 m)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.395, 0.395, 0.395)
+	env.ambient_light_energy = 60.0 / 255.0 * 2.0
+	env.fog_mode = Environment.FOG_MODE_DEPTH
+	env.fog_light_color = Color8(24, 29, 35)
+	env.fog_depth_begin = 1.0
+	env.fog_depth_end = 100.0
+	env.fog_depth_curve = 1.0
+	env.fog_sky_affect = 0.0
+	env.fog_enabled = true
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)

@@ -1,0 +1,160 @@
+{
+ "schema": 1,
+ "map": "20_18",
+ "zones": [
+  {
+   "name": "ZoneInfo5",
+   "location": [
+    16264.904296875,
+    20606.419921875,
+    923.38916015625
+   ],
+   "zone_tag": null,
+   "ambient_brightness": null,
+   "ambient_vector": null,
+   "distance_fog_color": "None",
+   "b_distance_fog": true,
+   "terrain_zone": true
+  },
+  {
+   "name": "ZoneInfo4",
+   "location": [
+    11322.546875,
+    16882.2421875,
+    -4646.76171875
+   ],
+   "zone_tag": "DElfZone01",
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo0",
+   "location": [
+    28078.0,
+    11034.0,
+    -4065.0
+   ],
+   "zone_tag": "SylenTempleZone01",
+   "ambient_brightness": null,
+   "ambient_vector": null,
+   "distance_fog_color": "None",
+   "b_distance_fog": null,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo3",
+   "location": [
+    16292.5126953125,
+    14943.3994140625,
+    -3771.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo7",
+   "location": [
+    6620.62890625,
+    18665.24609375,
+    -3779.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo6",
+   "location": [
+    6098.015625,
+    17992.2578125,
+    -4044.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo8",
+   "location": [
+    15954.3984375,
+    13985.091796875,
+    -3548.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo2",
+   "location": [
+    16797.08984375,
+    15582.4501953125,
+    -4015.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  },
+  {
+   "name": "ZoneInfo1",
+   "location": [
+    6924.728515625,
+    19643.68359375,
+    -3379.762451171875
+   ],
+   "zone_tag": null,
+   "ambient_brightness": 60,
+   "ambient_vector": [
+    0.3948806822299957,
+    0.3948806822299957,
+    0.3948806822299957
+   ],
+   "distance_fog_color": "{'$raw': 'Ix0YAA==', 'length': 4}",
+   "b_distance_fog": true,
+   "terrain_zone": null
+  }
+ ]
+}
