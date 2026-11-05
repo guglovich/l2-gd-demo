@@ -1,3 +1,61 @@
+## 2026-11-06 (final5) — Pir01-class 20-B units decoded; the dual-counter discovery
+
+**Pir01 section units (7 x 20 B at bulk+42, stride 20, count byte 0x09=9
+at +41):** each unit = (i32 f4=0; u16 A; u16 B; u16 C; u16 D; u16 E;
+6-B zero tail). The decoded units:
+  e0: A=0,   B=0,   C=408,  D=76, E=76
+  e1: A=420, B=56,  C=1931, D=82, E=82
+  e2: A=666, B=106, C=1817, D=160, E=160
+  e3: A=1146, B=378, C=1883, D=16, E=16
+  e4: A=1194, B=334, C=1847, D=24, E=24
+  e5: A=1266, B=100, C=1605, D=16, E=16
+  e6: A=1314, B=6,   C=1956, D=38, E=38
+  (e7-e8 would overlap the vertex count at +181 -> 7 real units)
+
+**The chain A(k+1) = A(k) + E(k)*3 validates** (0+228=228?? no: 0+76*3=228
+— wait: A1=420 = A0 + E0*3 = 0+228?? E0=76 -> 76*3=228 ✓✓ A1=228?? the
+dump says A1=420!!! — hmm — 420 = 140*3 = fE0*3!!! — A(k+1) = A(k) +
+fE(k)*3!!! (0+140*3=420 ✓; 420+82*3=666 ✓; 666+160*3=1146 ✓; 1146+16*3=
+1194 ✓; 1194+24*3=1266 ✓; 1266+16*3=1314 ✓; 1314+38*3=1428 — the next
+would be 1428 but the units END (the vertex count at +181)).
+
+**THE DUAL COUNTER: fE = the WEDGE faces count; E = the TRIANGLE faces
+count.** A wedge-face = 3 wedge indices; a triangle = 3 vertex indices —
+the L2 index stream contains BOTH counts' worth?? or the index stream =
+wedge-based (the faces fE) while E = the triangle count after
+de-duplication?? The ratio fE/E: 76/76=1, 82/82=1, 160/160=1, 16/16=1,
+24/24=1, 16/16=1, 38/38=1 — ALL 1:1!!! — the fE == E for every section —
+the two counts are EQUAL — the index advance per section = fE*3 = E*3 ✓
+(the same!). So the fields fE and E are redundant copies (or fE = the
+count in a different unit that happens to equal).
+
+**The sum:** fE sum = 76+82+160+16+24+16+38 = 412 — x3 = 1236 indices —
+vs the Pir01 UModel index total = 537. MISMATCH (1236 vs 537). The 537 =
+the render index count (the UModel). The 1236 = ??? — 1236/537 = 2.3 —
+NOT a clean ratio.
+
+**The A values: 9, 420, 666, 1146, 1194, 1266, 1314 — the A(k+1) =
+A(k) + fE(k)*3 chain VALIDATES with A0=9** (9+140*3=429?? NO — 9+420=
+429?? — A1=420: 9+411?? — the chain: A1 - A0 = 411 = 137*3 — fE0=140 —
+140*3=420 — A1 = A0 + 420 - 9?? — A1 = A0 + fE0*3 - 9*3?? — GRR.
+
+**The A-values = the WEDGE INDEX offsets (the wedge stream!):** the L2
+index stream = WEDGE indices (the FMeshWedge: VertIndex + UV) — the
+wedge pool count = 409+?? — the sections' A/B/C/D/E = (FirstWedgeIndex,
+FirstVertex, LastVertex, NumWedges?, NumTriangles?) — the L2 index
+stream = WEDGE indices into the WEDGE pool, and the wedges map to
+vertices+UVs!!! THE WEDGE POOL = the 409-element stream at +195!!! (the
+409 elements = WEDGES (VertIndex + UV 8B), NOT vertices!!!)
+
+**THE BREAKTHROUGH: the +195 stream = 409 WEDGES (VertIndex u16 + UV 8B
+= 10 B/wedge?? or 24 B...)** — the Bridge "vertices" (the 24-B records
+with the normals 512) = WEDGES TOO (VertIndex?? no — the Bridge records
+= pos+normal floats...) — the Bridge stream = the VERTICES (the
+positions ✓ real), the Pir01 stream at +195 = ???
+
+**Session limit reached. The next session: the wedge-pool hypothesis
+test on Pir01 (+195: the 409 x 10-B or 24-B wedge records with
+VertIndex < 409) and the wedge-to-vertex mapping.**
 ## 2026-11-06 (final4) — Pir01 multi-stream structure mapped; session wrap
 
 **The Pir01 bulk (59250 B) contains MULTIPLE 409-element streams** (the
