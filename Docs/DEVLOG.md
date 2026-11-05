@@ -1556,3 +1556,50 @@ the L2 variable header and the 32-B class before replacing UModel staging.
 then reverted with world.gd; the corner rule already renders correctly).
 The strict-present experiment is documented here only — do not repeat it as
 a render mask.
+
+## 2026-11-06 (later) — residual "grass from the outer texture" inside caves:
+CULL_DISABLED backface leak, replaced with per-face winding flip
+
+**User report:** small grass-textured pieces remain inside caves at
+(7096,17888) and (6141,18673) — "the old bug we already fixed".
+
+**Diagnosis (numeric):**
+- Floor grid at the chamber (5950-6550, 18350-18950): 625 points, terrain
+  hits = ZERO. The green wall is NOT terrain — it is a mesh face.
+- The wall's texture = DE_V_m06 (oren_dev_t) — a mossy grass-over-rock
+  texture legitimately assigned to O_DE_MT_obj01 section 1 by materials.json
+  (primitive_material_indices [0,1,2,3], verified against the glTF).
+- The face is the BACKSIDE of an exterior mossy surface, visible because
+  `_down_floor_meshes` disabled backface culling on whole meshes (the UE2
+  two-sided emulation added for down-normal floors). obj01/MT_In/MT_Out/
+  inlet were in that list; obj02-04 and MT_Btm (not in the list) never leak.
+- Winding analysis: glTF winding agrees with stored normals on EVERY face
+  of obj01 (0 down-normal faces at all) and inlet (368 down-normal floor
+  faces, duplicates MT_Btm whose faces are all up-normal).
+
+**Fix (world.gd _get_mesh):** replaced the whole-mesh CULL_DISABLED hack
+with a per-face winding flip for meshes in `_down_floor_meshes`: faces whose
+vertex normal points down (y < -0.5) get their index triple reversed, so the
+floor becomes front-facing from above; every other backface culs normally.
+This reproduces UE2's two-sided-from-above result without exposing the
+backsides of exterior surfaces. Collision untouched (backface_collision
+stays on the trimesh; winding is irrelevant to ConcavePolygonShape3D).
+
+**Verification:**
+- Chamber (6141,18673): green wall gone — dark rock + the inlet floor
+  (now front-facing) render instead.
+- Mouth (7096,17888): the mossy patch gone.
+- Bridge (8000,17650): deck still renders (the flip preserves the down-face
+  visibility that CULL_DISABLED provided) — the original motivation for the
+  hack holds.
+- Spawn (7400,17650): unchanged composition, no green in the cave volume.
+- E-W profile through the tunnel: 21/21 points with deck floor; N-S across
+  the mouth: 26/26 points walkable. No collision regressions.
+
+**Parked (mask-orientation investigation):** slope-correlation test of the
+terrain masks suggests the alpha maps may be DIRECT-mapped (no V-flip):
+ST rock correlates with steep quads ×25 under DIRECT vs ~0 under the current
+V-flip, road-bed cells are dirt-only under DIRECT. Not applied — the open-
+terrain look was user-approved with the current flip and the cave-green bug
+turned out to be mesh backfaces, not masks. Revisit with original-client
+reference screenshots before touching the shader.

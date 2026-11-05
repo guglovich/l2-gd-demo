@@ -414,6 +414,32 @@ func _get_mesh(key: String) -> Mesh:
 	for c in root.get_children():
 		if c is MeshInstance3D: mesh = c.mesh; break
 	if mesh == null: _mesh_cache[key] = null; return null
+	# UE2 renders these statics TWO-SIDED: floor faces carry down-pointing
+	# normals yet must be visible (and walkable) from above. The old hack
+	# disabled backface culling on the whole mesh — that also exposed the
+	# BACKSIDE of exterior surfaces (mossy/grass rock tops) inside caves:
+	# the "grass from the outer texture" defect. Instead, flip the winding
+	# of down-normal faces so they become front-facing from above, and let
+	# every other backface cull normally. Collision is winding-agnostic
+	# (ConcavePolygonShape3D backface_collision stays on).
+	if key in _down_floor_meshes:
+		var flipped := false
+		var am := ArrayMesh.new()
+		for si in range(mesh.get_surface_count()):
+			var arrays := mesh.surface_get_arrays(si)
+			var idx_arr = arrays[Mesh.ARRAY_INDEX]
+			var norms = arrays[Mesh.ARRAY_NORMAL]
+			if idx_arr != null and norms != null:
+				for k in range(0, int(idx_arr.size()) - 2, 3):
+					if norms[idx_arr[k]].y < -0.5:
+						var tmp: int = idx_arr[k + 1]
+						idx_arr[k + 1] = idx_arr[k + 2]
+						idx_arr[k + 2] = tmp
+						flipped = true
+				arrays[Mesh.ARRAY_INDEX] = idx_arr
+			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		if flipped:
+			mesh = am
 	var parts := key.split(":")
 	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
 	var pis: Array = info.get("primitive_material_indices", [])
@@ -448,10 +474,8 @@ func _get_mesh(key: String) -> Mesh:
 					m.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 					m.alpha_scissor_threshold = 0.35
 					m.cull_mode = StandardMaterial3D.CULL_DISABLED
-				elif key in _down_floor_meshes:
-					# Пол с нормалями вниз в экспорте — невидим сверху (backface culling).
-					# Делаем поверхность двусторонней, чтобы пол был виден и по нему можно ходить.
-					m.cull_mode = StandardMaterial3D.CULL_DISABLED
+				# Down-normal floors are handled by the per-face winding flip
+				# above (UE2 two-sided emulation without backface leaks).
 				mesh.surface_set_material(si, m)
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
 					print("DIAG bridge floor surface %d: texture applied" % [si])
