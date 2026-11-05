@@ -33,8 +33,86 @@ func _ready() -> void:
 		_floor_profile_flow()
 	if OS.get_environment("L2_FLOOR_GRID") != "":
 		_floor_grid_flow()
+	if OS.get_environment("L2_GREEN_TRACE") != "":
+		_green_trace_flow()
 	if OS.get_environment("L2_SCREENSHOT") != "":
 		_screenshot_flow()
+
+
+## Green-pixel tracer: L2_GREEN_TRACE=1 renders one frame, finds green-dominant
+## pixels, casts rays from the camera through them and reports the exact hit —
+## mesh key, face index, resolved surface texture. Settles "what is this green
+## surface" without any eyeballing.
+func _green_trace_flow() -> void:
+	await get_tree().create_timer(4.0).timeout
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or img == null:
+		print("GREEN_TRACE: no camera/image")
+		get_tree().quit()
+		return
+	var w := img.get_width()
+	var h := img.get_height()
+	var space := get_world_3d().direct_space_state
+	var counts := {}
+	for py in range(0, h, 4):
+		for px in range(0, w, 4):
+			var c := img.get_pixel(px, py)
+			if c.g <= 0.28 or c.g < c.r or c.g <= c.b * 1.12:
+				continue
+			var pos := Vector2(px, py)
+			var from := cam.project_ray_origin(pos)
+			var dir := cam.project_ray_normal(pos)
+			var q := PhysicsRayQueryParameters3D.create(from, from + dir * 500.0)
+			var hit := space.intersect_ray(q)
+			if hit.is_empty():
+				continue
+			var col = hit.get("collider")
+			var owner_name := "unknown"
+			if col is Node and (col as Node).has_meta("mesh_key"):
+				owner_name = str((col as Node).get_meta("mesh_key"))
+			var fid := int(hit.get("face_index", -1))
+			var k := "%s" % owner_name
+			counts[k] = counts.get(k, 0) + 1
+			if counts[k] <= 3:
+				# face index -> surface -> texture name
+				var surf := _surface_for_face(owner_name, fid)
+				print("GREEN_TRACE px(%d,%d) %s face=%d surf=%d tex=%s pos=%v n=%v" % [
+					px, py, owner_name, fid, surf, _texture_for_surface(owner_name, surf),
+					hit.get("position"), hit.get("normal")])
+	print("GREEN_TRACE totals:", counts)
+	get_tree().quit()
+
+
+func _surface_for_face(mesh_key: String, fid: int) -> int:
+	var mesh := _get_mesh(mesh_key)
+	if mesh == null or fid < 0:
+		return -1
+	var acc := 0
+	for si in range(mesh.get_surface_count()):
+		var arrays := mesh.surface_get_arrays(si)
+		var idx = arrays[Mesh.ARRAY_INDEX]
+		var n := 0 if idx == null else int(idx.size()) / 3
+		if fid < acc + n:
+			return si
+		acc += n
+	return -1
+
+
+func _texture_for_surface(mesh_key: String, surf: int) -> String:
+	if surf < 0:
+		return "?"
+	var parts := mesh_key.split(":")
+	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
+	var info = asset_map_data.get("meshes", {}).get(mesh_key, {})
+	var pis: Array = info.get("primitive_material_indices", [])
+	if surf >= pis.size() or pis[surf] >= texs.size():
+		return "no-mapping"
+	var t = texs[int(pis[surf])]
+	if t == null or not (t is Dictionary):
+		return "?"
+	return "%s:%s" % [t.get("package", "?"), t.get("object", "?")]
 
 
 ## Numeric floor verifier (replaces eyeball/OCR checks): L2_FLOOR_PROFILE=
@@ -221,6 +299,19 @@ func _build_terrain() -> void:
 	for y in range(terrain_grid_height):
 		for x in range(terrain_width):
 			var i00 := y * stride + x
+			# L2 QuadVisibilityBitmap: present=0 quads are NOT rendered — the
+			# client cuts the terrain under the village, the tunnel and the
+			# cave chambers (static meshes enclose those volumes). The
+			# heightfield keeps real heights in the cut (leftover data) and
+			# the masks keep meadow weights there — rendering those quads
+			# leaked grass into caves. The 2026-11-06 "voids" measured under
+			# this filter were caused by the broken 0fcf0d0 mesh staging
+			# (missing inlet floor), not by the filter; with the UModel
+			# meshes restored the profiles are clean.
+			var q := y * terrain_width + x
+			if terrain_present.size() == terrain_grid_height * terrain_width \
+					and terrain_present[q] != 1:
+				continue
 			# corners in cyclic order: (x,y) (x+1,y) (x+1,y+1) (x,y+1);
 			# heights z0 z1 z3 z2 respectively
 			var zs := [
@@ -229,17 +320,13 @@ func _build_terrain() -> void:
 				terrain_heights[i00 + stride + 1],
 				terrain_heights[i00 + stride],
 			]
-			# L2 edge-turn handling: a quad touching a terrain hole renders
-			# only its REAL-corner part. 4 real corners -> 2 triangles over
-			# the c0-c2 diagonal; 3 real -> the single triangle of the real
-			# corners (cyclic order keeps the winding); <=2 real -> skip.
-			# Dropping these quads made holes the player fell through;
-			# stretching them made giant slanted planes into tunnels.
+			# A present=1 quad whose corners still hold placeholder heights
+			# (3 such quads on the map) would draw a spike into the void.
 			var real := []
 			for i in range(4):
 				if zs[i] >= ph:
 					real.append(i)
-			if real.size() < 3:
+			if real.size() < 4:
 				continue
 			quads += 1
 			var cs := [
@@ -414,32 +501,6 @@ func _get_mesh(key: String) -> Mesh:
 	for c in root.get_children():
 		if c is MeshInstance3D: mesh = c.mesh; break
 	if mesh == null: _mesh_cache[key] = null; return null
-	# UE2 renders these statics TWO-SIDED: floor faces carry down-pointing
-	# normals yet must be visible (and walkable) from above. The old hack
-	# disabled backface culling on the whole mesh — that also exposed the
-	# BACKSIDE of exterior surfaces (mossy/grass rock tops) inside caves:
-	# the "grass from the outer texture" defect. Instead, flip the winding
-	# of down-normal faces so they become front-facing from above, and let
-	# every other backface cull normally. Collision is winding-agnostic
-	# (ConcavePolygonShape3D backface_collision stays on).
-	if key in _down_floor_meshes:
-		var flipped := false
-		var am := ArrayMesh.new()
-		for si in range(mesh.get_surface_count()):
-			var arrays := mesh.surface_get_arrays(si)
-			var idx_arr = arrays[Mesh.ARRAY_INDEX]
-			var norms = arrays[Mesh.ARRAY_NORMAL]
-			if idx_arr != null and norms != null:
-				for k in range(0, int(idx_arr.size()) - 2, 3):
-					if norms[idx_arr[k]].y < -0.5:
-						var tmp: int = idx_arr[k + 1]
-						idx_arr[k + 1] = idx_arr[k + 2]
-						idx_arr[k + 2] = tmp
-						flipped = true
-				arrays[Mesh.ARRAY_INDEX] = idx_arr
-			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-		if flipped:
-			mesh = am
 	var parts := key.split(":")
 	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
 	var pis: Array = info.get("primitive_material_indices", [])
@@ -474,8 +535,10 @@ func _get_mesh(key: String) -> Mesh:
 					m.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 					m.alpha_scissor_threshold = 0.35
 					m.cull_mode = StandardMaterial3D.CULL_DISABLED
-				# Down-normal floors are handled by the per-face winding flip
-				# above (UE2 two-sided emulation without backface leaks).
+				elif key in _down_floor_meshes:
+					# Пол с нормалями вниз в экспорте — невидим сверху (backface culling).
+					# Делаем поверхность двусторонней, чтобы пол был виден и по нему можно ходить.
+					m.cull_mode = StandardMaterial3D.CULL_DISABLED
 				mesh.surface_set_material(si, m)
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
 					print("DIAG bridge floor surface %d: texture applied" % [si])
