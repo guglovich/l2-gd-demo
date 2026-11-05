@@ -1508,3 +1508,51 @@ findings that remain true:
 - Character material parsing and animation conversion are the next user-
   visible features.
 - Steam Audio and export presets are not started.
+
+## 2026-11-06 — CAVE BUGS ROOT-CAUSED AND FIXED: 0fcf0d0 own-importer staging
+lost ~20% of the tunnel shell geometry
+
+**User report:** serious bugs in the cave near spawn (X=7309 Y=17720 Z=-4406):
+green mossy terrain slopes visible inside the tunnel.
+
+**Diagnosis chain (numeric, no OCR):**
+1. Corridor cells hold REAL heightfield data (raw 17176..17481 -> -44 m), not
+   the 2511 placeholder — the valley continues under the tunnel down to -71 m.
+2. Strict QuadVisibilityBitmap experiment (render present=1 only): the green
+   disappeared BUT the floor grid then showed voids east of the road and no
+   walkable surface south of the tunnel mouth -> present=0 does NOT mean
+   "don't render": the original renders real-height present=0 quads (canyon
+   slopes; the 2026-11-03 finding re-confirmed numerically). Reverted
+   world.gd to the corner-height rule (git checkout).
+3. Floor profile at the user's point BEFORE the mesh restore: top floor was
+   MT_Btm (-44.04) with terrain only 0.07-0.5 m below and ABOVE MT_Btm at the
+   west end (-44.25 vs -44.55) -> z-fighting/poking green.
+4. **Root cause:** stage commit 0fcf0d0 re-staged 26 meshes with our own v3
+   importer. O_DE_MT_Out .bin shrank 207872->162422 B (-22%), MT_In -19%,
+   MT_Btm -19%, and O_DE_inlet LOST ITS FLOOR SECTION ENTIRELY (no inlet hits
+   in the profile at all). The inlet is a huge single mesh = the whole gated
+   passage (walls + ceiling + floor). Without its floor, the corridor terrain
+   (grass-masked canyon) showed through = the green cave bug. Same class of
+   gap for every re-staged mesh (known blockers: L2 variable header unk1/
+   unk2/unk3/unk4 offset shifts; 32-B class sections after the index streams).
+
+**Fix:** restored all 26 mesh .gltf/.bin pairs to the UModel exports
+(`git checkout 0fcf0d0^ -- <files>`), deleted their .import stamps and
+.godot/imported, re-imported headless. UModel exporter geometry is exact
+(bfd887c). The own importer remains the future path — it must first solve
+the L2 variable header and the 32-B class before replacing UModel staging.
+
+**Verification (after fix):**
+- E-W profile through (7309,17720): top surface at every point is a MESH —
+  inlet floor -44.18..-44.22 (west) / MT_Btm -44.04..-44.49 — terrain always
+  below; O_DE_inlet spans the whole tunnel (rock bands -33.6/-36.2 + floor).
+- N-S profile at x=7100 (across the mouth): 0 points without a walkable
+  surface (-46..-30 band), 0 terrain hits above -44.0 (no pokes).
+- Screenshots at the user's point and at spawn: ornamental road + dark
+  pillars + rock walls + statue in fog; NO green terrain inside the cave
+  (tmp/shots/shot1.png, tmp/shots_spawn/shot1.png).
+
+**Parked:** EdgeTurnBitmap as the triangulation diagonal (loader was wired
+then reverted with world.gd; the corner rule already renders correctly).
+The strict-present experiment is documented here only — do not repeat it as
+a render mask.
