@@ -149,7 +149,7 @@ def parse_static_mesh(data: bytes, start: int, size: int,
             return False
         if abs(nx * nx + ny * ny + nz * nz - 1.0) >= 0.02:
             return False
-        if stride == 32:
+        if stride >= 32:
             u, v = struct.unpack_from("<2f", data, p + 24)
             if abs(u) > 16 or abs(v) > 16:
                 return False
@@ -212,19 +212,20 @@ def parse_static_mesh(data: bytes, start: int, size: int,
             raise ValueError("vertex stream anchor not found (hinted)")
         vstart, vcount, stride = found_at, hint_verts, stride
     else:
-        vs24, n24 = _scan_runs(data, start, size, 24)
-        vs32, n32 = _scan_runs(data, start, size, 32)
-        if n32 > n24:
-            vstart, vcount, stride = vs32, n32, 32
-        else:
-            vstart, vcount, stride = vs24, n24, 24
+        best = (0, 0, 24)
+        for stride in (24, 32, 36):
+            vs, n = _scan_runs(data, start, size, stride)
+            if n > best[1]:
+                best = (vs, n, stride)
+        vstart, vcount, stride = best
+        uvs = []
         if vcount < 8:
-            raise ValueError(f"vertex stream anchor not found (24:{n24} 32:{n32})")
+            raise ValueError(f"vertex stream anchor not found (best {vcount})")
     verts = []
     for i in range(vcount):
         p = vstart + i * stride
         x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, p)
-        uv = struct.unpack_from("<2f", data, p + 24) if stride == 32 else (0.0, 0.0)
+        uv = struct.unpack_from("<2f", data, p + 24) if stride >= 32 else (0.0, 0.0)
         verts.append((x, y, z, nx, ny, nz, uv[0], uv[1]))
     r = Reader(data, vstart + vcount * stride)
     vert_revision = r.i32()

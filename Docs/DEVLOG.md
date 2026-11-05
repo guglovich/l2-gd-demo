@@ -1,3 +1,28 @@
+## 2026-11-06 (4) — 36-B vertex stride confirmed; session wrap
+
+**The third vertex format confirmed: stride 36 B** = pos(12) + normal(12)
++ uv(8) + tail(4 B zeros) — Pir01's dump: (0.497, -0.068, 96.5) pos,
+(-0.045, -0.85, 0.545) normal, (-97.8, 0.082) uv, 00 00 00 00. The
+scanner now tries strides 24/32/36 and picks the longest valid run; the
+inline UVs (stride >= 32) take priority over the separate UV stream.
+
+**State after the run:** 14 meshes converted (the dual-stride scanner
+works); the fences/Pir class still yields 1-prim fallback — their
+section tables sit at offsets the current finder misses (the Pir01 table
+was manually located at bulk+41: count 9, one EMPTY section — the
+empty-section support is in; the remaining offset shifts = the L2
+variable header between the sections and the vertex stream — unk1 int +
+unk2 TArray<float> + unk3 + unk4, the sizes vary per mesh).
+
+**The next session (importer 100%):**
+1. Parse the L2 variable header (unk1 int; unk2 = compact + N floats;
+   unk3 int; unk4 int — per the skeletal L2 branch in the engine, applied
+   to static meshes too) -> the EXACT section-table offset per mesh.
+2. The fences/Pir section decode with the header parsed.
+3. Stage all 46 meshes from our importer; full map + texture re-run.
+
+**The staged state:** 26 matched own glTFs + the verified UModel glTFs
+for the rest — the game runs clean either way (git: 5 stages).
 ## 2026-11-06 (3c) — empty-section support; per-mesh variations remain
 
 **Empty sections are legal** (Pir01: 9 sections, one with NF=0 — UModel
