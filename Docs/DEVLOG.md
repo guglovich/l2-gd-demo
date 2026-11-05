@@ -1,3 +1,33 @@
+## 2026-11-06 (3b) — Pir01 class: section units before vertex count; handoff
+
+**Pir01 bulk layout (bulk=5848552, size=59250, materials=0 in props, UModel 8
+prims / 409 verts):**
+- +0..24: BoundingBox (matches: -341..727 x, -546..546 y)
+- +24: `01 00 00 00` — ?? (a count? a flag?)
+- +40..+180: SEVEN 20-B units (the section-like table):
+  (9, 0, 408, 76, 76), (228, 146, 396, 43, 43), (393, 4, 9, 4, 4),
+  (405, 114, 129, 8, 8), (429, 50, 113, 16, 16), (477, 341, 364, 8, 8),
+  (501, 82, 165, 12, 12) — each + 6 zero bytes.
+- +181: compact 409 (59 06) = THE VERTEX COUNT; the 32-B interleaved
+  vertex stream follows (pos+normal+uv, verified).
+- +172..: bbox #2 (98 f4 aa c3 ...) sits between the units and the count.
+
+**Field-semantics puzzle:** the first values (9, 228, 393, 405, 429, 477,
+501) ASCEND; the deltas (219, 165, 12, 24, 48, 24) are NOT exactly 3x the
+last field (76, 43, 4, 8, 16, 8) — unlike Bridge where
+FI+NF*3 = next FI exactly. Either the Pir01 fields are
+(FirstVertex, FirstIndex, LastVertex, fE, NumFaces) with a base offset,
+or an extra stream/LOD interleaves. The Pir01 UModel index total (sum of
+the prim index counts) is the missing number to close the puzzle.
+
+**Next session plan (importer 100%):**
+1. Compute Pir01's total index count from the UModel glTF; test
+   sum(unit.NF)*3 == total (the Bridge oracle) under both field orders.
+2. The 7 units vs 8 prims: one prim = the section 0..9 pre-range? or
+   8th section after +180?
+3. Generalize: the sections+streams parse for the 32-B class
+   (Pir01/MT_obj04/Bank_Set/fences/CH_*), the 3 anchor-skips
+   (Btm_Obj02/03, DE_effect), then stage ALL meshes from our importer.
 ## 2026-11-06 (3) — dual-stride vertices, fast hint anchor; 14-mesh section pass pending
 
 **Vertex formats: TWO variants confirmed** (byte-verified):
