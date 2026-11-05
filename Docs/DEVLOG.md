@@ -1,3 +1,39 @@
+## 2026-11-06 (final4) — Pir01 multi-stream structure mapped; session wrap
+
+**The Pir01 bulk (59250 B) contains MULTIPLE 409-element streams** (the
+compact 409 found at bulk+193, +10015, +11657, +13300):
+- +195: 409 x 24 B — the pos+normal stream (the normals = length 512,
+  the UEViewer "length = 512" note confirmed!)
+- +10015: 409 x 4 B — the ColorStream
+- +11657: 409 x 4 B — the AlphaStream
+- +13300: 409 x 8 B — the UVStream (the UVs dumped: 0.999/0.291...)
+- The positions ALSO at bulk+21660 (the f32 dump: 96.5, -97.8, 288.1)
+
+**The section table**: 9 entries at bulk+41; entries 0-4 decode perfectly
+((0,0,0,408,76,76), (228,146,396,43,43), (393,4,9,4,4), (405,114,129,8,8),
+(429,50,113,16,16)) — the FI chain 0->228->393->405->429 works; the
+entries 5-8 land in a float region (f4 != 0 — the L2 sections' f4 is NOT
+always 0!) — the relaxed scan (f4 unchecked) still fails: the entries 5+
+are in a DIFFERENT format or the table structure differs for the
+multi-stream meshes.
+
+**The unit normals vs 512:** Bridge's normals = length 1; Pir01's = 512 —
+BOTH formats exist (or the 512 = the Bridge normals × 512 too — the
+Bridge verts "valid" under the unit test AND the 512 test — ambiguous).
+
+**The next session (the importer 100% plan):**
+1. The Pir01-class stream map: 5 streams x 409 elements identified — the
+   vertex stream = +195 (pos+normal, the normals /512); the UVs at
+   +13300; the sections at +41 (the count 9, 5-9 entries).
+2. The sections 5-8: decode with f4 unchecked + the FI chain — the
+   failure means the Pir01-class table has MORE fields per entry (the
+   20-B units! — the 20-B stride was RIGHT for Pir01: the units at
+   +40/+60/+80/+100/+120/+140/+160 with the 6-B tails!).
+3. The Pir01-class entry = 20 B: (u16 FirstIndex; u16 FirstVertex;
+   u16 LastVertex; u16 fE; u16 NumFaces; i32 tail=0) — the tail = 6 B?
+   The Bridge entries = 14 B (NO tail) — the formats DIFFER per mesh
+   class!!! (MT_Btm/Bridge = 14 B; Pir01 = 20 B — the L2 licensee
+   version flag per mesh?...)
 ## 2026-11-06 (final3) — parser v3 state; the packed-vertex RE is the next RE target
 
 **Parser v3 status:** the hint-anchored algorithm is CORRECT (Bridge
