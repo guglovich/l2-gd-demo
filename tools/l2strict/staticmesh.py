@@ -75,49 +75,57 @@ def _valid_vertex(rec: bytes) -> bool:
 
 
 def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
-                   vert_count: int, index_count: int) -> list:
-    """Locate the FStaticMeshSection table. Engine-verified (sub_1030a41b):
-    FStaticMeshSection is 20 bytes — (i32 f4; u16 FirstIndex; u16
-    FirstVertex; u16 LastVertex; u16 fE; u16 NumFaces; 6 B tail) — preceded
-    by a compact count. Followed by the second BoundingBox. Validated
-    against the vertex/index pools."""
-    want_tris = index_count // 3
+                   want_faces: int) -> list:
+    """Locate the FStaticMeshSection table: compact count followed by
+    count x 14-B entries (i32 f4=0; u16 FirstIndex; FirstVertex;
+    LastVertex; fE; NumFaces) — the standard UE2 layout. Oracle: the
+    FirstIndex sequence is non-decreasing and consecutive sections chain
+    (FI + NF*3 = next FI). Verified on Oren_DEV_S (Bridge: 18 sections,
+    sum NF = 924 = the whole index pool)."""
     best = None
-    for off in range(bulk_start, bulk_end - 22):
+    for off in range(bulk_start, bulk_end - 16):
         rr = Reader(data, off)
-        cnt = rr.compact()
+        try:
+            cnt = rr.compact()
+        except IndexError:
+            continue
         if cnt <= 0 or cnt > 64:
             continue
         ok = True
         secs = []
+        prev_fi = -1
         for _ in range(cnt):
-            if rr.p + 20 > bulk_end:
+            if rr.p + 14 > bulk_end:
                 ok = False
                 break
-            vals = struct.unpack_from("<IHHHHHHH", data, rr.p)
-            rr.p += 20
-            f4, fi, fv, lv, fe, nf = vals[0], vals[1], vals[2], vals[3], vals[4], vals[5]
-            if f4 != 0 or fi >= index_count or nf == 0:
+            f4, fi, fv, lv, fe, nf = struct.unpack_from("<IHHHHH", data, rr.p)
+            rr.p += 14
+            if f4 != 0 or fi < prev_fi or nf == 0:
                 ok = False
                 break
-            if fv > lv or lv >= vert_count or fi + nf * 3 > index_count:
+            if fv > lv or lv >= 30000 or fi + nf * 3 > 30000:
                 ok = False
                 break
-            secs.append((fi, fv, lv, nf))
+            prev_fi = fi
+            secs.append((fi, fv, lv, fe, nf))
         if not ok or not secs:
             continue
-        covered = sum(s[3] for s in secs)
-        if covered == want_tris:
+        covered = sum(s[4] for s in secs)
+        if covered == want_faces:
             return secs
-        if best is None and covered > 0:
+        if best is None or covered > sum(s[4] for s in best):
             best = secs
     return best or []
 
 
 def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
-    """Parse one StaticMesh export. `start` must point at the BINARY bulk
-    (i.e. AFTER the property list — serial_offset + props.end).
-    Returns dict or raises."""
+    """Parse one StaticMesh export binary bulk (props already consumed).
+
+    Layout (verified from engine.dll + Oren_DEV_S):
+      BoundingBox 24B -> [gap] -> sections (14B entries) -> [gap] ->
+      VertexStream (compact count, count*24B pos+normal, i32 revision) ->
+      ColorStream -> AlphaStream -> UVStreams -> IndexStream1/2 -> ...
+    """
     r = Reader(data, start)
     bbox_min = struct.unpack_from("<3f", data, r.p)
     bbox_max = struct.unpack_from("<3f", data, r.p + 12)
@@ -125,41 +133,44 @@ def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
     sphere = struct.unpack_from("<4f", data, r.p)
     r.p += 16
 
-    # --- vertex stream: find the anchor [compact count][count*24 valid]
-    anchor = None
+    # --- vertex stream: [compact count][count*24B pos+normal] with a long
+    # valid run right after the count
+    vstart = None
+    vcount = 0
     p = r.p
-    limit = start + size - 452 * 24
+    limit = start + size - 64
     while p < limit:
-        probe = Reader(data, p)
-        cnt = probe.compact()
-        if 0 < cnt < 200000:
-            ok = all(
-                _valid_vertex(data[probe.p + i * 24:probe.p + i * 24 + 24])
-                for i in range(min(cnt, 4))
-            )
-            if ok and probe.p + cnt * 24 + 4 <= start + size:
-                # tail sanity: after the stream comes an int (Revision)
-                anchor = (p, probe.p, cnt)
-                break
+        if data[p] >= 0x40 and data[p] < 0x80:  # positive compact, 2 bytes likely
+            rr = Reader(data, p)
+            try:
+                c = rr.compact()
+            except IndexError:
+                c = 0
+            if 8 <= c <= 200000 and p + 2 + min(c, 64) * 24 < start + size:
+                good = sum(
+                    1 for i in range(min(c, 64))
+                    if _valid_vertex(data[rr.p + i * 24:rr.p + i * 24 + 24])
+                )
+                if good == min(c, 64):
+                    vstart = rr.p
+                    vcount = c
+                    break
         p += 1
-    if anchor is None:
+    if vstart is None:
         raise ValueError("vertex stream anchor not found")
-    _, vpos, vcount = anchor
     verts = []
     for i in range(vcount):
-        rec = data[vpos + i * 24:vpos + i * 24 + 24]
-        x, y, z, nx, ny, nz = struct.unpack("<6f", rec)
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, vstart + i * 24)
         verts.append((x, y, z, nx, ny, nz))
-    r = Reader(data, vpos + vcount * 24)
+    r = Reader(data, vstart + vcount * 24)
     vert_revision = r.i32()
 
     # --- color / alpha streams
-    colors = []
     for _ in range(2):
         n = r.compact()
         if 0 < n < 200000 and r.p + n * 4 + 4 <= start + size:
             r.p += n * 4
-        r.i32()  # revision
+        r.i32()
 
     # --- uv streams
     uvs = []
@@ -185,10 +196,9 @@ def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
         n = r.compact()
         if n <= 0 or n > 4_000_000 or r.p + n * 2 > start + size:
             break
-        idx = struct.unpack_from(f"<{n}H", data, r.p)
-        indices.append(idx)
+        indices.append(struct.unpack_from(f"<{n}H", data, r.p))
         r.p += n * 2
-        r.i32()  # revision
+        r.i32()
     render_idx = None
     for idx in indices:
         if idx and max(idx) < len(verts):
@@ -197,8 +207,8 @@ def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
     if render_idx is None:
         raise ValueError("no render index stream referencing the vertex pool")
 
-    sections = _find_sections(data, start + 40, min(start + 4096,
-                              start + size), len(verts), len(render_idx))
+    sections = _find_sections(data, start + 24, vstart,
+                              len(render_idx) // 3)
 
     return {
         "bbox_min": bbox_min,
@@ -270,11 +280,11 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
 
     # One primitive per section (world.gd maps textures per primitive).
     prims = []
-    secs = mesh.get("sections") or [(0, 0, len(mesh["verts"]) - 1,
+    secs = mesh.get("sections") or [(0, 0, len(mesh["verts"]) - 1, 0,
                                      len(mesh["indices"]) // 3)]
     used = 0
-    for (fi, fv, lv, nf) in secs:
-        sub = mesh["indices"][fi * 3:(fi + nf) * 3]
+    for (fi, fv, lv, fe, nf) in secs:
+        sub = mesh["indices"][fi:fi + nf * 3]  # FirstIndex is in index units
         if not sub:
             continue
         used += len(sub) // 3

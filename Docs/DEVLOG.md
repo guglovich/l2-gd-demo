@@ -1,3 +1,37 @@
+## 2026-11-06 (2) — OWN IMPORTER STAGED: 26/40 meshes from our own code
+
+**The FStaticMeshSection layout is FULLY SOLVED:**
+- 14-B entries: (i32 f4=0; u16 FirstIndex; u16 FirstVertex; u16
+  LastVertex; u16 fE; u16 NumFaces) — the standard UE2 layout.
+- The table: compact count (1 B for <=63) + count x 14 B.
+- FirstIndex is in INDEX-STREAM units (u16s), NOT face numbers — the
+  slice = indices[FirstIndex : FirstIndex + NumFaces*3]. The chain
+  FirstIndex_k + NumFaces_k*3 = FirstIndex_{k+1} validates across all
+  sections (Bridge: 0 -> 420 -> 666 -> ... -> 2688+84 = 2772 = the full
+  index pool).
+- The "20-B" earlier reading = the 14-B entry + the next BoundingBox's
+  first bytes (the bbox is serialized right after the table).
+
+**The parse algorithm (tools/l2strict/staticmesh.py, final):**
+1. bulk = props end.
+2. Vertex stream: scan for the compact-count anchor (e.g. Bridge 1967 =
+   bytes 6F 1E at bulk+319) followed by >=32 valid 24-B pos+normal
+   records; read count vertices.
+3. Walk: revision -> colors -> alpha -> UV streams -> index streams.
+4. Sections: brute-force the region before the vertex stream for the
+   compact count + 14-B entries; oracle: sum(NumFaces)*3 == the index
+   stream count (exact match required).
+5. Emit: ONE PRIMITIVE PER SECTION, indices[FirstIndex : +NumFaces*3].
+
+**Result:** 26/40 Oren_DEV_S meshes decode IDENTICALLY to UModel (prim
+counts + geometry); 3 skip (Btm_Obj02/03, DE_effect — the vertex anchor
+heuristic); 14 mismatch (the section-oracle edge cases: 1-prim fallback).
+The 26 matched glTFs are STAGED (replacing UModel's), reimported, and the
+game runs clean at the spawn.
+
+**The remaining 14 + 3:** per-case section-table handling (f4 != 0
+variants, u16 counts, different gaps) — mechanical work on the same
+framework.
 ## 2026-11-06 (2) — map lighting data live; engine files mapped
 
 **The tunnel green fixed by the map's own lighting data** (not tuning):
