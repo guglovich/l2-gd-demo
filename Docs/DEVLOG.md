@@ -1,3 +1,32 @@
+## 2026-11-06 (final3) — parser v3 state; the packed-vertex RE is the next RE target
+
+**Parser v3 status:** the hint-anchored algorithm is CORRECT (Bridge
+verified) but converts only 11/46 meshes — slower and narrower than v2
+(26). The write_gltf UV logic fixed (the 24-B meshes use the separate UV
+stream; the 32/36-B use the inline UVs).
+
+**The remaining mesh classes (the RE targets):**
+1. The PACKED-vertex meshes (O_DE_MT_obj01-04, O_DE_H01-04, O_DE_Lamp01/
+   02, O_DE_Btm_Obj02/03, DE_effect, Etc_Bridge02): their vertices are
+   NOT f32 in the bulk — the packed format (16-bit positions? the UE2
+   quantized format?) — the positions don't match ANY float permutation.
+   The engine reader: the FStaticMeshVertexStream serialization for these
+   meshes must differ (the L2 licensee packed format). RE target:
+   engine.dll's vertex deserialization for the packed meshes.
+2. The 32/36-B class (Pir01/fences/CH_*): the post-stream walk + the
+   section tables (the layout documented, the walk divergence pending).
+3. The no-hint meshes (DE_effect, Etc_Bridge02): the empty Materials ->
+   UModel skipped them -> no staged glTF -> no hint. Their vert count
+   source: the section table's LastVertex+1 (parse the sections FIRST).
+
+**The staged state (the game):** the previous good staging intact (the
+own 24-B glTFs + the verified UModel glTFs). The parser v3 output is in
+tmp/l2/20_18/own_meshes (11 meshes, not staged).
+
+**The path to the own-importer 100%:** (a) parse the L2 variable header
+(the unk2 float array) for the section offsets; (b) RE the packed-vertex
+format from engine.dll; (c) the no-hint meshes: parse the sections first
+(LastVertex+1 = the vert count) then the streams.
 ## 2026-11-06 (final2) — parse v3 verified on Bridge; batch has 2 known bugs
 
 **parse v3 (anchor-based) VERIFIED:** Bridge direct test = 1967 verts /

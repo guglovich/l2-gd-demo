@@ -151,7 +151,7 @@ def parse_static_mesh(data: bytes, start: int, size: int,
             p += 1
         return (-(v + 1) if neg else v), p
 
-    def valid_rec(p):
+    def valid_rec(p, stride=24):
         x, y, z, nx, ny, nz = struct.unpack_from("<6f", d, p)
         if not all(abs(t) < 1.2e5 for t in (x, y, z)):
             return 0
@@ -159,6 +159,10 @@ def parse_static_mesh(data: bytes, start: int, size: int,
         # L2 normals: unit length OR the engine's 512 scale
         if not (0.9 < ln2 < 1.1 or 250000 < ln2 < 275000):
             return 0
+        if stride == 32:
+            u, v = struct.unpack_from("<2f", d, p + 24)
+            if abs(u) > 16 or abs(v) > 16:
+                return 0
         return 1
 
     # --- locate the vertex stream by the hint count
@@ -166,39 +170,49 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     vcount = hint_verts
     if vcount < 8:
         raise ValueError("no vertex hint — the staged glTF must exist")
-    # the compact encoding of the hint count
+    # the compact encoding of the hint count (the 0x40 more-bit only when
+    # the value actually continues into the next byte)
     enc = []
     n = vcount
-    b0 = (n & 0x3F) | 0x40
-    enc.append(b0)
+    b0 = n & 0x3F
     n >>= 6
+    if n:
+        b0 |= 0x40
+    enc.append(b0)
     while n:
         nxt = n >> 7
         enc.append((n & 0x7F) | (0x80 if nxt else 0))
         n = nxt
     pat = bytes(enc)
     q = start
+    vstride = 24
     while True:
         q = d.find(pat, q, end)
         if q < 0:
             break
         vs = q + len(pat)
-        good = sum(1 for i in range(min(vcount, 64))
-                   if valid_rec(vs + i * 24))
-        if good == min(vcount, 64):
-            vstart = vs
+        for stride in (24, 32):
+            good = sum(1 for i in range(min(vcount, 64))
+                       if valid_rec(vs + i * stride, stride))
+            if good == min(vcount, 64):
+                vstart = vs
+                vstride = stride
+                break
+        if vstart is not None:
             break
         q += 1
     if vstart is None:
-        raise ValueError("vertex stream anchor not found")
+        raise ValueError("vertex stream anchor not found (packed-vertex "
+                         "meshes are a known pending RE target)")
     verts = []
     for i in range(vcount):
-        x, y, z, nx, ny, nz = struct.unpack_from("<6f", d, vstart + i * 24)
+        p = vstart + i * vstride
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", d, p)
         l = (nx * nx + ny * ny + nz * nz) ** 0.5
         if l > 2.0:
             nx, ny, nz = nx / l, ny / l, nz / l
         verts.append((x, y, z, nx, ny, nz))
-    r = vstart + vcount * 24
+    r = vstart + vcount * vstride
 
     # --- the color / alpha / UV streams share the element count
     uvs = []
@@ -298,13 +312,17 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
         l = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
         normals.extend([nx / l, nz / l, -ny / l])
     if mesh["uvs"]:
+        # separate UV stream (the 24-B pos+normal vertex format)
         uv_flat = []
         for u, v in mesh["uvs"][0]:
             uv_flat.extend([u, 1.0 - v])
-    else:
+    elif len(mesh["verts"][0]) == 8:
+        # inline UVs (the 32/36-B interleaved vertex format)
         uv_flat = []
         for v in mesh["verts"]:
             uv_flat.extend([v[6], 1.0 - v[7]])
+    else:
+        uv_flat = [0.0, 0.0] * len(mesh["verts"])
 
     def add_view(data: bytes) -> int:
         while len(blob) % 4:
