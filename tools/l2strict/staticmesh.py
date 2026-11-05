@@ -250,34 +250,49 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     if render_idx is None:
         raise ValueError("no render index stream referencing the vertex pool")
 
-    # --- sections: 14-B entries, oracle sum(NumFaces)*3 == index count
+    # --- sections: 14-B entries (f4 i32=0; FirstIndex, FirstVertex,
+    # LastVertex, fE, NumFaces as u16). Empty sections (NumFaces=0) are
+    # legal. Oracle: sum(NumFaces)*3 == the index count.
     sections = []
     idx_total = len(render_idx)
     best = None
-    for off in range(start, min(vstart, start + 4096) - 16):
+    scan_end = min(vstart, start + 4096) - 16
+    import os as _os
+    _dbg = _os.environ.get("L2_SECTION_DEBUG") != ""
+    for off in range(start, scan_end):
         cc, p2 = compact(off)
         if cc <= 0 or cc > 64:
             continue
+        if _dbg and 30 <= off - start <= 60:
+            print(f"SECDBG off=+{off-start} cc={cc}")
         ok = True
         secs = []
         prev_fi = -1
         for _ in range(cc):
             if p2 + 14 > end:
                 ok = False
+                if _dbg and 30 <= off - start <= 60:
+                    print("SECDBG   over bulk end")
                 break
             f4, fi, fv, lv, fe, nf = struct.unpack_from("<IHHHHH", d, p2)
             p2 += 14
             if f4 != 0 or fi < prev_fi or fi + nf * 3 > idx_total:
                 ok = False
+                if _dbg and 30 <= off - start <= 60:
+                    print(f"SECDBG   fail1: f4={f4} fi={fi} nf={nf} idx_total={idx_total}")
                 break
             if nf and (fv > lv or lv >= vcount):
                 ok = False
+                if _dbg and 30 <= off - start <= 60:
+                    print(f"SECDBG   fail2: fv={fv} lv={lv} vcount={vcount}")
                 break
             prev_fi = fi
             secs.append((fi, fv, lv, fe, nf))
         if not ok or not secs:
             continue
         covered = sum(s[4] for s in secs) * 3
+        if _dbg and 30 <= off - start <= 60:
+            print(f"SECDBG   table valid covered={covered} need={idx_total}")
         if covered == idx_total:
             sections = secs
             break

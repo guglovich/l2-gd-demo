@@ -1,3 +1,35 @@
+## 2026-11-06 (final7) — Pir01 region +41..+170 is the L2 HEADER, not sections
+
+**The section-debug trace on Pir01 revealed:** the region bulk+41..+170
+(count byte 9, the zero entries, the float data) is NOT the section
+table — it is the L2 VARIABLE HEADER (the unk2 float array + zeros).
+The real sections for the 32-B class are ELSEWHERE (after the streams).
+
+**The confirmed Pir01-class structure:**
+- bulk+0..24: bbox; +24..40: sphere; +40..41: the header start
+- +41..+170: the L2 header (the zeros + the unk2 floats) — NOT sections
+- +195: the VertexStream (409 x 24 B pos+normal, the unit normals)
+- +10015: the ColorStream (409 x 4 B)
+- +11657: the AlphaStream (409 x 4 B)
+- +13300: the UVStream (409 x 8 B)
+- after +16582: the IndexStreams (the render indices = 537)
+- the SECTIONS: after the index streams (the location TBD)
+
+**The 24-B class (Bridge/MT_Btm):** the sections at bulk+41 (BEFORE the
+vertex stream). The two classes have DIFFERENT layouts:
+- 24-B class: props -> bbox+sphere -> sections -> vertices -> streams
+- 32-B class: props -> bbox+sphere -> L2 header -> vertices -> colors ->
+  alpha -> UVs -> indices -> SECTIONS???
+The distinguishing feature: the 24-B class = the separate UV stream
+ABSENT (the UVs in the header region?); the 32-B class = the UV stream
+present. OR: the first byte after the sphere (0x01 for Bridge/MT_Btm vs
+0x44/0x09 for Pir01) = a FORMAT FLAG.
+
+**The exporter status:** the 24-B class = fully working (26 meshes
+staged); the 32-B class = the geometry extracts (the vertices/UVs via
+the anchors) but the sections need the post-index-stream walk — the
+next session: dump Pir01's post-index-stream region, find the section
+table there, decode, and the 32-B class completes.
 ## 2026-11-06 (final6) — UModel vertices CONFIRMED in the file stream
 
 **The cross-search:** the UModel vert0 (0.924, -5.298, 0.456) m FOUND in
