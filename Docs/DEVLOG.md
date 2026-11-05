@@ -1,3 +1,31 @@
+## 2026-11-06 (final2) — parse v3 verified on Bridge; batch has 2 known bugs
+
+**parse v3 (anchor-based) VERIFIED:** Bridge direct test = 1967 verts /
+2772 indices / 18 sections — the anchor-based algorithm (the hint count
+compact pattern -> 24B pos+normal records with the normal length 512 OR
+1 -> the color/alpha/UV streams sharing the count -> the u16 index pools
+-> the 14-B section tables with the sum oracle) WORKS.
+
+**The batch (convert_export) has 2 known bugs to fix next session:**
+1. The staged-glTF hint path is computed RELATIVE (normpath(tools/../assets))
+   — works only when the CWD = the project root; make it absolute via the
+   package path or pass the staged root explicitly.
+2. IndexError: tuple index out of range — on the FIRST mesh (the hint
+   encoding for hint < 64 is a single byte without the 0x40 bit — the
+   compact_bytes builder sets the 0x40 bit unconditionally; also validate
+   hint >= 8 before encoding).
+3. The 32-B interleaved class (obj04/H01-04/Lamps): the v3 anchor expects
+   the 24-B records — the 32-B class needs the hint-anchored 32-B variant
+   (pos+normal+uv) — the dual-stride scanner from the previous iteration
+   has the logic; merge it into v3's anchor (try both strides per match).
+
+**The v3 advantages over the previous parser:** no format guessing (the
+hint count anchors everything), the normal length 512 OR 1 both accepted
+(the L2 normal scale), the streams located by their shared element count.
+
+**The game state:** the staged glTFs = the previous iteration's (26 own +
+the UModel rest) — the game runs clean; the v3 parser will regenerate
+them all once the batch bugs are fixed.
 ## 2026-11-06 (final) — session wrap: the 32/36-B post-stream walk is the last blocker
 
 **The hint-anchor loop VALIDATES each pattern match and continues**

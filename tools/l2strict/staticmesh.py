@@ -124,166 +124,163 @@ def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
 
 def parse_static_mesh(data: bytes, start: int, size: int,
                       hint_verts: int = 0) -> dict:
-    """Parse one StaticMesh export binary bulk (props already consumed).
+    """Parse one L2 StaticMesh binary bulk (props already consumed).
 
-    Layout (verified from engine.dll + Oren_DEV_S):
-      BoundingBox 24B -> [gap] -> sections (14B entries) -> [gap] ->
-      VertexStream (compact count, count*24B pos+normal, i32 revision) ->
-      ColorStream -> AlphaStream -> UVStreams -> IndexStream1/2 -> ...
+    Anchor-based (format-proof): the vertex stream is located by its
+    compact count (== the hint from the staged glTF) followed by count
+    x 24 B records (pos + normal, the L2 normals have length 512);
+    the color/alpha/UV streams share the same element count; the index
+    streams are u16 pools; the sections are 14-B tables whose NumFaces
+    sum x 3 == the index count.
     """
-    r = Reader(data, start)
-    bbox_min = struct.unpack_from("<3f", data, r.p)
-    bbox_max = struct.unpack_from("<3f", data, r.p + 12)
-    r.p += 24
-    sphere = struct.unpack_from("<4f", data, r.p)
-    r.p += 16
+    d = data
+    end = start + size
 
-    # --- vertex stream: [compact count][count * stride]; the stride is
-    # 24 B (pos+normal) or 32 B (pos+normal+uv interleaved) -- both exist
-    # in Oren_DEV_S (Bridge=24B, Pir01/obj04=32B).
-    def _ok_rec(data, p, stride):
-        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, p)
-        if not all(abs(v) < 1.2e5 for v in (x, y, z)):
-            return False
-        if not all(abs(v) <= 1.001 for v in (nx, ny, nz)):
-            return False
-        if abs(nx * nx + ny * ny + nz * nz - 1.0) >= 0.02:
-            return False
-        if stride >= 32:
-            u, v = struct.unpack_from("<2f", data, p + 24)
-            if abs(u) > 16 or abs(v) > 16:
-                return False
-        return True
+    def compact(p):
+        b = d[p]
+        more = b & 0x40
+        neg = b & 0x80
+        v = b & 0x3F
+        sh = 6
+        p += 1
+        while more:
+            b = d[p]
+            more = b & 0x80
+            v |= (b & 0x7F) << sh
+            sh += 7
+            p += 1
+        return (-(v + 1) if neg else v), p
 
-    def _scan_runs(data, start, size, stride):
-        # byte-wise scan with a cheap exponent filter: a position float in
-        # +-64..+-131072 has biased exponent 130..142, top byte (sign|E>>1)
-        # = 0x41..0x48 (positive) or 0xC1..0xC8 (negative)
-        best_start, best_len, p = 0, 0, start
-        end = start + size - stride
-        while p < end:
-            hi = data[p + 3] & 0x7F
-            if 0x41 <= hi <= 0x48 and _ok_rec(data, p, stride):
-                run = 0
-                q = p
-                while q < end and _ok_rec(data, q, stride):
-                    run += 1
-                    q += stride
-                if run > best_len:
-                    best_start, best_len = p, run
-                p = max(q, p + 1)
-            else:
-                p += 1
-        return best_start, best_len
+    def valid_rec(p):
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", d, p)
+        if not all(abs(t) < 1.2e5 for t in (x, y, z)):
+            return 0
+        ln2 = nx * nx + ny * ny + nz * nz
+        # L2 normals: unit length OR the engine's 512 scale
+        if not (0.9 < ln2 < 1.1 or 250000 < ln2 < 275000):
+            return 0
+        return 1
 
-    uvs = []
-    if hint_verts >= 8:
-        # exact anchor: find the byte pattern of the compact encoding of the
-        # known vertex count, then validate the records after it
-        def compact_bytes(n: int) -> bytes:
-            b0 = (n & 0x3F) | 0x40
-            rest = n >> 6
-            out = [b0]
-            while rest:
-                nxt = rest >> 7
-                out.append((rest & 0x7F) | (0x80 if nxt else 0))
-                rest = nxt
-            return bytes(out)
-        pat = compact_bytes(hint_verts)
-        found_at = None
-        q = start
-        while True:
-            q = data.find(pat, q, start + size)
-            if q < 0:
-                break
-            for stride in (24, 32):
-                if q + 2 + min(hint_verts, 64) * stride <= start + size:
-                    good = sum(
-                        1 for i in range(min(hint_verts, 64))
-                        if _ok_rec(data, q + 2 + i * stride, stride)
-                    )
-                    if good == min(hint_verts, 64):
-                        found_at = q + 2
-                        break
-            if found_at is not None:
-                break
-            q += 1
-        if found_at is None:
-            raise ValueError("vertex stream anchor not found (hinted)")
-        vstart, vcount, stride = found_at, hint_verts, stride
-    else:
-        best = (0, 0, 24)
-        for stride in (24, 32, 36):
-            vs, n = _scan_runs(data, start, size, stride)
-            if n > best[1]:
-                best = (vs, n, stride)
-        vstart, vcount, stride = best
-        uvs = []
-        if vcount < 8:
-            raise ValueError(f"vertex stream anchor not found (best {vcount})")
+    # --- locate the vertex stream by the hint count
+    vstart = None
+    vcount = hint_verts
+    if vcount < 8:
+        raise ValueError("no vertex hint — the staged glTF must exist")
+    # the compact encoding of the hint count
+    enc = []
+    n = vcount
+    b0 = (n & 0x3F) | 0x40
+    enc.append(b0)
+    n >>= 6
+    while n:
+        nxt = n >> 7
+        enc.append((n & 0x7F) | (0x80 if nxt else 0))
+        n = nxt
+    pat = bytes(enc)
+    q = start
+    while True:
+        q = d.find(pat, q, end)
+        if q < 0:
+            break
+        vs = q + len(pat)
+        good = sum(1 for i in range(min(vcount, 64))
+                   if valid_rec(vs + i * 24))
+        if good == min(vcount, 64):
+            vstart = vs
+            break
+        q += 1
+    if vstart is None:
+        raise ValueError("vertex stream anchor not found")
     verts = []
     for i in range(vcount):
-        p = vstart + i * stride
-        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, p)
-        uv = struct.unpack_from("<2f", data, p + 24) if stride >= 32 else (0.0, 0.0)
-        verts.append((x, y, z, nx, ny, nz, uv[0], uv[1]))
-    r = Reader(data, vstart + vcount * stride)
-    vert_revision = r.i32()
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", d, vstart + i * 24)
+        l = (nx * nx + ny * ny + nz * nz) ** 0.5
+        if l > 2.0:
+            nx, ny, nz = nx / l, ny / l, nz / l
+        verts.append((x, y, z, nx, ny, nz))
+    r = vstart + vcount * 24
 
-    # --- color / alpha streams
-    for _ in range(2):
-        n = r.compact()
-        if 0 < n < 200000 and r.p + n * 4 + 4 <= start + size:
-            r.p += n * 4
-        r.i32()
-
-    # --- uv streams
+    # --- the color / alpha / UV streams share the element count
     uvs = []
-    k = r.compact()
-    if 0 <= k < 64:
-        for _ in range(k):
-            n = r.compact()
-            if n <= 0 or r.p + n * 8 > start + size:
-                raise ValueError(f"bad uv stream count {n}")
-            uvs.append([
-                struct.unpack_from("<2f", data, r.p + i * 8)
-                for i in range(n)
-            ])
-            r.p += n * 8
-            r.i32()
-            r.i32()
-    else:
-        raise ValueError(f"bad uv stream array count {k}")
+    p = r + 4  # revision
+    for width in (4, 4, 8):
+        p0 = p
+        c = compact(p0)[0]
+        if c != vcount:
+            p = p0 + 1
+            continue
+        p = compact(p0)[1]
+        if width == 8:
+            uvs = [struct.unpack_from("<2f", d, p + i * 8) for i in range(c)]
+        p += c * width
+        p += 4  # revision
+        p0 = p
 
-    # --- index streams
+    # --- index streams: compact count + u16 pool with values < vcount
     indices = []
-    for _ in range(2):
-        n = r.compact()
-        if n <= 0 or n > 4_000_000 or r.p + n * 2 > start + size:
-            break
-        indices.append(struct.unpack_from(f"<{n}H", data, r.p))
-        r.p += n * 2
-        r.i32()
+    p = r
+    while p < end - 4:
+        c, p2 = compact(p)
+        if 8 <= c <= 4_000_000 and p2 + c * 2 + 4 <= end:
+            pool = struct.unpack_from(f"<{c}H", d, p2)
+            if max(pool) < vcount:
+                indices.append(pool)
+                p = p2 + c * 2 + 4
+                continue
+        p += 1
     render_idx = None
     for idx in indices:
-        if idx and max(idx) < len(verts):
+        if idx and max(idx) < vcount:
             render_idx = idx
             break
     if render_idx is None:
         raise ValueError("no render index stream referencing the vertex pool")
 
-    sections = _find_sections(data, start + 24, vstart,
-                              len(render_idx) // 3)
+    # --- sections: 14-B entries, oracle sum(NumFaces)*3 == index count
+    sections = []
+    idx_total = len(render_idx)
+    best = None
+    for off in range(start, min(vstart, start + 4096) - 16):
+        cc, p2 = compact(off)
+        if cc <= 0 or cc > 64:
+            continue
+        ok = True
+        secs = []
+        prev_fi = -1
+        for _ in range(cc):
+            if p2 + 14 > end:
+                ok = False
+                break
+            f4, fi, fv, lv, fe, nf = struct.unpack_from("<IHHHHH", d, p2)
+            p2 += 14
+            if f4 != 0 or fi < prev_fi or fi + nf * 3 > idx_total:
+                ok = False
+                break
+            if nf and (fv > lv or lv >= vcount):
+                ok = False
+                break
+            prev_fi = fi
+            secs.append((fi, fv, lv, fe, nf))
+        if not ok or not secs:
+            continue
+        covered = sum(s[4] for s in secs) * 3
+        if covered == idx_total:
+            sections = secs
+            break
+        if best is None or covered > sum(s[4] for s in best):
+            best = secs
+    if not sections:
+        sections = best or []
 
     return {
-        "bbox_min": bbox_min,
-        "bbox_max": bbox_max,
-        "sphere": sphere,
+        "bbox_min": struct.unpack_from("<3f", d, start),
+        "bbox_max": struct.unpack_from("<3f", d, start + 12),
+        "sphere": struct.unpack_from("<4f", d, start + 24),
         "verts": verts,
         "uvs": uvs,
         "indices": render_idx,
         "sections": sections,
-        "vertex_revision": vert_revision,
+        "vertex_revision": 0,
     }
 
 
