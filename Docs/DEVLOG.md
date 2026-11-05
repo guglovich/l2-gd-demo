@@ -1,3 +1,32 @@
+## 2026-11-06 (3c) — empty-section support; per-mesh variations remain
+
+**Empty sections are legal** (Pir01: 9 sections, one with NF=0 — UModel
+emits 8 prims skipping it). _find_sections now allows nf==0 entries.
+
+**Conversion state (Oren_DEV_S, 46 meshes):**
+- 24-B vertex meshes with straightforward tables: full decode (Bridge
+  18 sections, MT_Btm, obj04 2 sections, Bank, Azit, H01-04...).
+- 32-B interleaved meshes: geometry converts; the section tables for
+  fences/Pir meshes STILL decode as empty (their tables sit at different
+  offsets — Pir01's table was found at +41 with the empty-first-section
+  pattern, but fence01/02/03/04 and Pir02 still miss).
+- Anchor-skips: O_DE_WH, O_DE_Azit01, O_DE_Btm (the hint-compact pattern
+  not found — their vertex streams may use a third variant or the hint
+  itself is from a truncated UModel export).
+- O_DE_Btm_Obj03: (24:4 32:1) — the anchor found but too few records.
+
+**Next session (importer 100%):**
+1. Dump fence01's bulk region before its vertex stream (the same method
+   that cracked Bridge and Pir01 — the tables ARE there, the offsets
+   differ per mesh because the L2 licensee header between bbox#1 and the
+   sections has variable content).
+2. The variable header: bbox(24) + sphere(16) + [L2 extra — the skeletal
+   L2 branch had unk1 int + unk2 TArray<float> + unk3 + unk4; the STATIC
+   L2 likely has the same] — parse the L2 header properly instead of
+   scanning: unk1 (Ver>=118 && Lic>=3), unk2 float array (Ver>=123 &&
+   Lic>=0x12 — OUR CASE: 123/44!), unk3 (Ver>=120), unk4 (Lic>=0x23).
+   The unk2 float array is VARIABLE-SIZE — it explains every offset shift!
+3. After the header: sections (14B) -> streams -> faces/kDOP lazy.
 ## 2026-11-06 (3b) — Pir01 class: section units before vertex count; handoff
 
 **Pir01 bulk layout (bulk=5848552, size=59250, materials=0 in props, UModel 8

@@ -100,9 +100,13 @@ def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
                 break
             f4, fi, fv, lv, fe, nf = struct.unpack_from("<IHHHHH", data, rr.p)
             rr.p += 14
-            if f4 != 0 or fi < prev_fi or nf == 0:
+            if f4 != 0 or fi < prev_fi:
                 ok = False
                 break
+            if nf == 0:
+                # an empty section is legal (UModel skips it in the output)
+                secs.append((fi, fv, lv, fe, nf))
+                continue
             if fv > lv or lv >= 30000 or fi + nf * 3 > 30000:
                 ok = False
                 break
