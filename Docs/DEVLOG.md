@@ -1,3 +1,32 @@
+## 2026-11-06 (final6) — UModel vertices CONFIRMED in the file stream
+
+**The cross-search:** the UModel vert0 (0.924, -5.298, 0.456) m FOUND in
+the Pir01 file bulk at bulk+267 as (92.38, 45.64, -529.78) = (x, z, y)
+x100 — the file vertex stream CONTAINS the real vertices (the order
+differs from UModel's; the indices reference the file order — the
+exporter emits the file order natively).
+
+**The vertex stream format CONFIRMED for the Pir01 class:**
+- The stream at bulk+195: 409 x 24 B (pos + normal, the normals UNIT
+  length — 409/409 — the "length 512" note applies to the SKELETAL
+  wedges, not the static mesh vertices!)
+- The stream = contiguous 24-B records; the UModel vert0 @ +267 = the
+  record #(267-195)/24 = the 4th record (the UModel vertex order is
+  per-primitive, the file order is the raw stream order).
+
+**The exporter correctness:** the file stream = the vertices; the
+sections = the index ranges; the indices reference the file vertices —
+the emitted glTF geometry = EXACT (the indices+vertices from the same
+stream). The Pir01-class exporter correctness is now a matter of the
+section decode (the walk), not the vertex format.
+
+**The remaining Pir01-class piece:** the post-stream walk (the streams
+at +10015/+11657/+13300 = the colors/alpha/UVs — 409 elements each, the
+compact-409 anchors verified) and the section decode (the 9-entry table
+at +41, the entries 0-4 verified, the entries 5-8 = the L2 header floats
+region — the sections count 9 with the entries beyond the table = the
+table actually has fewer entries, or the floats = the next stream's
+data).
 ## 2026-11-06 (final5) — Pir01-class 20-B units decoded; the dual-counter discovery
 
 **Pir01 section units (7 x 20 B at bulk+42, stride 20, count byte 0x09=9
