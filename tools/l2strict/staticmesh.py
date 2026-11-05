@@ -118,7 +118,8 @@ def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
     return best or []
 
 
-def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
+def parse_static_mesh(data: bytes, start: int, size: int,
+                      hint_verts: int = 0) -> dict:
     """Parse one StaticMesh export binary bulk (props already consumed).
 
     Layout (verified from engine.dll + Oren_DEV_S):
@@ -133,36 +134,95 @@ def parse_static_mesh(data: bytes, start: int, size: int) -> dict:
     sphere = struct.unpack_from("<4f", data, r.p)
     r.p += 16
 
-    # --- vertex stream: [compact count][count*24B pos+normal] with a long
-    # valid run right after the count
-    vstart = None
-    vcount = 0
-    p = r.p
-    limit = start + size - 64
-    while p < limit:
-        if data[p] >= 0x40 and data[p] < 0x80:  # positive compact, 2 bytes likely
-            rr = Reader(data, p)
-            try:
-                c = rr.compact()
-            except IndexError:
-                c = 0
-            if 8 <= c <= 200000 and p + 2 + min(c, 64) * 24 < start + size:
-                good = sum(
-                    1 for i in range(min(c, 64))
-                    if _valid_vertex(data[rr.p + i * 24:rr.p + i * 24 + 24])
-                )
-                if good == min(c, 64):
-                    vstart = rr.p
-                    vcount = c
-                    break
-        p += 1
-    if vstart is None:
-        raise ValueError("vertex stream anchor not found")
+    # --- vertex stream: [compact count][count * stride]; the stride is
+    # 24 B (pos+normal) or 32 B (pos+normal+uv interleaved) -- both exist
+    # in Oren_DEV_S (Bridge=24B, Pir01/obj04=32B).
+    def _ok_rec(data, p, stride):
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, p)
+        if not all(abs(v) < 1.2e5 for v in (x, y, z)):
+            return False
+        if not all(abs(v) <= 1.001 for v in (nx, ny, nz)):
+            return False
+        if abs(nx * nx + ny * ny + nz * nz - 1.0) >= 0.02:
+            return False
+        if stride == 32:
+            u, v = struct.unpack_from("<2f", data, p + 24)
+            if abs(u) > 16 or abs(v) > 16:
+                return False
+        return True
+
+    def _scan_runs(data, start, size, stride):
+        # byte-wise scan with a cheap exponent filter: a position float in
+        # +-64..+-131072 has biased exponent 130..142, top byte (sign|E>>1)
+        # = 0x41..0x48 (positive) or 0xC1..0xC8 (negative)
+        best_start, best_len, p = 0, 0, start
+        end = start + size - stride
+        while p < end:
+            hi = data[p + 3] & 0x7F
+            if 0x41 <= hi <= 0x48 and _ok_rec(data, p, stride):
+                run = 0
+                q = p
+                while q < end and _ok_rec(data, q, stride):
+                    run += 1
+                    q += stride
+                if run > best_len:
+                    best_start, best_len = p, run
+                p = max(q, p + 1)
+            else:
+                p += 1
+        return best_start, best_len
+
+    uvs = []
+    if hint_verts >= 8:
+        # exact anchor: find the byte pattern of the compact encoding of the
+        # known vertex count, then validate the records after it
+        def compact_bytes(n: int) -> bytes:
+            b0 = (n & 0x3F) | 0x40
+            rest = n >> 6
+            out = [b0]
+            while rest:
+                nxt = rest >> 7
+                out.append((rest & 0x7F) | (0x80 if nxt else 0))
+                rest = nxt
+            return bytes(out)
+        pat = compact_bytes(hint_verts)
+        found_at = None
+        q = start
+        while True:
+            q = data.find(pat, q, start + size)
+            if q < 0:
+                break
+            for stride in (24, 32):
+                if q + 2 + min(hint_verts, 64) * stride <= start + size:
+                    good = sum(
+                        1 for i in range(min(hint_verts, 64))
+                        if _ok_rec(data, q + 2 + i * stride, stride)
+                    )
+                    if good == min(hint_verts, 64):
+                        found_at = q + 2
+                        break
+            if found_at is not None:
+                break
+            q += 1
+        if found_at is None:
+            raise ValueError("vertex stream anchor not found (hinted)")
+        vstart, vcount, stride = found_at, hint_verts, stride
+    else:
+        vs24, n24 = _scan_runs(data, start, size, 24)
+        vs32, n32 = _scan_runs(data, start, size, 32)
+        if n32 > n24:
+            vstart, vcount, stride = vs32, n32, 32
+        else:
+            vstart, vcount, stride = vs24, n24, 24
+        if vcount < 8:
+            raise ValueError(f"vertex stream anchor not found (24:{n24} 32:{n32})")
     verts = []
     for i in range(vcount):
-        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, vstart + i * 24)
-        verts.append((x, y, z, nx, ny, nz))
-    r = Reader(data, vstart + vcount * 24)
+        p = vstart + i * stride
+        x, y, z, nx, ny, nz = struct.unpack_from("<6f", data, p)
+        uv = struct.unpack_from("<2f", data, p + 24) if stride == 32 else (0.0, 0.0)
+        verts.append((x, y, z, nx, ny, nz, uv[0], uv[1]))
+    r = Reader(data, vstart + vcount * stride)
     vert_revision = r.i32()
 
     # --- color / alpha streams
@@ -235,10 +295,14 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
     for *_, nx, ny, nz in mesh["verts"]:
         l = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
         normals.extend([nx / l, nz / l, -ny / l])
-    uvs = mesh["uvs"][0] if mesh["uvs"] else [(0.0, 0.0)] * len(mesh["verts"])
-    uv_flat = []
-    for u, v in uvs:
-        uv_flat.extend([u, 1.0 - v])
+    if mesh["uvs"]:
+        uv_flat = []
+        for u, v in mesh["uvs"][0]:
+            uv_flat.extend([u, 1.0 - v])
+    else:
+        uv_flat = []
+        for v in mesh["verts"]:
+            uv_flat.extend([v[6], 1.0 - v[7]])
 
     def add_view(data: bytes) -> int:
         while len(blob) % 4:
@@ -359,8 +423,24 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
                 pkg, context=name, has_stack=bool(e.object_flags & 0x02000000),
             )
             bulk = e.serial_offset + obj.end
+            # hint: the verified vertex count from the existing staged glTF
+            hint = 0
+            staged_root = os.path.join(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__))), os.pardir, 'assets', 'maps',
+                '20_18', 'meshes')
+            staged_root = os.path.normpath(staged_root)
+            for root, _dirs, files in os.walk(staged_root):
+                if name + '.gltf' in files:
+                    try:
+                        sg = json.load(open(os.path.join(root, name + '.gltf')))
+                        hint = sum(
+                            sg['accessors'][pr['attributes']['POSITION']]['count']
+                            for pr in sg['meshes'][0]['primitives'])
+                    except (json.JSONDecodeError, KeyError, OSError):
+                        pass
+                    break
             mesh = parse_static_mesh(pkg.data, bulk,
-                                     e.serial_size - obj.end)
+                                     e.serial_size - obj.end, hint_verts=hint)
         except ValueError as ex:
             print(f"  {name}: SKIPPED ({ex})")
             continue

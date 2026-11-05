@@ -1,3 +1,30 @@
+## 2026-11-06 (3) — dual-stride vertices, fast hint anchor; 14-mesh section pass pending
+
+**Vertex formats: TWO variants confirmed** (byte-verified):
+- 24 B: pos(12) + normal(12) — Bridge, MT_Btm, most meshes
+- 32 B: pos(12) + normal(12) + uv(8) interleaved — Pir01, MT_obj04,
+  Bank_Set, fences (the dump shows unit normals and 0..1 UVs inline)
+
+**Exporter upgrades (tools/l2strict/staticmesh.py):**
+1. Dual-stride scanner: runs of valid records at both strides; the longer
+   wins. Byte-wise scan with an exponent filter (top byte & 0x7F in
+   0x41..0x48 for |pos| in 64..131072 — the first filter range was wrong).
+2. Hint-based exact anchor: when the staged UModel glTF exists, its
+   verified vertex count is the hint; the compact encoding of the hint is
+   searched as a byte pattern (fast d.find), then all hint_verts records
+   must validate at stride 24 or 32. This resolved the anchor for the
+   previously-skipped meshes (Bridge was found this way: bulk+319).
+3. Sections: 14-B entries, oracle sum(NumFaces)*3 == index count (exact).
+
+**Current conversion state (Oren_DEV_S):** 24-B meshes fully decode with
+sections; the 32-B interleaved meshes convert (geometry correct) but
+their section tables resist the current oracle (1-prim fallback) — 14
+meshes pending a dedicated pass (their tables sit in different gaps;
+the Pir01 dump shows the interleaved stream starting with a position,
+then normal+uv units).
+
+**Staging:** only the 26 matched glTFs are swapped in; the rest keep the
+verified UModel geometry. The game runs clean. Git: 3 stages committed.
 ## 2026-11-06 (2) — OWN IMPORTER STAGED: 26/40 meshes from our own code
 
 **The FStaticMeshSection layout is FULLY SOLVED:**
