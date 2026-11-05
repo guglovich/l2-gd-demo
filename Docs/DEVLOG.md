@@ -1,3 +1,37 @@
+## 2026-11-06 (final) — session wrap: the 32/36-B post-stream walk is the last blocker
+
+**The hint-anchor loop VALIDATES each pattern match and continues**
+(the false compact-409 match at bulk+193 was correctly rejected; the real
+stream found later). Pir01 converted with correct geometry — but its
+section table still decodes empty -> 1-prim fallback.
+
+**The remaining blocker (the next session's first task):** the
+post-vertex-stream WALK for the 32/36-B inline-UV meshes. After the
+vertex stream (vstart + count*36) the layout should be: revision i32 ->
+ColorStream -> AlphaStream -> [UV streams? — possibly ABSENT for the
+inline-UV meshes!] -> IndexStream1/2. The current walk assumes the UV
+stream array exists (reads compact k) — for the inline-UV meshes that
+read consumes wrong bytes -> the index stream garbage -> the section
+oracle (sum NF == index_count/3) fails -> the fallback.
+
+**The diagnostic for the next session:** for Pir01 (hint 409, the real
+stream found by the hint anchor at vstart): dump vstart+409*36 .. +200,
+walk the streams step by step with prints (revision, the color/alpha
+counts, the UV array count, the index counts), find where the walk
+diverges. The candidates: (a) no UV array for the inline meshes — skip
+the k read; (b) an extra L2 int between; (c) the Faces lazy array comes
+before the index streams.
+
+**Everything else is DONE and verified:**
+- The 24-B class: sections (14B, chain oracle) + streams + per-section
+  prims — 26 meshes staged from our own code, the game runs clean.
+- The 32/36-B geometry: the hint-anchored vertex scan + the inline UVs
+  (the 36-B = pos+normal+uv+tail4).
+- The lighting from the map data (NSun sun, zone ambient 0.093, zone fog
+  dark blue 1->100 m) — the tunnels dark, the distance haze.
+- The terrain splat (8 layers, flipped-V masks, Scale tiling, edge-turn
+  boundaries) — "зелень почти как в оригинале" (the user's words).
+- Git: 7 stages; the coordinate HUD for any future diagnostics.
 ## 2026-11-06 (4) — 36-B vertex stride confirmed; session wrap
 
 **The third vertex format confirmed: stride 36 B** = pos(12) + normal(12)
