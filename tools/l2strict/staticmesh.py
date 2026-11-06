@@ -175,45 +175,62 @@ def parse_static_mesh(data: bytes, start: int, size: int,
                 return 0
         return 1
 
-    # --- locate the vertex stream by the hint count
+    # --- locate the vertex stream as the LONGEST valid 24-B record run.
+    # The stream offset is not aligned to anything (it follows the compact
+    # count + the L2 header fields), so the scan walks EVERY byte offset.
+    # No hint needed: the run length IS the vertex count (this replaced the
+    # hint-compact-pattern anchor whose false positives/negatives produced
+    # the wrong 24-vert "slabs" and the phantom "packed-vertex" class).
+    # Guard: the stream = [compact count == the run length][records] — a
+    # candidate run must be preceded by its own compact count (the kDOP
+    # float blocks can form accidental runs but never with the count).
+    runs = []  # the maximal (length, offset) pairs, longest-first later
+    # vectorized scan (numpy): the records are f32-aligned, so only 4 byte
+    # phases exist; per phase the records form a strided 6-float grid.
+    import numpy as _np
+    for phase in range(24):  # the record stride = 24 B: 24 byte phases
+        tail = d[start + phase:end]
+        tail = tail[:len(tail) - (len(tail) % 4)]
+        buf = _np.frombuffer(tail, dtype='<f4')
+        m = buf.size // 6
+        if m < 8:
+            continue
+        rec = buf[:m * 6].reshape(m, 6).astype(_np.float32)
+        pos_ok = (_np.abs(rec) < 1.2e5).all(axis=1)
+        ln2 = rec[:, 3] ** 2 + rec[:, 4] ** 2 + rec[:, 5] ** 2
+        nrm_ok = ((ln2 > 0.9) & (ln2 < 1.1)) | ((ln2 > 250000) & (ln2 < 275000))
+        good = pos_ok & nrm_ok
+        if not good.any():
+            continue
+        padded = _np.concatenate(([False], good, [False]))
+        diffs = _np.diff(padded.astype(_np.int8))
+        starts = _np.flatnonzero(diffs == 1)
+        stops = _np.flatnonzero(diffs == -1)
+        for s0, s1 in zip(starts, stops):
+            if s1 - s0 >= 8:
+                runs.append((int(s1 - s0), start + phase + int(s0) * 24))
     vstart = None
-    vcount = hint_verts
-    if vcount < 8:
-        raise ValueError("no vertex hint — the staged glTF must exist")
-    # the compact encoding of the hint count (the 0x40 more-bit only when
-    # the value actually continues into the next byte)
-    enc = []
-    n = vcount
-    b0 = n & 0x3F
-    n >>= 6
-    if n:
-        b0 |= 0x40
-    enc.append(b0)
-    while n:
-        nxt = n >> 7
-        enc.append((n & 0x7F) | (0x80 if nxt else 0))
-        n = nxt
-    pat = bytes(enc)
-    q = start
+    vcount = 0
     vstride = 24
-    while True:
-        q = d.find(pat, q, end)
-        if q < 0:
+    for length, off in sorted(runs, reverse=True):
+        if length < 8:
             break
-        vs = q + len(pat)
-        for stride in (24, 32):
-            good = sum(1 for i in range(min(vcount, 64))
-                       if valid_rec(vs + i * stride, stride))
-            if good == min(vcount, 64):
-                vstart = vs
-                vstride = stride
+        # the compact count must end exactly at `off` and equal `length`
+        ok = False
+        for back in (1, 2, 3):
+            q = off - back
+            if q < start:
                 break
-        if vstart is not None:
+            c, p2 = compact(q)
+            if p2 == off and c == length:
+                ok = True
+                break
+        if ok:
+            vstart = off
+            vcount = length
             break
-        q += 1
-    if vstart is None:
-        raise ValueError("vertex stream anchor not found (packed-vertex "
-                         "meshes are a known pending RE target)")
+    if vcount < 8:
+        raise ValueError("no count-guarded 24-B vertex stream in the bulk")
     verts = []
     for i in range(vcount):
         p = vstart + i * vstride
@@ -281,10 +298,15 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     sections = []
     idx_total = len(render_idx)
     best = None
+    # The L2 section table sits BEFORE the bbox (the engine's
+    # UPrimitive::Serialize emits it right after the props — UEViewer's
+    # "Ar << Sections; Ar << BoundingBox" order), so the scan starts in
+    # the pre-bulk region.
+    scan_begin = max(0, start - 4096)
     scan_end = min(vstart, start + 4096) - 16
     import os as _os
     _dbg = _os.environ.get("L2_SECTION_DEBUG") != ""
-    for off in range(start, scan_end):
+    for off in range(scan_begin, scan_end):
         cc, p2 = compact(off)
         if cc <= 0 or cc > 64:
             continue

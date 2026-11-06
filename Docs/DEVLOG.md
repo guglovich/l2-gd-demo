@@ -1792,3 +1792,41 @@ Center_obj, inlet, the sylen temple stairs/floors. All the visible
    -44.79 per the user's ground truth).
 4. Apply to sylen_temple_s (the stairs ent_stair/ent_stair02/side_stair +
    the floors) — the package needs its own convert pass.
+
+## 2026-11-07 (5) — THE PACKED-VERTEX MYTH DEMOLISHED: run-anchor decodes everything
+
+**The phantom "packed-vertex class" never existed.** The real cause of every
+"undecodable" mesh: the vertex stream sits at an offset NOT aligned to the
+bulk start, and the old scans were either aligned to 24 bytes (missing the
+stream entirely) or hinted by UModel's wrong counts. Evidence:
+- sub_10305f29 (engine.dll) = the TArray serializer with 0x18 = 24-byte
+  elements = FStaticMeshVertex (Pos+Normal, 6x f32) for ALL static meshes.
+- Btm_Obj01: an unaligned scan finds a count-guarded 20-record run at
+  bulk+426 (the first vert = the bbox max corner exactly); UModel said 24.
+- inlet: a 1384-record run at bulk+236 — a plain 24-B stream.
+
+**The new anchor (staticmesh.py):** scan the serial region with numpy over
+all 24 byte phases (the record stride = 24 B), collect the maximal valid
+runs (>= 8 records), pick the run whose preceding compact count equals its
+own length (the count-guard rejects the kDOP float blocks). No staged-glTF
+hints anywhere. The vertex data must fill the file bbox (the invariant).
+
+**The section scan widened** to the pre-bulk region (max(0, start-4096)) —
+the L2 tables serialize before the bbox (the 2026-11-07 (3) finding).
+
+**Result: 43/43 Oren_DEV_S + 26/26 sylen_temple_s meshes converted from our
+importer and staged** (69 files; Btm_Obj02/03 + DE_effect gained asset_map
+entries). The section tables decode 1:1 with UModel (H03 17 prims, MT_obj01
+4, MT_Out 5, the skin 20/20). The temple floors (sylentemple_skin at -24.1
+..-24.8 through the great hall) and the stairs (ent_stair 168 verts/3
+sections, ent_stair02 252/3, side_stair 96/2) are now real geometry.
+
+**Bridge after the fix:** the road bed (Btm_Obj01, pitched -12.48 deg =
+the road slope to the village) is a SMOOTH ramp -44.38 -> -46.11 along the
+axis (the old jittery slab faces gone); the player stands on it at -44.9;
+the road = the ornamental center strip + the stone deck = one surface. The
+0.68 m ledge at x~8555 where the plate butts the Bridge deck remains and is
+the exact-mesh data.
+
+**H03 floor = -41.95 from the REAL geometry now** (the invariant-passed
+mesh) — the houses stand on terraces above the road; verify in game.
