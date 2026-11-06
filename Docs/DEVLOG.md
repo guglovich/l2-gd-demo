@@ -1736,3 +1736,59 @@ the curbs poke 0.8 m above the deck and the H03 floor reads -41.95. The
 packed u32-vertex format (FStaticMeshVertexStream<< = engine.dll
 0x1030bdcf = a u32 array via ByteOrderSerialize) + the pre-bulk section
 tables = the next session's RE targets; both are now precisely located.
+
+## 2026-11-07 (4) — the temple joins the packed family; RE state snapshot
+
+**The user's report:** the Shilen Temple (sylen_temple_s package, the east
+structure at x~26030) is missing floors and stairs (sylentemple_ent_stair,
+ent_stair02, side_stair) — the same packed-vertex class as the bridge curbs
+(Btm_Obj01-03) and the house floors (H01-04). The sylen_temple_s package has
+never been processed by our importer at all; its staged meshes = UModel.
+
+**The packed class (known members so far):** Btm_Obj01/02/03, DE_effect,
+MT_obj01-04, H03/H04, MT_Out, SH, CH_Btm, CH_sidestair, CH_mainstair,
+Center_obj, inlet, the sylen temple stairs/floors. All the visible
+"missing floors / wrong heights" defects map to it.
+
+**engine.dll structure (verified across sources):**
+- UPrimitive::Serialize (the L2 parent) = the props + THE SECTIONS TArray
+  (sub_1030a41b, count at +0x34, data at +0x60 — serialized right after the
+  props, BEFORE the bbox) — matches UEViewer (Ar << Sections; Ar <<
+  BoundingBox; ...).
+- UStaticMesh::Serialize (Ver>=0x70): 5x FStaticMeshVertexStream,
+  2x FRawColorStream, 1 more stream (sub_10303ff8), 2x FRawIndexBuffer,
+  kDOP UObject (sub_10308788), the lazy arrays +0x148/+0x160 (sections?),
+  then Ver<0x72 / Lic>=6,7,11,13,14,15 small reads; InternalVersion=8
+  (i32, Ver>=0x51); +0x1f0 (Ver>=0x64); +0x1e0 (Ver>=0x78).
+- FStaticMeshVertexStream<< (0x1030bdcf) = [count via sub_10305f29(stream+12)]
+  [ByteOrderSerialize(data, 4)] — the stream payload = 4-BYTE elements = the
+  packed vertices. sub_10305f29 = the array reader — NOT yet studied.
+- The L2 ULodMesh branch (UEViewer): ArVer >= 133 stores the vertices as a
+  PLAIN FVector array (12 B each, f32) — our packages are Ver 123, so the
+  packed format applies; ArVer>=133 = a later simplification.
+
+**Pre-bulk region facts (the sections live here, before the bbox):**
+- Btm_Obj01: repeating 14-B-ish units `04 53 00 01 53 00 02 d3 00 03 15 c0
+  01 00` (one varying byte c0/c1/... per unit) after `ff..ff | 04 00 00 00
+  | 00 00 00 00 | 08 00 00 00 | 00 00 00 00 | 05 59 ac 0d`; wider region
+  has float blocks with 0.99-normals between FF-runs.
+- Pir01: `ff ff ff ff ff | 0d 00 00 00 | 00 00 00 00 | 08 00 00 00 | 00 00
+  00 00 | 05 59 76 09` then the same repeating units (the varying byte:
+  84 94 8f 85 9e 8b 9f 90 97 88 ae).
+- The Bridge-style 14-B section tables (f4=0 + ascending FirstIndex) are
+  NOT found pre-bulk — the packed class uses a different section/vertex
+  encoding; the engine's element serializer (the vtable call inside
+  sub_1030a41b) is the ground truth to mine next.
+
+**Next session plan (fresh context, pick up here):**
+1. native_function_study sub_10305f29 (the stream array reader) and the
+   element operator it dispatches to — that yields the packed vertex struct
+   (probably i16 XYZ + the bbox scale/base, cf. UEViewer's UC2 decoder:
+   Pos = i16/32767/Scale + Base).
+2. Mine the L2 UPrimitive::Serialize (engine.dll) around sub_1030a41b for
+   the section element layout of the packed class.
+3. Decode Btm_Obj01 end-to-end (validate: the verts fill the file bbox
+   34x2.6x2 m; the road plate = ONE wide layer at the PlayerStart height
+   -44.79 per the user's ground truth).
+4. Apply to sylen_temple_s (the stairs ent_stair/ent_stair02/side_stair +
+   the floors) — the package needs its own convert pass.
