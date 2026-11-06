@@ -2151,3 +2151,34 @@ Btm_Obj01 boxes with a different Z, or separate deco meshes.
 **The tooling ready:** the unit scanner (this session's script,
 tmp/-disposable), the L2_TRACE_BOX tracer, the floor profiles. The
 staged state = the v7 boxes (the real geometry, the right height).
+
+## 2026-11-07 (16) — THE BRIDGE REFERENCES SAVED; the composition finally clear
+
+**Four live-client captures saved to Docs/** (bridge_original_spawn/level/
+side/tunnel.png). The analysis:
+
+1. The road = ONE flat wide cobblestone surface (the Bridge deck — our
+   deck is correct and present).
+2. The ornamental filigree patterns (the spider-web designs) = FLAT
+   INLAYS ON the road surface — thin decorative slabs laid on the road,
+   NOT raised strips. They run transversally across the road and along
+   the edges.
+3. No curbs/walls along the road; the low railings sit outside the road
+   surface.
+
+**Consequently: Btm_Obj01/02/03 = the FILIGREE INLAY SLABS** — thin
+plates lying on the road with the ornamental texture. Our 2-m-thick box
+= a misdecode (the real thin slab decodes from the packed entries; the
+flat-plate scan already found the clear vertices at z = -102.87).
+
+**The height question for the next session:** the extracted plate reads
+world -46.11 (with the -4508 actor) while the road surface at the bridge
+spans -44.4..-46.8 (sloping). Either (a) the plate = the under-slab and
+the visible inlays = OTHER instances/meshes, or (b) the actor Z of the
+strip instances must be re-checked against the map (the instances at
+9059/13698 cover different road segments). The trace tool against the
+live-client captures will pin the exact placement.
+
+**The remaining work (unchanged):** the packed-entry decoder (the
+variable-length [01][idx][len][data] records) => the real thin inlay
+slabs => laid on the road => the bridge matches the references.
