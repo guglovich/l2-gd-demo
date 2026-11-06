@@ -2027,3 +2027,35 @@ variable-length family when their roles demand it (the temple floors/
 stairs keep their real 24-B geometry where the count-guarded runs are
 genuine); the packed-entry decompressor for the full fidelity (the exact
 strip outlines instead of the bounding slabs).
+
+## 2026-11-07 (12) — the plate experiment reverted; the road = the strips at -44.06
+
+**The user's verdict on the flat-plate experiment:** "теперь просто нету
+верхнего слоя, только нижний. это не фикс" — sinking the strips under the
+deck removed the walkable upper layer. Combined with the earlier reports
+the picture is now complete and consistent:
+
+- THE ROAD = the strip layer at **-44.06** (the user's walking HUD height,
+  = the plate tops). In the original the strips form the FULL-WIDTH road
+  surface at that height ("один широкий слой").
+- Our strips are only 2.56 m wide ("у нас от неё только середина") because
+  the packed delta-encoded entries are undecoded: the flat-z scan caught
+  only the base subset (y ±128) of the full-width plate.
+- The Bridge deck (-45.4..-46.8) = the structure BELOW the road, visible
+  at the openwork sides — correct as geometry.
+
+**The single remaining task for the bridge:** decode the packed
+delta-encoded vertex entries (the [01][idx][len 09..0d][data] units in
+Btm_Obj01/02/03's bulks, rel+2779..+4233 in Obj01) — the full-width plates
+at z = -102.87 (world -44.06 at the -4508 actor) replace the narrow ones.
+The v7 boxes are re-staged until then (the wrong width but the right
+height and walkability).
+
+**The decoder clues accumulated:** the entries are length-prefixed
+(09..0d bytes), sequential per vertex (the counters 01,02,03...), the
+constants inside = -103.49 (the z), 1651.04 / -553 (the x bounds), ±128
+(the y bounds); the 12-B separators between the entries = the counters +
+the type bytes (09/0a/0b/0c/0d = the lengths). The mineable code path =
+the L2 static mesh loader in engine.dll that walks these entries (around
+the FStaticMeshVertexStream handling, sub_10305f29 is the UNPACKED
+variant).
