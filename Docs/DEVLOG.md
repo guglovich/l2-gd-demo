@@ -1942,3 +1942,36 @@ the user sees on the bridge.
 3. Stage; the bridge becomes ONE wide flush layer per the user's ground
    truth. The reference: ask the user for a fresh DE_village.png from
    the bridge spot (the current file = the Oct 29 spawn view).
+
+## 2026-11-07 (9) — THE BRIDGE SOLVED (the composition): the curb plates are raised garbage
+
+**The user's revelation:** DE_village.png IS the bridge — the spawn view
+looks east along it. In the original it is a WIDE ROAD with the golden
+ornamental border strips at the edges, flat. In our build it became a
+"raised walkway over the abyss": we only have the middle strip, and the
+player walks ON it (the HUD Z = the strip top -44.06).
+
+**The composition decoded:**
+- Btm_Obj01/02/03 = the ORNAMENTAL BORDER STRIPS of the road (2.56 m wide,
+  2 instances = the two edges; 34 m long). In the original they are flat
+  curbs flush with the road surface.
+- Ours are 2-m-thick boxes sticking ~1.5 m above the road => the player
+  climbs onto the strip => "the hanging walkway", "only the middle".
+- The road itself = the Bridge deck (-45.4..-45.6 = exactly the
+  PlayerStart Z minus the pawn half-height) — correct all along.
+
+**The root cause (final):** for the pre-bulk-table meshes the value at
+bulk+0 is not the bbox, so the run-anchor's "vertices" are table bytes and
+the circular bbox invariant passes them. The real thin plates are still
+undecoded. Everything else (the deck, the tunnel floors, the temple shell)
+is real geometry.
+
+**The fix (next session, single focus):**
+1. Locate the true bbox for the pre-bulk class: the engine order is
+   props -> sections -> bbox, so the bbox sits AFTER the pre-bulk tables —
+   scan for the second float sextet (Pir01 has it at bulk+168! — find the
+   same pattern in Btm_Obj01/02/03).
+2. Re-run the vertex stream search AFTER the true bbox; validate: the
+   plate = thin (z-span < 0.3 m), its top = the road level.
+3. Re-stage Btm_Obj01/02/03: the bridge becomes the flush wide road with
+   the flat border strips per DE_village.png.
