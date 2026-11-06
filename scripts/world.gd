@@ -35,6 +35,46 @@ func _ready() -> void:
 		_floor_grid_flow()
 	if OS.get_environment("L2_GREEN_TRACE") != "":
 		_green_trace_flow()
+	if OS.get_environment("L2_TRACE_BOX") != "":
+		_trace_box_flow()
+
+
+## Region tracer: L2_TRACE_BOX="x1,y1,x2,y2" casts rays from the camera
+## through every 8th pixel of that screen rect and reports the hit mesh,
+## face, surface and resolved texture — identifies any suspect region
+## (flat-color patches, missing geometry) without eyeballing.
+func _trace_box_flow() -> void:
+	await get_tree().create_timer(4.0).timeout
+	await RenderingServer.frame_post_draw
+	var p := OS.get_environment("L2_TRACE_BOX").split(",")
+	var r := Rect2i(int(p[0]), int(p[1]), int(p[2]) - int(p[0]), int(p[3]) - int(p[1]))
+	var cam := get_viewport().get_camera_3d()
+	var space := get_world_3d().direct_space_state
+	var counts := {}
+	for py in range(r.position.y, r.end.y, 8):
+		for px in range(r.position.x, r.end.x, 8):
+			var pos := Vector2(px, py)
+			var from := cam.project_ray_origin(pos)
+			var dir := cam.project_ray_normal(pos)
+			var q := PhysicsRayQueryParameters3D.create(from, from + dir * 500.0)
+			var hit := space.intersect_ray(q)
+			if hit.is_empty():
+				counts["NO-HIT"] = counts.get("NO-HIT", 0) + 1
+				continue
+			var col = hit.get("collider")
+			var owner_name := "unknown"
+			if col is Node and (col as Node).has_meta("mesh_key"):
+				owner_name = str((col as Node).get_meta("mesh_key"))
+			var fid := int(hit.get("face_index", -1))
+			var k := owner_name
+			counts[k] = counts.get(k, 0) + 1
+			if counts[k] <= 4:
+				var surf := _surface_for_face(owner_name, fid)
+				print("TRACE_BOX px(%d,%d) %s face=%d surf=%d tex=%s n=%v" % [
+					px, py, owner_name, fid, surf,
+					_texture_for_surface(owner_name, surf), hit.get("normal")])
+	print("TRACE_BOX totals:", counts)
+	get_tree().quit()
 	if OS.get_environment("L2_SCREENSHOT") != "":
 		_screenshot_flow()
 

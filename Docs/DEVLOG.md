@@ -1830,3 +1830,33 @@ the exact-mesh data.
 
 **H03 floor = -41.95 from the REAL geometry now** (the invariant-passed
 mesh) — the houses stand on terraces above the road; verify in game.
+
+## 2026-11-07 (6) — trace-box tool; the temple state after the run-anchor staging
+
+**New instrument: L2_TRACE_BOX="x1,y1,x2,y2"** (world.gd) — casts rays from
+the camera through every 8th pixel of a screen rect and reports the hit
+mesh, face, surface and the resolved texture + totals. The permanent
+answer to "what is this surface" for ANY suspect region.
+
+**The temple at the user's spot (26030,11038) after the v7 staging:**
+- TRACE totals: ent_main 747, pir 294, deco11 110, ent_stair 36,
+  ent_stair02 22, deco12 36, the statue, deco01/04 — THE STAIRS RENDER
+  (the real geometry from our importer), all hits carry resolved textures.
+- The flat brown mid-hall area = the ent_main surface (surf 1, texture
+  oren_sylen_in020 — a DARK stone texture) lit by the warm NSun: the
+  brown = the sunlit dark stone, not a missing texture (all 26 temple
+  meshes resolve every material file; zero zero-UV meshes).
+- The floors: the sylentemple_skin floor at -24.1..-24.8 spans the whole
+  hall (the profile, no gaps).
+- The user still reports "no changes" — the visible difference vs the
+  original remains unidentified; the candidates: (a) the sun should be
+  blocked by the roof (the shadow map question — the lighting stage),
+  (b) the section->material binding differs from the identity in the L2
+  engine, (c) the UV convention per the engine.
+
+**The engine dive queue (the user's directive: "разбирай ещё больше
+движок"):** the L2 UPrimitive::Serialize section element layout (the
+vtable call inside sub_1030a41b), the section->material binding in the L2
+renderer (is it Materials[i] or the section field?), the L2 UV
+conventions for the static mesh streams, the NSun/shadow interplay for
+the interiors. Each = native_function_study targets in engine.dll.
