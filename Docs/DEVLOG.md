@@ -2002,3 +2002,28 @@ class and why the "runs" found earlier were garbage.
   the bridge matches DE_village.png.
 - The temple floors/stairs and the other "packed family" members share
   this format (the same variable-length entries) — one decoder fixes all.
+
+## 2026-11-07 (11) — THE BRIDGE IS ONE LAYER: flat plates extracted and staged
+
+**The road-plate extractor implemented** (staticmesh.py `_flat_plate_mesh`
++ the `_ROAD_PLATE_MESHES` family): scans the bulk for vertex triplets
+sharing a constant height (the L2 file vertex = (X, Z, Y) — the height is
+the SECOND column; Btm_Obj01's plate collapses to z = -102.87 while the
+column-0 spans 22 m and the column-2 spans 2.56 m), builds the thin
+12-cm slab from the cluster bounds with the planar 2.56 m UVs and the
+first material.
+
+**All three strips extracted and staged** (Btm_Obj01/02/03): 8 verts each,
+the glTF height range -0.12..0.00 relative to the actor = the plate top at
+the actor Z = -45.08 = **flush with the road** (a 40-cm curb at most).
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the top
+walkable surface = DECK at EVERY point (-45.14 -> -46.79, the smooth
+descent) — NO strip/deck transitions, NO second level. The bridge = ONE
+wide layer per the user's ground truth (DE_village.png).
+
+**Remaining:** the same flat-plate treatment for the rest of the
+variable-length family when their roles demand it (the temple floors/
+stairs keep their real 24-B geometry where the count-guarded runs are
+genuine); the packed-entry decompressor for the full fidelity (the exact
+strip outlines instead of the bounding slabs).

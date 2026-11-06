@@ -516,6 +516,78 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
         fp.write(bytes(blob))
 
 
+def _flat_plate_mesh(data: bytes, start: int, end: int,
+                     hint_plan: list | None) -> dict | None:
+    """Extract a flat road plate: a cluster of vertex triplets sharing a
+    CONSTANT height. The L2 file vertex = (X, Z, Y) — the height is the
+    SECOND column (the same order UModel's glTF mapping exposes; confirmed
+    by the Btm_Obj01 plate: the column-1 values collapse to -102.87 while
+    the column-0 spans 22 m and the column-2 spans 2.56 m). The road plates
+    (Btm_Obj01/02/03) store their vertices as raw 12-B positions inside
+    variable-length packed entries — invisible to fixed-stride scans.
+    Returns the thin-plate mesh built from the cluster bounds, or None."""
+    import numpy as _np
+    span = end - start
+    if span < 64:
+        return None
+    tail = data[start:end]
+    tail = tail[:len(tail) - (len(tail) % 4)]
+    buf = _np.frombuffer(tail, dtype='<f4')
+    n3 = buf.size // 3
+    if n3 < 16:
+        return None
+    tri = buf[:n3 * 3].reshape(n3, 3).astype(_np.float32)
+    best = None
+    zs = tri[:, 1]  # the height column
+    for zc in _np.unique(zs):
+        mask = _np.abs(zs - zc) < 2.0
+        cnt = int(mask.sum())
+        if cnt < 24:
+            continue
+        pts = tri[mask]
+        xlo, xhi = float(pts[:, 0].min()), float(pts[:, 0].max())
+        ylo, yhi = float(pts[:, 2].min()), float(pts[:, 2].max())
+        if xhi - xlo < 400 or yhi - ylo < 150:
+            continue
+        if best is None or cnt > best[0]:
+            best = (cnt, zc, xlo, xhi, ylo, yhi)
+    if best is None:
+        return None
+    cnt, zc, xlo, xhi, ylo, yhi = best
+    # the plate = the flat slab at raw z = zc; the thickness = 12 cm down
+    zt, zb = float(zc), float(zc) - 12.0
+    cs = [(x, y, z) for x in (xlo, xhi) for y in (ylo, yhi) for z in (zt, zb)]
+    quads = [
+        (1, 3, 7, 5), (0, 4, 6, 2),   # top / bottom (raw z)
+        (0, 1, 3, 2), (4, 6, 7, 5),   # -x / +x
+        (0, 1, 5, 4), (2, 6, 7, 3),   # y-lo / y-hi
+    ]
+    indices = []
+    for a, b, c, dd in quads:
+        indices.extend([a, b, c, a, c, dd])
+    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    mat = hint_plan[0][1] if hint_plan else 0
+    return {
+        "bbox_min": (xlo, ylo, zb), "bbox_max": (xhi, yhi, zt),
+        "sphere": struct.unpack_from('<4f', data, start + 24),
+        "verts": [(cx, cy, cz, 0.0, 0.0, 1.0) for cx, cy, cz in cs],
+        "uvs": uvs,
+        "indices": indices,
+        "sections": [(0, 0, len(cs) - 1, len(indices) // 3,
+                      len(indices) // 3)],
+        "section_materials": [mat],
+        "vertex_revision": 0,
+    }
+
+
+# The road-strip family: the meshes whose vertices live in the
+# variable-length packed entries (the flat plates extracted by
+# _flat_plate_mesh). The bridge border strips + the village lane strips.
+_ROAD_PLATE_MESHES = {
+    "O_DE_Btm_Obj01", "O_DE_Btm_Obj02", "O_DE_Btm_Obj03",
+}
+
+
 def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list:
     """Convert every StaticMesh export of a package to glTF. Returns names."""
     import sys
@@ -540,7 +612,6 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
                 pkg, context=name, has_stack=bool(e.object_flags & 0x02000000),
             )
             bulk = e.serial_offset + obj.end
-            # hint: the verified vertex count from the existing staged glTF
             hint = 0
             hint_plan = []
             staged_root = os.path.join(os.path.dirname(os.path.dirname(
@@ -570,9 +641,23 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
                     except (json.JSONDecodeError, KeyError, OSError):
                         pass
                     break
-            mesh = parse_static_mesh(pkg.data, bulk,
-                                     e.serial_size - obj.end, hint_verts=hint,
-                                     hint_plan=hint_plan)
+            # The road-strip family (Btm_Obj01/02/03) stores its vertices as
+            # raw 12-B positions with a constant height inside
+            # variable-length packed entries — the fixed-stride run anchor
+            # reads table bytes there. Extract the flat plate directly.
+            if name in _ROAD_PLATE_MESHES:
+                plate = _flat_plate_mesh(pkg.data, bulk,
+                                         e.serial_offset + e.serial_size,
+                                         hint_plan)
+                if plate is not None:
+                    print(f"  {name}: flat road plate extracted")
+                    mesh = plate
+                else:
+                    raise ValueError("no flat plate cluster in the bulk")
+            else:
+                mesh = parse_static_mesh(pkg.data, bulk,
+                                         e.serial_size - obj.end, hint_verts=hint,
+                                         hint_plan=hint_plan)
             # fundamental invariant: the parsed vertices must fill the
             # file's own bbox. A mismatch = the anchor latched onto a false
             # stream (Btm_Obj01: both UModel and the anchor read a wrong
