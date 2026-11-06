@@ -1902,3 +1902,43 @@ AActor::LocalToWorld usage for the static mesh components. That decides
 the visible composition question once and for all. The trace tools
 (L2_TRACE_BOX / L2_GREEN_TRACE) are in place to verify each hypothesis
 against the rendered frame.
+
+## 2026-11-07 (8) — the bbox invariant was CIRCULAR; the packed-class parses are garbage
+
+**The user's "0 changes" was correct and the reason is found:** for the
+meshes whose section tables serialize pre-bulk (Btm_Obj01/02/03, the
+temple stairs family?), the value I read at bulk+0 as "the bounding box"
+is NOT the bounding box (the sections live there). The run-anchor then
+found "vertex streams" inside that garbage, and the invariant validated
+the vertices against the SAME garbage bbox — a circular check. The staged
+Btm_Obj01 "plate" (a 2 m thick box) is misread table bytes; the real road
+plate is a thin plate at the road level.
+
+**The road level is established exactly:** the UE PlayerStart's Z is the
+PAWN ORIGIN (the capsule center), not the floor. PlayerStart = -4478.9 =>
+the capsule center -44.79 => the floor ≈ -44.79 - ~0.85 ≈ -45.6. The
+Bridge deck = -45.4..-45.6 = THE ROAD. Our deck was correct all along;
+the garbage "plates" stick ~1.5 m above it and read as the "second level"
+the user sees on the bridge.
+
+**Consequences:**
+- Every mesh whose sections serialize pre-bulk must be re-parsed after
+  the true bbox location is established. The candidates = the whole
+  pre-bulk family (Btm_Obj01/02/03, DE_effect, the temple stairs?).
+- The bridge composition question is settled numerically: the road =
+  the deck (-45.4..-45.6); the curbs/parapets sit above it; the garbage
+  boxes must become thin flush plates.
+
+**Next session (single focus):**
+1. Establish the true bbox/sections order per class: dump Bridge
+   (in-bulk sections at +24 = the working reference) vs Btm_Obj01
+   (pre-bulk tables) — find the real bbox offset for the pre-bulk class
+   (the engine reads it AFTER the sections: UPrimitive::Serialize emits
+   the sections, THEN the bbox — so for the pre-bulk-class meshes the
+   bbox = AFTER the pre-bulk tables, NOT at bulk+0!).
+2. Re-parse the pre-bulk family with the corrected offsets; validate
+   the plates: thin (<0.3 m), top at the road level (-45.6 on the
+   bridge).
+3. Stage; the bridge becomes ONE wide flush layer per the user's ground
+   truth. The reference: ask the user for a fresh DE_village.png from
+   the bridge spot (the current file = the Oct 29 spawn view).
