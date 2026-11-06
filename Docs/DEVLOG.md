@@ -1860,3 +1860,45 @@ vtable call inside sub_1030a41b), the section->material binding in the L2
 renderer (is it Materials[i] or the section field?), the L2 UV
 conventions for the static mesh streams, the NSun/shadow interplay for
 the interiors. Each = native_function_study targets in engine.dll.
+
+## 2026-11-07 (7) — the user reports 0 visible changes; the honest state
+
+**The user ran the build after the v7 staging: the temple and the bridges
+look unchanged.** The numeric state DID change (the bridge ramp is smooth,
+the profiles differ), but the visible composition is the same: the bridge
+still reads as the strip + the deck, the temple hall still has the flat
+brown mid-ground. The user's ground truth stands: the original bridge =
+ONE wide layer, the house floors at the same height.
+
+**The header-float test (this session):** the L2 header unk1/unk2/unk3/unk4
+regions in the bulk are zeros/NaNs for Pir01, Btm_Obj01 and Bridge — there
+is NO vertex offset/scale hidden in the header. The vertices are absolute.
+
+**New structural facts:**
+- The Bridge (the 24-B class) keeps its 18 section units AT bulk+24
+  (18 x 14 B = 252 B, then the vertex stream at +321) — in-bulk.
+- The Pir01 pre-bulk table (8 x ~12 B after the i32 counts 13/8) does NOT
+  contain the face-count values the UModel prims imply (76/43/12/4/8/16/8/12
+  are absent) — so it is NOT the section table; likely the vertex/wedge
+  remap (the "dual counter" units from the 2026-11-06 final5 note).
+- Pir01 carries TWO bbox copies (bulk+0 and bulk+168 — UPrimitive's
+  BoundingBox "serialized twice" per UEViewer).
+
+**What this means for the bridge:** the geometry of every piece is now
+byte-validated against the file bboxes, yet the composition (the 2.56 m
+plate over the wide deck) contradicts the user's one-layer ground truth.
+The remaining unknowns are RENDER-side, not parse-side:
+  1. the section->material binding in the L2 engine (UEViewer assumes
+     Materials[i]; the engine may index differently — the flat brown
+     surfaces are the prime suspect),
+  2. the draw transform: whether the L2 client adds a per-mesh offset
+     (the mesh origin vs the bbox) on top of the actor Location,
+  3. the possibility that some road meshes are simply not yet identified
+     as present (the actor->mesh role mapping for Btm_Obj01/02/03).
+
+**Next session: mine the RENDER side of engine.dll** — the static mesh
+draw path (the section/material/vertex-stream binding at draw time), and
+AActor::LocalToWorld usage for the static mesh components. That decides
+the visible composition question once and for all. The trace tools
+(L2_TRACE_BOX / L2_GREEN_TRACE) are in place to verify each hypothesis
+against the rendered frame.
