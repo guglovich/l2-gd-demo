@@ -551,12 +551,90 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             mesh = parse_static_mesh(pkg.data, bulk,
                                      e.serial_size - obj.end, hint_verts=hint,
                                      hint_plan=hint_plan)
+            # fundamental invariant: the parsed vertices must fill the
+            # file's own bbox. A mismatch = the anchor latched onto a false
+            # stream (Btm_Obj01: both UModel and the anchor read a wrong
+            # 24-vert slab instead of the real ~20-vert road plate).
+            fmn = struct.unpack_from('<3f', pkg.data, bulk)
+            fmx = struct.unpack_from('<3f', pkg.data, bulk + 12)
+            vs = mesh['verts']
+            vmn = [min(v[k] for v in vs) for k in range(3)]
+            vmx = [max(v[k] for v in vs) for k in range(3)]
+            worst = max(
+                max(abs(fmn[k] - vmn[k]), abs(fmx[k] - vmx[k]))
+                for k in range(3))
+            span = max(fmx[k] - fmn[k] for k in range(3))
+            if worst > max(8.0, 0.05 * max(1.0, span)):
+                raise ValueError(
+                    f"vertex bbox deviates {worst:.0f} from the file bbox")
         except ValueError as ex:
-            print(f"  {name}: SKIPPED ({ex})")
-            continue
+            # The packed-vertex class (no f32 records at any anchor —
+            # Btm_Obj01/02/03 carry the road-bed plates over the bridge and
+            # the village lanes; both UModel and the anchor parser emit a
+            # wrong 24-vert slab for them). Their file bounding box is
+            # exact and for the road plates it is a thin slab — reconstruct
+            # the plate box from the bbox corners (exact data, not a guess;
+            # the real mesh is a ~0.25 m plate whose shape this box bounds).
+            plate = _bbox_plate(pkg.data, bulk, hint_plan)
+            if plate is None:
+                print(f"  {name}: SKIPPED ({ex})")
+                continue
+            print(f"  {name}: bbox-plate reconstruction ({ex})")
+            mesh = plate
         write_gltf(os.path.join(out_dir, name), name, mesh)
         done.append(name)
     return done
+
+
+def _bbox_plate(data: bytes, bulk: int, hint_plan: list | None) -> dict | None:
+    """Reconstruct a thin plate mesh from the file's exact bounding box.
+
+    The packed-vertex road plates (O_DE_Btm_Obj01/02/03) are ~0.25 m thick
+    slabs; their bbox is stored exactly at bulk+0..24 as two corners. The
+    reconstruction emits an 8-corner box with planar world-scaled UVs —
+    the walkable road surface and the collision match the real plate's
+    bounds. Returns None when the box is not plate-like (z-span >= 2 m).
+
+    Verts are RAW game (x, y, z) — write_gltf applies the UModel transform.
+    The quad windings are derived for the glTF result (outward CCW):
+    top (1,3,7,5), bottom (0,4,6,2), -x (0,1,3,2), +x (4,6,7,5),
+    y-lo (0,1,5,4), y-hi (2,6,7,3).
+    """
+    mn = struct.unpack_from('<3f', data, bulk)
+    mx = struct.unpack_from('<3f', data, bulk + 12)
+    zlo, zhi = min(mn[2], mx[2]), max(mn[2], mx[2])
+    if zhi - zlo >= 200.0 or zhi - zlo <= 0.0:
+        return None
+    xlo, xhi = min(mn[0], mx[0]), max(mn[0], mx[0])
+    ylo, yhi = min(mn[1], mx[1]), max(mn[1], mx[1])
+    cs = [(x, y, z) for x in (xlo, xhi) for y in (ylo, yhi) for z in (zlo, zhi)]
+    quads = [
+        (1, 3, 7, 5),  # top    (raw z = zhi)
+        (0, 4, 6, 2),  # bottom (raw z = zlo)
+        (0, 1, 3, 2),  # raw x = xlo
+        (4, 6, 7, 5),  # raw x = xhi
+        (0, 1, 5, 4),  # raw y = ylo
+        (2, 6, 7, 3),  # raw y = yhi
+    ]
+    indices = []
+    for a, b, c, d in quads:
+        indices.extend([a, b, c, a, c, d])
+    # planar UVs from the raw game XY, 2.56 m per repeat (Obase scale)
+    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    mat = hint_plan[0][1] if hint_plan else 0
+    return {
+        "bbox_min": mn, "bbox_max": mx,
+        "sphere": struct.unpack_from('<4f', data, bulk + 24),
+        # all normals raw (0,0,1) = the plate's top: after the UModel
+        # transform it becomes glTF +Y — the road surface lights correctly.
+        "verts": [(cx, cy, cz, 0.0, 0.0, 1.0) for cx, cy, cz in cs],
+        "uvs": uvs,
+        "indices": indices,
+        "sections": [(0, 0, len(cs) - 1, len(indices) // 3,
+                      len(indices) // 3)],
+        "section_materials": [mat],
+        "vertex_revision": 0,
+    }
 
 
 if __name__ == "__main__":

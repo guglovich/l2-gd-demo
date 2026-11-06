@@ -1654,3 +1654,43 @@ DE_effect + Etc_Bridge02 (not staged at all).
 **In-engine verification:** bridge deck 26/26, tunnel deck 21/21 profile
 points; spawn and Pir01 pillar screenshots textured correctly (the pillar
 shows its ornamental deco band — the material mapping works).
+
+## 2026-11-07 (2) — the bridge resolved: the two levels are authentic
+
+**The user's standing bridge complaint ("пол в 2 уровня", "провалился в
+нижний ярус, второй слой сквозной") — root-caused and closed:**
+
+- Fine cross/axis floor profiles at the bridge (7987-8700, 17624): EVERY
+  point carries BOTH the ornamental road deck (O_DE_Bridge, -45.3..-46.8,
+  the sunken walkway with the filigree strips) AND the side curbs
+  (O_DE_Btm_Obj01, -44.0..-44.7, 0.8 m above). The "two levels" are the
+  authentic Dark Elf bridge shape: a sunken ornamental road between raised
+  curbs. The Btm_Obj01 mesh is a REAL 34x2.6x2 m box (24 verts, 2 instances
+  = the two sides) — its bbox matches the file bbox exactly, so UModel's
+  decode of it was correct all along.
+- The "fell through into the lower tier" defect = the deck's down-normal
+  faces without backface collision — fixed earlier (backface_collision on
+  all trimesh colliders). Re-verified today: the cross-profile is 21/21
+  walkable (-46.6..-42.5 band), the deck present at 21/21, the curbs at
+  21/21. No through-gap remains.
+
+**Importer hardening (tools/l2strict/staticmesh.py):**
+1. bbox invariant: the parsed vertices must fill the file's own bbox
+   (tolerance max(8 cm, 5% of span)) — a mismatch now raises instead of
+   silently staging a false-stream mesh. This is the check that exposed
+   the Btm_Obj01 story.
+2. bbox-plate fallback for the packed-vertex class: when a mesh has no
+   f32 records and its bbox is a thin plate (z-span < 2 m), reconstruct
+   the plate box from the exact bbox corners (raw-frame verts, outward-CCW
+   glTF windings, planar 2.56 m UVs, the first material). Applied to
+   DE_effect (a thin plane) in the scratch run; NOT staged — effects are
+   not road-critical and a box approximates an effect plane poorly.
+   Btm_Obj01/02/03 do NOT take this path (their bboxes are thin in Y, not
+   Z, and their UModel boxes are already correct).
+
+Still parked: the truly packed-vertex meshes (inlet, Btm_Obj01's SIBLINGS
+Btm_Obj02/03 are unstaged but their UModel boxes decode fine when staged;
+MT_obj01-04, H03/H04, MT_Out, SH, CH_Btm/stairs, Center_obj — the anchor
+finds no f32 stream) — the packed u32-vertex format from
+FStaticMeshVertexStream<< (engine.dll 0x1030bdcf: the stream = a u32
+array) is the next RE target.
