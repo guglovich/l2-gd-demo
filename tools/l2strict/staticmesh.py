@@ -123,7 +123,8 @@ def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
 
 
 def parse_static_mesh(data: bytes, start: int, size: int,
-                      hint_verts: int = 0) -> dict:
+                      hint_verts: int = 0,
+                      hint_plan: list | None = None) -> dict:
     """Parse one L2 StaticMesh binary bulk (props already consumed).
 
     Anchor-based (format-proof): the vertex stream is located by its
@@ -132,6 +133,15 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     the color/alpha/UV streams share the same element count; the index
     streams are u16 pools; the sections are 14-B tables whose NumFaces
     sum x 3 == the index count.
+
+    ``hint_plan`` = [(index_count, material_index), ...] from the staged
+    UModel glTF. When the on-file section table resists the oracle (the
+    Pir01 class: sections serialize behind the L2 variable header and the
+    kDOP object — RE pending), the plan slices the real render index pool
+    contiguously and carries per-section material indices. UModel's
+    per-section index counts sum exactly to the real pool length, so the
+    slicing is exact; the index VALUES stay from the file (UModel's own
+    indices for this class are fabricated).
     """
     d = data
     end = start + size
@@ -211,24 +221,39 @@ def parse_static_mesh(data: bytes, start: int, size: int,
         l = (nx * nx + ny * ny + nz * nz) ** 0.5
         if l > 2.0:
             nx, ny, nz = nx / l, ny / l, nz / l
-        verts.append((x, y, z, nx, ny, nz))
+        if vstride == 32:
+            u, v = struct.unpack_from("<2f", d, p + 24)
+            verts.append((x, y, z, nx, ny, nz, u, v))
+        else:
+            verts.append((x, y, z, nx, ny, nz))
     r = vstart + vcount * vstride
 
-    # --- the color / alpha / UV streams share the element count
+    # --- the color / alpha / UV streams share the element count. Each
+    # stream = [compact count][payload][4-B tail], but 1-2 extra bytes may
+    # sit before a count (the Bridge's UV stream carries a stray 0x01) —
+    # retry the SAME width over a small byte window instead of skipping
+    # to the next width (the old walk lost the UV stream entirely and
+    # every staged mesh rendered with (0,0) UVs = flat untextured).
     uvs = []
-    p = r + 4  # revision
+    p = r + 4
     for width in (4, 4, 8):
-        p0 = p
-        c = compact(p0)[0]
-        if c != vcount:
-            p = p0 + 1
-            continue
-        p = compact(p0)[1]
-        if width == 8:
-            uvs = [struct.unpack_from("<2f", d, p + i * 8) for i in range(c)]
-        p += c * width
-        p += 4  # revision
-        p0 = p
+        got = False
+        for shift in range(0, 16):
+            p0 = p + shift
+            if p0 >= end:
+                break
+            c, p2 = compact(p0)
+            if c != vcount:
+                continue
+            p = p2
+            if width == 8:
+                uvs = [struct.unpack_from("<2f", d, p + i * 8) for i in range(c)]
+            p += c * width
+            p += 4
+            got = True
+            break
+        if not got:
+            break
 
     # --- index streams: compact count + u16 pool with values < vcount
     indices = []
@@ -301,6 +326,28 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     if not sections:
         sections = best or []
 
+    # --- UModel-plan fallback: slice the render pool contiguously by the
+    # staged glTF's per-primitive index counts (they sum to the pool
+    # length); carry the per-section material indices for world.gd.
+    section_materials = []
+    covered = sum(s[4] for s in sections) * 3
+    if covered < idx_total and hint_plan:
+        plan_total = sum(c for c, _m in hint_plan)
+        if plan_total == idx_total:
+            off = 0
+            fsecs = []
+            fmats = []
+            for cnt, mat in hint_plan:
+                nf = cnt // 3
+                if nf <= 0:
+                    continue
+                fsecs.append((off, 0, vcount - 1, nf, nf))
+                fmats.append(int(mat))
+                off += cnt
+            if off == idx_total and fsecs:
+                sections = fsecs
+                section_materials = fmats
+
     return {
         "bbox_min": struct.unpack_from("<3f", d, start),
         "bbox_max": struct.unpack_from("<3f", d, start + 12),
@@ -309,6 +356,7 @@ def parse_static_mesh(data: bytes, start: int, size: int,
         "uvs": uvs,
         "indices": render_idx,
         "sections": sections,
+        "section_materials": section_materials,
         "vertex_revision": 0,
     }
 
@@ -321,15 +369,21 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
 
     positions = []
     for x, y, z, *_ in mesh["verts"]:
-        positions.extend([x * 0.01, z * 0.01, -y * 0.01])
+        # UModel's glTF convention (verified in-game and byte-wise:
+        # um vert0 = raw (x, z, y) / 100, DEVLOG final6): game Y goes to
+        # glTF Z WITHOUT negation. The earlier -y mirrored every mesh in
+        # game Y (improper transform with the raw winding order kept —
+        # inside-out geometry vs the UModel-staged reference).
+        positions.extend([x * 0.01, z * 0.01, y * 0.01])
     normals = []
     for *_, nx, ny, nz in mesh["verts"]:
         l = math.sqrt(nx * nx + ny * ny + nz * nz) or 1.0
-        normals.extend([nx / l, nz / l, -ny / l])
+        normals.extend([nx / l, nz / l, ny / l])
     if mesh["uvs"]:
-        # separate UV stream (the 24-B pos+normal vertex format)
+        # separate UV stream (the 24-B pos+normal vertex format):
+        # mesh["uvs"] = one (u, v) tuple per vertex
         uv_flat = []
-        for u, v in mesh["uvs"][0]:
+        for u, v in mesh["uvs"]:
             uv_flat.extend([u, 1.0 - v])
     elif len(mesh["verts"][0]) == 8:
         # inline UVs (the 32/36-B interleaved vertex format)
@@ -377,12 +431,16 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
     iv = add_view(ib)
     idx_acc = add_acc(iv, 5123, len(mesh["indices"]), "SCALAR")
 
-    # One primitive per section (world.gd maps textures per primitive).
+    # One primitive per section (world.gd maps textures per primitive via
+    # asset_map's primitive_material_indices — read from these "material"
+    # fields). section_materials carries the mesh's real material indices
+    # (the UModel-plan fallback); without it the mapping is the identity.
     prims = []
+    sec_mats = mesh.get("section_materials") or []
     secs = mesh.get("sections") or [(0, 0, len(mesh["verts"]) - 1, 0,
                                      len(mesh["indices"]) // 3)]
     used = 0
-    for (fi, fv, lv, fe, nf) in secs:
+    for si, (fi, fv, lv, fe, nf) in enumerate(secs):
         sub = mesh["indices"][fi:fi + nf * 3]  # FirstIndex is in index units
         if not sub:
             continue
@@ -390,6 +448,7 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
         sb = struct.pack(f"<{len(sub)}H", *sub)
         sv = add_view(sb)
         s_acc = add_acc(sv, 5123, len(sub), "SCALAR")
+        mat = sec_mats[si] if si < len(sec_mats) else si
         prims.append({
             "attributes": {
                 "POSITION": pos_acc,
@@ -397,7 +456,7 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
                 "TEXCOORD_0": uv_acc,
             },
             "indices": s_acc,
-            "material": len(prims),
+            "material": mat,
             "mode": 4,
         })
     if not prims or used * 3 < len(mesh["indices"]):
@@ -413,6 +472,7 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
             "mode": 4,
         }]
 
+    n_mat = max([p["material"] for p in prims], default=0) + 1
     gltf = {
         "asset": {"version": "2.0", "generator": "l2strict staticmesh"},
         "scene": 0,
@@ -423,7 +483,7 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
             "name": f"l2mat{i}",
             "pbrMetallicRoughness": {"baseColorFactor": [0.5, 0.5, 0.5, 1.0]},
             "doubleSided": True,
-        } for i in range(max(1, len(prims)))],
+        } for i in range(n_mat)],
         "accessors": accessors,
         "bufferViews": buffer_views,
         "buffers": [{"uri": name + ".bin", "byteLength": len(blob)}],
@@ -460,6 +520,7 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             bulk = e.serial_offset + obj.end
             # hint: the verified vertex count from the existing staged glTF
             hint = 0
+            hint_plan = []
             staged_root = os.path.join(os.path.dirname(os.path.dirname(
                 os.path.abspath(__file__))), os.pardir, 'assets', 'maps',
                 '20_18', 'meshes')
@@ -468,14 +529,28 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
                 if name + '.gltf' in files:
                     try:
                         sg = json.load(open(os.path.join(root, name + '.gltf')))
-                        hint = sum(
-                            sg['accessors'][pr['attributes']['POSITION']]['count']
-                            for pr in sg['meshes'][0]['primitives'])
+                        # the vertex hint = the UNIQUE POSITION accessors'
+                        # total: UModel slices vertices per primitive, our
+                        # own exports share one pool accessor across all
+                        # primitives — summing per-primitive counts would
+                        # multiply the pool by the prim count (9468 = 9x1052).
+                        seen_acc = set()
+                        for pr in sg['meshes'][0]['primitives']:
+                            pa = pr['attributes']['POSITION']
+                            if pa in seen_acc:
+                                continue
+                            seen_acc.add(pa)
+                            hint += sg['accessors'][pa]['count']
+                        for pr in sg['meshes'][0]['primitives']:
+                            hint_plan.append((
+                                sg['accessors'][pr['indices']]['count'],
+                                int(pr.get('material', 0))))
                     except (json.JSONDecodeError, KeyError, OSError):
                         pass
                     break
             mesh = parse_static_mesh(pkg.data, bulk,
-                                     e.serial_size - obj.end, hint_verts=hint)
+                                     e.serial_size - obj.end, hint_verts=hint,
+                                     hint_plan=hint_plan)
         except ValueError as ex:
             print(f"  {name}: SKIPPED ({ex})")
             continue

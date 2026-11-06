@@ -1603,3 +1603,54 @@ V-flip, road-bed cells are dirt-only under DIRECT. Not applied — the open-
 terrain look was user-approved with the current flip and the cave-green bug
 turned out to be mesh backfaces, not masks. Revisit with original-client
 reference screenshots before touching the shader.
+
+## 2026-11-07 — importer v6: UModel-exact axes, real UVs, plan-fallback
+sections; 27 meshes staged from our own code
+
+**Three defects found and fixed in tools/l2strict/staticmesh.py:**
+
+1. **Y-axis mirror.** Our glTF mapping was (gx, gz, -gy) — a PROPER rotation
+   — while UModel's (the in-game verified reference) is (gx, gz, +gy): an
+   improper transform with the raw face order kept. Byte evidence: Pir01
+   file vert0 (92.38, 45.64, -529.78) = UModel (0.924, -5.298, 0.456) x100
+   = (x, z, y) — the DEVLOG final6 note read literally; plus the fence01
+   bbox: the file bbox (arbiter) has game-Y as the long axis, UModel's
+   glTF carries it in glTF-Z un-negated. Winding check: 40/40 faces match
+   UModel's order with NO swap (UE's raw winding is opposite-handed, so
+   the mirror lands on glTF CCW correctly). Fix: positions (x, z, y)*0.01,
+   normals (nx, nz, ny).
+2. **Zero UVs (the "flat untextured" regression).** The color/alpha/UV
+   stream walk `continue`d to the NEXT width on a count mismatch — the
+   Bridge's UV stream carries a stray 0x01 byte before its compact count,
+   so the width-8 attempt failed and every staged mesh rendered with
+   (0,0) UVs (solid texture-corner color). Fix: retry the SAME width over
+   a 16-byte window. Also: stride-32 anchors now read their inline UVs;
+   and a latent `mesh["uvs"][0]` unpack bug (uvs is a flat tuple list)
+   surfaced and fixed.
+3. **Hint multiplication.** The vertex hint summed POSITION counts over
+   primitives; our own exports share one pool accessor across all prims,
+   so re-running the converter on our own staging multiplied the hint by
+   the prim count (9468 = 9x1052) and poisoned the anchor. Fix: sum
+   UNIQUE accessor indices.
+
+**Section plan fallback (the 32-B class):** when the on-file 14-B section
+table resists the oracle (it serializes behind the L2 variable header and
+the kDOP object — the engine.dll order is bbox/sphere -> L2 header ->
+5x FStaticMeshVertexStream -> 2x FRawColorStream -> 1 stream -> 2x
+FRawIndexBuffer -> kDOP UObject -> sections (+0x148) -> +0x160 array),
+the staged UModel glTF's per-primitive index counts (they sum EXACTLY to
+the real render-pool length) slice the file's real index pool contiguously
+and carry the per-section material indices (Pir01: [0,1,2,3,4,6,7,8] —
+material 5 unused). The index VALUES stay from the file — UModel's own
+indices for this class are fabricated (sequential runs).
+
+**Result: 27 Oren_DEV_S meshes staged from our importer** (git history
+keeps the UModel versions). Validation vs UModel: bbox 27/27 exact,
+UVs non-zero everywhere, prim counts and material mappings 1:1 — with
+REAL file indices where UModel fabricates them. Skips remain: inlet,
+Btm_Obj01, MT_obj01-03 (packed-vertex anchor RE pending), Btm_Obj02/03 +
+DE_effect + Etc_Bridge02 (not staged at all).
+
+**In-engine verification:** bridge deck 26/26, tunnel deck 21/21 profile
+points; spawn and Pir01 pillar screenshots textured correctly (the pillar
+shows its ornamental deco band — the material mapping works).
