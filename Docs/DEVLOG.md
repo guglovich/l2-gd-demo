@@ -2119,3 +2119,35 @@ inside sub_10308c6a at 0x106f6ca6/0x106f6cb3) — the exact functions to
 mine next session. One decoder unpacks the strips => the bridge = the
 full-width road; the same format family covers the house floors and the
 temple pieces.
+
+## 2026-11-07 (15) — the units are SECTION RECTANGLES; the box is real
+
+**The 29-B units decoded as vertex pairs** (the scan `[01][XX][YY][81 81]`
++ 24 B = 2 vertices): 17 units, the pairs = the DIAGONAL CORNERS of
+rectangles:
+- the z = -102.87 family: (-553.26, -128) -- (1651.04, 128), (-1304.83,
+  -128) -- (-553.26, 128), etc — the plate's bottom rectangles,
+- the z = +103.48 family: (-1762.47, -128) -- (-1304.83, 128), etc — the
+  top rectangles.
+The XX = the section index (0..17), the pairs = each section's bounding
+rectangle. **The Btm_Obj01 mesh IS a real 34x2.56x2 m box** (the
+vertices were byte-validated; both UModel and our run-anchor agree).
+
+**The placement insight:** the actor (9059, 17388) + the box y-span
+[-128..128] = the world y 17260..17516 — the road line is y ~17630 =>
+**the box = the road's NORTH CURB**, not the road itself. The second
+instance (13698, 16320) = the next segment's curb. The road surface
+between the curbs = the Bridge deck (-45.4..-45.6 = the correct level).
+
+**The open question (needs the live-client reference):** the original's
+bridge shows the golden border strips AT the road edges, flat. If the
+Btm_Obj01 box is the north curb, its top (-44.05) rides 1.35 m above the
+deck — in the original the curb top is presumably much lower (a flat
+border) or the visual reads differently. A fresh DE_village.png capture
+standing ON the bridge (x~8000-8500, y~17630, looking east) settles:
+(a) the curb height, (b) whether the golden strips are the same
+Btm_Obj01 boxes with a different Z, or separate deco meshes.
+
+**The tooling ready:** the unit scanner (this session's script,
+tmp/-disposable), the L2_TRACE_BOX tracer, the floor profiles. The
+staged state = the v7 boxes (the real geometry, the right height).
