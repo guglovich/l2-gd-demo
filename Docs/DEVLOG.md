@@ -1694,3 +1694,45 @@ MT_obj01-04, H03/H04, MT_Out, SH, CH_Btm/stairs, Center_obj — the anchor
 finds no f32 stream) — the packed u32-vertex format from
 FStaticMeshVertexStream<< (engine.dll 0x1030bdcf: the stream = a u32
 array) is the next RE target.
+
+## 2026-11-07 (3) — BREAKTHROUGH: the sections serialize BEFORE the bbox
+
+**UEViewer's UnMesh2.cpp UStaticMesh::Serialize (the reference decode that
+works for L2):**
+```
+Super::Serialize(Ar);          // UPrimitive = the properties
+Ar << Sections;                // <-- THE SECTIONS, right after the props
+Ar << BoundingBox;             // "UPrimitive field, serialized twice"
+Ar << VertexStream << ColorStream << AlphaStream << UVStream
+    << IndexStream1 << IndexStream2 << f108;
+goto skip_remaining;           // the kDOP/collision is never read
+```
+Our parser reads `bulk = props_end` and treats bulk+0 as the bbox — for the
+L2 layout the SECTIONS sit between the props end and the bbox, i.e. in the
+region our parse never scans for tables (the L2 20-B "units at +41" were
+the L2 header — final7 — and the real section tables are PRE-bulk).
+
+**Pre-bulk dumps (recorded for the next pass):**
+- O_DE_Btm_Obj01 (bulk=7176321, props end 176): the region bulk-160..-16
+  = a repeating ~12-14 B pattern `04 53 00 01 53 00 02 d3 00 03 15 c0 01 00`
+  with one varying byte per unit; before it: `ff..ff 04 00 00 00 00 00 00
+  00 08 00 00 00 00 00 00 00 05 59 ac 0d` — an i32 8 (a count?) near -186.
+- O_DE_Pir01 (bulk=5848552, props end 122): `ff ff ff ff ff 0d 00 00 00
+  00 00 00 00 08 00 00 00 00 00 00 00 05 59 76 09` then the same repeating
+  pattern `04 53 00 01 53 00 02 d3 00 03 05 XX` (XX varies: 84 94 8f 85 9e
+  8b 9f 90 97 88 ae) — an i32 8 (the section count? Pir01 has 8 sections)
+  near -131, and i32 13 (`0d`) near -139.
+
+**FStaticMeshSection = the SAME 14-B layout for every class** (UEViewer
+asserts Ver>=112): f4(i32), FirstIndex, FirstVertex, LastVertex, fE,
+NumFaces (u16 x5). FStaticMeshVertexStream = [TArray<FStaticMeshVertex>]
+[Revision i32]; the vertex = Pos+Normal (6x f32) for the standard class.
+
+**The bridge/house height story (the user's ground truth: the bridge road
+= ONE wide layer = the house floor level):** the road-adjacent meshes
+(Btm_Obj01 curbs, H01-04 house floors) belong to the packed-vertex class —
+their CURRENT geometry (UModel/ours) carries wrong positions, which is why
+the curbs poke 0.8 m above the deck and the H03 floor reads -41.95. The
+packed u32-vertex format (FStaticMeshVertexStream<< = engine.dll
+0x1030bdcf = a u32 array via ByteOrderSerialize) + the pre-bulk section
+tables = the next session's RE targets; both are now precisely located.
