@@ -2059,3 +2059,34 @@ the type bytes (09/0a/0b/0c/0d = the lengths). The mineable code path =
 the L2 static mesh loader in engine.dll that walks these entries (around
 the FStaticMeshVertexStream handling, sub_10305f29 is the UNPACKED
 variant).
+
+## 2026-11-07 (13) — the vertices were always fine; the PACKED ENTRIES ARE THE FACES
+
+**Reframing after the user's "make the wide bridge, continue the decoder":**
+- The 20-record pool at Btm_Obj01 bulk+426 = the REAL plate vertices —
+  vert0 = (1651.04, -64, -102.87), ALL z = -102.87 (the flat plate at the
+  world -46.11 with the -4508 actor). The vertices were never the problem.
+- The variable-length entries at bulk+2779..+4233 (`[01][idx 01,02,03...]
+  [len 09..0d][data]`, the 29-byte visible period) = THE TRIANGLES/FACES
+  in the L2 compressed format — NOT vertices. Our pipeline takes the faces
+  from the UModel prim plans (fabricated) => the box instead of the plate.
+- So the fix = decode the packed FACE entries: each entry presumably packs
+  the triangle's wedge/vertex references (+ the edge flags) in len bytes.
+  The 29-byte period = the entry + the following vertex coords repeated
+  in the clear (the float runs -128.0/-103.49/1651.04/128.0/-103.49 =
+  the (Y,Z,X)-ordered plate corner coordinates visible between entries).
+
+**The engine hook:** these entries are the LAZY arrays (+0x148/+0x160 in
+UStaticMesh, sub_1030ac90/sub_10308c6a — serialized AFTER the streams,
+skipped by UEViewer's `goto skip_remaining`). The L2 loader walks them
+with the length-prefixed records — mine sub_10308c6a and the element
+serializer it dispatches.
+
+**Interim state:** the v7 boxes are staged (the right height, the wrong
+faces). The plate decode = the next session's single focus:
+1. native_function_study sub_10308c6a + the element op (the triangle
+   decompressor).
+2. Decode Btm_Obj01's entries -> the faces; validate: sum(tris) covers
+   the 20-vert plate flat in z.
+3. Same for Btm_Obj02/03, then re-stage: the bridge = the flat strips at
+   -44.06 = the full road per DE_village.png.
