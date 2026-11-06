@@ -2090,3 +2090,32 @@ faces). The plate decode = the next session's single focus:
    the 20-vert plate flat in z.
 3. Same for Btm_Obj02/03, then re-stage: the bridge = the flat strips at
    -44.06 = the full road per DE_village.png.
+
+## 2026-11-07 (14) — the lazy array structure decoded (sub_10308c6a)
+
+**sub_10308c6a (the +0x160 lazy array serializer):**
+- the count via sub_1030599d (the compact/int reader),
+- the in-memory elements = **44 bytes each (imul 0x2C)**,
+- the element serialization dispatches through vtable+0x3c (the element
+  op) — the ground truth for the record format.
+
+**The file-side units in Btm_Obj01's packed region (~29 B each):**
+- the 5-B header: `01 | XX | YY | 81 | 81` where XX = the sub-index
+  (00,01,02,03,...,10,11 — walks the segments) and YY = the growing
+  length byte (06,08,09,0a,0b,0c,0d,0e,0f,10,11),
+- the 24-B data = six unaligned f32s. Sample (the unit at bulk+2716):
+  `01 10 06 81 81 | (-882.1, 64.0, 103.5 | -1341.6, 128.0, 103.5)` —
+  plausible plate coordinates (x within [-1762..1651], y within
+  [-128..128], z within [-103..103]), two 3-float groups per unit.
+- the clear float runs between the headers = the plate's cross-section
+  constants: y = ±128, z = -103.49/-102.87, x = 1651.04 / -553.
+
+**The picture:** the L2 lazy array = the per-segment records of the
+extruded road strip; the 44-B in-memory element = the unpacked record
+(the segment's vertices + the link fields); the file record = the 29-B
+packed unit with the growing payload. The decompressor = the element op
+behind vtable+0x3c in sub_1030ac90's loading path (or the twin dispatch
+inside sub_10308c6a at 0x106f6ca6/0x106f6cb3) — the exact functions to
+mine next session. One decoder unpacks the strips => the bridge = the
+full-width road; the same format family covers the house floors and the
+temple pieces.
