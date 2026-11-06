@@ -1975,3 +1975,30 @@ is real geometry.
    plate = thin (z-span < 0.3 m), its top = the road level.
 3. Re-stage Btm_Obj01/02/03: the bridge becomes the flush wide road with
    the flat border strips per DE_village.png.
+
+## 2026-11-07 (10) — THE PLATE DATA LOCATED: variable-length packed vertices
+
+**The road plate's real vertex data found in Btm_Obj01's bulk** at
+rel+2779..+4233: flat-plate vertices with z = -102.87 CONSTANT (the plate
+is FLAT, 22 m x 2.56 m: x in [-553..1651], y in [-128..128]) — at the world
+height -46.11 = the deck level = THE ROAD. The z=-102.87 sextets repeat
+through the region (the scan's "thin bbox" hits are the plate's own
+vertex pairs).
+
+**The vertex entry format (visible in the raw dump):** variable-length
+units `[01][index: 01,02,03,...,0c,0d][length: 09,0a,0b,0c,0d][data...]`
+— the length byte VARIES (9..13 B) = delta/packed encoding, NOT a fixed
+stride. This is why every fixed-stride scan (24/32/36 B) failed on this
+class and why the "runs" found earlier were garbage.
+
+**Consequences:**
+- The plate's true geometry = a flat 22x2.56 m slab at the road level —
+  the decode requires the packed-entry format (the next session's single
+  focus: mine the L2 decompressor in engine.dll — the stream reader that
+  walks these length-prefixed entries; sub_10305f29's 24-byte path is the
+  UNPACKED variant, the packed class uses a different element reader).
+- The bridge = ONE wide layer away: the deck (-45.4..-45.6 = the road) is
+  correct; the border strips (Btm_Obj01/02/03) decode flat and flush =>
+  the bridge matches DE_village.png.
+- The temple floors/stairs and the other "packed family" members share
+  this format (the same variable-length entries) — one decoder fixes all.
