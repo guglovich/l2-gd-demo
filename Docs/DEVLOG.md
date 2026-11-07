@@ -2226,3 +2226,14 @@ the structure below.
 slabs with the filigree) come from the packed-entry decoder later; the
 slab restores the correct road surface, width and height now. The slabs'
 material = the strip family's first texture.
+
+## 2026-11-07 (19) — the road pattern orientation fixed (the slab UV axes swapped)
+
+The user's report: the upper layer works, but the center pattern repeats
+ACROSS the road instead of running forward. The slab's UVs had the u along
+the road length; the strip textures carry the ornamental band along the
+v axis — the band rendered across. Fix: the slab UVs swapped — the u =
+the width, the v = the length; the band now runs forward along the road.
+
+Verified: the walkable top = the road slab at -44.06 at 21/21 points.
+The band orientation now matches the reference (the longitudinal strip).

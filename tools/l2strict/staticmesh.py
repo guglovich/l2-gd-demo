@@ -579,7 +579,10 @@ def _road_slab_mesh(data: bytes, bulk: int, hint_plan: list | None) -> dict:
     indices = []
     for a, b, c, dd in quads:
         indices.extend([a, b, c, a, c, dd])
-    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    # the u runs ACROSS the road (the width), the v ALONG it (the length):
+    # the strip textures carry the ornamental band along the v axis, so
+    # the band runs forward along the road (the reference orientation).
+    uvs = [((cy - ylo) / 256.0, (cx - xlo) / 256.0) for cx, cy, cz in cs]
     mat = hint_plan[0][1] if hint_plan else 0
     return {
         "bbox_min": (xlo, ylo, zlo), "bbox_max": (xhi, yhi, zhi),
