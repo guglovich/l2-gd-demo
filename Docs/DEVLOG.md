@@ -2529,3 +2529,52 @@ The road composition (final): the deck = the walking surface; the
 parapet boxes = the walls along the edges; the carpet strips = the
 ornamental tops/edges of the parapets. Un-skipped — the boxes render
 with their textures (the material 0 = the parapet's stone/ornament).
+
+## 2026-11-08 — the decoder closes: the faces = UModel 1-1; the 29-B units = the kDOP collision bboxes; the road layout = measured
+
+**The parse-completeness proof.** Dumped the UModel exports
+(tmp/l2/20_18/umodel/Oren_DEV_S/StaticMesh) against our staged glTF for all
+46 Oren_DEV_S meshes: the face counts are IDENTICAL for every mesh (Bridge
+924/924, Btm 690/690, MT_In 1010/1010, H01 626/626...). The only delta =
+O_DE_Btm_Obj01 (UModel 2 prims/24 verts vs ours 1 prim/20 verts — 4 dedup
+verts) and ±a few dedup verts elsewhere. **Our run-anchor decoder extracts
+the complete visual geometry.** The huge bulk leftovers (Bridge 327 KB vs
+46 KB of streams) = the kDOP collision tree + the lazy arrays, not visuals.
+
+**The 29-B units = the kDOP node bboxes.** The units
+([01][XX][YY][81 81] + 24 B = 2 corners) are (min,max) corner pairs of the
+collision-tree nodes — for flat plates z1==z2, for the Obj01 slope the unit
+spans the whole z range −102.87..+103.48 (a bbox, not a plate). They are
+the engine's collision decomposition: Btm_Obj01 17 nodes, H01 177, CH_body
+138, MT_Out 434, Bridge 105 (railings only — the deck has no nodes).
+41679 units total across all placed actors.
+
+**The road layout = the numeric ground truth** (units + actors, the floor
+profiles and the perpendicular profile at x=8200):
+- the spawn plateau = MT_Btm flat −44.0, flush with the Obj01 TOP plate
+  (+103.48 local at actor −4508 = −44.05);
+- the road = the Obj01 slab: top plate −44.05 (x 7339..7885) → slope →
+  bottom plate −46.11 (x 8640..10670), the carpet band 2.56 m wide down
+  the road center (the actor line = 1 m off-center);
+- the Bridge mesh = the ornamental arch with the LOWER deck ramp
+  −44.97→−46.79, 0.75 m below the Obj01 top (its railing nodes stand on
+  the road level: railing base local −119.92 = −44.08);
+- the village plaza = O_DE_Btm −46.07 (flush with the slab bottom −46.11);
+- the house floors = −44.3..−44.7 (raised above the plaza);
+- O_De_01/02/03 are NOT floor slabs (UModel confirms 3D chunks) — they are
+  the center ornaments anchored at −55.4; the +1161 shift hack in
+  world.gd = pending removal (a wrong assumption, kept until the plaza
+  visuals are re-checked).
+
+**The tool fix.** L2_SCREENSHOT was dead code: its dispatch sat INSIDE
+_traces_box_flow() after get_tree().quit() (world.gd) — screenshots never
+saved from the normal flow. Moved to the _ready dispatch chain. The spawn
+shot re-taken: the carpet = one pattern down the road center (matches the
+"один узор" requirement), the road descends, composition = the references.
+
+**The next decoder step (single focus):** parse the kDOP tree leaves —
+which triangles the collision nodes reference (UE2: kDOPNodes +
+kDOPCollisionFaces, skipped by UEViewer after f108). That yields the
+AUTHENTIC collision subset (the engine collides only the kDOP faces, not
+the whole trimesh) and settles which decks are walkable (the Bridge lower
+deck vs the Obj01 road) without approximations.

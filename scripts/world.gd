@@ -37,6 +37,8 @@ func _ready() -> void:
 		_green_trace_flow()
 	if OS.get_environment("L2_TRACE_BOX") != "":
 		_trace_box_flow()
+	if OS.get_environment("L2_SCREENSHOT") != "":
+		_screenshot_flow()
 
 
 ## Region tracer: L2_TRACE_BOX="x1,y1,x2,y2" casts rays from the camera
@@ -75,8 +77,6 @@ func _trace_box_flow() -> void:
 					_texture_for_surface(owner_name, surf), hit.get("normal")])
 	print("TRACE_BOX totals:", counts)
 	get_tree().quit()
-	if OS.get_environment("L2_SCREENSHOT") != "":
-		_screenshot_flow()
 
 
 ## Green-pixel tracer: L2_GREEN_TRACE=1 renders one frame, finds green-dominant
