@@ -2281,3 +2281,12 @@ Btm_Obj01 = -46.11 (the actor -4508), Btm_Obj02/03 = -47.14 (the actor
 -4611) — the road steps down east exactly per the segment levels. The
 bridge's west = the deck (-45.4..-45.6); the road = the stepped
 composition of the exact-mesh plates.
+
+## 2026-11-07 (22) — Craft Anything updated 0.3.0 -> 0.5.0
+
+The CLI replaced at ~/.local/bin/craft-anything-cli (the rm+cp dance —
+the old binary was held by the running MCP server process; the running
+session keeps the old version until the MCP restarts). Verified: the CLI
+reports 0.5.0 and opens the project. The project's evidence (analysis/
+l2-godot.cany) is untouched. The MCP server picks 0.5.0 on the next
+ZCode restart (the tool list may gain new tools).
