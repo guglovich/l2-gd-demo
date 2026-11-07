@@ -651,7 +651,8 @@ def _flat_plate_mesh(data: bytes, start: int, end: int,
     indices = []
     for a, b, c, dd in quads:
         indices.extend([a, b, c, a, c, dd])
-    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    # the carpet: ONE texture repeat across the width, the repeats along
+    uvs = [((cy - ylo) / max(1.0, (yhi - ylo)), (cx - xlo) / 256.0) for cx, cy, cz in cs]
     mat = hint_plan[0][1] if hint_plan else 0
     return {
         "bbox_min": (xlo, ylo, zb), "bbox_max": (xhi, yhi, zt),
@@ -819,7 +820,8 @@ def _bbox_plate(data: bytes, bulk: int, hint_plan: list | None) -> dict | None:
     for a, b, c, d in quads:
         indices.extend([a, b, c, a, c, d])
     # planar UVs from the raw game XY, 2.56 m per repeat (Obase scale)
-    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    # the carpet: ONE texture repeat across the width, the repeats along
+    uvs = [((cy - ylo) / max(1.0, (yhi - ylo)), (cx - xlo) / 256.0) for cx, cy, cz in cs]
     mat = hint_plan[0][1] if hint_plan else 0
     return {
         "bbox_min": mn, "bbox_max": mx,
