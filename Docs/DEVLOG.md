@@ -2182,3 +2182,28 @@ live-client captures will pin the exact placement.
 **The remaining work (unchanged):** the packed-entry decoder (the
 variable-length [01][idx][len][data] records) => the real thin inlay
 slabs => laid on the road => the bridge matches the references.
+
+## 2026-11-07 (17) — the flush road plates implemented and staged
+
+**The flat-plate extractor hardened** (staticmesh.py):
+- the finite-triplet filter (the NaN garbage floats excluded),
+- the circular bbox invariant scoped to the standard parse path only
+  (for the road-plate family the value at bulk+0 is not the bbox),
+- the flat-strip faces = the quad chain between the consecutive
+  cross-section pairs, the winding normalized per quad by the normal z
+  (the plate's top up).
+
+**All three strips (Btm_Obj01/02/03) re-staged**: 8 verts, 12 faces,
+finite, the height range 12 cm, the top at the actor Z (-45.08) = flush
+with the road.
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the top
+walkable surface = DECK at every point (-45.14 -> -46.79) — no
+strip/deck transitions, no second level. The road = one wide flush
+layer; the ornamental strips = the 12-cm inlays on it (the reference
+composition).
+
+**The user verification pending** (the in-game look). The next candidates
+if the pattern holds: the same flat-plate treatment wherever the
+variable-length family plays the floor role (the house floors H01-04,
+the temple pieces) — each case validated against its reference first.

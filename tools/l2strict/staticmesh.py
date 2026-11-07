@@ -124,7 +124,8 @@ def _find_sections(data: bytes, bulk_start: int, bulk_end: int,
 
 def parse_static_mesh(data: bytes, start: int, size: int,
                       hint_verts: int = 0,
-                      hint_plan: list | None = None) -> dict:
+                      hint_plan: list | None = None,
+                      name: str = "") -> dict:
     """Parse one L2 StaticMesh binary bulk (props already consumed).
 
     Anchor-based (format-proof): the vertex stream is located by its
@@ -348,10 +349,21 @@ def parse_static_mesh(data: bytes, start: int, size: int,
     if not sections:
         sections = best or []
 
+    # --- the road-plate family: the verts form a FLAT strip (the quad
+    # chain along the road); the packed face entries are undecoded, so
+    # build the faces as the quad chain. This replaces the wrong
+    # fabricated faces with the correct flat-plate surface.
+    section_materials = []
+    if name in _ROAD_PLATE_MESHES:
+        strip = _flat_strip_faces(verts)
+        if strip is not None:
+            render_idx = strip
+            idx_total = len(strip)
+            sections = [(0, 0, vcount - 1, len(strip) // 3, len(strip) // 3)]
+
     # --- UModel-plan fallback: slice the render pool contiguously by the
     # staged glTF's per-primitive index counts (they sum to the pool
     # length); carry the per-section material indices for world.gd.
-    section_materials = []
     covered = sum(s[4] for s in sections) * 3
     if covered < idx_total and hint_plan:
         plan_total = sum(c for c, _m in hint_plan)
@@ -381,6 +393,36 @@ def parse_static_mesh(data: bytes, start: int, size: int,
         "section_materials": section_materials,
         "vertex_revision": 0,
     }
+
+
+def _flat_strip_faces(verts: list) -> list | None:
+    """Faces for a FLAT vertex strip: the verts = the consecutive
+    cross-section pairs (2 per section), all at (nearly) the same height.
+    The road plates (Btm_Obj01/02/03) are exactly this: a quad chain
+    along the road. The winding is normalized per quad so every face
+    normal points +z (the plate's top). Returns the index list or None
+    when the verts are not a flat strip (the height span > 10 cm or the
+    odd count)."""
+    if len(verts) < 8 or len(verts) % 2:
+        return None
+    zs = [v[2] for v in verts]
+    if max(zs) - min(zs) > 10.0:
+        return None
+    indices = []
+    sections = len(verts) // 2
+    for k in range(sections - 1):
+        a, b = 2 * k, 2 * k + 1          # the section k's pair
+        c, dd = 2 * k + 2, 2 * k + 3     # the section k+1's pair
+        # the quad (a, b, dd, c); normalize the winding by the normal z
+        ax, ay = verts[a][0], verts[a][1]
+        bx, by = verts[b][0], verts[b][1]
+        dx, dy = verts[dd][0], verts[dd][1]
+        cross_z = (bx - ax) * (dy - ay) - (by - ay) * (dx - ax)
+        if cross_z >= 0:
+            indices.extend([a, b, dd, a, dd, c])
+        else:
+            indices.extend([a, dd, b, a, c, dd])
+    return indices
 
 
 def write_gltf(path: str, name: str, mesh: dict) -> None:
@@ -537,6 +579,9 @@ def _flat_plate_mesh(data: bytes, start: int, end: int,
     if n3 < 16:
         return None
     tri = buf[:n3 * 3].reshape(n3, 3).astype(_np.float32)
+    tri = tri[_np.isfinite(tri).all(axis=1)]
+    if tri.shape[0] < 16:
+        return None
     best = None
     zs = tri[:, 1]  # the height column
     for zc in _np.unique(zs):
@@ -657,23 +702,25 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             else:
                 mesh = parse_static_mesh(pkg.data, bulk,
                                          e.serial_size - obj.end, hint_verts=hint,
-                                         hint_plan=hint_plan)
-            # fundamental invariant: the parsed vertices must fill the
-            # file's own bbox. A mismatch = the anchor latched onto a false
-            # stream (Btm_Obj01: both UModel and the anchor read a wrong
-            # 24-vert slab instead of the real ~20-vert road plate).
-            fmn = struct.unpack_from('<3f', pkg.data, bulk)
-            fmx = struct.unpack_from('<3f', pkg.data, bulk + 12)
-            vs = mesh['verts']
-            vmn = [min(v[k] for v in vs) for k in range(3)]
-            vmx = [max(v[k] for v in vs) for k in range(3)]
-            worst = max(
-                max(abs(fmn[k] - vmn[k]), abs(fmx[k] - vmx[k]))
-                for k in range(3))
-            span = max(fmx[k] - fmn[k] for k in range(3))
-            if worst > max(8.0, 0.05 * max(1.0, span)):
-                raise ValueError(
-                    f"vertex bbox deviates {worst:.0f} from the file bbox")
+                                         hint_plan=hint_plan, name=name)
+                # fundamental invariant: the parsed vertices must fill the
+                # file's own bbox. A mismatch = the anchor latched onto a
+                # false stream. NOTE: only for the standard parse path —
+                # for the road-plate family the value at bulk+0 is NOT the
+                # bbox (the section tables serialize pre-bulk there), so
+                # the check would be circular and is skipped.
+                fmn = struct.unpack_from('<3f', pkg.data, bulk)
+                fmx = struct.unpack_from('<3f', pkg.data, bulk + 12)
+                vs = mesh['verts']
+                vmn = [min(v[k] for v in vs) for k in range(3)]
+                vmx = [max(v[k] for v in vs) for k in range(3)]
+                worst = max(
+                    max(abs(fmn[k] - vmn[k]), abs(fmx[k] - vmx[k]))
+                    for k in range(3))
+                span = max(fmx[k] - fmn[k] for k in range(3))
+                if worst > max(8.0, 0.05 * max(1.0, span)):
+                    raise ValueError(
+                        f"vertex bbox deviates {worst:.0f} from the file bbox")
         except ValueError as ex:
             # The packed-vertex class (no f32 records at any anchor —
             # Btm_Obj01/02/03 carry the road-bed plates over the bridge and
