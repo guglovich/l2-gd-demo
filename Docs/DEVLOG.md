@@ -2327,3 +2327,24 @@ calls). Evidence:
    normals point up.
 3. The same for Btm_Obj02/03, then the bridge = the flat strips at
    -44.06/-46.11 per the segments.
+
+## 2026-11-07 (24) — the curb boxes skipped; the road = the deck until the packed decoder
+
+**The user's capture confirmed the final piece:** with the real Btm_Obj01
+box geometry staged, the "upper layer" over the road = the curb boxes'
+render — the 2-m-thick boxes stick above the deck, the lamps and the
+houses. The reference shows the road clean: the cobblestone + the flat
+ornamental inlays.
+
+**The action:** the road-strip family (Btm_Obj01/02/03) = skipped from
+the render and the collision (`_ROAD_STRIP_SKIP` in world.gd) — the road
+= the Bridge deck (the cobblestone, -45.4..-45.6, the correct level,
+10.5 m wide). The curb boxes return when the packed decompressor yields
+the real thin flush slabs.
+
+**The bridge state:** the road = the wide deck (correct); the strips =
+pending the packed decode. The texture orientation and the width are in
+place from the earlier fixes. The packed decompressor = the element op
+behind vtable+0x3c in the lazy-array serializers (sub_1030ac90/
+sub_10308c6a), the 44-B in-memory elements, the ~29-B file units with
+the [01][XX][YY][81 81] headers.

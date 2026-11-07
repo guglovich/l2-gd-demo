@@ -460,6 +460,14 @@ func _build_meshes() -> void:
 		var mr = actor.get("mesh")
 		if mr == null or not (mr is Dictionary): continue
 		var key := "%s:%s" % [mr["package"], mr["object"]]
+		# The road-strip family (Btm_Obj01/02/03) = the curb boxes decoded
+		# from the variable-length packed records. Their unpacked shape (a
+		# 2-m-thick box) renders as raised walls over the road; in the
+		# original the border strips are flush inlays. Skip the render and
+		# the collision until the packed decompressor yields the real thin
+		# slabs — the road surface = the Bridge deck below.
+		if key in _ROAD_STRIP_SKIP:
+			continue
 		var mesh := _get_mesh(key)
 		if mesh == null:
 			skipped.append(key)
@@ -587,6 +595,14 @@ func _get_mesh(key: String) -> Mesh:
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
 # Предвычислено анализатором геометрии glTF.
+# The road-strip family skipped from the render/collision: the curb boxes
+# decoded from the variable-length packed records render as 2-m-thick walls
+# over the road; the original has them as flush border inlays. Skipped until
+# the packed decompressor yields the real thin slabs.
+var _ROAD_STRIP_SKIP := {
+	"Oren_DEV_S:O_DE_Btm_Obj01", "Oren_DEV_S:O_DE_Btm_Obj02",
+	"Oren_DEV_S:O_DE_Btm_Obj03",
+}
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",
