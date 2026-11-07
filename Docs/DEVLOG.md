@@ -2439,3 +2439,42 @@ across the road = the user's "3 strips"). Fixed: the u = one repeat
 across the plate width (the y-span), the v = the repeats along (every
 2.56 m). The staged plates now render the carpet with the borders along
 the road edges = the reference composition.
+
+## 2026-11-07 (30) — the session wrap: the road = the deck; the decoder = the next session's opening task
+
+**The current visible state:** the bridge road = the Bridge deck (the
+cobblestone, -45.4..-46.8 sloping, 10.5 m wide) — the curb boxes
+(Btm_Obj01/02/03) = skipped (the render + the collision) pending the
+packed decode. The user verified: the road = walkable, the composition =
+clean, but the ornamental strips = absent (the decoder pending).
+
+**The accumulated decoder knowledge (the complete chain):**
+1. The vertex pool = the 24-B (pos + normal) records interleaved, 20
+   verts at bulk+250..+730 (the vert0 = (1651.04, -64, -102.87), the
+   normal (0, 0, 1) — the flat plate's up-normal).
+2. The index/faces = the u16 pool at bulk+899 (the 56-run: the tris
+   referencing the 20-vert pool, e.g. (2,3,0), (0,1,2), (9,2,1)...) —
+   18-19 tris.
+3. The 29-B units at bulk+2600..+3064 = the section rectangles (the
+   collision decomposition): 17 units, the pairs of the diagonal corners,
+   the z families -102.87 (the bottom plates) / +103.48 (the top plates)
+   / the mixed (the walls).
+4. The carpet = DE_V_capet01 (the ornamental borders along the long
+   edges); the material 0 of the strip family.
+5. The road height = -44.06 at the spawn (the tunnel MT_Btm), -45.4..
+   -46.8 = the deck (the descent), -44.05 = the box top = the curb top
+   (1.35 m above the deck = the parapet, per the reference image 2).
+
+**The next session's opening task (the single focus):** the packed-entry
+decompressor — the element op behind vtable+0x3c in sub_1030ac90/
+sub_10308c6a (the 44-B in-memory elements, the ~29-B file units). The
+decode yields the real strip outlines => the bridge = the road + the
+parapets + the ornamental inlays = 1-1 with the references. Then the
+house floors (H01-04) and the temple pieces = the same format.
+
+**The session's commits:** 07d9376 (the run-anchor), 3382081, 477bb1f,
+b1e71b3 (the format chain), 761b1d6 (the road slab), 1821805 (the skip),
+c99804c (the click-to-move), 6b95484 (the cursor), db09cd5/36e2b63/
+403feb4 (the unit scanner), dfa82ab (craft 0.5.0), cd40627, 1897d33
+(the parse fix), d4fa51f, ab61085 (the carpet UVs), f36f800, 1ca7927
+(the references).
