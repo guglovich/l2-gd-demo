@@ -2400,3 +2400,31 @@ center), the camera orbits on the held RIGHT button (the classic L2
 camera), the LEFT click = the precise move to the cursor point. The
 procedural gait boosted: the bob 9 cm, the lean 6 degrees, the side sway
 2.5 degrees (until the skeletal .psa animations land).
+
+## 2026-11-07 (28) — the road composition final: the descending segments, the transition gap
+
+**The unit scanner saved as a tool** (tools/l2strict/scan_units.py): the
+29-B unit scan ([01][XX][YY][81 81][2 verts]) for any strip mesh.
+
+**The road composition (the final understanding from all the evidence):**
+the road DESCENDS east from the gate: the tunnel floor (MT_Btm) at
+-44.06 (the spawn's walking level) -> the bridge deck (Bridge) at
+-45.4..-45.6 -> the strip plates (Btm_Obj01) at -46.11 -> (Btm_Obj02/03)
+at -47.14. The reference image 3 confirms the descent visually. The curb
+assembly (the bottom/top plates + the 2-m walls in Btm_Obj01's units) =
+the bridge's side structure (the parapets), authentic but currently
+rendering as the bare boxes (the facing/railings = the separate pieces).
+
+**The gap the user sees ("2 уровня", "только середина"):** the
+transition segments between the tunnel level (-44.06) and the bridge
+deck (-45.4) — the sloped/stepped road pieces — are the packed plates
+not yet decoded. Without them the road reads as two disconnected
+levels.
+
+**The next session (the single focus):** decode the packed entries
+across ALL the strip meshes (Btm_Obj01/02/03 + the unidentified
+transition plates) — the entries contain the per-segment vertex/face
+data; the segments chain the descent smoothly. The engine's
+decompressor = the element op behind vtable+0x3c in the lazy-array
+serializers (sub_1030ac90/sub_10308c6a, the 44-B elements, the 29-B
+file units with the [01][XX][YY][81 81] headers).
