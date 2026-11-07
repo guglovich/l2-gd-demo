@@ -670,9 +670,7 @@ def _flat_plate_mesh(data: bytes, start: int, end: int,
 # The road-strip family: the meshes whose vertices live in the
 # variable-length packed entries (the flat plates extracted by
 # _flat_plate_mesh). The bridge border strips + the village lane strips.
-_ROAD_PLATE_MESHES = {
-    "O_DE_Btm_Obj01", "O_DE_Btm_Obj02", "O_DE_Btm_Obj03",
-}
+_ROAD_PLATE_MESHES = set()
 
 
 def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list:

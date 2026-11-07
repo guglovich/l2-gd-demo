@@ -600,8 +600,7 @@ func _get_mesh(key: String) -> Mesh:
 # over the road; the original has them as flush border inlays. Skipped until
 # the packed decompressor yields the real thin slabs.
 var _ROAD_STRIP_SKIP := [
-	"Oren_DEV_S:O_DE_Btm_Obj01", "Oren_DEV_S:O_DE_Btm_Obj02",
-	"Oren_DEV_S:O_DE_Btm_Obj03",
+	"Oren_DEV_S:O_DE_Btm_Obj02", "Oren_DEV_S:O_DE_Btm_Obj03",
 ]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",

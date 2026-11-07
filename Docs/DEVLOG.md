@@ -2478,3 +2478,27 @@ c99804c (the click-to-move), 6b95484 (the cursor), db09cd5/36e2b63/
 403feb4 (the unit scanner), dfa82ab (craft 0.5.0), cd40627, 1897d33
 (the parse fix), d4fa51f, ab61085 (the carpet UVs), f36f800, 1ca7927
 (the references).
+
+## 2026-11-08 — Btm_Obj01's real plate staged (20 verts, 18 tris); Obj02/03 pending
+
+**The run-anchor now decodes Btm_Obj01 end-to-end**: the parse yields the
+real plate — 20 verts (the pos+normal interleaved, the normals up to
+(0.13, 0, 0.99)), 54 indices = 18 triangles, the height ±1.03 m (the
+curb assembly's top at the actor -45.08 + 1.035 = -44.05 = the road
+level, the bottom -46.11). Staged and reimported; un-skipped from the
+render (the Obj02/03 stay skipped — their pools sit at the different
+offsets and the count-guard misses them).
+
+**The placement note:** the actor (9059, 17388) + the box y-span puts
+the plate at the road's NORTH edge (the world y 17260..17516 vs the road
+line ~17630) — the curb assembly beside the road, per the reference
+image 2 (the ornamental parapets at the edges).
+
+**Next:**
+1. Btm_Obj02/03: the pools = the different counts/offsets — scan their
+   bulks for the 12-B position runs (the relaxed count-guard or the
+   per-mesh compact-count discovery).
+2. The visual check on the bridge (the plates render with the carpet
+   texture; the placement = beside the road per the reference).
+3. The house floors (H01-04) and the temple = the same 12-B position
+   pools + the packed faces.
