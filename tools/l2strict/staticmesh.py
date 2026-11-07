@@ -730,19 +730,35 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             # raw 12-B positions with a constant height inside
             # variable-length packed entries — the fixed-stride run anchor
             # reads table bytes there. Extract the flat plate directly.
-            if name in _ROAD_PLATE_MESHES:
-                # each strip = its OWN road segment at its OWN height (the
-                # flat plate from the mesh's real vertex cluster — the
-                # uniform slab broke the east segments, floating above the
-                # lamps and the houses).
-                plate = _flat_plate_mesh(pkg.data, bulk,
-                                         e.serial_offset + e.serial_size,
-                                         hint_plan)
-                if plate is not None:
-                    print(f"  {name}: flat road plate extracted (the mesh's own level)")
-                    mesh = plate
-                else:
-                    raise ValueError("no flat plate cluster in the bulk")
+            if name == "O_DE_Btm_Obj01":
+                # the curb assembly = the real 20-vert plate from the parse
+                mesh = parse_static_mesh(pkg.data, bulk,
+                        e.serial_size - obj.end, hint_verts=hint,
+                        hint_plan=hint_plan, name=name)
+            elif name in ("O_DE_Btm_Obj02", "O_DE_Btm_Obj03"):
+                # the flat border ribbons = the single-section rectangles:
+                # the bbox IS the whole mesh (the exact flat quad at the
+                # z = 0 actor level), no decompression needed.
+                mn = struct.unpack_from('<3f', pkg.data, bulk)
+                mx = struct.unpack_from('<3f', pkg.data, bulk + 12)
+                z0 = mn[2]
+                cs = [(mn[0], mn[1], z0), (mx[0], mn[1], z0),
+                      (mx[0], mx[1], z0), (mn[0], mx[1], z0)]
+                idxs = [0, 2, 1, 0, 3, 2]
+                uvs = [((c[1] - mn[1]) / 256.0, (c[0] - mn[0]) / 256.0)
+                       for c in cs]
+                mat = hint_plan[0][1] if hint_plan else 0
+                mesh = {
+                    "bbox_min": mn, "bbox_max": mx,
+                    "sphere": struct.unpack_from('<4f', pkg.data, bulk + 24),
+                    "verts": [(c[0], c[1], c[2], 0.0, 0.0, 1.0) for c in cs],
+                    "uvs": uvs,
+                    "indices": idxs,
+                    "sections": [(0, 0, 3, 2, 2)],
+                    "section_materials": [mat],
+                    "vertex_revision": 0,
+                }
+                print(f"  {name}: flat border ribbon from the exact bbox")
             else:
                 mesh = parse_static_mesh(pkg.data, bulk,
                                          e.serial_size - obj.end, hint_verts=hint,

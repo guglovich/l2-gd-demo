@@ -2502,3 +2502,17 @@ image 2 (the ornamental parapets at the edges).
    texture; the placement = beside the road per the reference).
 3. The house floors (H01-04) and the temple = the same 12-B position
    pools + the packed faces.
+
+## 2026-11-08 — the border ribbons decoded (Btm_Obj02/03)
+
+**Btm_Obj02/03 = the single-section flat rectangles** (the one unit each:
+the diagonal corners (-32, -1134, 0)–(32, 1074, 0) for the Obj02): the
+exact bbox quad = the whole mesh, no decompression needed. The ribbons:
+0.64 m wide x 22 m / 12.3 m long, flat at the z = 0 actor level = the
+world -46.11 = the road level. The textures = capet02 (the second carpet
+design). Built as the exact bbox quads (4 verts, 2 tris) and staged.
+
+**The bridge road composition now:**
+- the deck (the cobblestone) = the base surface,
+- the carpet strip (Btm_Obj01, the 20-vert real plate) = the center,
+- the border ribbons (Btm_Obj02/03) = the ornamental edge lines.
