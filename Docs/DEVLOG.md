@@ -2516,3 +2516,16 @@ design). Built as the exact bbox quads (4 verts, 2 tris) and staged.
 - the deck (the cobblestone) = the base surface,
 - the carpet strip (Btm_Obj01, the 20-vert real plate) = the center,
 - the border ribbons (Btm_Obj02/03) = the ornamental edge lines.
+
+## 2026-11-08 — the parapets ARE the original composition (un-skipped)
+
+The reference (bridge_original_level.png) shows the parapet walls at the
+road edges — the ornamental walls ~1.35 m above the road surface. The
+Btm_Obj01/02/03 boxes = exactly those parapets (the top -44.05, the road
+-45.4 => 1.35 m = the waist-high parapet). My earlier "skip" removed the
+authentic parapets (the user: "нет верхнего слоя").
+
+The road composition (final): the deck = the walking surface; the
+parapet boxes = the walls along the edges; the carpet strips = the
+ornamental tops/edges of the parapets. Un-skipped — the boxes render
+with their textures (the material 0 = the parapet's stone/ornament).
