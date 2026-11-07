@@ -2371,3 +2371,22 @@ load. Fixed: the Array literal + the `in` membership test.
 3. Each restaging invalidates the .gltf imports — the first launch after
    a staging pays the reimport. Mitigated by the headless --import after
    every staging (already the practice).
+
+## 2026-11-07 (26) — click-to-move implemented + the procedural gait placeholder
+
+**New control scheme (player.gd):** the left mouse click while captured =
+cast through the click position onto the world (the ray excludes the
+player's own collider) -> the destination -> the character RUNS there in
+a straight line (no pathfinding yet), the arrival threshold 0.6 m, the
+destination = a glowing disc marker placed at the hit point. The WASD =
+kept as the fallback.
+
+**The procedural gait placeholder:** the bob (rig.position.y = the
+abs-sine, the amplitude 5.5 cm, the frequency 7.5/11 Hz for the walk/run)
++ the 4-degree forward lean while moving; the smooth return to the rest
+pose on stop. The REAL skeletal walk/run requires the L2 animation
+pipeline (the .psa/.ukx conversion) — the next big task.
+
+**The load/slowdown notes:** the parse error fixed earlier (the set
+literal); the ~1-min startup = the trimesh bake + the PNG decode per
+launch (the fix paths recorded in (25)).
