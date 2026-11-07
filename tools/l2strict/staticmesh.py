@@ -558,6 +558,42 @@ def write_gltf(path: str, name: str, mesh: dict) -> None:
         fp.write(bytes(blob))
 
 
+def _road_slab_mesh(data: bytes, bulk: int, hint_plan: list | None) -> dict:
+    """The interim wide road slab for the strip family: the box from the
+    file's exact bbox footprint (x) + the measured road width (10.5 m, the
+    Bridge deck's z-span) + the measured road height (the top layer's
+    raw z = +90..+102 => the world -44.06, the user's walking level).
+    The exact outlines come from the packed decoder later; this slab
+    restores the wide walkable road now."""
+    mn = struct.unpack_from('<3f', data, bulk)
+    mx = struct.unpack_from('<3f', data, bulk + 12)
+    xlo, xhi = min(mn[0], mx[0]), max(mn[0], mx[0])
+    ylo, yhi = -525.0, 525.0          # the road width = the deck's 10.5 m
+    zlo, zhi = 90.0, 102.0            # the top = the raw +102 => -44.06 world
+    cs = [(x, y, z) for x in (xlo, xhi) for y in (ylo, yhi) for z in (zlo, zhi)]
+    quads = [
+        (1, 3, 7, 5), (0, 4, 6, 2),
+        (0, 1, 3, 2), (4, 6, 7, 5),
+        (0, 1, 5, 4), (2, 6, 7, 3),
+    ]
+    indices = []
+    for a, b, c, dd in quads:
+        indices.extend([a, b, c, a, c, dd])
+    uvs = [((cx - xlo) / 256.0, (cy - ylo) / 256.0) for cx, cy, cz in cs]
+    mat = hint_plan[0][1] if hint_plan else 0
+    return {
+        "bbox_min": (xlo, ylo, zlo), "bbox_max": (xhi, yhi, zhi),
+        "sphere": struct.unpack_from('<4f', data, bulk + 24),
+        "verts": [(cx, cy, cz, 0.0, 0.0, 1.0) for cx, cy, cz in cs],
+        "uvs": uvs,
+        "indices": indices,
+        "sections": [(0, 0, len(cs) - 1, len(indices) // 3,
+                      len(indices) // 3)],
+        "section_materials": [mat],
+        "vertex_revision": 0,
+    }
+
+
 def _flat_plate_mesh(data: bytes, start: int, end: int,
                      hint_plan: list | None) -> dict | None:
     """Extract a flat road plate: a cluster of vertex triplets sharing a
@@ -691,14 +727,8 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             # variable-length packed entries — the fixed-stride run anchor
             # reads table bytes there. Extract the flat plate directly.
             if name in _ROAD_PLATE_MESHES:
-                plate = _flat_plate_mesh(pkg.data, bulk,
-                                         e.serial_offset + e.serial_size,
-                                         hint_plan)
-                if plate is not None:
-                    print(f"  {name}: flat road plate extracted")
-                    mesh = plate
-                else:
-                    raise ValueError("no flat plate cluster in the bulk")
+                print(f"  {name}: wide road slab built")
+                mesh = _road_slab_mesh(pkg.data, bulk, hint_plan)
             else:
                 mesh = parse_static_mesh(pkg.data, bulk,
                                          e.serial_size - obj.end, hint_verts=hint,

@@ -2207,3 +2207,22 @@ composition).
 if the pattern holds: the same flat-plate treatment wherever the
 variable-length family plays the floor role (the house floors H01-04,
 the temple pieces) — each case validated against its reference first.
+
+## 2026-11-07 (18) — THE ROAD: one wide flat layer at -44.06 across the bridge
+
+**The wide road slab implemented and staged** (Btm_Obj01/02/03 =
+_road_slab_mesh): the box from the file's exact bbox footprint (x, 34 m)
++ the measured road width (10.5 m = the Bridge deck's z-span) + the
+measured road height (the top layer's raw z = +90..+102 => the world
+-44.06 = the user's walking HUD height).
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the
+walkable top = ROAD(slab) at **-44.06 at EVERY point** — one wide flat
+layer, no transitions. This matches the user's ground truth: the original
+bridge = one wide road at the walking height; the deck (-45.4..-46.8) =
+the structure below.
+
+**The interim nature:** the exact strip outlines (the ornamental inlay
+slabs with the filigree) come from the packed-entry decoder later; the
+slab restores the correct road surface, width and height now. The slabs'
+material = the strip family's first texture.
