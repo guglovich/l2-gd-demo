@@ -2428,3 +2428,14 @@ data; the segments chain the descent smoothly. The engine's
 decompressor = the element op behind vtable+0x3c in the lazy-array
 serializers (sub_1030ac90/sub_10308c6a, the 44-B elements, the 29-B
 file units with the [01][XX][YY][81 81] headers).
+
+## 2026-11-07 (29) — the carpet identified; the plate UVs = one repeat across
+
+The strip family's material 0 = DE_V_capet01 = **the ornamental CARPET**
+(the dark field + the chain borders along the long edges). The strips =
+the carpets laid on the road (the classic L2 decoration). The plate UVs
+were tiling the carpet 8.6x across the width (the borders multiplied
+across the road = the user's "3 strips"). Fixed: the u = one repeat
+across the plate width (the y-span), the v = the repeats along (every
+2.56 m). The staged plates now render the carpet with the borders along
+the road edges = the reference composition.
