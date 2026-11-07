@@ -599,9 +599,7 @@ func _get_mesh(key: String) -> Mesh:
 # decoded from the variable-length packed records render as 2-m-thick walls
 # over the road; the original has them as flush border inlays. Skipped until
 # the packed decompressor yields the real thin slabs.
-var _ROAD_STRIP_SKIP := [
-	"Oren_DEV_S:O_DE_Btm_Obj02", "Oren_DEV_S:O_DE_Btm_Obj03",
-]
+var _ROAD_STRIP_SKIP := []  # all the strip pieces render
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",
