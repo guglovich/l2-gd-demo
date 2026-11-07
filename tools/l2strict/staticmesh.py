@@ -582,7 +582,9 @@ def _road_slab_mesh(data: bytes, bulk: int, hint_plan: list | None) -> dict:
     # the u runs ACROSS the road (the width), the v ALONG it (the length):
     # the strip textures carry the ornamental band along the v axis, so
     # the band runs forward along the road (the reference orientation).
-    uvs = [((cy - ylo) / 256.0, (cx - xlo) / 256.0) for cx, cy, cz in cs]
+    # ONE texture repeat across the road width (10.5 m); the pattern
+    # repeats along the length every 2.56 m as in the original.
+    uvs = [((cy - ylo) / 1050.0, (cx - xlo) / 256.0) for cx, cy, cz in cs]
     mat = hint_plan[0][1] if hint_plan else 0
     return {
         "bbox_min": (xlo, ylo, zlo), "bbox_max": (xhi, yhi, zhi),
