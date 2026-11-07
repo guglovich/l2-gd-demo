@@ -2348,3 +2348,26 @@ place from the earlier fixes. The packed decompressor = the element op
 behind vtable+0x3c in the lazy-array serializers (sub_1030ac90/
 sub_10308c6a), the 44-B in-memory elements, the ~29-B file units with
 the [01][XX][YY][81 81] headers.
+
+## 2026-11-07 (25) — the load-breaking parse error fixed; the startup slowdown causes
+
+**The project stopped loading:** the _ROAD_STRIP_SKIP was written as a
+GDScript SET literal `{"a", "b"}` — GDScript has no set literals (the
+AGENTS.md quirk, violated again). The parse error killed the world.gd
+load. Fixed: the Array literal + the `in` membership test.
+
+**The ~1-minute startup (the accumulated causes):**
+1. The trimesh colliders are baked at every launch
+   (mesh.create_trimesh_shape() per mesh key, 69 meshes, the big ones
+   like inlet = 485 KB of triangles) — the physics bake is the dominant
+   cost. Fix path: bake once and save via ResourceSaver to .tres, load
+   on start (or share the shape across the instances — already shared
+   per key via _shape_cache, but not persisted between launches).
+2. The PNG textures are decoded at every launch (world.gd loads the
+   PNGs directly with Image.load + ImageTexture — ~69 meshes x several
+   2048^2 textures). Fix path: import the textures as the compressed
+   Godot resources and load the imported CTex instead of decoding the
+   PNGs.
+3. Each restaging invalidates the .gltf imports — the first launch after
+   a staging pays the reimport. Mitigated by the headless --import after
+   every staging (already the practice).
