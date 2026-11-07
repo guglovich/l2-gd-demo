@@ -63,6 +63,7 @@ func _ready() -> void:
 	hud.name = "HUD"
 	add_child(hud)
 	hud.add_child(_coord_label)
+	_make_crosshair()
 	# the destination marker: a glowing disc placed on the ground by the click
 	dest_marker = MeshInstance3D.new()
 	var disc := CylinderMesh.new()
@@ -79,7 +80,23 @@ func _ready() -> void:
 	dest_marker.mesh = disc
 	dest_marker.visible = false
 	add_child(dest_marker)
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func _make_crosshair() -> void:
+	# the visible cursor: the L2-style crosshair (the mouse is never
+	# captured in this game — the clicks are aimed precisely)
+	var img := Image.create(32, 32, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for i in range(32):
+		if i < 11 or i > 21:
+			img.set_pixel(i, 16, Color(1, 1, 1, 0.95))
+			img.set_pixel(16, i, Color(1, 1, 1, 0.95))
+	for i in range(10, 23):
+		img.set_pixel(i, 16, Color(0.1, 0.1, 0.1, 0.6))
+		img.set_pixel(16, i, Color(0.1, 0.1, 0.1, 0.6))
+	img.set_pixel(16, 16, Color(1.0, 0.75, 0.2))
+	var tex := ImageTexture.create_from_image(img)
+	Input.set_custom_mouse_cursor(tex, Input.CURSOR_ARROW, Vector2(16, 16))
 
 func _load_character() -> void:
 	rig = Node3D.new()
@@ -94,15 +111,13 @@ func _load_character() -> void:
 			rig.add_child(inst)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+		# the camera orbit on the held right button (the classic L2 camera);
+		# the mouse stays visible and free for aiming
 		yaw -= event.relative.x * 0.003
 		pitch = clampf(pitch - event.relative.y * 0.003, -1.2, 0.4)
 	elif event is InputEventMouseButton and event.pressed \
-			and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	elif event is InputEventMouseButton and event.pressed \
-			and event.button_index == MOUSE_BUTTON_LEFT \
-			and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			and event.button_index == MOUSE_BUTTON_LEFT:
 		# click-to-move: cast through the click position onto the world,
 		# set the destination, the character runs there in a straight line
 		var from := cam.project_ray_origin(event.position)
@@ -162,11 +177,14 @@ func _physics_process(delta: float) -> void:
 	# (the real skeletal walk/run comes from the L2 .psa conversion)
 	if moving and rig:
 		bob_t += delta * (11.0 if speed >= RUN_SPEED else 7.5)
-		rig.position.y = absf(sin(bob_t)) * 0.055
-		rig.rotation_degrees.x = 4.0
+		rig.position.y = absf(sin(bob_t)) * 0.09
+		rig.rotation_degrees.x = 6.0
+		rig.rotation_degrees.z = sin(bob_t * 0.5) * 2.5
 	elif rig:
 		rig.position.y = lerpf(rig.position.y, 0.0, minf(10.0 * delta, 1.0))
 		rig.rotation_degrees.x = lerpf(rig.rotation_degrees.x, 0.0,
+				minf(10.0 * delta, 1.0))
+		rig.rotation_degrees.z = lerpf(rig.rotation_degrees.z, 0.0,
 				minf(10.0 * delta, 1.0))
 		bob_t = 0.0
 	# live game coordinates: window title + on-screen HUD (debug aid)

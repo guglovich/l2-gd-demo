@@ -2390,3 +2390,13 @@ pipeline (the .psa/.ukx conversion) — the next big task.
 **The load/slowdown notes:** the parse error fixed earlier (the set
 literal); the ~1-min startup = the trimesh bake + the PNG decode per
 launch (the fix paths recorded in (25)).
+
+## 2026-11-07 (27) — the visible crosshair cursor; the RMB camera; the gait boost
+
+The mouse was CAPTURED (no cursor on screen) — the click-to-move aimed
+blind. Fixed the L2 way: the mouse stays VISIBLE with a procedural
+crosshair cursor (Input.set_custom_mouse_cursor, the hotspot at the
+center), the camera orbits on the held RIGHT button (the classic L2
+camera), the LEFT click = the precise move to the cursor point. The
+procedural gait boosted: the bob 9 cm, the lean 6 degrees, the side sway
+2.5 degrees (until the skeletal .psa animations land).
