@@ -2237,3 +2237,34 @@ the width, the v = the length; the band now runs forward along the road.
 
 Verified: the walkable top = the road slab at -44.06 at 21/21 points.
 The band orientation now matches the reference (the longitudinal strip).
+
+## 2026-11-07 (20) — the session's end state: the road surface, the missing ornament
+
+**The user's last captures vs ours:** the road = the wide cobblestone —
+present, wide, walkable (the one-layer slab at -44.06 across the bridge).
+The remaining gap vs the live client: **the ornamental filigree bands
+ON the road are absent** — the original's road = the cobblestone + the
+flat ornamental inlay bands; ours = the plain cobblestone only.
+
+**The height finding (this session):** no vertex cluster at the raw
++29 (the road level per the PlayerStart) exists in Btm_Obj01's bulk —
+the road surface is NOT a hidden vertex plate in this mesh. The road =
+the deck itself (the Bridge mesh's cobblestone, correct) and the
+ornament = either (a) the deck section's material must be a DIFFERENT
+texture (the section->material binding per the L2 engine — UEViewer's
+identity assumption may be wrong for L2), or (b) separate inlay meshes
+(not yet identified among the actors), or (c) the filigree = part of the
+deck texture's detail that our mips/UV scale lose.
+
+**The engine-dive queue (the priority order):**
+1. The section->material binding in the L2 static mesh draw path
+   (is it Materials[i] per UEViewer, or a per-section field?).
+2. The deck section's texture verification against the live capture
+   (the cobblestone vs the ornate — the material list of O_DE_Bridge).
+3. The lazy-array element decompressor (sub_10308c6a's vtable+0x3c
+   dispatch) for the exact inlay outlines if (a)/(b) fail.
+
+**The session's accumulated assets:** the run-anchor importer (69 meshes
+staged), the trace tools (L2_TRACE_BOX/L2_GREEN_TRACE), the floor
+profiles, the bridge references in Docs/ (4 angles), the strip family's
+bbox and unit maps. All committed.
