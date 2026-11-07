@@ -732,8 +732,18 @@ def convert_export(pkg_path: str, out_dir: str, only: set | None = None) -> list
             # variable-length packed entries — the fixed-stride run anchor
             # reads table bytes there. Extract the flat plate directly.
             if name in _ROAD_PLATE_MESHES:
-                print(f"  {name}: wide road slab built")
-                mesh = _road_slab_mesh(pkg.data, bulk, hint_plan)
+                # each strip = its OWN road segment at its OWN height (the
+                # flat plate from the mesh's real vertex cluster — the
+                # uniform slab broke the east segments, floating above the
+                # lamps and the houses).
+                plate = _flat_plate_mesh(pkg.data, bulk,
+                                         e.serial_offset + e.serial_size,
+                                         hint_plan)
+                if plate is not None:
+                    print(f"  {name}: flat road plate extracted (the mesh's own level)")
+                    mesh = plate
+                else:
+                    raise ValueError("no flat plate cluster in the bulk")
             else:
                 mesh = parse_static_mesh(pkg.data, bulk,
                                          e.serial_size - obj.end, hint_verts=hint,

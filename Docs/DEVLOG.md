@@ -2268,3 +2268,16 @@ deck texture's detail that our mips/UV scale lose.
 staged), the trace tools (L2_TRACE_BOX/L2_GREEN_TRACE), the floor
 profiles, the bridge references in Docs/ (4 angles), the strip family's
 bbox and unit maps. All committed.
+
+## 2026-11-07 (21) — per-segment plate heights restored
+
+The user's capture: the uniform slab at -44.06 floated above the lamps
+and the houses east of the bridge — the road DESCENDS east and each
+strip = its OWN segment at its OWN level. The slab's uniform height was
+wrong.
+
+Reverted to the flat-plate extraction (the mesh's own vertex cluster):
+Btm_Obj01 = -46.11 (the actor -4508), Btm_Obj02/03 = -47.14 (the actor
+-4611) — the road steps down east exactly per the segment levels. The
+bridge's west = the deck (-45.4..-45.6); the road = the stepped
+composition of the exact-mesh plates.
