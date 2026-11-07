@@ -2290,3 +2290,40 @@ session keeps the old version until the MCP restarts). Verified: the CLI
 reports 0.5.0 and opens the project. The project's evidence (analysis/
 l2-godot.cany) is untouched. The MCP server picks 0.5.0 on the next
 ZCode restart (the tool list may gain new tools).
+
+## 2026-11-07 (23) — the L2 streams are SPLIT BY ATTRIBUTE; the vertices are 12 B
+
+**The discovery (the fresh 0.5.0-tool session):** the L2 static mesh
+streams are SPLIT BY ATTRIBUTE — the positions are their own stream with
+**12-byte vertices (the positions only, no normals!)**. The normals and
+the UVs live in the separate streams (the "5x FStaticMeshVertexStream"
+calls). Evidence:
+- Btm_Obj01: the 20-record "24-B run" at bulk+426 = actually **40
+  positions** (12 B each) — every position lands inside the file bbox
+  (x within [-1762..1651], y within [-128..128], z within [-103..103]),
+  e.g. vert0 = (1651.04, -64, -102.87), vert1 = (-1341.6, 128, 103.5).
+- The "normals" in the 24-B reading = the NEXT positions (the garbage
+  unit-length test passed only because consecutive plate positions are
+  close to each other... the unit-length check on the 3-float windows
+  slid across the position stream).
+- The 29-B units = the packed INDEX/TRIANGLE records referencing the
+  position pool (their 24-B tails contain the plate corner coordinates
+  too — the coplanar plate makes position-like runs).
+
+**What this changes:**
+- The vertex count = 2x the old reading (the plate = 40 verts).
+- The normals/UVs = the separate streams to locate (the same
+  [compact count][data] framing).
+- The faces = the index stream (the u16 pool already found) — the
+  indices reference the 40-position pool; the old "faces" = built against
+  the 20-vert misreading = the box instead of the plate!
+
+**Next session (single focus):**
+1. Re-parse Btm_Obj01 with the 12-B positions: the positions pool = the
+   40 verts; find the normals stream (the unit-vectors, 12 B each) and
+   the UV stream (the pairs, 8 B each) nearby; decode the index pool
+   against the 40 verts.
+2. Validate: the plate = FLAT (all z = -102.87), the faces cover it, the
+   normals point up.
+3. The same for Btm_Obj02/03, then the bridge = the flat strips at
+   -44.06/-46.11 per the segments.
