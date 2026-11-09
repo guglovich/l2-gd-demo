@@ -3281,3 +3281,15 @@ the face plane (0,0,1,-103.48) at +1416, the vertex 1651.04 at +1444, the
 edge planes (y=+64) after. The record start = pinned by scanning for the
 known plate plane. The importer can now decode the authentic walkable
 triangles directly — no archive lazy virtual needed.
+
+## 2026-11-09 (6) — the records are NOT 4-aligned in the bulk (the scan fix)
+
+The plane floats (0,0,1,-103.48) sit at ODD byte offsets (the dump: 1.0 at
++1421!) — the triangle records are back-to-back and the 4-compact tails
+break the 4-byte grid relative to the bulk start. The extractor's scan must
+be BYTE-WISE (search the plane byte pattern at any offset), then the record
+stride = the distance between consecutive plane hits. From the stride +
+the serializer layout (16 dwords + 4 compacts, the plane = the last dwords)
+the record start = plane_pos - K; the 9 vertex floats + the wedge indices
+decode from the record; the walkable set = the record verts directly (no
+wedge pool needed). The implementation = the next session's first task.
