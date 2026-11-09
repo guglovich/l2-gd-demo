@@ -511,14 +511,25 @@ func _build_clean_room_road() -> void:
 			var lx1: float = seg[1]
 			var h0: float = seg[2]
 			var h1: float = seg[3]
+			var u0: float
+			var u1: float
 			var p00 := _road_pt(origin, dir, right, lx0, w0, actor_z + h0)
 			var p10 := _road_pt(origin, dir, right, lx1, w0, actor_z + h1)
 			var p01 := _road_pt(origin, dir, right, lx0, w1, actor_z + h0)
 			var p11 := _road_pt(origin, dir, right, lx1, w1, actor_z + h1)
-			var along0: float = lx0 / 2.56
-			var along1: float = lx1 / 2.56
-			var u0: float = w0 / 2.56
-			var u1: float = w1 / 2.56
+			# the original UV densities (from the staged glTF): the carpet =
+			# one repeat across (u 0..1 over +-128) and ~1.18 m along (the
+			# Obj01 v range -29..1); the cobble = ~1.2 m tiles (the deck's
+			# +-20 over its span)
+			var tile: float = 118.0 if b[0] == "carpet" else 120.0
+			if b[0] == "carpet":
+				u0 = (w0 + 128.0) / 256.0
+				u1 = (w1 + 128.0) / 256.0
+			else:
+				u0 = w0 / 120.0
+				u1 = w1 / 120.0
+			var along0: float = lx0 / tile
+			var along1: float = lx1 / tile
 			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
 			st.set_uv(Vector2(u0, along1)); st.add_vertex(p10)
 			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)

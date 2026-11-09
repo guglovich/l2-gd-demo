@@ -3441,3 +3441,13 @@ the next step: find ?Serialize@ULinkerLoad@@ -> scan .rdata for the
 containing vtable -> the +0x40/+0x3c slots = the lazy-block reader and
 the Seek (per fnd_8) -> study = the packed decompressor -> the authentic
 CollisionTriangles -> replace/confirm the clean-room collision.
+
+## 2026-11-09 (17) — the slab UVs = the original densities (the quality pass)
+
+The original UVs extracted from the staged glTF (the correct component
+types): the Obj01 carpet = u 0..1 across (one repeat) + ~29 repeats along
+(the ~1.18-m tile, not 2.56); the Bridge deck = the ~1.2-m tiles. The
+clean-room slab now uses the same densities: the carpet u = (w+128)/256,
+v = lx/118; the cobble = /120. The span shot (tmp/shots/uvorig/): the
+cobble road + the center carpet band with the visible chain borders =
+the reference composition.
