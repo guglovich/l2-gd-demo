@@ -3715,3 +3715,11 @@ band of De_Statue002 = the user's pale cracked hand!). OURS: v spread
 THE FIX (the next iteration, the clean-room approved): override prim5's
 TEXCOORD_0 in the staged glTF with the original values (v = 0.001, u =
 the original range) - the python fixer, then the reimport + the verify.
+
+## 2026-11-10 (18) — the statue hand FIXED: the UV override applied (the clean room)
+
+prim5's TEXCOORD_0 in the staged O_De_03.gltf = rewritten in place: v =
+0.001 constant (the original's degenerate line), u kept. The reimport +
+the verify: the hand = PALE (the bottom ornamental band of De_Statue002)
+= matches the user's live reference. The dark = the statue's shadowed
+body = the lighting stage.
