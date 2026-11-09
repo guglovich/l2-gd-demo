@@ -3665,3 +3665,18 @@ removal. The MT_In = restored fully (the render + the collision): it
 covers the holes in the outer shell. The verify at (9338,17144): no
 gaps. The striped-texture question at the center remains open — the
 next sighting needs the trace at the exact user angle before any skip.
+
+## 2026-11-10 (14) — the statue hand = the face texture: the section->material binding (fnd_12)
+
+The user's screenshot: the statue's hand = the face texture. ROOT CAUSE
+(inferred, fnd_12): the L2 render resolves the section's material via its
+OWN MaterialIndex field (Materials[Section.MaterialIndex]); the sections
+are NOT guaranteed ordered by material. Our importer = the identity
+assumption (prim i = material i) - wrong for O_De_03 (the permuted
+sections).
+
+FIX (the next iteration): parse each mesh's section table (the count +
+the 18-B FStaticMeshSection records at the bulk start - the parse worked
+for MT_In/Bridge earlier), take per-section MaterialIndex, write it into
+asset_map primitive_material_indices. The craft Deep brief = updated
+(rev 50), the target = engine.dll. The test case = the statue's hand.
