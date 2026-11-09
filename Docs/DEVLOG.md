@@ -3469,3 +3469,19 @@ The bridge road = finally fully correct, built via the clean-room path:
 THE PENDING DEFECT (the next task): the extra walls along the houses
 (лишние стенки вдоль домов) — the user's report; investigate which mesh
 renders them and whether the client shows them.
+
+## 2026-11-09 (19) — the "extra walls along the houses": the first diagnostics
+
+The teleports into the house area (12300,17400) and (12300,16900) both end
+with the player FALLING to -4844: the open ground between/around the
+houses has NO collision floor. The O_DE_Btm mesh = a 55x2.4x49-m TALL
+WALL (the earlier bbox), not a floor cover - its flats at -46.07 cover
+only a narrow strip. The houses' own floors (the H meshes) = fine.
+
+THE HYPOTHESIS for the user's "лишние стенки вдоль домов": the visible
+walls = (a) the O_DE_Btm 49-m wall rendered where the client shows
+nothing, and/or (b) the house undersides visible through the two-sided
+render when the camera is low. The next session: the trace-box pass with
+the correct camera (the spawn ON a house floor, e.g. 10336,16349,-4480 =
+H02#3), identify the wall meshes by the L2_TRACE_BOX hits, then compare
+with the live client screenshots the user provides.
