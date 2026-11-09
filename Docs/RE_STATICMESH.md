@@ -166,3 +166,44 @@ verified.
 **None of this yet establishes the DS bridge's file offsets.** It
 establishes the *object graphs and field widths*, which is the necessary
 step before probing the bulk.
+
+---
+
+## 2026-11-09 (later) - the on-disk boxes in `O_DE_Bridge.gltf`: what is really there
+
+Measured on the **staged glTF**, not guessed (`/tmp/bridge_prims.py`,
+`/tmp/tris.py`, `/tmp/deck3.py`):
+
+* `O_DE_Bridge.gltf` has **18 primitives**. Their boxes (glTF X/Y/Z, metres):
+  `x ∈ [-7.27, 7.27]`, `y ∈ [-3.90, 3.90]`, `z ∈ [-5.23, 5.23]`.
+  So the staged mesh is a **7-15 m wide x 8 m tall x 10 m long arch** - not
+  a road.
+* **Primitive 10 (`DE_V_floor02`) is the deck**: its 24 verts occupy two
+  planes,
+  ```
+  A: y = -0785, z ∈ [4.00, 4.12]     (west end)
+  B: y = -2.90, z ∈ [-4.01, 4.12]    (floor)
+  ```
+  the whole 9.4 m long face is **one sloped plane** (drop 2.05 m over 8.26 m
+  -> 14 deg) with the box cross-section. There is **no** 3-segment structure;
+  my earlier "3 segments of 2.56 m" was the segmentation of a probe, not the
+  mesh.
+* **Primitive 0 (`DE_V_wall05`) carries 140 tris** (the same as `deco10`
+  82 + `roof_deco1` 160), and its UVs run `u ∈ [-5.5, 6.5]`, `v ∈ [-2.7, 3.7]`
+  - i.e. the wall material is tiled **dozens of times** over the arch: it is
+  the stone structure, not the road surface. The old "22 upward tris" was a
+  partial filter, not a count.
+
+**Consequence for the user's report ("the bridge is not textured across the
+full road width"):** this staged `O_DE_Bridge` is the *arch ribbons and
+parapets*, its deck is a **single sloped floor02 plate without side bands**.
+Widening this plate would make the floor wider, but it can not put the road
+texture across the parapet tops - that is a different mesh. Before any edit,
+the game must be compared against the **original client** at the bridge
+(stand at spawn, look along the road): if the original also shows only the
+sloped plate, there is nothing to fix; if it shows a flat road with both
+edges covered, the missing part is the *strip / Btm_Obj* family, not this
+plate.
+
+The user authorised editing `scripts/world.gd` with a git checkpoint before
+and after. The checkpoint exists (`git tag savepoint-before-world-edit`).
