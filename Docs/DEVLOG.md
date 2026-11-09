@@ -3293,3 +3293,23 @@ the serializer layout (16 dwords + 4 compacts, the plane = the last dwords)
 the record start = plane_pos - K; the 9 vertex floats + the wedge indices
 decode from the record; the walkable set = the record verts directly (no
 wedge pool needed). The implementation = the next session's first task.
+
+## 2026-11-09 (7) — THE AUTHENTIC COLLISION DECODER IMPLEMENTED (fnd_10 done)
+
+The record layout cracked by the byte-wise scan: the stride = exactly 68 B;
+the record = 4 PLANES (the face + 3 edge planes, 16 B each) + 4 FCompactIndex
+(iVertex[3] + MaterialIndex). The vertices are NOT stored — the engine
+computes them as the plane intersections. The record start = the face-plane
+position; the next face = +68.
+
+tools/l2strict/collision_extract.py now decodes the records byte-wise
+(the +68 stride pair-check filters the vertex-pool false positives), solves
+the 3-plane intersections per record (numpy), maps the native (X,Y,Z) to
+the staged glTF frame, and emits collision.json from the AUTHENTIC
+collision geometry. All 46 meshes decode (Obj01 17, Obj02/03 1 each, Bridge
+24 = the railings, MT_Btm 56, Pir01 30...).
+
+The verify (x=8200): the carpet = walkable (-45.28..-45.16 via Obj01) from
+the authentic records; the Bridge deck = absent (authentic). The road side
+margins = still NO-HIT — now a PLACEMENT question (the Pir01/Etc_Bridge
+records vs the bridge span), not a decoder one. The spawn visual = unchanged.

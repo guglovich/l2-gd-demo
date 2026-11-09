@@ -62,33 +62,81 @@ def extract(pkg: Package, name: str, gltf_path: str) -> bool:
         b = np.array(vs[3:], dtype=np.float64)
         boxes.append((np.minimum(a, b), np.maximum(a, b)))
 
+    # --- the authentic collision triangle records (fnd_9/10) ---
+    # TArray<FStaticMeshCollisionTriangle>::Serialize = {compact count} +
+    # count back-to-back records of 16 dwords + 4 compacts (~68 B). The
+    # plane = d12..d15, the vertices = d0..d8 (9 floats). The records are
+    # NOT 4-aligned to the bulk (the compact tails break the grid), so the
+    # scan is byte-wise for the plane pattern (|n| ~ 1, sane D).
+    d = pkg.data
+    n_seg = end - bulk
+    raw = d[bulk:end]
+    plane_hits = []
+    i = 0
+    while i < n_seg - 68:
+        nx, ny, nz, D = struct.unpack_from('<4f', raw, i)
+        if abs(nx * nx + ny * ny + nz * nz - 1.0) < 1e-4 and -1e5 < D < 1e5:
+            # candidate plane: require the same pattern at +68 (the stride)
+            nx2, ny2, nz2, D2 = struct.unpack_from('<4f', raw, i + 68)
+            if abs(nx2 * nx2 + ny2 * ny2 + nz2 * nz2 - 1.0) < 1e-4 and -1e5 < D2 < 1e5:
+                plane_hits.append(i)
+                i += 68
+                continue
+        i += 1
+    # --- the authentic collision records (fnd_9/10 + the plane layout) ---
+    # The record = 4 planes (the face + 3 edges, 16 B each = 64 B) + 4
+    # FCompactIndex (iVertex[3] + MaterialIndex) = 68 B, back-to-back, NOT
+    # 4-aligned to the bulk. The triangle verts = the intersections of the
+    # face plane with the adjacent edge plane pairs.
+    raw = pkg.data[bulk:end]
+    n_seg = len(raw)
+    plane_hits = []
+    i = 0
+    while i < n_seg - 68:
+        nx, ny, nz, D = struct.unpack_from('<4f', raw, i)
+        if abs(nx * nx + ny * ny + nz * nz - 1.0) < 1e-4 and -1e5 < D < 1e5:
+            nx2, ny2, nz2, D2 = struct.unpack_from('<4f', raw, i + 68)
+            if abs(nx2 * nx2 + ny2 * ny2 + nz2 * nz2 - 1.0) < 1e-4 and -1e5 < D2 < 1e5:
+                plane_hits.append(i)
+                i += 68
+                continue
+        i += 1
     keep = []
-    for pr in g["meshes"][0]["primitives"]:
-        pa = g["accessors"][pr["attributes"]["POSITION"]]
-        bv = g["bufferViews"][pa["bufferView"]]
-        # staged glTF vertex = (fileX, fileZ, fileY) * 0.01 where the file
-        # order is (X, height, Y-width); the unit frame is (X, Y, Z=height),
-        # so the glTF->unit remap is (x, z, y).
-        pos = np.frombuffer(buf, "<f4", pa["count"] * 3,
-                            bv.get("byteOffset", 0)).reshape(-1, 3).astype(np.float64)
-        # glTF = (fileX, fileZ-up, fileY-width); the unit frame = (X, Y-width, Z-up)
-        cunit = pos[:, [0, 2, 1]] * 100.0
-        if "indices" not in pr:
+    recs = 0
+    for ph in plane_hits:
+        planes = []
+        ok = True
+        for pi in range(4):
+            n = np.array(struct.unpack_from('<3f', raw, ph + pi * 16), dtype=np.float64)
+            D = struct.unpack_from('<f', raw, ph + pi * 16 + 12)[0]
+            if abs(np.linalg.norm(n) - 1.0) > 1e-3:
+                ok = False
+                break
+            planes.append((n, float(D)))
+        if not ok:
             continue
-        ia = g["accessors"][pr["indices"]]
-        bi = g["bufferViews"][ia["bufferView"]]
-        idx = np.frombuffer(buf, "<H", ia["count"], bi.get("byteOffset", 0))
-        tris = idx.reshape(-1, 3)
-        tc = cunit[tris].mean(axis=1)  # per-triangle centroid (unit frame)
-        tol = 3.0
-        mask = np.zeros(len(tris), dtype=bool)
-        for lo, hi in boxes:
-            inside = ((tc >= lo - tol) & (tc <= hi + tol)).all(axis=1)
-            mask |= inside
-        for t, m in zip(tris, mask):
-            if m:
-                for vi in t:
-                    keep.extend(pos[vi].tolist())
+        face = planes[0]
+        verts3 = []
+        good = True
+        for ei in range(3):
+            e1 = planes[1 + ei]
+            e2 = planes[1 + (ei + 1) % 3]
+            A = np.array([face[0], e1[0], e2[0]])
+            b = np.array([face[1], e1[1], e2[1]])
+            if abs(np.linalg.det(A)) < 1e-9:
+                good = False
+                break
+            v = np.linalg.solve(A, b)
+            verts3.append(v)
+        if not good or len(verts3) != 3:
+            continue
+        if not all(np.all(np.abs(v) < 1e5) for v in verts3):
+            continue
+        for v in verts3:
+            x, y, z = v  # the file native (X, Y-width, Z-up)
+            keep.extend([x * 0.01, z * 0.01, y * 0.01])
+        recs += 1
+    print(f"  {name}: {recs} collision records")
     if not keep:
         return False
     out = {"units": len(units), "tris": len(keep) // 9, "verts": keep}
