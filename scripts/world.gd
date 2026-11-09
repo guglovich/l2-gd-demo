@@ -482,7 +482,7 @@ func _build_clean_room_road() -> void:
 		[-553.26, 1651.04, -102.87, -102.87],
 	]
 	var mats := {}
-	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor02"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
+	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
 		var tp := "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tex[1], tex[2]]
 		if not FileAccess.file_exists(tp):
 			print("clean-room road: missing texture ", tp)
