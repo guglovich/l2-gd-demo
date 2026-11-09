@@ -3636,3 +3636,16 @@ renders on it); the climb [3080..3600] from the octagon level (-67) to
 the street (+34.6). The layering = gone (the road no longer cuts the
 ring). The verify: the player STANDS at (11200,16850) on -4575.0, the
 hand sculpture at the authentic height, the temple behind.
+
+## 2026-11-10 (10) — the foreign texture at the center = the MT_In shell (the prime suspect)
+
+The user (2 iterations): the foreign striped texture lies as the second
+layer at the center. The center redo (2a3531f) = the octagon + the road
+gap done, but the striped = still there from the user's angles. The
+trace at the bridge = the legit meshes; the center's prime suspect =
+O_DE_MT_In (the cave inner shell, O_dark_01) enveloping the village -
+the alien layer near the octagon.
+
+NEXT: the trace at the center from the user's angle -> confirm the MT_In
+-> hide/trim the shell near the octagon (the render-only trim or the
+specific faces), verify vs the user's live screenshot.
