@@ -3609,3 +3609,20 @@ collider? nothing?); check the Center_obj = loaded/placed (the actor
 402); if its trimesh = broken - the octagon ring covers r_in = 0 (the
 full octagon) instead. The hand/pillars (O_De_01/02/03) = at the
 authentic height now (115f312).
+
+## 2026-11-10 (8) — THE MESH GRID = the lamp levels: the village is FLAT -44.73, the terraces decoded
+
+The user: first the correct geometry/meshes from the original, then the
+textures — my slab had the layering and the coordinate mismatches (the
+lamps floating).
+
+THE LAMP GRID (31 lamps extracted): ALL Lamp01 = z -4473.4 EXACTLY
+(the pairs flanking the road along the whole village), Lamp02 = -4498.4.
+=> the village street = FLAT -44.73 (the lamp level), NOT the descent's
+-46.11. The profile = the terraces: the bridge dip (-46.11) -> the
+octagon terrace (-45.7, the Center_obj) -> the street (-44.73).
+
+The road segments now: the descent ends at the octagon level (h -62),
+the gap (the octagon), the climb [3080..3600] to the street (+34.6), the
+flat street to the east bridge. The lamps = the street-level markers for
+all the further geometry work.

@@ -480,13 +480,16 @@ func _build_clean_room_road() -> void:
 	var segs := [
 		[-1762.47, -1304.83, 103.48, 103.48],
 		[-1304.83, -553.26, 103.48, -102.87],
-		[-553.26, 1651.04, -102.87, -102.87],
+		[-553.26, 1651.04, -102.87, -62.0],
 		# the east flat continues to the east bridge (the world x ~10670..14720):
 		# the original Obj01 slab ends at +1651 but the road floor must reach
 		# the far bridge, else the east village = the void (the falls)
 		# the octagon plaza (Center_obj at the local lx ~2376) breaks the road:
-		# the east street resumes behind it
-		[3080.0, 5800.0, -102.87, -102.87],
+		# the east street resumes behind it AT THE LAMP LEVEL: all Lamp01s
+		# stand at z -4473.4 = the village street is FLAT -44.73 (the actor
+		# z -4508 => the local h = +34.6), the bridge = the dip below it
+		[3080.0, 3600.0, -62.0, 34.6],
+		[3600.0, 5800.0, 34.6, 34.6],
 	]
 	var mats := {}
 	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
