@@ -3227,3 +3227,27 @@ tools/ghidra/) cross-checked: the 0x106f7a40 Serialize instance = the ICF
 duplicate of our 0x103108c5; the Bridge prim analysis (floor02 = ONE sloped
 deck plane, wall05 = the arch) agrees with our measurements; the git tag
 savepoint-before-world-edit exists.
+
+## 2026-11-09 (3) — the authentic collision wired: the carpet walkable, the false deck gone
+
+**Two blockers found and fixed:**
+1. _ROAD_STRIP_SKIP = [Obj01/02/03] AGAIN — the second AI's world.gd edit
+(the savepoint edit) had re-added the skip; the strips = the real parsed
+meshes (the run-anchor = UModel 1-1). Un-skipped.
+2. My "identity remap" in collision_extract.py was WRONG — the correct
+glTF->unit remap = [0,2,1] (the glTF = (fileX, fileZ-up, fileY-width); the
+unit = (X, Y-width, Z-up)). The first run's Pir01=73 tris (with the deck)
+was correct all along; the second run's 4 tris was the breakage.
+
+**The verify (L2_FLOOR_PROFILE x=8200 across the bridge):**
+- t=0.17..0.67 (the carpet band): y=-45.28..-45.16 via O_DE_Btm_Obj01 = THE
+CARPET IS WALKABLE (the json shapes work!);
+- the Bridge lower deck = ABSENT from the hits = the engine-authentic
+behavior (the Bridge has no collision nodes — fnd_7);
+- the road side margins (y<17440, y>17720) = NO-HIT = OPEN: the side
+coverage = pending the true CollisionTriangle decode (the packed entries;
+the Pir01's deck flats are elsewhere than the bridge sides).
+
+The remaining NO-HIT margins = the next iteration's target together with
+the archive vtable+0x40 lazy decompressor (fnd_8). The visual state:
+the strips render again (the carpet = one pattern down the middle).

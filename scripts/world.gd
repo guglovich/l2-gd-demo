@@ -501,7 +501,7 @@ func _build_meshes() -> void:
 		world.add_child(inst)
 		placed += 1
 		if not _shape_cache.has(key):
-			var mshape := mesh.create_trimesh_shape()
+			var mshape := _collision_shape(key, mesh)
 			# UE2 collision is winding-agnostic; many L2 deck faces point DOWN
 			# (inverted winding). Without backface collision the character
 			# falls through rendered floors — the "hollow second tier" bug.
@@ -638,9 +638,7 @@ func _get_mesh(key: String) -> Mesh:
 # decoded from the variable-length packed records render as 2-m-thick walls
 # over the road; the original has them as flush border inlays. Skipped until
 # the packed decompressor yields the real thin slabs.
-var _ROAD_STRIP_SKIP := [
-	"Oren_DEV_S:O_DE_Btm_Obj01", "Oren_DEV_S:O_DE_Btm_Obj02", "Oren_DEV_S:O_DE_Btm_Obj03",
-]
+var _ROAD_STRIP_SKIP := []  # the strips = the real parsed meshes (the run-anchor = UModel 1-1)
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",
