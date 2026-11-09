@@ -3526,3 +3526,24 @@ Removed the whole rails block from _build_clean_room_road(). The verify
 at (9276,17227): the road open, the houses visible, the lamps on the
 road edge = the original composition. LESSON: do not invent geometry
 absent from the references — every added piece needs the reference proof.
+
+## 2026-11-10 (3) — the next clean-room build: the plaza floors around the houses
+
+The user's live screenshot: the plaza around the houses = the large flat
+dark stone surface (the same texture family as the road), separated from
+the carpet road by only a SMALL ornamental border (the thin dark curb).
+No side walls anywhere.
+
+THE BUILD PLAN (the next session):
+1. The plaza slab(s) at the house-floor level (~-44.5, the H-mesh units
+   -44.3..-44.7), the texture = DE_V_floor01, the same UV family as the
+   road slab (~1.2-m tiles).
+2. The extent = the central plaza between the houses (the verified
+   no-floor spots: 12300,17400 and 12300,16900 = inside; the houses =
+   H02 12526,17342 / H03 12210,17822 / H02 10336,16349 / H03 9623,18375
+   / H01 11440,19405 / H04 13173,15445 + 10623,15882). The slab must NOT
+   poke above the house floors or over the carpet road.
+3. The small border: the thin dark curb strip along the slab edge facing
+   the carpet road.
+4. The collision = the slab's own trimesh; the verify = the player stands
+   (no fall at 12300,17400), the spawn screenshots, the profiles.
