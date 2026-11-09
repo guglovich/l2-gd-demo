@@ -3649,3 +3649,11 @@ the alien layer near the octagon.
 NEXT: the trace at the center from the user's angle -> confirm the MT_In
 -> hide/trim the shell near the octagon (the render-only trim or the
 specific faces), verify vs the user's live screenshot.
+
+## 2026-11-10 (11) — the alien striped shell removed: O_DE_MT_In fully skipped
+
+O_DE_MT_In (the cave inner shell, O_dark_01) moved to _ROAD_STRIP_SKIP =
+the render AND the collision skipped. The center (11200,16850) = clean:
+the octagon plaza + the hand + the temple, no striped walls. The tunnel
+walls = MT_Out (the legit rock), the inner shell was not needed
+anywhere.
