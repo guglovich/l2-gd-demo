@@ -798,6 +798,9 @@ func _get_mesh(key: String) -> Mesh:
 # the packed decompressor yields the real thin slabs.
 var _ROAD_STRIP_SKIP := [
 	"Oren_DEV_S:O_DE_Btm_Obj01",  # replaced by the clean-room wide road slab
+	"Oren_DEV_S:O_DE_Btm",  # the 49-m terraced wall blocking the houses:
+	# the render AND the collision are skipped - the invisible collider
+	# was walling off the houses (the trace: 45 Btm hits)
 ]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
