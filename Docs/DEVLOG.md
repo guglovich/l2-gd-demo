@@ -3251,3 +3251,22 @@ the Pir01's deck flats are elsewhere than the bridge sides).
 The remaining NO-HIT margins = the next iteration's target together with
 the archive vtable+0x40 lazy decompressor (fnd_8). The visual state:
 the strips render again (the carpet = one pattern down the middle).
+
+## 2026-11-09 (4) — the collision triangle records located in the file (fnd_9)
+
+The Obj01 bulk region ~+1400..+2560 (before the CollisionNodes at +2600) =
+the CollisionTriangles: ~68-72 B per record. Visible: a 4-compact group
+(bytes 05 0a 0b 01 = the wedge indices 5,10,11 + a trailing 1) and 16
+dwords with the vertex floats (66 61 ce 44 = 1651.04) and the plane
+(00 00 80 3f fa be cd c2 = normal (0,0,1), D=-103.48 = the plate floor).
+The record = the FStaticMeshCollisionTriangle file form (the wedge indices
++ the vertices + the plane). The exact field order = one dis pass of
+sub_10302108's inner loop away; then the importer decodes the authentic
+walkable set directly (no need for the archive lazy virtual — the nodes
+are already raw 29-B records and the triangles are near-raw).
+
+TLazyArray::Load decoded (ev_015263ef): state(+8) > 0 => Tell (+0x28) ->
+Seek (+0x3c) to the saved offset -> sub_10310d3e reads the data ->
+state = -state -> Seek back. The lazy = the DEFERRED RAW read, the count
+in Serialize = the BYTE count. FLazyLoader (Core.dll) attaches via
+FArchive::AttachLazyLoader; the UGameEngine exec "LazyMode" toggles it.
