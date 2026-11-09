@@ -3350,3 +3350,19 @@ composition as the reference spawn view — the wide MT_Btm cobble plateau
 at the entrance (the original has it too), the carpet strip descending the
 span, the arches. The remaining visible deltas = the lighting (the lamp
 glows, the fog) = the FORBIDDEN stage.
+
+## 2026-11-09 (10) — the span view verified: the composition = the tunnel reference
+
+L2_SPAWN="7700,17640,-4405" (the span entrance) shot (tmp/shots/spanview/):
+the narrow carpet walkway with the border chains descends the span, the
+darkness under and beside it (the deck ramp gone), the arches and the
+border rails at the sides — the composition matches
+Docs/bridge_original_tunnel.png. The remaining deltas = the lighting only
+(the lamp glows, the fog color) = the FORBIDDEN stage.
+
+THE BRIDGE IS DONE within the stage-1 scope (textures/maps/geometry):
+- the walkway = the Obj01 carpet strip (the authentic collision records);
+- the deck ramp = not rendered (the reference-backed one-layer fix);
+- the arch/pillars/rails = rendered; the approach platforms = Pir01;
+- the levels = the MT_Btm plateau -44.0 / the carpet -44.05..-46.11 / the
+  plaza -46.07.
