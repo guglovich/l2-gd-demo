@@ -650,6 +650,12 @@ func _build_meshes() -> void:
 		inst.position = Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2]))
 		inst.scale = Vector3.ONE * float(actor.get("draw_scale", 1.0))
+		# The render-only skip: the mesh = hidden but the collision stays.
+		# O_DE_Btm = the 55x49-m terraced wall structure along the east road:
+		# the live client does not show it above the floor level, our render
+		# did - blocking the houses ("лишние стенки вдоль домов").
+		if key in _RENDER_ONLY_SKIP:
+			inst.visible = false
 		world.add_child(inst)
 		placed += 1
 		if not _shape_cache.has(key):
@@ -798,6 +804,9 @@ func _get_mesh(key: String) -> Mesh:
 # the packed decompressor yields the real thin slabs.
 var _ROAD_STRIP_SKIP := [
 	"Oren_DEV_S:O_DE_Btm_Obj01",  # replaced by the clean-room wide road slab
+]
+var _RENDER_ONLY_SKIP := [
+	"Oren_DEV_S:O_DE_Btm",  # the 49-m terraced wall blocking the houses
 ]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",

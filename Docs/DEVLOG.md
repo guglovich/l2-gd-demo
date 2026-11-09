@@ -3485,3 +3485,17 @@ render when the camera is low. The next session: the trace-box pass with
 the correct camera (the spawn ON a house floor, e.g. 10336,16349,-4480 =
 H02#3), identify the wall meshes by the L2_TRACE_BOX hits, then compare
 with the live client screenshots the user provides.
+
+## 2026-11-09 (20) — the "extra walls along the houses" = the O_DE_Btm 49-m wall — FIXED
+
+The user's screenshot at (9276,17227): the long stone wall blocking the
+houses along the east road = the O_DE_Btm mesh (55x2.4x49 m, the actor
+(11375,16872,-4952), the yaw -2320: its long axis runs (9094,17476) ->
+(13656,16268) = along the road, and the structure rises to -25 m =
+19 m ABOVE the floor). The live client does not show it above the floor.
+
+Fix: the render-only skip (_RENDER_ONLY_SKIP = [Oren_DEV_S:O_DE_Btm]) —
+the mesh instance = hidden, the collision body stays (its -46.07 flats).
+The verify at the user's viewpoint (tmp/shots/nowall/): the wall = gone,
+the houses visible, the road with the carpet strip and the lamps = the
+original composition.
