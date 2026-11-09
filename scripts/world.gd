@@ -585,7 +585,7 @@ func _build_center_octagon() -> void:
 	var r_in := 0.0                     # just outside the Center_obj (-7 m)
 	var r_out := 1800.0                   # the octagon's outer radius
 	var top_z := -4575.0                  # the plaza level, cm
-	var tp := "%s/textures/oren_dev_t/Texture/DE_V_floor02.png" % MAP_DIR
+	var tp := "%s/textures/oren_dev_t/Texture/DE_V_floor01.png" % MAP_DIR
 	if not FileAccess.file_exists(tp):
 		print("center octagon: missing texture")
 		return

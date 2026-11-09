@@ -3657,10 +3657,3 @@ the render AND the collision skipped. The center (11200,16850) = clean:
 the octagon plaza + the hand + the temple, no striped walls. The tunnel
 walls = MT_Out (the legit rock), the inner shell was not needed
 anywhere.
-
-## 2026-11-10 (12) — the center octagon texture = DE_V_floor02 (the ornamental medallion)
-
-The user: the foreign texture at the center. The octagon ring was floor01
-(the road cobble) — the original center = the ORNAMENTAL medallion tile =
-DE_V_floor02. Swapped. The verify (tmp/shots/oct2/): the patterned tile
-plaza = the user's live octagon composition.
