@@ -3574,3 +3574,22 @@ village street (lx > 1651) = the carpet +-2 m + the plaza stone bands
 (floor01) +-2..6 m. The GDScript scoping bug fixed (the commit block was
 outside the band loop). The verify at (10473,16943): the carpet road +
 the plaza stone = no voids, the user's composition.
+
+## 2026-11-10 (6) — the tower height fixed (the +1161 hack removed); the octagon floor = the next
+
+The user: the tower sticks out too far. THE CAUSE = the +1161 z-shift
+hack on O_De_01/02/03 (the Shillien hand / the center ornaments) — the
+meshes were raised 11.6 m above their map placement. REMOVED: the meshes
+now sit at the map z (-5541) = the pillars/hand at the authentic height
+(the shot tmp/shots/tower/ = the columns at the correct place).
+
+ALSO: the clean-room road east extension was CUTTING through the octagon
+plaza (the Center_obj at the local lx ~2376) — the road now BREAKS at
+the octagon and resumes behind it ([3080..5800]).
+
+THE NEXT TASK: the center octagon floor — the Center_obj (14-m platform,
+the actor (11374,16847,-4832), the top at -45.7) does not catch the
+collision (the player falls through at (11400,16850)) — diagnose why
+(the trimesh? the load?) and add the octagon plaza floor around it per
+the user's live screenshot (the octagonal platform + the outer ring with
+the crystal pillars).

@@ -483,7 +483,9 @@ func _build_clean_room_road() -> void:
 		# the east flat continues to the east bridge (the world x ~10670..14720):
 		# the original Obj01 slab ends at +1651 but the road floor must reach
 		# the far bridge, else the east village = the void (the falls)
-		[1651.04, 5800.0, -102.87, -102.87],
+		# the octagon plaza (Center_obj at the local lx ~2376) breaks the road:
+		# the east street resumes behind it
+		[3080.0, 5800.0, -102.87, -102.87],
 	]
 	var mats := {}
 	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
@@ -603,8 +605,6 @@ func _build_meshes() -> void:
 		# in the Z family of the other floor meshes (Bridge -4288, Btm_Obj01
 		# -4508, O_DE_Btm -4952). Experimental shift pending engine-RE of the
 		# discrepancy.
-		if mr["object"] in ["O_De_01", "O_De_02", "O_De_03"]:
-			pos_z = loc[2] + 1161.0
 		inst.position = Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2]))
 		inst.scale = Vector3.ONE * float(actor.get("draw_scale", 1.0))
