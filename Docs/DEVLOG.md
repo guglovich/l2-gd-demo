@@ -3513,3 +3513,16 @@ the collision). The dead _RENDER_ONLY_SKIP block removed (the parse
 error caught by the verification). The verify: 0 errors, the view at
 (9276,17227) = clean (the road + the carpet strip + the houses + the
 lamps), the player stands at -4610.9 on the clean-room slab.
+
+## 2026-11-10 (2) — the "walls" = MY clean-room rails — removed
+
+The user (repeatedly): the walls remain. The real culprit = the rails I
+added myself in the clean-room build (wall05, 1.1 m along the edges) —
+the original has NO side walls: the road = open to the houses, only the
+carpet's own border chains mark the edges. The Btm skip (the invisible
+collider) = a parallel real fix, but the visible wall = my rails.
+
+Removed the whole rails block from _build_clean_room_road(). The verify
+at (9276,17227): the road open, the houses visible, the lamps on the
+road edge = the original composition. LESSON: do not invent geometry
+absent from the references — every added piece needs the reference proof.

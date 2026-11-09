@@ -553,59 +553,7 @@ func _build_clean_room_road() -> void:
 		body.add_child(col)
 		body.set_meta("mesh_key", "clean_room_road")
 		world.add_child(body)
-	# the low rails at the edges
-	for side in [-1.0, 1.0]:
-		var st2 := SurfaceTool.new()
-		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var rw := 35.0
-		var rh := 1.1  # the meters (the rail vertices are in the world meters)
-		for seg in segs:
-			var lx0: float = seg[0]
-			var lx1: float = seg[1]
-			var h0: float = seg[2]
-			var h1: float = seg[3]
-			var wb0: float = side * (half_w - rw)
-			var wb1: float = side * half_w
-			var b00 := _road_pt(origin, dir, right, lx0, wb0, actor_z + h0)
-			var b10 := _road_pt(origin, dir, right, lx1, wb0, actor_z + h1)
-			var b01 := _road_pt(origin, dir, right, lx0, wb1, actor_z + h0)
-			var b11 := _road_pt(origin, dir, right, lx1, wb1, actor_z + h1)
-			var t00 := b00 + Vector3(0, rh, 0)
-			var t10 := b10 + Vector3(0, rh, 0)
-			var t01 := b01 + Vector3(0, rh, 0)
-			var t11 := b11 + Vector3(0, rh, 0)
-			# the inner face (the world-scaled UVs: u = along / 128 cm)
-			var u0r: float = lx0 / 128.0
-			var u1r: float = lx1 / 128.0
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
-			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
-			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(b10)
-			# the top cap
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t01)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
-			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(t10)
-		st2.generate_normals()
-		var mesh2 := ArrayMesh.new()
-		st2.commit(mesh2)
-		mesh2.surface_set_material(0, mats["rail"])
-		var mi2 := MeshInstance3D.new()
-		mi2.mesh = mesh2
-		world.add_child(mi2)
-		var shape2 := mesh2.create_trimesh_shape()
-		shape2.backface_collision = true
-		var body2 := StaticBody3D.new()
-		var col2 := CollisionShape3D.new()
-		col2.shape = shape2
-		body2.add_child(col2)
-		body2.set_meta("mesh_key", "clean_room_rail")
-		world.add_child(body2)
-	print("clean-room road built: the wide flush deck + the carpet band + the rails")
+	print("clean-room road built: the wide flush deck + the carpet band")
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:
