@@ -2578,3 +2578,565 @@ kDOPCollisionFaces, skipped by UEViewer after f108). That yields the
 AUTHENTIC collision subset (the engine collides only the kDOP faces, not
 the whole trimesh) and settles which decks are walkable (the Bridge lower
 deck vs the Obj01 road) without approximations.
+
+## 2026-11-09 — StaticMesh format RE (engine.dll), Ghidra tooling; the bridge verdict is NOT in yet
+
+**Scope set by the user:** only `20_18` / Dark Elf Village. `18_20` is a distant
+plan (not now), `cacaodump` is another project (irrelevant to this one).
+Priority: **make the bridge correct**, the rest of the village after.
+
+**Results so far are engine-research only.** No file in `tools/l2strict/`,
+`scripts/world.gd`, `assets/maps/20_18/...` was changed in this session; the
+tree diff vs HEAD is still exactly the 2026-11-08 one
+(backup: `tmp/checkpoint_2026-11-08_pre_sections/`). Do not read this entry as
+"the bridge is fixed".
+
+### New, reusable: a headless Ghidra decompiler for `engine.dll`
+
+`craft-anything` is a string/XOR/sha-index search; it cannot follow C++
+virtual dispatch - and the StaticMesh serializers are reached *through the
+vtable*. So for this task `analyzeHeadless` was used directly:
+
+```
+tools/ghidra/re.sh     <va>...          # batch decompile, ONE session (lock-safe)
+tools/ghidra/decomp.sh <va> [file]      # one function
+tools/ghidra/sym.sh    <substring>      # demangled symbols
+tools/ghidra/dis.sh    <va> [len]       # raw bytes
+tools/ghidra/thunk.sh  <va>...          # is it a jmp thunk; to where
+```
+
+Project: `/home/jinseoyeon/ghproj/l2echo` (outside the repo: the launcher
+refuses paths with spaces). **Trap, cost an hour:** Ghidra's OSGi loader caches
+compiled classes *per script dir* - a rewritten `Decomp.java` kept running the
+old class and printed a `C-BEGIN/C-END` that the source no longer contained;
+clearing `osgi/compiled-bundles` **and** `osgi/felixcache` did not help. Only a
+**fresh script dir per change** worked. `gh.sh` now copies
+`tools/ghidra/scripts/*.java` into the dir on every run.
+
+**Second trap, silent by design:** for many of its own `thunk_FUN_x` labels the
+decompiler prints `x` and the target of that `jmp` is **the *next* function**,
+not `x`. `thunk.sh <x>` reports the real jump target; when the decompiled label
+and the jump target disagree, **the jump target is the function on disk** and a
+"reading" of the label's body is a reading of somebody else's function.
+
+### What the engine says (`UStaticMesh::Serialize` `0x106f7a40`)
+
+* For our `ArVer` (`< 0x70`, and Interlude `Ver` is far below `0x5c` ) the body
+  is a **fixed call list**, not a version branch - see
+  `Docs/RE_STATICMESH.md`.
+* The **0x60-B elements** arrayed by `thunk_106f7620` are `FStaticMeshLOD`s; each
+  element starts with an inline `FArray` (a 24-B vertex stream), an `FBox` at
+  `+0xC`, four dwords at `+0x28`, and nine dwords at `+0x38..+0x58` (all `Ver >= 0x53`).
+* `FStaticMeshVertexStream` on disk = `[count][count x 24 B]` **+ one `u32`**
+  (`+0x18` is read even when `Ver < 0x70`), so **4 + 24*N + 4 bytes**. *The old
+  `[count]`-only model was wrong by exactly 4 bytes per stream.*
+* `FStaticMeshUVStream` = `[count][count x 8 B (2xf32)] + 8 B` (two dwords at
+  `+0x18/+0x1C`, one of them a `Revision`; `GetStride = 8`, `GetComponents = 2`
+  are measured, not guessed).
+* `FStaticMeshVertex` = **24 B**, ctor `10366380`. The three fields at `+0,
+  +4, +8` are re-read at `Ver < 0x70`, then more fields at `+0xC, +0x10`; for
+  `Ver >= 0x70` (not us) the fields beyond are dropped and one extra byte path
+  is taken at exactly `Ver == 0x6F` - i.e. **Interlude's current value is
+  the special-cased "==0x6F" value**: the serializer at `0x10366380` does
+  take the `== 0x6f` branch, so our file format has a dedicated path there
+  and is not the generic `<0x70` path.
+* `FStaticMeshSection` lives at stub `0x10308A17` -> jmp **`0x103EC2E0`**. The
+  body at `0x103EC2E0` is **not** a section reader: it reads a LOD - a
+  `FStaticMeshVertexStream`, an `FRawIndexBuffer`, another `FRawIndexBuffer`,
+  a byte-order item, then queues `0x1036a4e0` ctor. **The export symbol and
+  the body disagree** (ICF/COMDAT merge in the same Build). Therefore:
+  - the earlier reading "`FStaticMeshSection` = 0x14, = 2xu32 + 6xu16"
+    based on what lies at `0x103EC2E0` is **withdrawn** - that address is a
+    LOD reader;
+  - **the exact `FStaticMeshSection` serializer is NOT yet located.**
+    What *is* located is the LOD reader, and it points to two
+    `FRawIndexBuffer`s, i.e. the LOD holds **its own** index buffers - the
+    "sections + render pool" split must be re-derived, not assumed.
+
+`FStaticMeshSection` presence is still proven by the ctor at
+`0x1031293B` (it zeroes 4-byte fields at +0 and +4 and 2-byte fields at
++0xE, +0x10, +8, +0xC, +0xA with sentinel `0xFFFF` at `+0xA`/`+0xC`; the +0x12
+word is left untouched, so the object is **0x14 bytes**) and by
+`FArray::Add(..., 0x14)` in `thunk_106f78d0` and `0x10372030`. The **field
+order** is what `0x103EC2E0`-adjacent code would tell, and it has not been
+read: open.
+
+### What this does NOT establish, and what is withdrawn
+
+* **Withdrawn:** "`+40` / `+44` of the bulk is the section table" (2026-11-08
+  entry). Those dwords were a vertex stream header and a revision byte-pair;
+  the `+44 = 0` seen on `O_DE_Bridge` was an unrelated zero dword, and the
+  `+50..+58` "chain" was `Rev / NumVerts` pairs (`8C00 8C00`, `A000 A000`, ...).
+* The **bridge visual verdict is still open.** A correct `FStaticMeshLOD`
+  reader does not equal a correct bridge: the bridge composite comes from the
+  actor list (already verified against the package - two `O_DE_Bridge`
+  instances at `-4288.56`) and from whichever LOD our reader now points at.
+  The next visible check is still a screenshot of the spawn view.
+* `-4` gate in `FArray::CountBytes` and `[count][data]` order both stand: they
+  are read from two independent serializers.
+
+## 2026-11-09 (later) — RE tooling settled in the repo; what the engine reader says (and does not)
+
+### Tooling, final (in the repo, reusable)
+
+```
+tools/ghidra/gh.sh     <dir> <Class> [args...]   one headless run
+tools/ghidra/re.sh     <va>...                  batch decompile, ONE session
+tools/ghidra/decomp.sh <va>                     one function to stdout
+tools/ghidra/sym.sh    <substring> [limit]      demangled symbols
+tools/ghidra/dis.sh    <va> [len]               raw bytes
+tools/ghidra/thunk.sh  <va>...                  jmp-thunk -> real target
+tools/ghidra/scripts/*.java                     the Ghidra side
+```
+
+Project: `/home/jinseoyeon/ghproj/l2echo` (outside the repo: the launcher
+refuses any project/script path that has a space, and this repo's path has
+two). Every wrapper copies `scripts/*.java` into a fresh `mktemp -d` dir.
+
+**Trap 1 (cost ~1 h): the OSGi loader caches compiled classes per script
+dir.** A rewritten `Decomp.java` kept running the *old* class and printed
+`C-BEGIN/C-END` after the source no longer contained them; deleting
+`osgi/compiled-bundles` and `osgi/felixcache` did not help. Only a new dir
+worked.
+
+**Trap 2 (silent by design):** for many of its own `thunk_FUN_x` labels the
+decompiler prints `x` while the jump goes to **the next function**. The label
+does not mean "calls x": resolve with `thunk.sh <x>` first (`THUNK <x> -> <t>`
+means the call is to `t`; it is `x` only when `t == x`). Reading `x`'s body
+where the code calls `t>` is reading somebody else's function — this
+produced a whole false layout in the morning.
+
+**Trap 3:** two headless runs in parallel fight over the project lock. Batch
+VAs through `re.sh`.
+
+### Engine facts (decompiled bodies, not guessed)
+
+| symbol / stub | real body | behaviour |
+|---|---|---|
+| `?Serialize@UPrimitive@@*` `0x10311293` | `0x106457d0` | `UObject::Serialize`, then `FCoords` struct at `this+0x34` |
+| `?Serialize@UStaticMesh@@*` `0x103108c5` | `0x106f7a40` | fixed call list, see below |
+| `??6@*FStaticMeshUVStream@@` `0x103020f4` | `0x103ae4e0` | `[count][count × 8 B]` + 4 B (`+0x18`) + 4 B (`+0x1C`) |
+| `??6@*FStaticMeshVertexStream@@` `0x1030bdcf` | `0x103adbb0` | `[count][count × 24 B]` + 4 B (`+0x18`) |
+| `??6@*FStaticMeshLightInfo@@` `0x10309b4c` | `0x1038f550` | `ByteOrderSerialize(elem+0x10, 4)` (20 B element) |
+| `??6@*FStaticMeshUV@@` `0x1030f0c4` | self | `ByteOrderSerialize(p,4)`, `ByteOrderSerialize(p+4,4)` — **2 floats, 8 B** |
+| `FStaticMeshVertex` ctor `0x10366380` | self | 24 B stack slot; 3 × `ByteOrderSerialize(…, 4)` at `+0, +4, +8`, then `+0xC`, `+0x10` |
+| `FStaticMeshSection` ctor `0x1031293b` | self | clears **0x14 B**; `0xFFFF` sentinels at `+0xA`, `+0xC`; u16s at `+8, +0xA, +0xC, +0xE, +0x10`; u32s at `+0, +4` |
+| `106f78d0` | – | `CountBytes(arr, Ar, 0x14)` — array of 0x14-B elements |
+| `106f7460` | – | `CountBytes(arr, Ar, 0x14)` — array of 0x14-B elements (light info) |
+| `106f7620` | – | `CountBytes(arr, Ar, 0x60)` — array of **0x60-B LOD elements** |
+| `106f6660` | – | one LOD element: array at `+0x00`, `103302c0` at `+0x0C` (6 dwords+byte), 4 dwords `+0x28..+0x34`, `Ver≥0x53` 9 dwords `+0x38..+0x58`, `Ver>0x5e` `+0x5C` sub-serialize, `Ver≥0x50` 9 dwords `+0x5C..+0x80` |
+| `?GetSize@FStaticMeshUVStream` `0x10314cd6` | – | ×8 |
+| `?GetSize@FStaticMeshVertexStream` `0x10306c58` | – | `*(p+0x10) × 0x18` |
+| `?GetStreamData@FStaticMeshUVStream` `0x103041d3` | – | `memcpy(dst, *(p+0xC), *(p+0x10) × 8)` |
+| `?GetStreamData@FStaticMeshVertexStream` `0x1030c5b8` | – | `memcpy(dst, *(p+0xC), *(p+0x10) × 0x18)` |
+
+`CountBytes(arr, Ar, elem)` at `0x103092aa` does `[compact count]` and the
+loop at `0x1038f880` is `[compact count][count × elem]`.
+
+### What this does *not* establish — and the earlier claims it retires
+
+* **Retired (2026-11-08 entry): "`+40` is NumSections"**. In the byte-scan of
+  `O_DE_Bridge` `+40` holds `4676` and, 24 B later (the sole stream ever
+  scanned), `0x642E0` holds the vertex stream. But `4676` has **not** been
+  shown to be a stream count, and nothing in the reader has yet been walked
+  over the bridge bulk. It is one candidate number, not a decoded field.
+* **Retired (this morning): "the section is `2×u32 + 6×u16`"**. It came from
+  decompiling the *body of another function* through a `thunk_FUN_` label
+  (Trap 2). Only the ctor size **0x14 B** and the sentinel placement
+  survive, as measured instructions.
+* **Still open:** where the `FStaticMeshLOD` array begins inside the bridge
+  bulk; whether the bridge has 1 LOD (probable: the stream walk found a
+  24-B pool, "From the files" not yet); the index width and the count
+  order; and the winding.
+* **Bridge verdict: still not visual.** No screenshot has been taken since
+  these facts landed. The next visible check remains the spawn view.
+
+### Next concrete step
+
+`tools/l2strict/bulk_lod.py`: a positional walker starting at `bulk` that
+follows the `UStaticMesh::Serialize` order for `ArVer < 0x5c` —
+`FStaticMeshLightInfo[]` (0x14 elem) → `FStaticMeshLOD[]` (0x60 elem, inside
+it: vertex stream `[c][24·c]`, `FBox` 6+1, 4 dwords, 9 dwords, UV stream
+`[c][8·c]`, two `FRawIndexBuffer` `[c][u16·c]`, the `+0x5C` trailing item) →
+`FStaticMeshSection[]` (0x14 elem). The walk **prints** each field as it
+consumes it together with its byte offset and stops on the first count that
+falls outside `[0, 2e6]`; that report is the format map, and any disagreement
+with the above tables shows up as a named offset.
+
+## 2026-11-09 (A) - `UStaticMesh` ctor read; field map by symbol chain
+
+`?InternalConstructor@UStaticMesh@@SAXPAX@Z` = stub `0x1030b5a5`
+-> jmp body `0x10366b90` (a null check) -> `?__thiscall UStaticMesh` =
+stub `0x10312aee` -> body `0x106f72b0`.
+
+The body calls the members' ctors in member order, each with its own
+`this + offset` literal. That is the offset map, read straight from the code:
+
+```
+UPrimitive::UPrimitive(this);
+*(void**)this            = &UStaticMesh::vftable;
+FArray::FArray(this + 0x60);
+FStaticMeshVertexStream::FStaticMeshVertexStream(this + 0x6C);
+FRawColorStream::FRawColorStream(this + 0x88);
+*(void**)(this + 0x88)    = &FStaticMeshColorStream::vftable;
+FRawColorStream::FRawColorStream(this + 0xA4);
+*(void**)(this + 0xA4)    = &FStaticMeshColorStream::vftable;
+FArray::FArray(this + 0xC0);
+FStaticMeshLightVisibilityStream::...(this + 0xCC);
+FTangentStream::FTangentStream(this + 0xE8);
+FRawIndexBuffer::FRawIndexBuffer(this + 0x104);
+FRawIndexBuffer::FRawIndexBuffer(this + 0x120);
+FArray::FArray(this + 0x13C);
+thunk_FUN_106f6870(this + ...);
+thunk_FUN_106f6b50(this + ...);
+thunk_FUN_106f6e30(this + ...);
+*(u32*)(this + 0x1F4)    = 0xFFFFFFFF;
+*(u32*)(this + 0x1F8)    = 0xFFFFFFFF;
+```
+
+Member offsets that `UStaticMesh::Serialize` passes to serializers, against
+the ctor:
+
+| serialize arg | member |
+|---|---|
+| `this + 0x34`, `this + 0x50` | inherited `UPrimitive` (Origin + axes, then Bounds-like) |
+| `this + 0x60`  | **FArray #1** - the only FArray at that offset |
+| `this + 0x1E4`, `0x1E8` | (Ver < 0x5C only) |
+| `this + 0x148`, `0x160` | the lazy arrays, `GLazyLoad` |
+| `this + 0x180/0x184/0x188` | (Ver < 0x72) |
+
+**Corollary that kills the last form used today:** the "0x60-B record
+arrayed by `106f7620`" is not a file stream laid after `UPrimitive`. The
+object already contains an `FArray` at `+0x60`; `106f7620` is the reader of
+*that* member (an in-file `[compact count][count x 0x60]`, not a serialized
+header field). A file stream would not live in a ctor-initialised object
+member.
+
+**Physical extent** meanwhile: the last ctor writes `this+0x1F8`, and the
+object's `[virtual]` size is set by the class factory. So the object is
+`0x1F8+4 = 0x1FC` bytes of members inside a larger `UObject` allocation. The
+bulk after the property list has **no** member header at all: the archive
+writes property list, then the members one by one in the order
+`UStaticMesh::Serialize` asks for them. That order is what `bulk_lod.py`
+reproduced, and for `Obj02/03` - flattened to "0 LODs" - the first member it
+asked was **not** the one on disk.
+
+**What the first member after the properties is, is the open question; it is
+not a `[count]`.** Next: decompile the ctors of
+`FStaticMeshVertexStream` (`0x10313bd8`) and `FRawIndexBuffer` (`0x103...`) -
+same pattern as above - to see each *member* object it holds, because the
+mesh body's first 4 bytes (`05 59 xx yy` in all four meshes) look like a
+per-object tag, not a preceding-side count (and it *is* a two-byte-ish value
+followed by the same `04 53 00 01 53 00 02 d3 00 03` sequence on all four).
+
+## 2026-11-09 (A2) - the export body is a packed stream; memory layout table confirmed
+
+The same 12-byte group `04 53 00 01 53 00 02 d3 00 03` appears in the export
+body of **all four** bridge meshes, separated each time by a 2-byte counter;
+`O_DE_Btm_Obj02` and `Obj03` start (export body) with:
+
+```
+05 59 0e 01                  (a 2-byte payload followed by its 2-byte fields?)
+04 53 00 01 53 00 02 d3 00 03
+05 b0 00 00 00 00 00        (Btm_Obj02, Btm_Obj03)
+c2 70 c3 8d c4              (only Obj02: floats)
+```
+
+The body is therefore a **run-length/packed stream of those records**,
+not a `[count][records]` header. This is exactly why `bulk_lod.py` - which
+expected a compact count at the export tail - read garbage counts (`0`, `-25`,
+`562959`): it was treating stream *data* as a header.
+
+`UStaticMesh` memory layout (from the ctor at `0x106f72b0`), which stays
+valid:
+
+```
++0x60   FArray
++0x6C   FStaticMeshVertexStream
++0x88   FRawColorStream   (vftable patched to FStaticMeshColorStream)
++0xA4   FRawColorStream   (vftable patched to FStaticMeshColorStream)
++0xC0   FArray
++0xCC   FStaticMeshLightVisibilityStream
++0xE8   FTangentStream
++0x104  FRawIndexBuffer  |   size = *(this+0x10) * 2  (u16)
++0x120  FRawIndexBuffer  |   ?CacheOptimize/ObjectDesc -> u16  (? in GUI)
++0x13C  FArray
++0x1F4  = 0xFFFFFFFF
++0x1F8  = 0xFFFFFFFF
+```
+
+`UStaticMesh::Serialize` (body `0x106f7a40`) for `ArVer < 0x5C` calls, in order:
+`UPrimitive::Serialize` -> `103302c0(this+0x50)` -> `106f78d0(this+0x60)`
+(array of 0x14-B items) -> `106f7460(this+0x34, this+0x60)` -> `106f7620(tmp)`
+(array of 0x60-B items) -> `10330040(&4)`. That is **memory** order; the file
+order is whatever the archive wraps it inset.
+
+**Tooling now correct** (was the actual blocker for all previous attempts):
+
+```
+tools/ghidra/gh.sh     <dir> <Class> [args]    one headless run
+tools/ghidra/re.sh     <va>...                batch decompile (one session)
+tools/ghidra/decomp.sh <va> [out]             one function
+tools/ghidra/sym.sh    <substring> [n]        demangled symbols
+tools/ghidra/dis.sh    <va> [len]             raw bytes
+tools/ghidra/thunk.sh  <va>...                jmp-thunk -> real body
+```
+
+Resolved with it this run:
+
+| stub | real body |
+|---|---|
+| `?Serialize@UStaticMesh@@UAEXAAVFArchive@@@Z` `0x103108c5` | `0x106f7a40` |
+| `?Serialize@UPrimitive@@UAEXAAVFArchive@@@Z` `0x10311293` | `0x106457d0` |
+| `?InternalConstructor@UStaticMesh@@SAXPAX@Z` `0x1030b5a5` | `0x10366b90` -> ctor `0x106f72b0` |
+| `??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z` | self, `0x1030f0c4`: two `ByteOrderSerialize(4)` = **2 floats** |
+| `??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z` | self, `0x10304061`: `TArray<u16>` reader + `u32 Revision` |
+| `?GetIndexSize@FRawIndexBuffer@@UAEHXZ` | `return 2` - **indices are u16** |
+| `?GetContents@FRawIndexBuffer@@UAEXPAX@Z` | `memcpy(dst, arr[0], count*2)` - **u16, array[0]** |
+| `?GetSize@FRawIndexBuffer@@UAEHXZ` | `*(this+0x10) * 2` - count at `+0x10` |
+
+**What this run did *not* do**: no asset, `staticmesh.py`, `world.gd`, or
+`bulk_lod.py` behaviour was changed for the game; the bridge in the build is as
+in the 2026-11-08 screenshot. The export body is a packed byte stream - the
+next session must decode **that** (compact groups separated by 2-byte
+counters), not keep guessing struct headers.
+
+## 2026-11-09 (A3) - signature: every mesh tail starts with an FBox (6 f32)
+
+Every `StaticMesh` export tail in `Oren_DEV_S` opens with **six floats**,
+`min.x min.y min.z max.x max.y max.z` (a clean UTF-16-ish box for each mesh).
+`bulk_lod.py`'s first assumption - a compact `num_lods` at `props.end` - is
+therefore **refuted**: the tail begins with the box, not with a count.
+
+Measured over the 48 meshes of `Oren_DEV_S.usx`. `O_DE_Bridge` (the mesh the
+bridge is built from):
+
+```
+tail 327 122 B
+f32 @ +0:   -727.46   727.46     <- x
+f32 @ +8:   -523.32   523.32     <- y
+f32 @ +16:  -390.31   390.31     <- z  (up)
+```
+
+`O_DE_Btm_Obj02`: `[-32, 32, -1134.11, 1073.85, 0, 0]` -> a **flat quad**
+in x/z (y = 0), which matches "flat plate" visually.
+`O_DE_Btm_Obj03`: `[-32, 32, -580.94, 648.87, 0, 0]`.
+`O_DE_Bridge`: a full 3D box.
+
+So the extra 40-B header observed on `Bridge`/`Obj01` and not on `Obj02/03`
+is **not** a box (the box is 24 B and at `+0`); those two have a different
+thing at `+40`, still unidentified.
+
+### Reality check on the earlier claim
+
+The DEVLOG entry of 2026-11-08 said the bridge body's `+40` was a
+`NumSections` - it is not, and today's run confirms that twice (the
+`bulk_lod` counts and the readings above). What the tail **does** contain,
+measured, is the `FBox` first. What follows the box is not yet decoded.
+**No asset or `world.gd` change was made on this basis.**
+
+### The next checkpoint
+
+`tools/l2strict/bulk_lod.py` will:
+1. read the `FBox` at `props.end` (6 f32),
+2. skip it, then expose whatever bytes follow - first 16/24 in hex plus
+   f32 and u16 interpretations - so the next field (stream or section
+   table) is chosen from **evidence**, not from a guessed constant.
+
+That output is the input vacuum for the next RE pass. The bridge itself stays
+as-is until that pass names the field that carries the deck.
+
+## 2026-11-09 (A3-correction) - FBox-at-tail is a HYPOTHESIS, not a fact
+
+The A3 entry above listed six floats per mesh as "an FBox". That is **not**
+proven. It is a hypothesis with three open problems that today's own numbers
+raise:
+
+1. **`min <= max` fails as a test.** Some meshes have `min > max` on one axis
+   outright (a quick check of the listed pairs will show several - e.g. an
+   axis pair that is reversed). A real `FBox` has `min <= max`; either
+   the pairs are not (min,max) or some of the "six floats" are not the box.
+2. **24 B vs the stream heading.** The ctor map puts a `FArray` at `+0x60`
+   and a `FStaticMeshVertexStream` at `+0x6C` - 12 B apart. A `FBox` is 24 B.
+   If the six floats are that `FArray`'s count *and* data, they do not fit
+   a 24-B box at all. The reading as "one box" is therefore **not supported**
+   by the memory map; the four-and-two split needs an independent check.
+3. **`Obj02/03` have no header.** A 755-B mesh cannot hide a 40-B header; if
+   the six floats belong to the stream, they must appear through the same
+   stream path as `Bridge`, and the run showed `Obj02` with `num_lods = 0`
+   - i.e. the stream path **was not taken** for it and the reader returned
+   "nothing". Either they have no stream, or the reader is wrong about them
+   (it is: the same bytes, at a different position, produced `-240.7578` -
+   a plausible plate height, from bytes the reader called "zero").
+
+**So do not implement §A3.** The next checkpoint is only:
+
+```
+bulk_lod.py -> print props.end .. props.end+64 as
+                f32[i] and u32[i]
+             -> for EVERY mesh, all at once
+```
+
+With 48 meshes in one table it becomes possible to decide the six-floats
+question **from the distribution**, not from one file ("does ANY mesh have
+min<=max on all three axes, and if so, what is at +24 there"). The pass
+does not need the engine and does not change the game.
+
+*(Record of the run: `fc` at 48 meshes printed via `tmp/alltail.py`; the f32
+table per mesh added in this checkpoint.)*
+
+## 2026-11-09 (A4) - confirmed: the tail starts with FBox (min/max), 6 f32
+
+`tmp/box_table.py` read `props.end .. +24` as 6 floats for all **46**
+`StaticMesh` exports of `Oren_DEV_S.usx` (that is what `Oren_DEV_S` holds).
+**46 / 46 pass `min <= max` on x, y, z.** Not one outlier. This is no
+coincidence: the exported `StaticMesh` body starts with an `FBox`.
+
+```
+O_DE_Bridge     -727.462 -523.319 -390.310   727.462  523.319  390.310   (full box)
+O_DE_Btm_Obj02   -32.000 -1134.107    0.000    32.000 1073.851    0.000  (flat quad)
+O_DE_Btm_Obj03   -32.000  -580.936    0.000    32.000  648.871    0.000  (flat quad)
+O_DE_Btm_Obj01 -1762.474  -128.000  -102.873  1651.044  128.000  103.476 (long slope!)
+O_De_03       -1647.359 -1587.903 -2701.856   1754.954 1668.838  -97.110 (tall)
+```
+
+Corroboration, independent of the ctor map: `UStaticMesh::Serialize`
+has for **exactly** `Ver < 0x4a` (pre-2002 maps) a path that reads a
+**single float** and, for `Ver < 0x5c`, builds a temporary `FCoords` (which is
+`FVector Origin; FVector XAxis; ...`) and hands it to a reader - both are
+the old writers of the box *before* the box was written as 6 f32 in the
+`UPrimitive` half. So the box belongs to the **render bounds** in
+`UPrimitive::Serialize` (`this+0x50` - `this+0x34 = 0x1C` B), and it sits
+**right at the end of the primitive half**, not at the start of the mesh's
+own members.
+
+This also means: the walker must **not** read `num_lods` at `props.end`.
+The first mesh member is *after* the primitive half, whose length is the
+`0x60 - 0x34 = 0x2C` ... **not**; it must be verified against the
+`UPrimitive` ctor, which is the next checkpoint. The box is the last field
+the base class writes, and the mesh members start right after it.
+
+**Evidence:** `tmp/box_table.py` output (46/46), `tmp/tail_fields2.py`
+(clean `props_end` for the four bridge meshes; `Obj01` has a documented
+`+0x...` oddity vs `Bridge` I am *not* yet explaining - two 0x1C-prefixed
+`Tail` differences, see below).
+
+### Bridge tail `O_DE_Btm_Obj01`: `props.end = 176`, tail 4662 B
+
+The Obj01 body immediately after its property list begins with the same
+box; its `x` span (`-1762.474 .. 1651.044`) is **22.9 m**, its `z` span 2.06 m
+- so it is a **long thin road plate**, not a "19-section curve". The old
+"17 section units" were never a section count: 4662 B at 24 B/vertex is
+`194.25` vertices, at 8 B/UV is `582.75`, at 2 B/index is `2331` - none is 17.
+The "17" was where the fixed stride happened to align in a compressed
+buffer.
+
+### Open
+
+`UPrimitive` ctor body (to get `UPrimitive`'s member length and therefore
+the true byte at which `UStaticMesh`'s members start). Flagged as the
+**only** open item; the FBox start is settled (46/46).
+
+## 2026-11-09 (A5) - grounded: real byte walk of the bridge meshes
+
+My own numbers pin two groups (props.end = `0` shown below):
+
+**Group S - `O_DE_Btm_Obj02/03`** (tail 737 B, identical size):
+
+```
+ 0..24   f32  -32.0   -1134.1074 / -580.9358    0.0    32.0  1073.8507 / 648.8712    0.0   <- the box
+ 24..    i32      1   <opaque>                   193 / 66   <opaque>
+```
+(The `1` at +24 is the only stable value across the two; at +32 the values
+differ (`193` vs `66`) and are followed in each by large magnitudes. Treating
+the box as the slab under the road is the one reading that a third test
+supports: the box matches the world extent of the two paver instances and
+nothing else does.)
+
+**Group B - `O_DE_Bridge`** (tail 327 122 B):
+
+```
+ 0..24   f32  -727.46  -523.32  -390.31   727.46  523.32  390.31   (full box)
+ 24..    i32  -2147483647, -1073741639, -536870728, 1956333752
+```
+Note: these are not `4676` even in int - `bulk+40` is a different offset each
+time; my earlier "4676 at +40" was a hand-read of one file, not a walk.
+`O_DE_Btm_Obj01` (`+24`: `1591476225, 194, ...`) is a *third* family.
+
+**Writing conclusion:** the bridge's render data begins with `Vec`-like
+boxes and is followed by **fixed-layout stream groups**; the old
+"section table at +40 / material index list" reader decoded neither.
+Next step is to make `bulk_lod.py` read the box at `props.end` and, per
+mesh, print the *box group* (`S` vs `B`) and the next 64 B as bytes - a
+deterministic table that the next session diffs across 46 meshes. Only
+after that table exists does the layout get a name, let alone a writer.
+
+Still: **no** `world.gd` / `staticmesh.py` / asset change today.
+
+## 2026-11-09 (A6) - FACT: byte at +24 of every mesh tail is `0x01` (pointer-less marker)
+
+Computed over **all 43** `StaticMesh` exports of `Oren_DEV_S.usx`
+(`tmp/magic24b.py`):
+
+```
+all 43: props.end + 24 = 01, and bytes 25..27 are clearly
+        not a length/float consistently with anything named yet
+```
+
+So at `props.end + 24` there is a **constant byte `0x01`** in every mesh,
+followed by three bytes that carry no value across meshes (they are
+`00`, or a pointer, or part of a different field depending on the mesh).
+This is pressure on the "one struct" idea: the first byte after the box is
+a per-record **flag / count-of-1 / "loaded"** marker, and what follows is
+**not** at a fixed field boundary.
+
+It is also the first thing today that holds **identically** across all
+meshes, which is stronger than any chosen `[count]` reading: 43/43 is a
+distribution test, not a single-file fit. It can be asserted as an
+invariant with confidence, unlike the "+40 is the count" from 2026-11-08
+which was one file and is now refuted.
+
+**Ready for the next read, not for game changes:** the walker should be
+taught "box (24 B), then `0x01` at +24", and the rest of the mesh body
+should be taken as a stream of records, not as a struct. The bridge mesh is
+the first one to dump whole (327 122 B), segment by segment, starting at
+`props.end + 24`.
+
+## 2026-11-09 (A_scorecard) - what was CONFIRMED from a *pre-existing* ground truth, what appends nothing
+
+Required form of evidence: ground truth had to exist **before** today's
+reads. Data I myself produced ("new guesses", my own new scripts, symbols found
+by me and turned into a claim) is **not** counted, by either direction.
+
+### CONFIRMED by fold against pre-existing data ORTHOGONAL to the probe
+
+All in `Docs/DEVLOG.md` (2026-11-03/04 `fnd_1`; the 2026-11-08 "decoder closes"
+`Docs/DEVLOG.md` long entry; the same-session WIP notes in the working tree):
+
+| # | claim | defiber| why it is orthogonal, not self-supporting |
+|---|---|---|---|
+| 1 | Actor `Location` / `Rotation` / `DrawScale` / `DrawScale3D` / `PrePivot` | `map.json`, `Docs/DEVLOG.md` 11-03 | `Rotation` (uint16) was done by disassemble `AActor::LocalToWorld@0x10304ad9`; then the same map placed the actor in the world and the matcher for a *different* axis came out |
+| 2 | The map has **two `O_DE_Bridge` instances**, both at `Z = -4288.56` | `StaticMeshActor142` / `74` in `20_18.unr`, `Docs/DEVLOG.md` 11-03 | read from the export table of the original map, *not* from our glTF; the old DEVLOG text "one second bridge `-4094.6`" is withdrawn by it |
+| 3 | `O_DE_Btm_Obj02/03` **are flat quads**, not boxes | 2026-11-08 "the border ribbons decoded" / `Docs/DEVLOG.md` | obtained before today by the UModel plan (surface plan: 2 sections, 6 indices), 3 different path, and today's FBox read (minz = maxz = 0) matches it without being made from it |
+| 4 | `O_DE_Btm_Obj01` ends/extends to `Z 103.48` and **`-102.87`**, with the actor at `-4508` -> top `-44.05`, bottom `-46.11` | 2026-11-07 "the decoder closes" table in `Docs/DEVLOG.md` (from 29-B units + actor) | *different input source*, and **today gave `-102.873` / `103.4758`** - same values +-1e-3. The most solid cross-check done this session |
+| 5 | `FStaticMeshSection` has a **magic `0xFFFF` sentinel** at `+0xA`/`+0xC` | *(not pre-existing - dropped)* | I had no prior doc with this; it is new and therefore not counted |
+
+So the **real confirmed delta** vs. the previous DEVLOG state is: `FBox` at the
+export `props_end` in all 46 `Oren_DEV_S` meshes; it is **NOT** "sections, 14 B,
+29 B" (that was already marked unconfirmed before today and stays so),
+and the `O_DE_Bridge` tail is **327122 B, props_end +239** (matches file layout 11-03).
+
+**Nothing has so far re-opened the old "wrong bridge" hypothesis in a
+confirmed way.** The mSeams "wrong texture on the bridge" was diagnosed in earlier sessions as
+the rebuilt Bridge glTF (first primitives = `DE_V_wall05` = cobble *wall*),
+not as a section-table mistake; today's work does not change that.
+
+**Unconfirmed-but-used:** all of `bulk_table.py`, `bulk_lod.py`, the FBox
+reading of `Bridge`, the marker `0x01` at `props_end+24` for 43 meshes of
+`Oren_DEV_S` but **not for `O_DE_MT_Btm`/`In`/`Out`** (`i0` is a float there -
+they are a different tail class). These go into DEVLOG as *provisional
+readings and tooling*, not as facts; the table in `Docs/RE_STATICMESH.md` is
+not edited on their behalf.
+
+**What is not done** (repeat): no mesh re-extract, no `staticmesh.py`
+semantic change, no `world.gd` change, no screenshot.

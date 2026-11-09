@@ -1578,7 +1578,14 @@
           "class": "Texture",
           "kind": "export",
           "outer_chain": [],
-          "raw": 8
+          "raw": 8,
+          "shader": {
+            "original": "Oren_DEV_T.O_chain_01",
+            "diffuse": "O_chain",
+            "output_blending": 1,
+            "two_sided": true,
+            "source": "Oren_DEV_T.utx Shader export[57]"
+          }
         },
         {
           "package": "oren_dev_t",
@@ -1675,7 +1682,13 @@
           "class": "Texture",
           "kind": "export",
           "outer_chain": [],
-          "raw": 4
+          "raw": 4,
+          "shader": {
+            "original": "Oren_DEV_T.DE_V_deco11_a",
+            "diffuse": "DE_V_deco11",
+            "two_sided": true,
+            "source": "Oren_DEV_T.utx Shader export[59]"
+          }
         }
       ],
       "O_DE_Btm": [
@@ -5401,6 +5414,271 @@
             "Oren_DEV_T"
           ],
           "raw": -53
+        }
+      ],
+      "O_DE_Etc_Bridge01": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "O_chain",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -41,
+          "original_material_class": "Shader",
+          "shader": {
+            "original": "Oren_DEV_T.O_chain_01",
+            "diffuse": "O_chain",
+            "diffuse_export": 8,
+            "opacity_property_ref": 8,
+            "output_blending": 1,
+            "two_sided": true,
+            "source": "Oren_DEV_T.utx Shader export[57]"
+          }
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -19
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -18
+        }
+      ],
+      "O_DE_Etc_Bridge02": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco11",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -54,
+          "original_material_class": "Shader",
+          "shader": {
+            "original": "Oren_DEV_T.DE_V_deco11_a",
+            "diffuse": "DE_V_deco11",
+            "diffuse_export": 4,
+            "opacity_property_ref": 4,
+            "two_sided": true,
+            "source": "Oren_DEV_T.utx Shader export[59]"
+          }
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_floor",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -23
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco3a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -31
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_win",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -32
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -19
         }
       ]
     },

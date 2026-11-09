@@ -46,7 +46,8 @@ func _ready() -> void:
 ## face, surface and resolved texture — identifies any suspect region
 ## (flat-color patches, missing geometry) without eyeballing.
 func _trace_box_flow() -> void:
-	await get_tree().create_timer(4.0).timeout
+	for i in 10:
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var p := OS.get_environment("L2_TRACE_BOX").split(",")
 	var r := Rect2i(int(p[0]), int(p[1]), int(p[2]) - int(p[0]), int(p[3]) - int(p[1]))
@@ -84,7 +85,8 @@ func _trace_box_flow() -> void:
 ## mesh key, face index, resolved surface texture. Settles "what is this green
 ## surface" without any eyeballing.
 func _green_trace_flow() -> void:
-	await get_tree().create_timer(4.0).timeout
+	for i in 10:
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
 	var cam := get_viewport().get_camera_3d()
@@ -248,14 +250,21 @@ func _floor_grid_flow() -> void:
 
 func _screenshot_flow() -> void:
 	var d := OS.get_environment("L2_SCREENSHOT")
-	await get_tree().create_timer(4.0).timeout
+	print("SCREENSHOT_FLOW ENTERED, dir=", d)
+	for i in 10:
+		await get_tree().process_frame
+	print("SCREENSHOT_FLOW 10 FRAMES DONE")
 	await RenderingServer.frame_post_draw
 	var cam = get_viewport().get_camera_3d()
 	print("DEBUG camera global_pos: ", cam.global_position if cam else "no camera")
 	print("DEBUG camera rotation: ", cam.global_rotation if cam else "no camera")
 	get_viewport().get_texture().get_image().save_png(d + "/shot1.png")
-	await get_tree().create_timer(2.0).timeout
+	print("SCREENSHOT_FLOW shot1 SAVED")
+	for i in 5:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(d + "/shot2.png")
+	print("SCREENSHOT_FLOW shot2 SAVED")
 	get_tree().quit()
 
 
@@ -574,6 +583,12 @@ func _get_mesh(key: String) -> Mesh:
 				tex = ImageTexture.create_from_image(img)
 				m.albedo_texture = tex
 				m.roughness = 0.95
+				# Real values (MECHANICS.md, decompiled/original packages):
+				# Shader flags carried in materials.json.shader — apply TwoSided.
+				# Opacity/OutputBlending are present as object refs/flags but not
+				# mapped to floats here (honest limitation; see MECHANICS.md).
+				var shader_flags = t.get("shader", null)
+				var shader_two_sided: bool = shader_flags is Dictionary and bool(shader_flags.get("two_sided", false))
 				# Alpha-scissor ONLY for foliage: in L2 textures the alpha
 				# channel is often a mask (specular/blend), not transparency —
 				# applying it to structures made the bridge edges see-through.
@@ -583,9 +598,7 @@ func _get_mesh(key: String) -> Mesh:
 					m.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 					m.alpha_scissor_threshold = 0.35
 					m.cull_mode = StandardMaterial3D.CULL_DISABLED
-				elif key in _down_floor_meshes:
-					# Пол с нормалями вниз в экспорте — невидим сверху (backface culling).
-					# Делаем поверхность двусторонней, чтобы пол был виден и по нему можно ходить.
+				elif shader_two_sided or key in _down_floor_meshes:
 					m.cull_mode = StandardMaterial3D.CULL_DISABLED
 				mesh.surface_set_material(si, m)
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
@@ -599,7 +612,9 @@ func _get_mesh(key: String) -> Mesh:
 # decoded from the variable-length packed records render as 2-m-thick walls
 # over the road; the original has them as flush border inlays. Skipped until
 # the packed decompressor yields the real thin slabs.
-var _ROAD_STRIP_SKIP := []  # all the strip pieces render
+var _ROAD_STRIP_SKIP := [
+	"Oren_DEV_S:O_DE_Btm_Obj01", "Oren_DEV_S:O_DE_Btm_Obj02", "Oren_DEV_S:O_DE_Btm_Obj03",
+]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",
@@ -677,6 +692,7 @@ func _build_lights() -> void:
 		var lamp := OmniLight3D.new()
 		lamp.position = Vector3(loc[0] * UNIT_SCALE, loc[2] * UNIT_SCALE, loc[1] * UNIT_SCALE)
 		lamp.light_color = Color(1.0, 0.9, 0.7)
+		# Energy mapping is an adaptation (exact LightBrightness formula not recovered).
 		lamp.light_energy = clampf(float(actor.get("light_brightness", 255.0)) / 64.0, 1.0, 8.0)
 		lamp.omni_range = maxf(float(actor.get("light_radius", 128.0)) * UNIT_SCALE * 6.0, 3.0)
 		lamp.omni_attenuation = 0.25
