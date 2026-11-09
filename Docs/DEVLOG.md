@@ -3499,3 +3499,17 @@ the mesh instance = hidden, the collision body stays (its -46.07 flats).
 The verify at the user's viewpoint (tmp/shots/nowall/): the wall = gone,
 the houses visible, the road with the carpet strip and the lamps = the
 original composition.
+
+## 2026-11-10 — the invisible walls = the Btm COLLIDER (the render hide was not enough)
+
+The user: the walls remain after the rebuild. The L2_TRACE_BOX at the
+user's viewpoint = DEFINITIVE: 45 collider hits = Oren_DEV_S:O_DE_Btm
+(the textures wall05/wall01 in the trace = the collider's surfaces). The
+render-only hide left the Btm's collision body = the INVISIBLE walls
+blocking the houses.
+
+Fix: O_DE_Btm moved to _ROAD_STRIP_SKIP = the full skip (the render AND
+the collision). The dead _RENDER_ONLY_SKIP block removed (the parse
+error caught by the verification). The verify: 0 errors, the view at
+(9276,17227) = clean (the road + the carpet strip + the houses + the
+lamps), the player stands at -4610.9 on the clean-room slab.
