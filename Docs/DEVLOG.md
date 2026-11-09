@@ -3270,3 +3270,14 @@ Seek (+0x3c) to the saved offset -> sub_10310d3e reads the data ->
 state = -state -> Seek back. The lazy = the DEFERRED RAW read, the count
 in Serialize = the BYTE count. FLazyLoader (Core.dll) attaches via
 FArchive::AttachLazyLoader; the UGameEngine exec "LazyMode" toggles it.
+
+## 2026-11-09 (5) — TArray<FStaticMeshCollisionTriangle>::Serialize decoded (fnd_10)
+
+sub_10302108 (the loading path): ReadCompactIndex(count) -> Empty(0x54) ->
+count x {Add(0x54); ctor; operator<<(FStaticMeshCollisionTriangle)@0x1030e76e}.
+The triangles = BACK-TO-BACK, no per-element headers. The file record =
+16 dwords + 4 compacts (~68 B). In the Obj01 bulk the records = ~+1368..2560:
+the face plane (0,0,1,-103.48) at +1416, the vertex 1651.04 at +1444, the
+edge planes (y=+64) after. The record start = pinned by scanning for the
+known plate plane. The importer can now decode the authentic walkable
+triangles directly — no archive lazy virtual needed.
