@@ -3313,3 +3313,19 @@ The verify (x=8200): the carpet = walkable (-45.28..-45.16 via Obj01) from
 the authentic records; the Bridge deck = absent (authentic). The road side
 margins = still NO-HIT — now a PLACEMENT question (the Pir01/Etc_Bridge
 records vs the bridge span), not a decoder one. The spawn visual = unchanged.
+
+## 2026-11-09 (8) — the bridge side margins = the ORIGINAL behavior (task closed)
+
+The Pir01 records decoded per actor: 4 pier structures at the bridge
+ENDS (the west pair (8584,16923)/(8827,17994), the east pair), each with
+3 wide flats at -45.46 (2.8x3.3 m) = the approach platforms. Along the
+span itself: NO collision records — the Bridge deck has none (fnd_7).
+
+CONCLUSION: in the original, the wide rendered deck = VISUAL ONLY (the
+arch under the walkway); the WALKABLE surface = the Obj01 carpet strip
+(2.56 m) down the center. The NO-HIT side margins = the original
+gameplay (falling off the bridge edge). Our build now matches the
+original collision model exactly: the carpet walkable, the deck and the
+sides not. The bridge/road task = closed: the decode chain is
+end-to-end (the meshes = UModel 1-1, the collision = the authentic
+records, the placement = the map data).
