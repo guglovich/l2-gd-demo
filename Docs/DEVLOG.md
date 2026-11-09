@@ -3680,3 +3680,17 @@ the 18-B FStaticMeshSection records at the bulk start - the parse worked
 for MT_In/Bridge earlier), take per-section MaterialIndex, write it into
 asset_map primitive_material_indices. The craft Deep brief = updated
 (rev 50), the target = engine.dll. The test case = the statue's hand.
+
+## 2026-11-10 (15) — the hand texture: the binding is NOT the culprit — the O_De_03 prim split is
+
+The section-table probes at the fixed offsets = garbage (the Sections sit
+after the variable-length LOD data, not at a fixed offset). The key
+realization: our strict parser ALREADY reads the sections correctly (the
+prim order/count = from them), and UEViewer renders L2 statics correctly
+with the identity (section i = material i). So the binding = fine.
+
+THE REAL SUSPECT: our O_De_03 parse's per-prim index ranges (the
+run-anchor split) differ from UModel's — the hand's triangles landed in
+the wrong prim (the face's material). NEXT: the per-prim diff of O_De_03
+ours vs tmp/l2/20_18/umodel/Oren_DEV_S (the prim counts, the index
+ranges, the UV boxes) -> fix the split -> the hand gets its material.
