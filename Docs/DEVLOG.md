@@ -3207,3 +3207,23 @@ triangles with their vertex indices -> the authentic collision mesh
 (84-B in-memory elements; the packed file form = [01][idx][len][data]).
 Then world.gd _collision_shape() reads the authentic subset (the wiring
 is already staged, debug of the json->shape path pending).
+
+## 2026-11-09 (2) — the lazy read path = the ARCHIVE's virtual (fnd_8)
+
+sub_1030ac90 (the CollisionTriangles array reader, IsLoading, Ver>0x3d):
+count = ReadCompactIndex (sub_1030599d); then if GUlyHackFlags&8==0 the
+elements are read by THE ARCHIVE'S OWN VIRTUAL vtable+0x40 (the L2 package
+archive subclass decodes the lazy [01][idx][len][data] blocks itself);
+if the hack flag is set = the plain loop sub_10302108 of
+operator<<(FStaticMeshCollisionTriangle)@0x1030e76e (16 dwords + 4 compacts
+each). The region closes with the archive virtual vtable+0x3c(count).
+
+**NEXT:** resolve the concrete L2 .usx archive class and its vtable+0x40 /
++0x3c = the actual lazy-block decompressor. The plain fallback format is
+already known end-to-end.
+
+Also this session: Docs/RE_STATICMESH.md (the second AI, headless-Ghidra
+tools/ghidra/) cross-checked: the 0x106f7a40 Serialize instance = the ICF
+duplicate of our 0x103108c5; the Bridge prim analysis (floor02 = ONE sloped
+deck plane, wall05 = the arch) agrees with our measurements; the git tag
+savepoint-before-world-edit exists.
