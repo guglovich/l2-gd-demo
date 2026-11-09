@@ -480,6 +480,10 @@ func _build_clean_room_road() -> void:
 		[-1762.47, -1304.83, 103.48, 103.48],
 		[-1304.83, -553.26, 103.48, -102.87],
 		[-553.26, 1651.04, -102.87, -102.87],
+		# the east flat continues to the east bridge (the world x ~10670..14720):
+		# the original Obj01 slab ends at +1651 but the road floor must reach
+		# the far bridge, else the east village = the void (the falls)
+		[1651.04, 5800.0, -102.87, -102.87],
 	]
 	var mats := {}
 	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:

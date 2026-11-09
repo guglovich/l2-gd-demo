@@ -3547,3 +3547,17 @@ THE BUILD PLAN (the next session):
    the carpet road.
 4. The collision = the slab's own trimesh; the verify = the player stands
    (no fall at 12300,17400), the spawn screenshots, the profiles.
+
+## 2026-11-10 (4) — the east road floor was missing: the clean slab extended
+
+The earlier "falls" at (12300,16900/17400) = the east road BEYOND the
+clean slab's end: the original Obj01 profile ends at the local +1651
+(the world x ~10670) but the road runs to the east bridge (~14720).
+Extended the bottom segment to the local +5800. The verify: the
+clean_room_road -46.109 at (12000,17000) and (12150,17100) = the floor
+covers the east road.
+
+THE PLAZA (the next iteration): the user's screenshot shows the plaza
+AT the road level (no visible step - only the small border), so the
+plaza slabs = the road-height side areas (the north strip first), the
+texture floor01, the small dark curb at the transition.
