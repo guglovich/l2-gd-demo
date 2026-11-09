@@ -3694,3 +3694,13 @@ run-anchor split) differ from UModel's — the hand's triangles landed in
 the wrong prim (the face's material). NEXT: the per-prim diff of O_De_03
 ours vs tmp/l2/20_18/umodel/Oren_DEV_S (the prim counts, the index
 ranges, the UV boxes) -> fix the split -> the hand gets its material.
+
+## 2026-11-10 (16) — the statue hand: the materials verified identical; the UV/atlas = the remaining suspect
+
+The per-prim diff O_De_03 ours vs UModel: the index counts IDENTICAL per
+prim (192/816/453/471/192/72/144); the material lists IDENTICAL (prim5 =
+De_Statue002 = the statue's own texture, the file = legit). So the
+materials are NOT the problem. The remaining suspects: the UV mapping of
+the hand's prim (prim5) pointing at the wrong atlas region (the face?),
+or the texture file export. NEXT: the user's zoomed screenshot of the
+hand + the UV box of prim5 vs UModel's prim5.
