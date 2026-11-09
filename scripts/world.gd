@@ -635,23 +635,7 @@ func _get_mesh(key: String) -> Mesh:
 				mesh.surface_set_material(si, m)
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
 					print("DIAG bridge floor surface %d: texture applied" % [si])
-	# The Bridge deck primitive (prim 10, DE_V_floor02) = the sloped ramp
-	# under the walkway: the original does not show it (the live reference
-	# Docs/bridge_original_tunnel.png = only the carpet walkway with the
-	# darkness under its border chains). The arch and the railings stay;
-	# the collision = unaffected (the deck has no collision records).
-	var hidden_prims := [10] if key == "Oren_DEV_S:O_DE_Bridge" else []
 	_mesh_cache[key] = mesh
-	if not hidden_prims.is_empty():
-		var am := ArrayMesh.new()
-		for si in range(mesh.get_surface_count()):
-			if si in hidden_prims:
-				continue
-			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
-					mesh.surface_get_arrays(si))
-			am.surface_set_material(am.get_surface_count() - 1,
-					mesh.surface_get_material(si))
-		mesh = am
 	return mesh
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).

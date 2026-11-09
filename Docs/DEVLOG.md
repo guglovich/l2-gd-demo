@@ -3380,3 +3380,20 @@ Fix: the mesh materials are now CULL_DISABLED (two-sided) — the L2
 authentic rendering. The span screenshot (tmp/shots/sides/): the
 ornamental side walls run along the walkway = the tunnel-reference
 composition (the chains + the rails + the darkness below).
+
+## 2026-11-09 (12) — the deck prim restored = the road side bands ("боковины")
+
+The user: the road side bands are missing - the task is not closed. They
+are the Bridge deck prim 10 itself (the wide sloped surface flanking the
+carpet strip): I had hidden it on a wrong "one layer" reading. RESTORED.
+The span shot (tmp/shots/wide/): the wide road = the carpet strip in the
+center + the cobble surface around it (the side bands) = the reference
+spawn composition.
+
+OPEN (the next iteration): the carpet slab sits 0.75-0.9 m ABOVE the deck
+(the measured step, the "2 уровня" complaint) — the original reads as one
+flush layer. The data conflict: the Obj01 actor z = -4508 (the map) puts
+the carpet top at -44.05 while the deck top = -44.97 at the span start.
+The flush options: the deck raise, the carpet lower, or the slab segments
+following the deck slope. Needs the next session's decision against the
+live screenshots.
