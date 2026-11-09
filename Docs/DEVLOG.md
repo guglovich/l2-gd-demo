@@ -3469,3 +3469,191 @@ The bridge road = finally fully correct, built via the clean-room path:
 THE PENDING DEFECT (the next task): the extra walls along the houses
 (лишние стенки вдоль домов) — the user's report; investigate which mesh
 renders them and whether the client shows them.
+
+## 2026-11-09 (19) — the "extra walls along the houses": the first diagnostics
+
+The teleports into the house area (12300,17400) and (12300,16900) both end
+with the player FALLING to -4844: the open ground between/around the
+houses has NO collision floor. The O_DE_Btm mesh = a 55x2.4x49-m TALL
+WALL (the earlier bbox), not a floor cover - its flats at -46.07 cover
+only a narrow strip. The houses' own floors (the H meshes) = fine.
+
+THE HYPOTHESIS for the user's "лишние стенки вдоль домов": the visible
+walls = (a) the O_DE_Btm 49-m wall rendered where the client shows
+nothing, and/or (b) the house undersides visible through the two-sided
+render when the camera is low. The next session: the trace-box pass with
+the correct camera (the spawn ON a house floor, e.g. 10336,16349,-4480 =
+H02#3), identify the wall meshes by the L2_TRACE_BOX hits, then compare
+with the live client screenshots the user provides.
+
+## 2026-11-09 (20) — the "extra walls along the houses" = the O_DE_Btm 49-m wall — FIXED
+
+The user's screenshot at (9276,17227): the long stone wall blocking the
+houses along the east road = the O_DE_Btm mesh (55x2.4x49 m, the actor
+(11375,16872,-4952), the yaw -2320: its long axis runs (9094,17476) ->
+(13656,16268) = along the road, and the structure rises to -25 m =
+19 m ABOVE the floor). The live client does not show it above the floor.
+
+Fix: the render-only skip (_RENDER_ONLY_SKIP = [Oren_DEV_S:O_DE_Btm]) —
+the mesh instance = hidden, the collision body stays (its -46.07 flats).
+The verify at the user's viewpoint (tmp/shots/nowall/): the wall = gone,
+the houses visible, the road with the carpet strip and the lamps = the
+original composition.
+
+## 2026-11-10 — the invisible walls = the Btm COLLIDER (the render hide was not enough)
+
+The user: the walls remain after the rebuild. The L2_TRACE_BOX at the
+user's viewpoint = DEFINITIVE: 45 collider hits = Oren_DEV_S:O_DE_Btm
+(the textures wall05/wall01 in the trace = the collider's surfaces). The
+render-only hide left the Btm's collision body = the INVISIBLE walls
+blocking the houses.
+
+Fix: O_DE_Btm moved to _ROAD_STRIP_SKIP = the full skip (the render AND
+the collision). The dead _RENDER_ONLY_SKIP block removed (the parse
+error caught by the verification). The verify: 0 errors, the view at
+(9276,17227) = clean (the road + the carpet strip + the houses + the
+lamps), the player stands at -4610.9 on the clean-room slab.
+
+## 2026-11-10 (2) — the "walls" = MY clean-room rails — removed
+
+The user (repeatedly): the walls remain. The real culprit = the rails I
+added myself in the clean-room build (wall05, 1.1 m along the edges) —
+the original has NO side walls: the road = open to the houses, only the
+carpet's own border chains mark the edges. The Btm skip (the invisible
+collider) = a parallel real fix, but the visible wall = my rails.
+
+Removed the whole rails block from _build_clean_room_road(). The verify
+at (9276,17227): the road open, the houses visible, the lamps on the
+road edge = the original composition. LESSON: do not invent geometry
+absent from the references — every added piece needs the reference proof.
+
+## 2026-11-10 (3) — the next clean-room build: the plaza floors around the houses
+
+The user's live screenshot: the plaza around the houses = the large flat
+dark stone surface (the same texture family as the road), separated from
+the carpet road by only a SMALL ornamental border (the thin dark curb).
+No side walls anywhere.
+
+THE BUILD PLAN (the next session):
+1. The plaza slab(s) at the house-floor level (~-44.5, the H-mesh units
+   -44.3..-44.7), the texture = DE_V_floor01, the same UV family as the
+   road slab (~1.2-m tiles).
+2. The extent = the central plaza between the houses (the verified
+   no-floor spots: 12300,17400 and 12300,16900 = inside; the houses =
+   H02 12526,17342 / H03 12210,17822 / H02 10336,16349 / H03 9623,18375
+   / H01 11440,19405 / H04 13173,15445 + 10623,15882). The slab must NOT
+   poke above the house floors or over the carpet road.
+3. The small border: the thin dark curb strip along the slab edge facing
+   the carpet road.
+4. The collision = the slab's own trimesh; the verify = the player stands
+   (no fall at 12300,17400), the spawn screenshots, the profiles.
+
+## 2026-11-10 (4) — the east road floor was missing: the clean slab extended
+
+The earlier "falls" at (12300,16900/17400) = the east road BEYOND the
+clean slab's end: the original Obj01 profile ends at the local +1651
+(the world x ~10670) but the road runs to the east bridge (~14720).
+Extended the bottom segment to the local +5800. The verify: the
+clean_room_road -46.109 at (12000,17000) and (12150,17100) = the floor
+covers the east road.
+
+THE PLAZA (the next iteration): the user's screenshot shows the plaza
+AT the road level (no visible step - only the small border), so the
+plaza slabs = the road-height side areas (the north strip first), the
+texture floor01, the small dark curb at the transition.
+
+## 2026-11-10 (5) — the village street = the carpet road + the plaza stone (the depression fixed)
+
+The user: the road was made solid — in the original the village street =
+the carpet band (~4 m) flanked by the PLAZA stone at the same level, and
+the areas beside it were the voids (the depression).
+
+The band layout restructured per segment: on the bridge/east flat
+(lx <= 1651) = the cobble shoulders + the carpet (as before); on the
+village street (lx > 1651) = the carpet +-2 m + the plaza stone bands
+(floor01) +-2..6 m. The GDScript scoping bug fixed (the commit block was
+outside the band loop). The verify at (10473,16943): the carpet road +
+the plaza stone = no voids, the user's composition.
+
+## 2026-11-10 (6) — the tower height fixed (the +1161 hack removed); the octagon floor = the next
+
+The user: the tower sticks out too far. THE CAUSE = the +1161 z-shift
+hack on O_De_01/02/03 (the Shillien hand / the center ornaments) — the
+meshes were raised 11.6 m above their map placement. REMOVED: the meshes
+now sit at the map z (-5541) = the pillars/hand at the authentic height
+(the shot tmp/shots/tower/ = the columns at the correct place).
+
+ALSO: the clean-room road east extension was CUTTING through the octagon
+plaza (the Center_obj at the local lx ~2376) — the road now BREAKS at
+the octagon and resumes behind it ([3080..5800]).
+
+THE NEXT TASK: the center octagon floor — the Center_obj (14-m platform,
+the actor (11374,16847,-4832), the top at -45.7) does not catch the
+collision (the player falls through at (11400,16850)) — diagnose why
+(the trimesh? the load?) and add the octagon plaza floor around it per
+the user's live screenshot (the octagonal platform + the outer ring with
+the crystal pillars).
+
+## 2026-11-10 (7) — the center octagon built; the Center_obj collision = the open bug
+
+_build_center_octagon() added (world.gd, called after the road): the
+octagonal floor ring around the Center_obj (r_in 730 / r_out 1800, the
+level -45.7 = the Center_obj's top), DE_V_floor01, the ~1.2-m tiles, the
+trimesh collision, the meta center_octagon.
+
+THE OPEN BUG: the player at (11400,16850) still falls through (-5263):
+the spawn point = inside the ring hole (26 cm from the center, r_in =
+730) AND the Center_obj's own trimesh does not catch (-45.7..-50.9).
+NEXT: the L2_TRACE_BOX at the center = what the rays hit (the Center_obj
+collider? nothing?); check the Center_obj = loaded/placed (the actor
+402); if its trimesh = broken - the octagon ring covers r_in = 0 (the
+full octagon) instead. The hand/pillars (O_De_01/02/03) = at the
+authentic height now (115f312).
+
+## 2026-11-10 (8) — THE MESH GRID = the lamp levels: the village is FLAT -44.73, the terraces decoded
+
+The user: first the correct geometry/meshes from the original, then the
+textures — my slab had the layering and the coordinate mismatches (the
+lamps floating).
+
+THE LAMP GRID (31 lamps extracted): ALL Lamp01 = z -4473.4 EXACTLY
+(the pairs flanking the road along the whole village), Lamp02 = -4498.4.
+=> the village street = FLAT -44.73 (the lamp level), NOT the descent's
+-46.11. The profile = the terraces: the bridge dip (-46.11) -> the
+octagon terrace (-45.7, the Center_obj) -> the street (-44.73).
+
+The road segments now: the descent ends at the octagon level (h -62),
+the gap (the octagon), the climb [3080..3600] to the street (+34.6), the
+flat street to the east bridge. The lamps = the street-level markers for
+all the further geometry work.
+
+## 2026-11-10 (9) — the center redone per the mesh grid: the player stands
+
+The road = the approach flat ends at the local lx 450 (before the
+octagon's west edge); the octagon = the FULL octagon (r_in = 0) at
+-45.75 (5 cm below the Center_obj's top = no z-fight, the Center_obj
+renders on it); the climb [3080..3600] from the octagon level (-67) to
+the street (+34.6). The layering = gone (the road no longer cuts the
+ring). The verify: the player STANDS at (11200,16850) on -4575.0, the
+hand sculpture at the authentic height, the temple behind.
+
+## 2026-11-10 (10) — the foreign texture at the center = the MT_In shell (the prime suspect)
+
+The user (2 iterations): the foreign striped texture lies as the second
+layer at the center. The center redo (2a3531f) = the octagon + the road
+gap done, but the striped = still there from the user's angles. The
+trace at the bridge = the legit meshes; the center's prime suspect =
+O_DE_MT_In (the cave inner shell, O_dark_01) enveloping the village -
+the alien layer near the octagon.
+
+NEXT: the trace at the center from the user's angle -> confirm the MT_In
+-> hide/trim the shell near the octagon (the render-only trim or the
+specific faces), verify vs the user's live screenshot.
+
+## 2026-11-10 (11) — the alien striped shell removed: O_DE_MT_In fully skipped
+
+O_DE_MT_In (the cave inner shell, O_dark_01) moved to _ROAD_STRIP_SKIP =
+the render AND the collision skipped. The center (11200,16850) = clean:
+the octagon plaza + the hand + the temple, no striped walls. The tunnel
+walls = MT_Out (the legit rock), the inner shell was not needed
+anywhere.

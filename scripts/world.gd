@@ -27,6 +27,7 @@ func _ready() -> void:
 	_build_terrain()
 	_build_meshes()
 	_build_clean_room_road()
+	_build_center_octagon()
 	_build_lights()
 	_spawn_player()
 	print("world built in ", (Time.get_ticks_msec() - started) / 1000.0, " s")
@@ -479,7 +480,16 @@ func _build_clean_room_road() -> void:
 	var segs := [
 		[-1762.47, -1304.83, 103.48, 103.48],
 		[-1304.83, -553.26, 103.48, -102.87],
-		[-553.26, 1651.04, -102.87, -102.87],
+		[-553.26, 1651.04, -102.87, -62.0],
+		# the east flat continues to the east bridge (the world x ~10670..14720):
+		# the original Obj01 slab ends at +1651 but the road floor must reach
+		# the far bridge, else the east village = the void (the falls)
+		# the octagon plaza (Center_obj at the local lx ~2376) breaks the road:
+		# the east street resumes behind it AT THE LAMP LEVEL: all Lamp01s
+		# stand at z -4473.4 = the village street is FLAT -44.73 (the actor
+		# z -4508 => the local h = +34.6), the bridge = the dip below it
+		[3080.0, 3600.0, -62.0, 34.6],
+		[3600.0, 5800.0, 34.6, 34.6],
 	]
 	var mats := {}
 	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
@@ -495,18 +505,24 @@ func _build_clean_room_road() -> void:
 		m.cull_mode = StandardMaterial3D.CULL_DISABLED
 		mats[tex[0]] = m
 
-	var bands := [
-		["cobble", -half_w, -carpet_w],
-		["carpet", -carpet_w, carpet_w],
-		["cobble", carpet_w, half_w],
-	]
+	# The band layout per segment: on the bridge/east flat (lx <= 1651) the
+	# cobble shoulders flank the carpet; on the village street (lx > 1651)
+	# the carpet road is flanked by the PLAZA stone (floor01) at the same
+	# level, separated by the small border step.
 	var bodies := {}
-	for b in bands:
-		var st := SurfaceTool.new()
-		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var w0: float = b[1]
-		var w1: float = b[2]
-		for seg in segs:
+	for seg_i in range(segs.size()):
+		var seg = segs[seg_i]
+		var street: bool = seg[0] >= 1651.04 or seg_i == 3
+		var bands := []
+		if street:
+			bands = [["carpet", -200.0, 200.0], ["cobble", -600.0, -200.0], ["cobble", 200.0, 600.0]]
+		else:
+			bands = [["cobble", -half_w, -carpet_w], ["carpet", -carpet_w, carpet_w], ["cobble", carpet_w, half_w]]
+		for b in bands:
+			var st := SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			var w0: float = b[1]
+			var w1: float = b[2]
 			var lx0: float = seg[0]
 			var lx1: float = seg[1]
 			var h0: float = seg[2]
@@ -536,81 +552,89 @@ func _build_clean_room_road() -> void:
 			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
 			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
 			st.set_uv(Vector2(u1, along0)); st.add_vertex(p01)
-		st.generate_normals()
-		var mesh := ArrayMesh.new()
-		st.commit(mesh)
-		var mi := MeshInstance3D.new()
-		mi.mesh = mesh
-		var count := mesh.get_surface_count()
-		for si in range(count):
-			mesh.surface_set_material(si, mats[b[0]])
-		world.add_child(mi)
-		var shape := mesh.create_trimesh_shape()
-		shape.backface_collision = true
-		var body := StaticBody3D.new()
-		var col := CollisionShape3D.new()
-		col.shape = shape
-		body.add_child(col)
-		body.set_meta("mesh_key", "clean_room_road")
-		world.add_child(body)
-	# the low rails at the edges
-	for side in [-1.0, 1.0]:
-		var st2 := SurfaceTool.new()
-		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var rw := 35.0
-		var rh := 1.1  # the meters (the rail vertices are in the world meters)
-		for seg in segs:
-			var lx0: float = seg[0]
-			var lx1: float = seg[1]
-			var h0: float = seg[2]
-			var h1: float = seg[3]
-			var wb0: float = side * (half_w - rw)
-			var wb1: float = side * half_w
-			var b00 := _road_pt(origin, dir, right, lx0, wb0, actor_z + h0)
-			var b10 := _road_pt(origin, dir, right, lx1, wb0, actor_z + h1)
-			var b01 := _road_pt(origin, dir, right, lx0, wb1, actor_z + h0)
-			var b11 := _road_pt(origin, dir, right, lx1, wb1, actor_z + h1)
-			var t00 := b00 + Vector3(0, rh, 0)
-			var t10 := b10 + Vector3(0, rh, 0)
-			var t01 := b01 + Vector3(0, rh, 0)
-			var t11 := b11 + Vector3(0, rh, 0)
-			# the inner face (the world-scaled UVs: u = along / 128 cm)
-			var u0r: float = lx0 / 128.0
-			var u1r: float = lx1 / 128.0
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
-			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
-			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(b10)
-			# the top cap
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t01)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
-			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
-			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
-			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(t10)
-		st2.generate_normals()
-		var mesh2 := ArrayMesh.new()
-		st2.commit(mesh2)
-		mesh2.surface_set_material(0, mats["rail"])
-		var mi2 := MeshInstance3D.new()
-		mi2.mesh = mesh2
-		world.add_child(mi2)
-		var shape2 := mesh2.create_trimesh_shape()
-		shape2.backface_collision = true
-		var body2 := StaticBody3D.new()
-		var col2 := CollisionShape3D.new()
-		col2.shape = shape2
-		body2.add_child(col2)
-		body2.set_meta("mesh_key", "clean_room_rail")
-		world.add_child(body2)
-	print("clean-room road built: the wide flush deck + the carpet band + the rails")
+			st.generate_normals()
+			var mesh := ArrayMesh.new()
+			st.commit(mesh)
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			var count := mesh.get_surface_count()
+			for si in range(count):
+				mesh.surface_set_material(si, mats[b[0]])
+			world.add_child(mi)
+			var shape := mesh.create_trimesh_shape()
+			shape.backface_collision = true
+			var body := StaticBody3D.new()
+			var col := CollisionShape3D.new()
+			col.shape = shape
+			body.add_child(col)
+			body.set_meta("mesh_key", "clean_room_road")
+			world.add_child(body)
+	print("clean-room road built: the wide flush deck + the carpet band")
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:
 	var g := origin + dir * lx + right * w
 	return Vector3(g.x * UNIT_SCALE, z * UNIT_SCALE, g.y * UNIT_SCALE)
+
+
+## The clean-room octagon plaza at the village center (the user's live
+## screenshot): the octagonal floor ring around the Center_obj platform
+## (its top = -45.7 = the plaza level), DE_V_floor01, the ~1.2-m tiles.
+func _build_center_octagon() -> void:
+	var c := Vector2(11374.0, 16847.0)   # the Center_obj actor (the map data)
+	var r_in := 0.0                     # just outside the Center_obj (-7 m)
+	var r_out := 1800.0                   # the octagon's outer radius
+	var top_z := -4575.0                  # the plaza level, cm
+	var tp := "%s/textures/oren_dev_t/Texture/DE_V_floor01.png" % MAP_DIR
+	if not FileAccess.file_exists(tp):
+		print("center octagon: missing texture")
+		return
+	var img := Image.new()
+	img.load(tp)
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.roughness = 0.95
+	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prev_out := Vector2.ZERO
+	var prev_in := Vector2.ZERO
+	for k in range(9):
+		var ang := float(k) * TAU / 8.0 + 0.3927  # the 22.5-deg offset
+		var d := Vector2(cos(ang), sin(ang))
+		var out_pt := c + d * r_out
+		var in_pt := c + d * r_in
+		var v_out := Vector3(out_pt.x * UNIT_SCALE, top_z * UNIT_SCALE, out_pt.y * UNIT_SCALE)
+		var v_in := Vector3(in_pt.x * UNIT_SCALE, top_z * UNIT_SCALE, in_pt.y * UNIT_SCALE)
+		if k > 0:
+			var po := prev_out * UNIT_SCALE
+			var pi2 := prev_in * UNIT_SCALE
+			var a := Vector3(po.x, top_z * UNIT_SCALE, po.y)
+			var b2 := Vector3(pi2.x, top_z * UNIT_SCALE, pi2.y)
+			st.set_uv(prev_out / 120.0); st.add_vertex(a)
+			st.set_uv(out_pt / 120.0); st.add_vertex(v_out)
+			st.set_uv(in_pt / 120.0); st.add_vertex(v_in)
+			st.set_uv(prev_out / 120.0); st.add_vertex(a)
+			st.set_uv(in_pt / 120.0); st.add_vertex(v_in)
+			st.set_uv(prev_in / 120.0); st.add_vertex(b2)
+		prev_out = out_pt
+		prev_in = in_pt
+	st.generate_normals()
+	var mesh := ArrayMesh.new()
+	st.commit(mesh)
+	mesh.surface_set_material(0, m)
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	world.add_child(mi)
+	var shape := mesh.create_trimesh_shape()
+	shape.backface_collision = true
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	col.shape = shape
+	body.add_child(col)
+	body.set_meta("mesh_key", "center_octagon")
+	world.add_child(body)
+	print("center octagon built")
 
 
 func _build_meshes() -> void:
@@ -645,8 +669,6 @@ func _build_meshes() -> void:
 		# in the Z family of the other floor meshes (Bridge -4288, Btm_Obj01
 		# -4508, O_DE_Btm -4952). Experimental shift pending engine-RE of the
 		# discrepancy.
-		if mr["object"] in ["O_De_01", "O_De_02", "O_De_03"]:
-			pos_z = loc[2] + 1161.0
 		inst.position = Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2]))
 		inst.scale = Vector3.ONE * float(actor.get("draw_scale", 1.0))
@@ -798,9 +820,10 @@ func _get_mesh(key: String) -> Mesh:
 # the packed decompressor yields the real thin slabs.
 var _ROAD_STRIP_SKIP := [
 	"Oren_DEV_S:O_DE_Btm_Obj01",  # replaced by the clean-room wide road slab
-	"Oren_DEV_S:O_DE_Btm",  # the 49-m terraced wall blocking the houses:
-	# the render AND the collision are skipped - the invisible collider
-	# was walling off the houses (the trace: 45 Btm hits)
+	"Oren_DEV_S:O_DE_Btm",  # the 49-m terraced wall blocking the houses
+	"Oren_DEV_S:O_DE_MT_In",  # the cave inner shell = the alien striped
+	# layer at the village center (the user's screenshots); the tunnel
+	# walls = MT_Out, the inner shell is not needed anywhere
 ]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
