@@ -3626,3 +3626,13 @@ The road segments now: the descent ends at the octagon level (h -62),
 the gap (the octagon), the climb [3080..3600] to the street (+34.6), the
 flat street to the east bridge. The lamps = the street-level markers for
 all the further geometry work.
+
+## 2026-11-10 (9) — the center redone per the mesh grid: the player stands
+
+The road = the approach flat ends at the local lx 450 (before the
+octagon's west edge); the octagon = the FULL octagon (r_in = 0) at
+-45.75 (5 cm below the Center_obj's top = no z-fight, the Center_obj
+renders on it); the climb [3080..3600] from the octagon level (-67) to
+the street (+34.6). The layering = gone (the road no longer cuts the
+ring). The verify: the player STANDS at (11200,16850) on -4575.0, the
+hand sculpture at the authentic height, the temple behind.

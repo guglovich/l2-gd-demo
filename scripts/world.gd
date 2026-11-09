@@ -582,9 +582,9 @@ func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float
 ## (its top = -45.7 = the plaza level), DE_V_floor01, the ~1.2-m tiles.
 func _build_center_octagon() -> void:
 	var c := Vector2(11374.0, 16847.0)   # the Center_obj actor (the map data)
-	var r_in := 730.0                     # just outside the Center_obj (-7 m)
+	var r_in := 0.0                     # just outside the Center_obj (-7 m)
 	var r_out := 1800.0                   # the octagon's outer radius
-	var top_z := -4570.0                  # the plaza level, cm
+	var top_z := -4575.0                  # the plaza level, cm
 	var tp := "%s/textures/oren_dev_t/Texture/DE_V_floor01.png" % MAP_DIR
 	if not FileAccess.file_exists(tp):
 		print("center octagon: missing texture")
