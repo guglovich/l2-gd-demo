@@ -3429,3 +3429,15 @@ rails were 110 m tall (the cm height added to the meter vertices).
 
 The span shot (tmp/shots/cr3/): the wide road + the rails + the arches =
 the reference composition. The remaining = the lighting stage.
+
+## 2026-11-09 (16) — the MCP-craft discipline: the archive class located (fnd_11)
+
+The user set the discipline: the craft MCP = the brain, the agent = the
+hands. The brief/plan updated (the current question = the .usx archive's
+vtable+0x40 lazy decompressor). Progress: engine.dll = only the base
+FArchive RTTI (0x10a50138) — no engine.dll archive subclass; Core.dll =
+ULinkerLoad RTTI @0x102382c8 = the .usx archive. The vtable resolution =
+the next step: find ?Serialize@ULinkerLoad@@ -> scan .rdata for the
+containing vtable -> the +0x40/+0x3c slots = the lazy-block reader and
+the Seek (per fnd_8) -> study = the packed decompressor -> the authentic
+CollisionTriangles -> replace/confirm the clean-room collision.
