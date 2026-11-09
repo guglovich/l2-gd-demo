@@ -26,6 +26,7 @@ func _ready() -> void:
 	_build_environment()
 	_build_terrain()
 	_build_meshes()
+	_build_clean_room_road()
 	_build_lights()
 	_spawn_player()
 	print("world built in ", (Time.get_ticks_msec() - started) / 1000.0, " s")
@@ -461,6 +462,146 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 	st.set_uv(uv3); st.add_vertex(p3)
 
 
+## The clean-room wide road over the bridge span (the user's request:
+## the bridge = whole, wide, ONE layer, per the live screenshots). The
+## profile = the Obj01 slab's own map-data profile widened to the full
+## road width; the center band = the carpet (capet01), the side bands =
+## the cobble (DE_V_floor02); the low rails at the edges; flush.
+func _build_clean_room_road() -> void:
+	var origin := Vector2(9059.0, 17388.0)   # the Obj01 actor (the map data)
+	var dir := Vector2(0.97638, -0.21590)    # the yaw -2272
+	var right := Vector2(-dir.y, dir.x)
+	var actor_z := -4508.0                  # the Obj01 actor z, cm
+	var half_w := 500.0
+	var carpet_w := 128.0
+	# the profile: (the local x from, to, the h from, to) in cm - the Obj01
+	# slab's own map-data profile (the top plate / the slope / the bottom)
+	var segs := [
+		[-1762.47, -1304.83, 103.48, 103.48],
+		[-1304.83, -553.26, 103.48, -102.87],
+		[-553.26, 1651.04, -102.87, -102.87],
+	]
+	var mats := {}
+	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor02"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
+		var tp := "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tex[1], tex[2]]
+		if not FileAccess.file_exists(tp):
+			print("clean-room road: missing texture ", tp)
+			return
+		var img := Image.new()
+		img.load(tp)
+		var m := StandardMaterial3D.new()
+		m.albedo_texture = ImageTexture.create_from_image(img)
+		m.roughness = 0.95
+		m.cull_mode = StandardMaterial3D.CULL_DISABLED
+		mats[tex[0]] = m
+
+	var bands := [
+		["cobble", -half_w, -carpet_w],
+		["carpet", -carpet_w, carpet_w],
+		["cobble", carpet_w, half_w],
+	]
+	var bodies := {}
+	for b in bands:
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var w0: float = b[1]
+		var w1: float = b[2]
+		for seg in segs:
+			var lx0: float = seg[0]
+			var lx1: float = seg[1]
+			var h0: float = seg[2]
+			var h1: float = seg[3]
+			var p00 := _road_pt(origin, dir, right, lx0, w0, actor_z + h0)
+			var p10 := _road_pt(origin, dir, right, lx1, w0, actor_z + h1)
+			var p01 := _road_pt(origin, dir, right, lx0, w1, actor_z + h0)
+			var p11 := _road_pt(origin, dir, right, lx1, w1, actor_z + h1)
+			var along0: float = lx0 / 2.56
+			var along1: float = lx1 / 2.56
+			var u0: float = w0 / 2.56
+			var u1: float = w1 / 2.56
+			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
+			st.set_uv(Vector2(u0, along1)); st.add_vertex(p10)
+			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
+			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
+			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
+			st.set_uv(Vector2(u1, along0)); st.add_vertex(p01)
+		st.generate_normals()
+		var mesh := ArrayMesh.new()
+		st.commit(mesh)
+		var mi := MeshInstance3D.new()
+		mi.mesh = mesh
+		var count := mesh.get_surface_count()
+		for si in range(count):
+			mesh.surface_set_material(si, mats[b[0]])
+		world.add_child(mi)
+		var shape := mesh.create_trimesh_shape()
+		shape.backface_collision = true
+		var body := StaticBody3D.new()
+		var col := CollisionShape3D.new()
+		col.shape = shape
+		body.add_child(col)
+		body.set_meta("mesh_key", "clean_room_road")
+		world.add_child(body)
+	# the low rails at the edges
+	for side in [-1.0, 1.0]:
+		var st2 := SurfaceTool.new()
+		st2.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var rw := 35.0
+		var rh := 1.1  # the meters (the rail vertices are in the world meters)
+		for seg in segs:
+			var lx0: float = seg[0]
+			var lx1: float = seg[1]
+			var h0: float = seg[2]
+			var h1: float = seg[3]
+			var wb0: float = side * (half_w - rw)
+			var wb1: float = side * half_w
+			var b00 := _road_pt(origin, dir, right, lx0, wb0, actor_z + h0)
+			var b10 := _road_pt(origin, dir, right, lx1, wb0, actor_z + h1)
+			var b01 := _road_pt(origin, dir, right, lx0, wb1, actor_z + h0)
+			var b11 := _road_pt(origin, dir, right, lx1, wb1, actor_z + h1)
+			var t00 := b00 + Vector3(0, rh, 0)
+			var t10 := b10 + Vector3(0, rh, 0)
+			var t01 := b01 + Vector3(0, rh, 0)
+			var t11 := b11 + Vector3(0, rh, 0)
+			# the inner face (the world-scaled UVs: u = along / 128 cm)
+			var u0r: float = lx0 / 128.0
+			var u1r: float = lx1 / 128.0
+			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
+			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t00)
+			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
+			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(b00)
+			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t10)
+			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(b10)
+			# the top cap
+			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
+			st2.set_uv(Vector2(u0r, 1)); st2.add_vertex(t01)
+			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
+			st2.set_uv(Vector2(u0r, 0)); st2.add_vertex(t00)
+			st2.set_uv(Vector2(u1r, 1)); st2.add_vertex(t11)
+			st2.set_uv(Vector2(u1r, 0)); st2.add_vertex(t10)
+		st2.generate_normals()
+		var mesh2 := ArrayMesh.new()
+		st2.commit(mesh2)
+		mesh2.surface_set_material(0, mats["rail"])
+		var mi2 := MeshInstance3D.new()
+		mi2.mesh = mesh2
+		world.add_child(mi2)
+		var shape2 := mesh2.create_trimesh_shape()
+		shape2.backface_collision = true
+		var body2 := StaticBody3D.new()
+		var col2 := CollisionShape3D.new()
+		col2.shape = shape2
+		body2.add_child(col2)
+		body2.set_meta("mesh_key", "clean_room_rail")
+		world.add_child(body2)
+	print("clean-room road built: the wide flush deck + the carpet band + the rails")
+
+
+func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:
+	var g := origin + dir * lx + right * w
+	return Vector3(g.x * UNIT_SCALE, z * UNIT_SCALE, g.y * UNIT_SCALE)
+
+
 func _build_meshes() -> void:
 	var placed := 0
 	var skipped: Array[String] = []
@@ -644,7 +785,9 @@ func _get_mesh(key: String) -> Mesh:
 # decoded from the variable-length packed records render as 2-m-thick walls
 # over the road; the original has them as flush border inlays. Skipped until
 # the packed decompressor yields the real thin slabs.
-var _ROAD_STRIP_SKIP := []  # the strips = the real parsed meshes (the run-anchor = UModel 1-1)
+var _ROAD_STRIP_SKIP := [
+	"Oren_DEV_S:O_DE_Btm_Obj01",  # replaced by the clean-room wide road slab
+]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",

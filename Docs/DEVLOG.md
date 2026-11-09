@@ -3411,3 +3411,21 @@ infrastructure stays for when the lazy records are decoded). The verify
 (the x=8200 profile): the deck -46.04 via O_DE_Bridge = walkable across
 the full width + the carpet -45.28 via Obj01 = both standable = the wide
 bridge as the original. The spawn shot = unchanged composition.
+
+## 2026-11-09 (14) — the clean-room wide road built from scratch (the user's path)
+
+_build_clean_room_road() in world.gd: the wide road slab built from
+scratch per the live screenshots — the profile = the Obj01 slab's own
+map-data profile (the top plate -44.05 / the slope / the bottom -46.11)
+widened to the full road width (10 m); the center band = the carpet
+(capet01), the side bands = the cobble (DE_V_floor02); the low rails
+(wall05, 1.1 m) at the edges; the collision = the slab's own trimesh =
+ONE FLUSH LAYER (the x=8200 profile: the single clean_room_road surface
+-45.32..-45.28, no step; the old deck ramp is under it).
+
+The Obj01 narrow staircase slabs = skipped (replaced). The units bug
+fixed on the way: the slab was 35 cm (the meters vs the cm mix) and the
+rails were 110 m tall (the cm height added to the meter vertices).
+
+The span shot (tmp/shots/cr3/): the wide road + the rails + the arches =
+the reference composition. The remaining = the lighting stage.
