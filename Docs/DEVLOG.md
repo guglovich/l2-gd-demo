@@ -3657,3 +3657,11 @@ the render AND the collision skipped. The center (11200,16850) = clean:
 the octagon plaza + the hand + the temple, no striped walls. The tunnel
 walls = MT_Out (the legit rock), the inner shell was not needed
 anywhere.
+
+## 2026-11-10 (13) — the light gaps fixed: MT_In restored (it covered the MT_Out holes)
+
+The user's screenshot: the sky gaps through the rock after the MT_In
+removal. The MT_In = restored fully (the render + the collision): it
+covers the holes in the outer shell. The verify at (9338,17144): no
+gaps. The striped-texture question at the center remains open — the
+next sighting needs the trace at the exact user angle before any skip.
