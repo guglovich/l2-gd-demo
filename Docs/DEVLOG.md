@@ -3140,3 +3140,11 @@ not edited on their behalf.
 
 **What is not done** (repeat): no mesh re-extract, no `staticmesh.py`
 semantic change, no `world.gd` change, no screenshot.
+
+## 2026-11-09 — craft-anything updated 0.5.0 -> 0.6.0
+
+The CLI replaced in place (~/.local/bin/craft-anything-cli + craft-anything,
+from the official linux-x86_64 tarball). The MCP server starts cleanly
+against the existing analysis/l2-godot.cany store; AGENTS.md version note
+bumped. The 0.6.0 highlights relevant here: the native toolset bounds
+hardening (PE/ELF reads) and the per-action approval settings.

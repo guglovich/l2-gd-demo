@@ -76,7 +76,7 @@ no server, no mobs. Native Linux target (no Wine), test machine: this Arch box.
   forces flat white ambient so black regions are recognisable as missing
   geometry rather than shadowed dark textures.
 - **MCP servers registered (need ZCode restart to appear in tool list):**
-  Craft Anything **0.3.0** (`~/.local/bin/craft-anything-cli mcp --project
+  Craft Anything **0.6.0** (`~/.local/bin/craft-anything-cli mcp --project
   analysis/l2-godot.cany --deep`) and **l2-modding**
   (`tools/l2-modding-mcp/.venv/bin/python -m l2_mcp.server`; 25 tools:
   .utx texture decode/encode, .unr map parse, package scan; it WRITES
