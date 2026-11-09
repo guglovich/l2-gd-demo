@@ -3732,3 +3732,16 @@ UVs. REDONE: the .bin restored from git (59c7b8b), then the TARGETED
 override = only the 40 verts referenced by prim5's indices (v = 0.001,
 u kept; ct=5126). The reimport + the verify = 0 errors. The final color
 check = the user's (my shot = the shadow side).
+
+## 2026-11-10 (20) — the hand texture mystery SOLVED by the trace: the Center_obj rim overlaps the statue
+
+L2_TRACE_BOX at the hand region = DEFINITIVE: the hand = O_DE_01 with
+De_Statue002 (CORRECT!) + the foreign hits = O_DE_Center_obj surf 5
+(DE_V_new_deco3) = the Center_obj's rim/surface INTERSECTS the statue's
+raised hand (the z-conflict: the platform's parts poke through the
+hand). The materials/UVs were never the problem — the GEOMETRY overlap
+is.
+
+NEXT: the Center_obj's placement/shape vs the live client (the hand
+must be ABOVE the platform) - the z or the mesh part to trim. The
+O_De_03 = the unrelated mesh (the red herring all along).
