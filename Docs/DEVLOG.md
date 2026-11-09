@@ -3177,3 +3177,33 @@ ship broken); the debug = the next session's opening task:
 1. why FileAccess finds the json but the ConcavePolygonShape3D = empty
    for the rays (suspect the pv resize/fill or the verts framing);
 2. why Btm_Obj01's json = not requested (the asset_map path case?).
+
+## 2026-11-09 — THE COLLISION FORMAT CLOSED (craft 0.6.0, fnd_7)
+
+engine.dll is symbol-rich: UStaticMesh::GetCollisionTriangle/GetCollisionNode/
+GetNumCollisionTriangles/GetNumCollisionNodes, FStaticMeshCollisionTriangle/
+FStaticMeshCollisionNode with their operator<< serializers, and
+UStaticMesh::Build ("Building collision BSP tree...").
+
+**The two collision arrays are the LAZY arrays we were chasing:**
+- UStaticMesh+0x148 = **CollisionTriangles** (sub_1030ac90 lazy reader;
+  in-memory 84 B = FStaticMeshCollisionTriangle: 16 dwords = iVertex[3] +
+  MaterialIndex + vertices[3] + plane data, then 4 FCompactIndex;
+  the file form via sub_10302108).
+- UStaticMesh+0x160 = **CollisionNodes** (sub_10308c6a lazy reader;
+  in-memory 44 B = 4 ints + FBox; the file form via sub_10303161:
+  4 FCompactIndex + [1 compact + FVector min + FVector max]
+  = the 29-B [01][XX][YY][81 81]+24B records EXACTLY; 0x81 = compact -1).
+
+So the bulk's variable-length packed [01][idx][len][data] entries =
+the lazily-compressed collision triangles and nodes, and the 29-B units =
+the raw collision nodes. The walkable set = the CollisionTriangles'
+iVertex[3] into the wedge/vertex pool. The engine builds the runtime BSP
+from these (UStaticMesh::Build).
+
+**The importer path (the next session):** decode the +0x148 lazy array
+(the element op behind vtable+0x3c in sub_1030ac90) -> the collision
+triangles with their vertex indices -> the authentic collision mesh
+(84-B in-memory elements; the packed file form = [01][idx][len][data]).
+Then world.gd _collision_shape() reads the authentic subset (the wiring
+is already staged, debug of the json->shape path pending).
