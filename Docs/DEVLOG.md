@@ -3451,3 +3451,21 @@ clean-room slab now uses the same densities: the carpet u = (w+128)/256,
 v = lx/118; the cobble = /120. The span shot (tmp/shots/uvorig/): the
 cobble road + the center carpet band with the visible chain borders =
 the reference composition.
+
+## 2026-11-09 (18) — MILESTONE: the bridge floor is CONQUERED (the user confirmed)
+
+The bridge road = finally fully correct, built via the clean-room path:
+- the profile from the map data (the Obj01 slab's own: -44.05 / the slope / -46.11),
+- widened to the full 10-m road width, ONE flush layer (no step),
+- the original surfaces: DE_V_floor01 cobble (~1.2-m tiles), the center
+  band = DE_V_capet01 carpet (1 repeat across, ~1.18 m along — the chain
+  borders visible), the low rails DE_V_wall05 (1.1 m),
+- the collision = the slab's own trimesh (the single clean_room_road
+  surface across the width, the x=8200 profile),
+- the Obj01 narrow staircase slabs replaced; the arches = the client's
+  Bridge mesh; verified by the profiles and the screenshots
+  (tmp/shots/uvorig/, cr4, cr4spawn).
+
+THE PENDING DEFECT (the next task): the extra walls along the houses
+(лишние стенки вдоль домов) — the user's report; investigate which mesh
+renders them and whether the client shows them.
