@@ -3148,3 +3148,32 @@ from the official linux-x86_64 tarball). The MCP server starts cleanly
 against the existing analysis/l2-godot.cany store; AGENTS.md version note
 bumped. The 0.6.0 highlights relevant here: the native toolset bounds
 hardening (PE/ELF reads) and the per-action approval settings.
+
+## 2026-11-09 — engine.dll mined with craft 0.6.0: the collision object located; the collision-subset wiring = staged, debug pending
+
+**fnd_6 (the full serialization map).** UStaticMesh::Serialize (ver>=112)
+order: UPrimitive bbox -> VertexStream(+0x6c) -> ColorStream(+0x88) ->
+AlphaStream(+0xa4) -> UVStream(+0xc0) -> IndexBuffer x2 (+0x104,+0x120) ->
+**the collision object = a VIRTUAL Serialize (vtable+0x18) on field +0x178
+(sub_10308788, called right after IndexStream2)** -> the lazy Wedges
+sub_1030ac90(+0x148, 84-B elements, GLazyLoad forced off during the read) ->
+the lazy Faces sub_10308c6a(+0x160, 44-B elements) -> misc ints -> a 4-byte
+field (+0x1e0, ver>=120). NO kDOP read in UStaticMesh::Serialize itself.
+
+**The 29-B units = the collision object's leaf bboxes** (Obj01: 17 units ~
+18 tris; the mesh bbox precedes them at +2576; the 1.6-KB tail = 20 Wedges
+x 84 B = the lazy Wedges array). The engine collides the leaf-bbox-covered
+triangles only — the Bridge lower deck has NO leaf bboxes (105 units = the
+railings) = NOT walkable in the original.
+
+**The wiring built, debug pending.** tools/l2strict/collision_extract.py
+writes <mesh>.collision.json (the leaf-covered triangles, staged glTF
+frame) for the Oren_DEV_S meshes (29 with the json, 17 without — Obj01's
+own file passes the 18-tri filter). world.gd gained _collision_shape()
+reading it — BUT the in-engine test = NO-HIT everywhere at the bridge
+(the shapes = built from the json yet the rays miss; Btm_Obj01's json =
+oddly not requested). REVERTED to the full trimesh (the world must not
+ship broken); the debug = the next session's opening task:
+1. why FileAccess finds the json but the ConcavePolygonShape3D = empty
+   for the rays (suspect the pv resize/fill or the verts framing);
+2. why Btm_Obj01's json = not requested (the asset_map path case?).

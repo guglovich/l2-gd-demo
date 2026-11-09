@@ -545,6 +545,32 @@ func _ue_basis(pitch: int, yaw: int, roll: int) -> Basis:
 		Vector3(y.x, y.z, y.y))
 
 
+## The engine-authentic collision: the L2 client collides only the triangles
+## covered by the mesh's kDOP leaf bboxes (the 29-B [01][XX][YY][81 81]+2
+## corners records, engine.dll finding fnd_6). tools/l2strict/
+## collision_extract.py writes <mesh>.collision.json (the covered triangles,
+## staged glTF frame) next to each glTF; meshes without it keep the full
+## trimesh. This is what removes the non-walkable Bridge lower deck.
+func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
+	var info = asset_map_data.get("meshes", {}).get(key)
+	if info != null:
+		var gp: String = info["gltf"]
+		var cpath := "%s/%s.collision.json" % [gp.get_base_dir(), gp.get_file().get_basename()]
+		if FileAccess.file_exists(cpath):
+			var f := FileAccess.open(cpath, FileAccess.READ)
+			var data = JSON.parse_string(f.get_as_text())
+			var verts = data.get("verts", []) if data is Dictionary else []
+			if verts is Array and verts.size() >= 9:
+				var shape := ConcavePolygonShape3D.new()
+				var pv := PackedVector3Array()
+				pv.resize(verts.size() / 3)
+				for i in range(verts.size() / 3):
+					pv[i] = Vector3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2])
+				shape.set_faces(pv)
+				return shape
+	return mesh.create_trimesh_shape()
+
+
 func _get_mesh(key: String) -> Mesh:
 	if _mesh_cache.has(key): return _mesh_cache[key]
 	var info = asset_map_data.get("meshes", {}).get(key)

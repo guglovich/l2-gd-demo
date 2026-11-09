@@ -71,8 +71,7 @@ def extract(pkg: Package, name: str, gltf_path: str) -> bool:
         # so the glTF->unit remap is (x, z, y).
         pos = np.frombuffer(buf, "<f4", pa["count"] * 3,
                             bv.get("byteOffset", 0)).reshape(-1, 3).astype(np.float64)
-        cent = pos.reshape(-1, 3)
-        cunit = cent[:, [0, 2, 1]] * 100.0  # back to cm in the unit frame
+        cunit = pos * 100.0  # glTF (fileX, fileY-width, fileZ-height) = the unit (X, Y, Z) frame
         if "indices" not in pr:
             continue
         ia = g["accessors"][pr["indices"]]
