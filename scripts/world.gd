@@ -27,6 +27,7 @@ func _ready() -> void:
 	_build_terrain()
 	_build_meshes()
 	_build_clean_room_road()
+	_build_center_octagon()
 	_build_lights()
 	_spawn_player()
 	print("world built in ", (Time.get_ticks_msec() - started) / 1000.0, " s")
@@ -571,6 +572,66 @@ func _build_clean_room_road() -> void:
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:
 	var g := origin + dir * lx + right * w
 	return Vector3(g.x * UNIT_SCALE, z * UNIT_SCALE, g.y * UNIT_SCALE)
+
+
+## The clean-room octagon plaza at the village center (the user's live
+## screenshot): the octagonal floor ring around the Center_obj platform
+## (its top = -45.7 = the plaza level), DE_V_floor01, the ~1.2-m tiles.
+func _build_center_octagon() -> void:
+	var c := Vector2(11374.0, 16847.0)   # the Center_obj actor (the map data)
+	var r_in := 730.0                     # just outside the Center_obj (-7 m)
+	var r_out := 1800.0                   # the octagon's outer radius
+	var top_z := -4570.0                  # the plaza level, cm
+	var tp := "%s/textures/oren_dev_t/Texture/DE_V_floor01.png" % MAP_DIR
+	if not FileAccess.file_exists(tp):
+		print("center octagon: missing texture")
+		return
+	var img := Image.new()
+	img.load(tp)
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.roughness = 0.95
+	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prev_out := Vector2.ZERO
+	var prev_in := Vector2.ZERO
+	for k in range(9):
+		var ang := float(k) * TAU / 8.0 + 0.3927  # the 22.5-deg offset
+		var d := Vector2(cos(ang), sin(ang))
+		var out_pt := c + d * r_out
+		var in_pt := c + d * r_in
+		var v_out := Vector3(out_pt.x * UNIT_SCALE, top_z * UNIT_SCALE, out_pt.y * UNIT_SCALE)
+		var v_in := Vector3(in_pt.x * UNIT_SCALE, top_z * UNIT_SCALE, in_pt.y * UNIT_SCALE)
+		if k > 0:
+			var po := prev_out * UNIT_SCALE
+			var pi2 := prev_in * UNIT_SCALE
+			var a := Vector3(po.x, top_z * UNIT_SCALE, po.y)
+			var b2 := Vector3(pi2.x, top_z * UNIT_SCALE, pi2.y)
+			st.set_uv(prev_out / 120.0); st.add_vertex(a)
+			st.set_uv(out_pt / 120.0); st.add_vertex(v_out)
+			st.set_uv(in_pt / 120.0); st.add_vertex(v_in)
+			st.set_uv(prev_out / 120.0); st.add_vertex(a)
+			st.set_uv(in_pt / 120.0); st.add_vertex(v_in)
+			st.set_uv(prev_in / 120.0); st.add_vertex(b2)
+		prev_out = out_pt
+		prev_in = in_pt
+	st.generate_normals()
+	var mesh := ArrayMesh.new()
+	st.commit(mesh)
+	mesh.surface_set_material(0, m)
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	world.add_child(mi)
+	var shape := mesh.create_trimesh_shape()
+	shape.backface_collision = true
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	col.shape = shape
+	body.add_child(col)
+	body.set_meta("mesh_key", "center_octagon")
+	world.add_child(body)
+	print("center octagon built")
 
 
 func _build_meshes() -> void:

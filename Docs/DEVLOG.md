@@ -3593,3 +3593,19 @@ collision (the player falls through at (11400,16850)) — diagnose why
 (the trimesh? the load?) and add the octagon plaza floor around it per
 the user's live screenshot (the octagonal platform + the outer ring with
 the crystal pillars).
+
+## 2026-11-10 (7) — the center octagon built; the Center_obj collision = the open bug
+
+_build_center_octagon() added (world.gd, called after the road): the
+octagonal floor ring around the Center_obj (r_in 730 / r_out 1800, the
+level -45.7 = the Center_obj's top), DE_V_floor01, the ~1.2-m tiles, the
+trimesh collision, the meta center_octagon.
+
+THE OPEN BUG: the player at (11400,16850) still falls through (-5263):
+the spawn point = inside the ring hole (26 cm from the center, r_in =
+730) AND the Center_obj's own trimesh does not catch (-45.7..-50.9).
+NEXT: the L2_TRACE_BOX at the center = what the rays hit (the Center_obj
+collider? nothing?); check the Center_obj = loaded/placed (the actor
+402); if its trimesh = broken - the octagon ring covers r_in = 0 (the
+full octagon) instead. The hand/pillars (O_De_01/02/03) = at the
+authentic height now (115f312).
