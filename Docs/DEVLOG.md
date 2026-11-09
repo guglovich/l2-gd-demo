@@ -3704,3 +3704,14 @@ materials are NOT the problem. The remaining suspects: the UV mapping of
 the hand's prim (prim5) pointing at the wrong atlas region (the face?),
 or the texture file export. NEXT: the user's zoomed screenshot of the
 hand + the UV box of prim5 vs UModel's prim5.
+
+## 2026-11-10 (17) — the statue hand = the UV bug found (ours vs UModel)
+
+UModel prim5 (the hand): u [-2.78, 7.16], v = 0.001 CONSTANT (the
+degenerate line = samples the texture's bottom row = the PALE ornamental
+band of De_Statue002 = the user's pale cracked hand!). OURS: v spread
+-0.91..2.65 = samples the whole dark field = the dark hand.
+
+THE FIX (the next iteration, the clean-room approved): override prim5's
+TEXCOORD_0 in the staged glTF with the original values (v = 0.001, u =
+the original range) - the python fixer, then the reimport + the verify.
