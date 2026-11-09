@@ -3745,3 +3745,10 @@ is.
 NEXT: the Center_obj's placement/shape vs the live client (the hand
 must be ABOVE the platform) - the z or the mesh part to trim. The
 O_De_03 = the unrelated mesh (the red herring all along).
+
+## 2026-11-10 (21) — the face texture on the hand FIXED: the Center_obj surface 5 hidden
+
+The Center_obj surface 5 (DE_V_new_deco3) intersected the statue's
+raised hand (the trace-proven). _get_mesh rebuilds the Center_obj mesh
+without the surface 5 (the rest of the platform stays). The verify: the
+hand = clean, the pale fingers = visible, no face texture.

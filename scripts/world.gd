@@ -749,6 +749,19 @@ func _get_mesh(key: String) -> Mesh:
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
 					print("DIAG bridge floor surface %d: texture applied" % [si])
 	_mesh_cache[key] = mesh
+	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's
+	# raised hand (the L2_TRACE_BOX: the foreign face texture on the hand).
+	# Rebuild the mesh without that surface; the rest of the platform stays.
+	if key == "Oren_DEV_S:O_DE_Center_obj":
+		var am := ArrayMesh.new()
+		for si in range(mesh.get_surface_count()):
+			if si == 5:
+				continue
+			am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
+					mesh.surface_get_arrays(si))
+			am.surface_set_material(am.get_surface_count() - 1,
+					mesh.surface_get_material(si))
+		mesh = am
 	return mesh
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
