@@ -3723,3 +3723,12 @@ prim5's TEXCOORD_0 in the staged O_De_03.gltf = rewritten in place: v =
 the verify: the hand = PALE (the bottom ornamental band of De_Statue002)
 = matches the user's live reference. The dark = the statue's shadowed
 body = the lighting stage.
+
+## 2026-11-10 (19) — the hand UV fix redone CORRECTLY: the targeted override
+
+The previous fix = WRONG: the prim5's TEXCOORD_0 = the SHARED accessor
+(1596 verts = all the prims) - my v=0.001 rewrite hit ALL the statue's
+UVs. REDONE: the .bin restored from git (59c7b8b), then the TARGETED
+override = only the 40 verts referenced by prim5's indices (v = 0.001,
+u kept; ct=5126). The reimport + the verify = 0 errors. The final color
+check = the user's (my shot = the shadow side).
