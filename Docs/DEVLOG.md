@@ -3366,3 +3366,17 @@ THE BRIDGE IS DONE within the stage-1 scope (textures/maps/geometry):
 - the arch/pillars/rails = rendered; the approach platforms = Pir01;
 - the levels = the MT_Btm plateau -44.0 / the carpet -44.05..-46.11 / the
   plaza -46.07.
+
+## 2026-11-09 (11) — the bridge "боковины" (the span side walls) restored
+
+The user: no side walls = the task not closed. The span rect (x7200-8800,
+y17200-18100) contains only 2 static meshes: O_DE_Bridge (the bbox 14.6 m
+= the WHOLE span) + a high decoration. The side walls = inside the Bridge
+mesh, but they are single-plane strips whose normals point AWAY from the
+road — Godot's default cull_back made them invisible from the walkway.
+The live client shows them (no backface culling for the L2 statics).
+
+Fix: the mesh materials are now CULL_DISABLED (two-sided) — the L2
+authentic rendering. The span screenshot (tmp/shots/sides/): the
+ornamental side walls run along the walkway = the tunnel-reference
+composition (the chains + the rails + the darkness below).

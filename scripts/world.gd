@@ -609,6 +609,12 @@ func _get_mesh(key: String) -> Mesh:
 				tex = ImageTexture.create_from_image(img)
 				m.albedo_texture = tex
 				m.roughness = 0.95
+				# L2 statics render TWO-SIDED: the bridge side walls are
+				# single-plane strips whose normals point away from the road;
+				# the live client shows them from the road (no backface
+				# culling for statics). Without this the bridge "боковины"
+				# (the span side walls inside O_DE_Bridge) are invisible.
+				m.cull_mode = StandardMaterial3D.CULL_DISABLED
 				# Real values (MECHANICS.md, decompiled/original packages):
 				# Shader flags carried in materials.json.shader — apply TwoSided.
 				# Opacity/OutputBlending are present as object refs/flags but not
