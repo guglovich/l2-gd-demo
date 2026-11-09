@@ -3329,3 +3329,24 @@ original collision model exactly: the carpet walkable, the deck and the
 sides not. The bridge/road task = closed: the decode chain is
 end-to-end (the meshes = UModel 1-1, the collision = the authentic
 records, the placement = the map data).
+
+## 2026-11-09 (9) — the Bridge deck prim hidden: "one wide layer" per the references
+
+The tunnel reference (Docs/bridge_original_tunnel.png) is definitive: at
+the span the original shows ONLY the narrow carpet walkway (2.56 m) with
+its border chains and the darkness under them — the Bridge's sloped deck
+ramp (prim 10, DE_V_floor02, -44.97..-46.79) is NOT visible. Our render
+showed it = the "second level" the user reported.
+
+Fix: _get_mesh hides the Bridge's surface 10 (the deck ramp) at load; the
+arch, the pillars, the railings stay; the collision is unaffected (the
+deck has no collision records). The walkable = the carpet strip (the
+authentic records) exactly as the original. The carpet texture (capet01 =
+the dark field + the chain borders, u across / v along) matches the
+reference chains-along-the-walkway composition.
+
+The spawn screenshot after the fix (tmp/shots/nodeck/shot1.png): the same
+composition as the reference spawn view — the wide MT_Btm cobble plateau
+at the entrance (the original has it too), the carpet strip descending the
+span, the arches. The remaining visible deltas = the lighting (the lamp
+glows, the fog) = the FORBIDDEN stage.
