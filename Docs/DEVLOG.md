@@ -3397,3 +3397,17 @@ the carpet top at -44.05 while the deck top = -44.97 at the span start.
 The flush options: the deck raise, the carpet lower, or the slab segments
 following the deck slope. Needs the next session's decision against the
 live screenshots.
+
+## 2026-11-09 (13) — the bridge = WIDE and walkable (the user's correction)
+
+The user: the original bridge is WHOLE and WIDE and walkable; ours was a
+narrow path. My "narrow walkway = authentic" reading was wrong - the
+undecoded lazy collision records hold the deck's walkable triangles, and
+until they are decoded the correct collision = the FULL MESH TRIMESH
+(the deck walkable, the railings block the edges, the carpet on top).
+
+Reverted _build_meshes to mesh.create_trimesh_shape() (the json
+infrastructure stays for when the lazy records are decoded). The verify
+(the x=8200 profile): the deck -46.04 via O_DE_Bridge = walkable across
+the full width + the carpet -45.28 via Obj01 = both standable = the wide
+bridge as the original. The spawn shot = unchanged composition.

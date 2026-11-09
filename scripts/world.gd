@@ -501,7 +501,7 @@ func _build_meshes() -> void:
 		world.add_child(inst)
 		placed += 1
 		if not _shape_cache.has(key):
-			var mshape := _collision_shape(key, mesh)
+			var mshape := mesh.create_trimesh_shape()
 			# UE2 collision is winding-agnostic; many L2 deck faces point DOWN
 			# (inverted winding). Without backface collision the character
 			# falls through rendered floors — the "hollow second tier" bug.
