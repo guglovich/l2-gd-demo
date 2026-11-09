@@ -3561,3 +3561,16 @@ THE PLAZA (the next iteration): the user's screenshot shows the plaza
 AT the road level (no visible step - only the small border), so the
 plaza slabs = the road-height side areas (the north strip first), the
 texture floor01, the small dark curb at the transition.
+
+## 2026-11-10 (5) — the village street = the carpet road + the plaza stone (the depression fixed)
+
+The user: the road was made solid — in the original the village street =
+the carpet band (~4 m) flanked by the PLAZA stone at the same level, and
+the areas beside it were the voids (the depression).
+
+The band layout restructured per segment: on the bridge/east flat
+(lx <= 1651) = the cobble shoulders + the carpet (as before); on the
+village street (lx > 1651) = the carpet +-2 m + the plaza stone bands
+(floor01) +-2..6 m. The GDScript scoping bug fixed (the commit block was
+outside the band loop). The verify at (10473,16943): the carpet road +
+the plaza stone = no voids, the user's composition.

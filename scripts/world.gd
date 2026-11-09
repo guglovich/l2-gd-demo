@@ -499,18 +499,24 @@ func _build_clean_room_road() -> void:
 		m.cull_mode = StandardMaterial3D.CULL_DISABLED
 		mats[tex[0]] = m
 
-	var bands := [
-		["cobble", -half_w, -carpet_w],
-		["carpet", -carpet_w, carpet_w],
-		["cobble", carpet_w, half_w],
-	]
+	# The band layout per segment: on the bridge/east flat (lx <= 1651) the
+	# cobble shoulders flank the carpet; on the village street (lx > 1651)
+	# the carpet road is flanked by the PLAZA stone (floor01) at the same
+	# level, separated by the small border step.
 	var bodies := {}
-	for b in bands:
-		var st := SurfaceTool.new()
-		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var w0: float = b[1]
-		var w1: float = b[2]
-		for seg in segs:
+	for seg_i in range(segs.size()):
+		var seg = segs[seg_i]
+		var street: bool = seg[0] >= 1651.04 or seg_i == 3
+		var bands := []
+		if street:
+			bands = [["carpet", -200.0, 200.0], ["cobble", -600.0, -200.0], ["cobble", 200.0, 600.0]]
+		else:
+			bands = [["cobble", -half_w, -carpet_w], ["carpet", -carpet_w, carpet_w], ["cobble", carpet_w, half_w]]
+		for b in bands:
+			var st := SurfaceTool.new()
+			st.begin(Mesh.PRIMITIVE_TRIANGLES)
+			var w0: float = b[1]
+			var w1: float = b[2]
 			var lx0: float = seg[0]
 			var lx1: float = seg[1]
 			var h0: float = seg[2]
@@ -540,23 +546,23 @@ func _build_clean_room_road() -> void:
 			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
 			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
 			st.set_uv(Vector2(u1, along0)); st.add_vertex(p01)
-		st.generate_normals()
-		var mesh := ArrayMesh.new()
-		st.commit(mesh)
-		var mi := MeshInstance3D.new()
-		mi.mesh = mesh
-		var count := mesh.get_surface_count()
-		for si in range(count):
-			mesh.surface_set_material(si, mats[b[0]])
-		world.add_child(mi)
-		var shape := mesh.create_trimesh_shape()
-		shape.backface_collision = true
-		var body := StaticBody3D.new()
-		var col := CollisionShape3D.new()
-		col.shape = shape
-		body.add_child(col)
-		body.set_meta("mesh_key", "clean_room_road")
-		world.add_child(body)
+			st.generate_normals()
+			var mesh := ArrayMesh.new()
+			st.commit(mesh)
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			var count := mesh.get_surface_count()
+			for si in range(count):
+				mesh.surface_set_material(si, mats[b[0]])
+			world.add_child(mi)
+			var shape := mesh.create_trimesh_shape()
+			shape.backface_collision = true
+			var body := StaticBody3D.new()
+			var col := CollisionShape3D.new()
+			col.shape = shape
+			body.add_child(col)
+			body.set_meta("mesh_key", "clean_room_road")
+			world.add_child(body)
 	print("clean-room road built: the wide flush deck + the carpet band")
 
 
