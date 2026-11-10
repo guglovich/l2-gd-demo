@@ -3765,3 +3765,12 @@ lost => the face texture renders across the arm/hand.
 THE FIX (the next iteration): the O_DE_01 = re-staged with the correct
 2-prim split (the head 69 + the body 648, the per-prim UVs as UModel)
 - the same check for the O_DE_02/Center_obj (the similar merge risk).
+
+## 2026-11-10 (23) — O_DE_01 re-staged from the UModel reference (the correct 2-prims split)
+
+The staged O_De_01 replaced with the UModel export: prim0 = 69 verts
+(the head, De_Statue001), prim1 = 648 verts (the body, DE_statue002_s)
+- the correct per-prim UVs (the face region for the head). The
+materials.json + the asset_map primitive_material_indices = [0,1]
+filled (were empty). The reimport done. The verify shot = the shadow
+side (the color inconclusive) - the user's check = the final gate.
