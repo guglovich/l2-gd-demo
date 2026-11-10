@@ -3774,3 +3774,28 @@ The staged O_De_01 replaced with the UModel export: prim0 = 69 verts
 materials.json + the asset_map primitive_material_indices = [0,1]
 filled (were empty). The reimport done. The verify shot = the shadow
 side (the color inconclusive) - the user's check = the final gate.
+
+## 2026-11-10 (24) — MILESTONE: the statue hand FIXED (the user confirmed) — the import bug catalog
+
+The statue's hand = fixed: O_DE_01 re-staged from the UModel export
+(the correct 69+648 prim split, the per-prim UVs) + the materials mapped
+(De_Statue001 / DE_statue002_s) + 5686b96. The user confirmed.
+
+**THE IMPORT BUG CATALOG (for every future mesh work):**
+1. **The prim merge** — our run-anchor parse can merge the adjacent
+   sections into one prim (O_DE_01: ours = 2 prims x 717 verts = the
+   whole mesh duplicated; the original = 69 head + 648 body). The
+   per-prim UVs are lost in the merge => the wrong atlas regions render
+   (the face across the arm/hand).
+2. **The shared UV accessor** — the staged prims often share ONE
+   POSITION/TEXCOORD accessor; a per-prim UV override must be
+   INDEX-TARGETED (only the verts referenced by that prim's indices),
+   never in-place over the whole accessor (the first hand fix broke all
+   the statue's UVs).
+3. **The validation gate**: every staged mesh = the per-prim diff vs
+   the UModel export (the prim count, the index counts, the UV boxes
+   per prim) BEFORE it is accepted. The materials.json / asset_map
+   entries = must be filled (the empty ones render untextured).
+4. **The diagnosis order**: L2_TRACE_BOX first (the mesh + the texture
+   per hit), then the hypotheses. The O_De_03 red herring cost several
+   iterations because the trace at the hand was done last, not first.
