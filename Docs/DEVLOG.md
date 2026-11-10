@@ -3752,3 +3752,16 @@ The Center_obj surface 5 (DE_V_new_deco3) intersected the statue's
 raised hand (the trace-proven). _get_mesh rebuilds the Center_obj mesh
 without the surface 5 (the rest of the platform stays). The verify: the
 hand = clean, the pale fingers = visible, no face texture.
+
+## 2026-11-10 (22) — the face on the arm = the O_DE_01 prim MERGE bug (the exact numbers)
+
+UModel O_DE_01: prim0 = 69 verts (the HEAD, the UV box u 0.34-0.63 /
+v 0.51-0.86 = the face region of the atlas!), prim1 = 648 verts (the
+body, u -2.38-0.96 / v -0.16-0.98). OURS: TWO prims of 717 verts EACH
+(69+648 = 717 = the whole mesh duplicated into both prims) with the
+BODY's UV range — the head prim = merged into the body, its face UVs =
+lost => the face texture renders across the arm/hand.
+
+THE FIX (the next iteration): the O_DE_01 = re-staged with the correct
+2-prim split (the head 69 + the body 648, the per-prim UVs as UModel)
+- the same check for the O_DE_02/Center_obj (the similar merge risk).
