@@ -1,13 +1,32 @@
 #!/usr/bin/env python3
 """Extract the authentic L2 collision subset per static mesh.
 
-The 29-B units ([01][XX][YY][81 81] + 2 corners) are the collision-tree
-leaf bboxes. The engine collides only the triangles covered by them.
-This tool scans a package's StaticMesh exports, reads the staged glTF,
-keeps the triangles whose centroid falls inside any unit bbox and writes
-<mesh>.collision.json next to it: {"tris": [x,y,z ...], "units": N}.
-Coordinates are written in the staged glTF frame (meters) so world.gd can
-build a trimesh directly.
+The on-disk collision array (engine.dll RE 2026-11-12, validated on
+Oren_DEV_S — O_DE_Btm 690/690 and O_De_01 961/961 records pass plane·v=D):
+
+    [compact N]                       N ≈ the mesh triangle count (can be
+                                      off by 1: O_DE_WH 1167 vs 1166)
+    N × record (VARIABLE stride):
+        FPlane   planes[4]            4 × 16 B — the face + 3 edge planes
+        compact  iVertex[3]           RAW VERTEX-STREAM indices (not wedges!)
+        compact  MaterialIndex
+
+Record stride is variable (64 B planes + 4-20 B of compacts) — the fixed
++68 stride of the first decoder caught only coincidental chains and
+recovered ~5% of the triangles, silently dropping the WH porch, the plaza
+floors and the stall decks.
+
+The triangle vertices come from the mesh's raw 24-B vertex stream
+(pos 12 B + normal 12 B) parsed straight out of the bulk — NOT from the
+staged glTF, whose vertex order is renumbered by the per-prim staging
+(the O_De_01 69+648 prim split). The winning stream is the one whose
+positions satisfy every record's face plane (plane·v = D).
+
+Output <mesh>.collision.json next to the glTF: {"units", "tris", "verts"}
+in the staged glTF frame (meters, y-up) so world.gd builds a trimesh
+directly. The kDOP leaf bboxes (the 29-B [01][XX][YY][81 81]+2 corners
+records) gate which triangles the engine collides: only triangles whose
+centroid falls inside some leaf bbox are kept.
 """
 import json
 import os
@@ -35,6 +54,119 @@ def scan_units(d, start, end):
     return out
 
 
+def read_compact(d, p):
+    b = d[p]
+    if b & 0x40:
+        v = b & 0x3F
+        sh = 6
+        while True:
+            p += 1
+            b = d[p]
+            v |= (b & 0x7F) << sh
+            sh += 7
+            if not b & 0x80:
+                break
+        return v, p + 1
+    return (b & 0x3F) if not (b & 0x80) else -(b & 0x3F) - 1, p + 1
+
+
+def unit_plane(seg, off):
+    if off + 16 > len(seg):
+        return False
+    nx, ny, nz, D = struct.unpack_from('<4f', seg, off)
+    return abs(nx * nx + ny * ny + nz * nz - 1.0) < 1e-3 and -1e5 < D < 1e5
+
+
+def walk_chain(seg, start, limit):
+    """Walk variable-stride records from `start`; return (count, end_off)."""
+    q = start
+    n = 0
+    while q + 64 <= limit:
+        if not all(unit_plane(seg, q + 16 * k) for k in range(4)):
+            break
+        q += 64
+        try:
+            for _ in range(4):
+                v, q = read_compact(seg, q)
+                if v < 0 or v > 1000000:
+                    return n, q
+        except IndexError:
+            break
+        n += 1
+    return n, q
+
+
+def locate_array(seg):
+    """Longest record chain whose preceding compact equals its length."""
+    best = None
+    o = 0
+    while o + 64 <= len(seg):
+        if all(unit_plane(seg, o + 16 * k) for k in range(4)):
+            n, q = walk_chain(seg, o, len(seg))
+            if n >= 8:
+                for cs in range(o - 1, max(o - 6, -1), -1):
+                    try:
+                        v, p = read_compact(seg, cs)
+                    except IndexError:
+                        continue
+                    if p == o and v == n:
+                        if best is None or n > best[0]:
+                            best = (n, o, q)
+                        break
+            o += 16
+        else:
+            o += 1
+    return best  # (count, first_record_off, end_off)
+
+
+def find_vertex_stream(seg, limit, records, max_idx):
+    """Candidate 24-B vertex streams; return the one that best satisfies
+    the records' face planes (the staged glTF vertex order is renumbered
+    by per-prim staging, so the raw stream must be matched by validation)."""
+    cands = []
+    o = 0
+    while o < limit:
+        try:
+            cnt, p = read_compact(seg, o)
+        except IndexError:
+            break
+        if 4 <= cnt <= 60000 and cnt > max_idx and p + cnt * 24 <= limit:
+            ok = 0
+            try:
+                for k in range(min(cnt, 12)):
+                    x, y, z = struct.unpack_from('<3f', seg, p + k * 24)
+                    nx, ny, nz = struct.unpack_from('<3f', seg, p + k * 24 + 12)
+                    if (abs(x) < 1e6 and abs(y) < 1e6 and abs(z) < 1e6 and
+                            abs(nx * nx + ny * ny + nz * nz - 1.0) < 0.01):
+                        ok += 1
+            except struct.error:
+                ok = 0
+            if ok == min(cnt, 12):
+                cands.append((cnt, p))
+        o += 1
+
+    def validate(sp):
+        ok = 0
+        for planes, idx in records[:60]:
+            nx, ny, nz, D = planes[0]
+            good = True
+            for k in idx[:3]:
+                x, y, z = struct.unpack_from('<3f', seg, sp + k * 24)
+                if abs(nx * x + ny * y + nz * z - D) > 2.0:
+                    good = False
+                    break
+            if good:
+                ok += 1
+        return ok
+
+    best = None
+    for cnt, p in cands:
+        v = validate(p)
+        if best is None or v > best[0]:
+            best = (v, cnt, p)
+    return best
+
+
 def extract(pkg: Package, name: str, gltf_path: str) -> bool:
     e = None
     for i in range(pkg.export_count):
@@ -49,97 +181,72 @@ def extract(pkg: Package, name: str, gltf_path: str) -> bool:
                       has_stack=bool(e.object_flags & 0x02000000))
     bulk = e.serial_offset + obj.end
     end = e.serial_offset + e.serial_size
-    units = scan_units(pkg.data, bulk, end)
-    if not units:
-        return False
+    seg = pkg.data[bulk:end]
+    units = scan_units(seg, 0, len(seg))
 
-    g = json.load(open(gltf_path))
-    base = os.path.dirname(gltf_path)
-    buf = open(os.path.join(base, g["buffers"][0]["uri"]), "rb").read()
-    boxes = []  # (min, max) in the native (X, Y, Z) unit frame, cm
+    arr = locate_array(seg)
+    if not arr:
+        return False
+    n, p, q = arr
+
+    # decode every record once (planes + compacts)
+    records = []
+    pp = p
+    mx = 0
+    for _ in range(n):
+        planes = [struct.unpack_from('<4f', seg, pp + 16 * k) for k in range(4)]
+        pp += 64
+        idx = []
+        for _ in range(4):
+            v, pp = read_compact(seg, pp)
+            idx.append(v)
+        mx = max(mx, max(idx[:3]))
+        records.append((planes, idx))
+
+    st = find_vertex_stream(seg, p, records, mx)
+    if not st:
+        return False
+    _, cnt, sp = st
+
+    boxes = []
     for vs in units:
         a = np.array(vs[:3], dtype=np.float64)
         b = np.array(vs[3:], dtype=np.float64)
         boxes.append((np.minimum(a, b), np.maximum(a, b)))
 
-    # --- the authentic collision triangle records (fnd_9/10) ---
-    # TArray<FStaticMeshCollisionTriangle>::Serialize = {compact count} +
-    # count back-to-back records of 16 dwords + 4 compacts (~68 B). The
-    # plane = d12..d15, the vertices = d0..d8 (9 floats). The records are
-    # NOT 4-aligned to the bulk (the compact tails break the grid), so the
-    # scan is byte-wise for the plane pattern (|n| ~ 1, sane D).
-    d = pkg.data
-    n_seg = end - bulk
-    raw = d[bulk:end]
-    plane_hits = []
-    i = 0
-    while i < n_seg - 68:
-        nx, ny, nz, D = struct.unpack_from('<4f', raw, i)
-        if abs(nx * nx + ny * ny + nz * nz - 1.0) < 1e-4 and -1e5 < D < 1e5:
-            # candidate plane: require the same pattern at +68 (the stride)
-            nx2, ny2, nz2, D2 = struct.unpack_from('<4f', raw, i + 68)
-            if abs(nx2 * nx2 + ny2 * ny2 + nz2 * nz2 - 1.0) < 1e-4 and -1e5 < D2 < 1e5:
-                plane_hits.append(i)
-                i += 68
-                continue
-        i += 1
-    # --- the authentic collision records (fnd_9/10 + the plane layout) ---
-    # The record = 4 planes (the face + 3 edges, 16 B each = 64 B) + 4
-    # FCompactIndex (iVertex[3] + MaterialIndex) = 68 B, back-to-back, NOT
-    # 4-aligned to the bulk. The triangle verts = the intersections of the
-    # face plane with the adjacent edge plane pairs.
-    raw = pkg.data[bulk:end]
-    n_seg = len(raw)
-    plane_hits = []
-    i = 0
-    while i < n_seg - 68:
-        nx, ny, nz, D = struct.unpack_from('<4f', raw, i)
-        if abs(nx * nx + ny * ny + nz * nz - 1.0) < 1e-4 and -1e5 < D < 1e5:
-            nx2, ny2, nz2, D2 = struct.unpack_from('<4f', raw, i + 68)
-            if abs(nx2 * nx2 + ny2 * ny2 + nz2 * nz2 - 1.0) < 1e-4 and -1e5 < D2 < 1e5:
-                plane_hits.append(i)
-                i += 68
-                continue
-        i += 1
-    keep = []
-    recs = 0
-    for ph in plane_hits:
-        planes = []
-        ok = True
-        for pi in range(4):
-            n = np.array(struct.unpack_from('<3f', raw, ph + pi * 16), dtype=np.float64)
-            D = struct.unpack_from('<f', raw, ph + pi * 16 + 12)[0]
-            if abs(np.linalg.norm(n) - 1.0) > 1e-3:
-                ok = False
-                break
-            planes.append((n, float(D)))
-        if not ok:
-            continue
-        face = planes[0]
-        verts3 = []
+    verts = []
+    kept = 0
+    valid = 0
+    for planes, idx in records:
+        nx, ny, nz, D = planes[0]
+        tri = []
         good = True
-        for ei in range(3):
-            e1 = planes[1 + ei]
-            e2 = planes[1 + (ei + 1) % 3]
-            A = np.array([face[0], e1[0], e2[0]])
-            b = np.array([face[1], e1[1], e2[1]])
-            if abs(np.linalg.det(A)) < 1e-9:
+        cent = [0.0, 0.0, 0.0]
+        for k in idx[:3]:
+            x, y, z = struct.unpack_from('<3f', seg, sp + k * 24)
+            if abs(nx * x + ny * y + nz * z - D) > 2.0:
                 good = False
                 break
-            v = np.linalg.solve(A, b)
-            verts3.append(v)
-        if not good or len(verts3) != 3:
+            cent[0] += x / 3
+            cent[1] += y / 3
+            cent[2] += z / 3
+            # staged glTF frame: (x, z-up→y, y-width→z) cm → m
+            tri.extend([x * 0.01, z * 0.01, y * 0.01])
+        if not good:
             continue
-        if not all(np.all(np.abs(v) < 1e5) for v in verts3):
-            continue
-        for v in verts3:
-            x, y, z = v  # the file native (X, Y-width, Z-up)
-            keep.extend([x * 0.01, z * 0.01, y * 0.01])
-        recs += 1
-    print(f"  {name}: {recs} collision records")
-    if not keep:
+        valid += 1
+        if boxes:
+            c = np.array(cent)
+            if not any(np.all(c >= lo) and np.all(c <= hi) for lo, hi in boxes):
+                continue
+        verts.extend(tri)
+        kept += 1
+
+    print(f"  {name}: {n} records, stream {cnt}v, {valid} plane-valid, "
+          f"{kept} kept by {len(units)} kDOP units")
+    if not kept:
         return False
-    out = {"units": len(units), "tris": len(keep) // 9, "verts": keep}
+    out = {"units": len(units), "tris": kept, "verts": verts}
     with open(gltf_path.rsplit("/", 1)[0] + f"/{name}.collision.json", "w") as f:
         json.dump(out, f)
     return True
@@ -152,7 +259,7 @@ def main() -> None:
     for i in range(pkg.export_count):
         if pkg.class_name_of_export(i) == "StaticMesh":
             names.add(pkg.name(pkg.exports[i].object_name))
-    done = missed = nounits = 0
+    done = missed = 0
     for f in sorted(os.listdir(staged_dir)):
         if not f.endswith(".gltf") or f[:-5] not in names:
             continue

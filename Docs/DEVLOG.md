@@ -3799,3 +3799,58 @@ The statue's hand = fixed: O_DE_01 re-staged from the UModel export
 4. **The diagnosis order**: L2_TRACE_BOX first (the mesh + the texture
    per hit), then the hypotheses. The O_De_03 red herring cost several
    iterations because the trace at the hand was done last, not first.
+
+## 2026-11-12 (25) — the middle studied: the collision format CRACKED (the ~5% extraction bug found)
+
+The task: study the village center (the statue plaza + the MT tree + the
+street). The grid/profile verification exposed that the spawn street band
+(x 13100-13500, y 17100-17300), the tower-east strip and the NW band have
+NO floor at street level, while every mesh AABB covers them. The cause was
+NOT the layout — it was `tools/l2strict/collision_extract.py`.
+
+**The authentic collision array format (fully decoded and validated):**
+
+```
+[compact N]                     N ≈ the mesh triangle count (O_DE_Btm 690=690;
+                                O_DE_WH is 1167 vs 1166 — one record more!)
+N × record (VARIABLE stride):
+    FPlane planes[4]            4 × 16 B — the face plane + 3 edge planes
+    compact iVertex[3]          indices into the RAW 24-B VERTEX STREAM
+    compact MaterialIndex
+```
+
+- The stride is variable (64 B planes + 4-20 B of compacts) — the old
+  fixed `+68` decoder only caught coincidental chains and recovered
+  **~5% of the triangles** (O_DE_Btm: 29 of 690). That silently dropped
+  the WH porch, the plaza floors and the stall decks — the "geodata gaps".
+- The `iVertex` indices are NOT wedge indices: they index the mesh's raw
+  vertex stream `[compact count][count × 24 B (pos 12 + normal 12)]`
+  parsed from the same bulk. The staged glTF vertex order is renumbered
+  by the per-prim staging (O_De_01 69+648), so the winning stream is
+  chosen by validation: every record must satisfy `plane·v = D`
+  (|dot−D| ≤ 2). Result: **O_DE_Btm 690/690, O_De_01 961/961, WH 1167/1167
+  plane-valid; all 46 Oren_DEV_S + 74 other-package meshes extracted**.
+- The kDOP leaf-bbox gate (the 29-B units) is kept as before.
+- The frame: stream pos (X, Y-width, Z-up) cm → staged glTF
+  (x, z→y-up, y→z) — the same conversion the stager uses.
+
+**What the middle is (the study results):**
+- The MT family = the GIANT TREE over the village, not a tower:
+  MT_In = the canopy underside (a near-flat shell at −1.2..−6 m over the
+  whole village), MT_Out = the top shell (+25..+31), MT_Btm = the deep
+  shaft (to −82.5). Authentic.
+- The plaza levels: Center_obj platform −46.4, O_De_01 pedestal −46.0,
+  O_De_02 terraces −51..−53, O_De_03 pit −53..−75, the north octagon
+  (O_DE_Btm ring, −46.02) covers the NE quarter around Azit01.
+- All 62 center mesh objects are staged + materials mapped.
+
+**The remaining floor gaps = the MISSING BSP BRUSHES.** bsp2.py paired
+Brush→Model→Polys by NAME (ModelN↔PolysN); only 166 of 249 brush-like
+actors match that way. The unmatched ones include the spawn street band
+brushes (Brush901/903/953/7/8/9 at x 11300-13900, y 16100-17700, z
+≈ −4600 — the exact missing floors). The Model serial does NOT carry a
+readable Polys reference in its 72-B blob (no property, no u32/compact
+ref found) — decoding the link needs an engine.dll RE of
+`UModel::Serialize` (fnd_next). BlockingVolume = walls only (checked).
+StaticMeshInstance (651) = per-instance vertex colors, not placements
+(correctly dropped).
