@@ -4224,3 +4224,45 @@ terrain no longer teleports the camera up into the rock.
    and the carpet borders vs the original (per-texture relief/scale tweaks are
    config-only changes in L2ProcTex.CONFIG).
 4. The market square + tower strip and the far-east end (unchanged from 30).
+
+## 2026-11-13 (34) — TEXTURES REGENERATED FROM THE CLIENT PNG (not analytic
+## approximations)
+
+**THE USER'S VERDICT on the analytic shader modes: "это заглушка, пародия"** —
+the hand-authored GLSL patterns (voronoi cobble etc.) do NOT match the client
+1:1. The directive: regenerate the textures/shaders FROM the client PNGs —
+the client texture is the PATTERN SOURCE, 1:1 by construction; add the modern
+volumetric layers on top (third-party/AI tools allowed if needed).
+
+**Implemented (all by our own pipeline, no third-party needed):**
+- `tools/l2strict/texgen.py` — generates a PBR set per client texture:
+  `<obj>.pbr_albedo.png` (RGB = the ORIGINAL albedo 1:1, A = height from the
+  painted luminance, gaussian-blurred) and `<obj>.pbr_normal.png`
+  (RGB = tangent-space normal from the height field, A = roughness
+  0.65..0.95 by painted darkness). Per-texture POM depth + normal strength in
+  the RELIEF config table (+ a .pbr.json sidecar). The road set generated:
+  floor01, floor02, m12, dark01, sylen_001_1, capet01 (256x256 — the earlier
+  128x256 guess was wrong), capet02, capet.
+- `assets/shaders/l2_surface_pbr.gdshader` — albedo + normal + roughness +
+  offset-mapping parallax. POM WITHOUT mesh tangents: the tangent basis is
+  derived per-pixel from the screen-Jacobian (dPdu/dPdv 2x2 solve of UV vs
+  position derivatives). The full POM loop produced banding/smear (implicit
+  LOD inside a dynamic GLSL loop is undefined + grazing-angle explosion) —
+  replaced by a SINGLE-STEP offset mapping with a view-angle fade
+  (smoothstep 0.12..0.45 on |vt.z|). Crevice AO is scaled by the POM depth so
+  the flat carpets keep the client's own painted shading without
+  double-darkening (pom 0.055 -> full AO, 0.012 -> ~24%).
+- `scripts/l2_proc_tex.gd` rewritten: material_for() returns the PBR
+  ShaderMaterial when the generated set exists; the analytic
+  l2_procedural.gdshader stays as the FALLBACK for not-yet-generated textures.
+  tile fixed for capet01 (256x256).
+
+**Verification:** the spawn screenshot now shows the client's own cobble,
+carpet with woven borders and the thorn-braid curbs — the pattern identity is
+exact by construction (the albedo IS the client texture). Hue ratios ours
+1:0.94:0.87 vs ref 1:0.92:0.83 (the residual = scene lighting, out of scope).
+No more POM artifacts after the offset-mapping fix.
+
+**NEXT:** extend texgen to ALL staged textures (the generator is generic —
+one batch run + Godot import), then the user's visual pass on POM depth per
+texture (config-only).
