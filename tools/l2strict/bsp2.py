@@ -213,9 +213,13 @@ def write_gltf(path, name, prims, prim_idx_of):
         materials.append({"name": f"m{prim['i']}", "pbrMetallicRoughness":
                           {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
                           "doubleSided": True})
+        # material index = the emitted-prim index, NOT the loop pi: degenerate
+        # prims above `continue` without emitting, so pi drifts past the
+        # materials array ("Index material = N out of bounds" import failure).
         mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
                                           "TEXCOORD_0": len(accessors) - 2},
-                           "indices": len(accessors) - 1, "material": pi, "mode": 4})
+                           "indices": len(accessors) - 1,
+                           "material": len(mesh_prims), "mode": 4})
         prim_idx_of[prim["i"]] = len(mesh_prims) - 1
     if not mesh_prims:
         return False
@@ -570,6 +574,15 @@ def main():
                 for f in br["faces"]:
                     f["prim"] = prim_idx_of.get(f["i"])
     # faces of unexported polys: prim stays null
+    # Self-clean: a polys that renders no prims this run must NOT leave its
+    # stale glTF in out_dir (old-format files kept failing Godot import with
+    # "Index material out of bounds"). Prune anything not written above.
+    for fn in os.listdir(out_dir):
+        base, ext = os.path.splitext(fn)
+        if ext not in (".gltf", ".bin") or not base.startswith("BSP_"):
+            continue
+        if base[4:] not in exported:  # file base = "BSP_" + polys name
+            os.remove(os.path.join(out_dir, fn))
 
     # 4) coverage raster (unchanged semantics: HIGHEST walkable brush height)
     cover_z = {}

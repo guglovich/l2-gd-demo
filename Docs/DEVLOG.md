@@ -4139,3 +4139,88 @@ verified by the mandatory comparison with the original.
    (the terrain = solid above the tunnel, has_terrain_surface = true) — the
    user's build shows the tunnel fine; verify the spawn path.
 3. The tunnel interior = visually unverified (see 2).
+
+## 2026-11-12 (33) — THE PROCEDURAL TEXTURE SYSTEM (the pilot: the road) + the
+## street-slab restoration
+
+**THE PROCEDURAL MATERIAL SYSTEM (the user's directive: no PNG in the render
+path, modern 3D/volumetric surfaces, clean-room, 1:1 identity):**
+- `assets/shaders/l2_procedural.gdshader` — ONE spatial shader, 8 modes:
+  0 cobble slate (DE_V_floor01), 1 ornament tile (DE_V_floor02), 2 rock cliff
+  (DE_V_m12), 3 dark stone (O_dark_01), 4 grey brick court (oren_sylen_001_1),
+  5 carpet grey (DE_V_capet01), 6 carpet ornate (DE_V_capet02), 7 thorn braid
+  (DE_V_capet). Base patterns are UV-aligned (the 1:1 LAYOUT identity);
+  the volumetric grain = 3D world-space simplex fbm; relief = height-field
+  normals with NO mesh tangents (screen-Jacobian world uv-step solve +
+  world-space height gradient — needed because modes 2/3 derive h from world
+  position). Palettes extracted by observation from the reference PNGs
+  (clean-room study only; the PNGs are not rendered anymore for these
+  materials).
+- `scripts/l2_proc_tex.gd` (L2ProcTex) — the texture->mode config; cache per
+  (tex, uv-convention). Case-insensitive package lookup (Oren_DEV_T vs
+  oren_dev_t).
+- Wiring: `_bsp_material()` tries the procedural material first (BSP UVs =
+  raw texels, uv_is_texels=true); the static-mesh loop in `_get_mesh()` tries
+  it before the PNG path (UModel UVs normalized, uv_is_texels=false). The
+  shader-chain diffuse is already resolved in materials.json (DE_capet_il ->
+  DE_V_capet), so Obj01's curb prim gets the thorn braid mode.
+- THE CURB TEXTURE FOUND (the user's request): the curb along the carpet =
+  Obj01 prim 1 = the DE_capet_il SHADER whose diffuse = DE_V_capet (the pale
+  thorn-braid strip); the thin edging bands = DE_V_capet02's woven side bands
+  on Obj02/03. No separate wall texture exists — the curb renders as soon as
+  Obj01/02/03 carry their materials (now procedural modes 5/6/7).
+
+**BSP EXPORT FIXES (both found by Godot import failures):**
+- bsp2.py write_gltf: prim "material" index used the loop enumeration `pi`
+  while degenerate prims `continue`d without emitting — indices drifted past
+  the materials array ("Index material = 4 out of bounds" on import; 22 brush
+  glTFs were failing). Fixed to `len(mesh_prims)`.
+- bsp2.py now PRUNES stale outputs (a polys that renders no prims this run
+  used to leave its old-format glTF in bsp_out forever — 70 stale files were
+  being staged and 23 failed Godot import).
+- levelbsp.py MAX_SPAN 3500 -> 7000: the "huge-span" drop was wrong — those 8
+  surfs are the TWO GIANT CSG-merged DE_V_floor01 street slabs (x 6343..10225
+  span 3882, x 9836..14877 span 5041), i.e. the temple street the user
+  reported missing. The REAL zone separators span 7.4k-11k (bsp2 measurement).
+  drawn surfs 635 -> 643, huge-span 0.
+
+**PLAYER CLAMP FIX:** the ground-snap clamp now fires only when the heightfield
+is close above the player (< 0.8 m). A tunnel/interior position under solid
+terrain no longer teleports the camera up into the rock.
+
+**VERIFICATION (numeric, per the AGENTS.md rule):**
+- Floor profile x 7000..14700 @ gy 17640 (80 steps): the walkable deck family
+  is continuous; the only no-deck cells = the market square 11331/11812 and
+  the far-east end 14026..14700 (both pre-existing, pending the user's
+  verdict). No multi-level regression.
+- Floor profile x 6350..7500 @ gy 16200: the restored street slab hits
+  `y=-30.222 ny=1.00 via LevelBSP` continuously from x 6618.
+- Spawn screenshot (X=7400 Y=17650): the procedural cobble renders with
+  recessed mortar grooves (the first attempt's white-crack artifact = the
+  screen-space fwidth epsilon exploding on the giant BSP polys; fixed with
+  the fixed 1-texel UV step). Carpet runner + braid strips render
+  (modes 5/6/7).
+- Color statistics ours vs Docs/bridge_original_level.png: cobble hue ratios
+  ours 1.00:0.87:0.74 vs the reference texture 1.00:0.90:0.75 — palette
+  identity; the absolute brightness difference is the scene lighting (out of
+  scope until the lighting stage).
+
+**PENDING (for the next iteration):**
+1. THE TERRAIN UNDER THE TEMPLE STREET: terrain present=1 cells at
+   (6416..7180, 15104..17456) hold leftover heights z -38..-42 BELOW the real
+   street slab (-30.22). The false lower walkable floor = exactly the user's
+   "пол над дорожкой" bug family. Needs the QuadVisibilityBitmap re-verified
+   against the engine (the original hole bitmap may mark the street cutout
+   like the village cutout).
+2. THE CANYON TUNNEL FLOOR: (x 6400..7300, gy 17536..18400) has NO surface in
+   ANY source we parse — terrain present=0, no brush actors (only 3 subtract
+   volumes), no level-BSP faces, no statics. A test spawn there FALLS into the
+   void. In the engine the subtract faces carry sylen_001_1/m12 materials —
+   the tunnel surfaces are the CSG-baked faces of the solid world. The modern
+   approach: take the GEOMETRY from the client (allowed) without recreating
+   the carving — needs an engine-RE pass to extract the baked faces (the
+   level Model's own nodes for that area, or a rendering decision).
+3. The procedural textures: the user's visual pass on the cobble cell size
+   and the carpet borders vs the original (per-texture relief/scale tweaks are
+   config-only changes in L2ProcTex.CONFIG).
+4. The market square + tower strip and the far-east end (unchanged from 30).

@@ -36,7 +36,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from l2_probe import Package  # noqa: E402
 
-MAX_SPAN = 3500.0
+# The temple street = TWO GIANT CSG-merged DE_V_floor01 slabs spanning 3882
+# and 5041 units (x 6343..10225 / 9836..14877) — the earlier MAX_SPAN 3500
+# misread them as the zone separators and dropped the street floors. The REAL
+# zone/sky separator boxes span 7.4k-11k units (bsp2 measurement), so 7000
+# keeps the street slabs and still drops the zone boxes.
+MAX_SPAN = 7000.0
 
 
 def read_compact(d, p):

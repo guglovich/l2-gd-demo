@@ -201,6 +201,10 @@ func _physics_process(delta: float) -> void:
 		var game_y: float = position.z / 0.01
 		if terrain.has_terrain_surface(game_x, game_y):
 			var t: float = terrain.terrain_height(game_x, game_y)
-			if position.y < t:
+			# Ground snap ONLY when the heightfield is close above the player.
+			# The canyon tunnel passes UNDER solid terrain: without the
+			# distance window the clamp teleported the camera up into the
+			# rock (the buried-in-tunnel bug, DEVLOG 2026-11-12).
+			if position.y < t and t - position.y < 0.8:
 				position.y = t
 				velocity.y = 0

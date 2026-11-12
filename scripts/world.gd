@@ -480,10 +480,16 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 ## (owner Brush, iBrushPoly = raw poly index). bsp2 writes per-face "tex"
 ## and the prim index into bsp.json; faces without a surf keep the neutral
 ## stone placeholder.
-func _bsp_material(tex: Array, cache: Dictionary) -> StandardMaterial3D:
+func _bsp_material(tex: Array, cache: Dictionary) -> Material:
 	var key := "%s:%s" % [tex[0], tex[1]]
 	if cache.has(key):
 		return cache[key]
+	# MODERN-PORT RULE: procedural clean-room shader first — no PNG in the
+	# render path for the road materials (BSP UVs are raw texels).
+	var pm := L2ProcTex.material_for(tex[0], tex[1], true)
+	if pm != null:
+		cache[key] = pm
+		return pm
 	var m := StandardMaterial3D.new()
 	var tp := _find_texture_path(tex[0], tex[1])
 	if tp != "":
@@ -778,6 +784,13 @@ func _get_mesh(key: String) -> Mesh:
 			continue
 		var tpkg: String = t.get("package", "")
 		var tobj: String = t.get("object", "")
+		# MODERN-PORT RULE: procedural clean-room shader first. NOTE: the
+		# shader must also see through the shader-chain diffuse (materials.json
+		# already resolved Shader->diffuse, e.g. DE_capet_il -> DE_V_capet).
+		var pm := L2ProcTex.material_for(tpkg, tobj, false)
+		if pm != null:
+			mesh.surface_set_material(si, pm)
+			continue
 		var tp: String = "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tpkg, tobj]
 		if not FileAccess.file_exists(tp):
 			tp = "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tpkg.to_lower(), tobj]
