@@ -171,27 +171,20 @@ def write_gltf(path, name, prims, prim_idx_of):
         pts = prim["verts"]
         if len(pts) < 3:
             continue  # degenerate: the face stays in bsp.json (prim null)
-        base = prim["base"]
-        udir = tuple(prim["tu"][k] - base[k] for k in range(3))
-        vdir = tuple(prim["tv"][k] - base[k] for k in range(3))
-        uu = sum(c * c for c in udir)
-        vv = sum(c * c for c in vdir)
-        if uu < 1e-9 or vv < 1e-9:
-            continue
-        uu_s = uu ** 0.5
-        vv_s = vv ** 0.5
+        if "uv_axes" not in prim:
+            continue  # no usable texture axes (no same-plane surf)
+        ubase, U, V = prim["uv_axes"]
         pos = []
         uvs = []
         for v in pts:
             pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
-            # L2 BSP texture mapping: 1 texel per world unit along the
-            # surface's U/V axes (the |U| magnitude in the file varies
-            # per brush and carries no scale — dividing by |U|^2 (the UE
-            # formula) stretched one tile over a 20+ m street plate).
-            # The UVs are TEXELS here; world.gd scales them by
-            # 1/texture_size per material.
-            u = sum((v[k] - base[k]) * udir[k] for k in range(3)) / uu_s
-            w = sum((v[k] - base[k]) * vdir[k] for k in range(3)) / vv_s
+            # L2 BSP texture mapping: u = dot(P - pBase, pTextureU) in TEXELS
+            # (the surf's U/V vectors carry the UE editor texel scale,
+            # |U| = 0.5..4). The FPoly's own TextureU/V are degenerate (U
+            # parallel to V in every 20_18 brush). world.gd scales the UVs
+            # by 1/texture size per material.
+            u = sum((v[k] - ubase[k]) * U[k] for k in range(3))
+            w = sum((v[k] - ubase[k]) * V[k] for k in range(3))
             uvs.extend([u, w])
         idx = []
         for k in range(1, len(pts) - 1):
@@ -347,7 +340,12 @@ def parse_model_surfs(pkg, midx):
             idx.append(v)
         owner, p = rc(p)
         p += 24
-        surfs.append({"mat": mat, "flags": flags, "poly": idx[4], "owner": owner})
+        axes = None
+        if idx[0] < len(pts) and idx[2] < len(vec) and idx[3] < len(vec):
+            axes = (pts[idx[0]], vec[idx[2]], vec[idx[3]])
+        pnrm = vec[idx[1]] if idx[1] < len(vec) else None
+        surfs.append({"mat": mat, "flags": flags, "poly": idx[4], "owner": owner,
+                      "axes": axes, "pnrm": pnrm})
     return {"surfs": surfs, "vec": vec, "pts": pts, "n_nodes": nnodes}
 
 
@@ -364,6 +362,7 @@ def main():
     surfs_by_owner = {}
     for s in model["surfs"]:
         surfs_by_owner.setdefault(s["owner"], []).append(s)
+    all_surfs = [s for s in model["surfs"] if s.get("axes")]
     print(f"level model: export {midx}, {len(model['surfs'])} surfs, "
           f"{len(model['vec'])} vecs, {len(model['pts'])} pts, "
           f"{model.get('n_nodes', '?')} nodes")
@@ -412,10 +411,12 @@ def main():
         # Brush property which points to the brush's Model)
         surf_tex = {}
         surf_flags = {}
+        surf_axes = {}
         for s in surfs_by_owner.get(i + 1, []):
             if s["poly"] not in surf_tex:
                 surf_tex[s["poly"]] = s["mat"]
                 surf_flags[s["poly"]] = s["flags"]
+                surf_axes[s["poly"]] = s["axes"]
         faces = []
         for pr in polys_objs[pname]:
             k = pr["i"]
@@ -425,11 +426,43 @@ def main():
             tex_ref = surf_tex.get(k, None)
             if tex_ref is None or tex_ref == 0:
                 tex_ref = pr.get("poly_mat")
+            # texture axes: the surf's pBase/pTextureU/pTextureV — the FPoly's
+            # own TextureU/V are degenerate (U parallel to V). For the
+            # CSG-merged faces (no own surf) borrow the axes of a same-plane
+            # surf of this brush (the normal match).
+            axes = surf_axes.get(k)
+            if axes is None:
+                # the CSG-merged faces have no own surf: borrow the axes of a
+                # same-plane surf — first among this brush's surfs, then
+                # globally (the plane = the normal + the point distance)
+                nrm = pr["normal"]
+                v0 = pr["verts"][0]
+                df = sum(v0[k] * nrm[k] for k in range(3))
+                for s in surfs_by_owner.get(i + 1, []):
+                    sv = s.get("pnrm")
+                    if sv and abs(sv[0] * nrm[0] + sv[1] * nrm[1] + sv[2] * nrm[2]) > 0.99:
+                        axes = s.get("axes")
+                        if axes is not None:
+                            break
+                if axes is None:
+                    for s in all_surfs:
+                        sv = s.get("pnrm")
+                        if not sv or abs(sv[0] * nrm[0] + sv[1] * nrm[1] + sv[2] * nrm[2]) < 0.99:
+                            continue
+                        sb = s.get("axes")
+                        if not sb:
+                            continue
+                        ds = sum(sb[0][k] * sv[k] for k in range(3))
+                        if abs(ds - df) < 20.0:
+                            axes = sb
+                            break
             faces.append({
                 "i": k,
                 "flags": surf_flags.get(k, pr["flags"]),
                 "tex": resolve_tex(pkg, tex_ref, shaders),
             })
+            if axes is not None:
+                pr["uv_axes"] = axes
         brushes.append({"polys": pname, "location": origin, "faces": faces})
 
     # 3) export glTF per Polys: renderable faces only. A face renders iff it

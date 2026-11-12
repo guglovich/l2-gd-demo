@@ -757,18 +757,34 @@ func _get_mesh(key: String) -> Mesh:
 	var parts := key.split(":")
 	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
 	var pis: Array = info.get("primitive_material_indices", [])
+	# EVERY surface gets our material: the UModel export writes colored
+	# baseColorFactor placeholders (red/green) for its materials — leaving
+	# them on unmapped surfaces shows flat pink/green strips.
+	var _static_grey := StandardMaterial3D.new()
+	_static_grey.albedo_color = Color(0.32, 0.31, 0.30)
+	_static_grey.roughness = 0.95
+	_static_grey.cull_mode = StandardMaterial3D.CULL_DISABLED
 	for si in range(mesh.get_surface_count()):
-		if si >= pis.size(): break
+		if si >= pis.size():
+			mesh.surface_set_material(si, _static_grey)
+			continue
 		var mi := int(pis[si])
-		if mi < 0 or mi >= texs.size(): continue
+		if mi < 0 or mi >= texs.size():
+			mesh.surface_set_material(si, _static_grey)
+			continue
 		var t = texs[mi]
-		if t == null or not (t is Dictionary): continue
+		if t == null or not (t is Dictionary):
+			mesh.surface_set_material(si, _static_grey)
+			continue
 		var tpkg: String = t.get("package", "")
 		var tobj: String = t.get("object", "")
 		var tp: String = "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tpkg, tobj]
 		if not FileAccess.file_exists(tp):
 			tp = "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tpkg.to_lower(), tobj]
-		if FileAccess.file_exists(tp):
+		if not FileAccess.file_exists(tp):
+			mesh.surface_set_material(si, _static_grey)
+			continue
+		if true:
 			var m := StandardMaterial3D.new()
 			var tex := ImageTexture.new()
 			var img := Image.new()

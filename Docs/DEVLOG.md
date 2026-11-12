@@ -4073,3 +4073,37 @@ profile: Polys363/353/Btm_Obj02 at -46.01..-46.11 continuous; the pit
   be open by design) — the user's verdict pending.
 - The windows render teal/pink flat quads (DE_V_win?) — verify vs the original.
 - The temple path UV scale (1 texel/unit) — the user's visual check.
+
+## 2026-11-12 (31) — the textures restored + the real BSP texture axes
+
+**The user: the meshes are closer to the original now, but half the textures
+are lost; make the textures as in the original + the curb textures.**
+
+**The lost textures = two bugs:**
+1. The re-stage's naive name->file material lookup clobbered the
+   pipeline-resolved materials.json entries (36 meshes). RESTORED from the
+   git history (a290769) — the pipeline entries resolve the shader chains
+   properly and are indexed by the mesh's own Materials array (independent
+   of the prim order), so they fit the re-staged meshes as-is.
+2. The UModel glTF writes COLORED baseColorFactor placeholders for its
+   materials (deco10 = red, roof_deco1 = green) — every surface without our
+   material rendered the placeholder. world.gd now forces our material (the
+   texture or the 0.32 grey) on EVERY static surface — no umodel leftovers.
+
+**The road "stripes" = the FPoly TextureU/V are DEGENERATE.** The texture
+axes in every 20_18 brush poly are PARALLEL (cos(U,V) = 1.0000) — the real
+render axes live in the level SURFS (pTextureU/pTextureV vectors, |U| =
+0.5..4 = the UE editor texel scale; u = dot(P - pBase, pTextureU) texels).
+bsp2 now takes the UV axes from the face's surf; the CSG-merged faces (no
+own surf) borrow the axes of a same-plane surf (the brush's surfs first,
+then globally by the normal + the plane distance). Result: the road = the
+cracked-cobble floor01 with ~5 m tiles, no stripes.
+
+**Also:** the circular import bsp2<->levelbsp doubled the brush list (438) —
+levelbsp is self-contained now. The world.gd static path forces the material
+on every surface (the missing textures = the grey placeholder, never the
+umodel colors).
+
+**PENDING:** the corridor gap at (10850,17300) (the same no-floor family as
+the market square — the shaft?); the user's visual verification of the
+texture scales and the windows.

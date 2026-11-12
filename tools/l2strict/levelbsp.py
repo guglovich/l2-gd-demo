@@ -35,12 +35,76 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from l2_probe import Package  # noqa: E402
-from bsp2 import read_compact, resolve_tex  # noqa: E402
+
+MAX_SPAN = 3500.0
+
+
+def read_compact(d, p):
+    """The authentic L2 FCompactIndex decode (Core.dll 0x1015cfb0, fnd_13):
+    sign = bit 0x80 of the FIRST byte; magnitude = (b0 & 0x3F) | (cont << 6).
+    Negative multi-byte values (first byte 0xC0|low6) decode negative."""
+    b0 = d[p]
+    p += 1
+    mag = b0 & 0x3F
+    if b0 & 0x40:
+        sh = 6
+        while True:
+            b = d[p]
+            p += 1
+            mag |= (b & 0x7F) << sh
+            sh += 7
+            if not b & 0x80:
+                break
+    return (-mag if b0 & 0x80 else mag), p
+
+
+def resolve_tex(pkg, ref, shaders):
+    """Resolve an object ref to a staged [package, object] texture pair."""
+    if not isinstance(ref, int) or ref == 0:
+        return None
+    if ref > 0:
+        j = ref - 1
+        if j >= pkg.export_count:
+            return None
+        cls = pkg.class_of_export(j)
+        nm = pkg.name(pkg.exports[j][3])
+        if cls == "Texture":
+            return [None, nm]
+        if cls == "Shader":
+            diff = shaders.get(f"::{nm}") or shaders.get(nm)
+            if diff:
+                return [None, diff]
+        return None
+    imp = -ref - 1
+    if not (0 <= imp < len(pkg.imports)):
+        return None
+    cp, cn, pk, nm = pkg.imports[imp]
+    cls = pkg.name(cn)
+    obj = pkg.name(nm)
+    pkg_file = None
+    cur = pk
+    while cur != 0:
+        if cur > 0:
+            pkg_file = pkg.name(pkg.exports[cur - 1][3])
+            break
+        imp2 = -cur - 1
+        if not (0 <= imp2 < len(pkg.imports)):
+            break
+        o_cp, o_cn, o_pk, o_nm = pkg.imports[imp2]
+        pkg_file = pkg.name(o_nm)
+        if pkg.name(o_cn) == "Package":
+            break
+        cur = o_pk
+    if cls == "Texture":
+        return [pkg_file.lower() if pkg_file else pkg_file, obj]
+    if cls == "Shader":
+        diff = shaders.get(f"{pkg_file}::{obj}") if pkg_file else None
+        if diff:
+            return [pkg_file.lower() if pkg_file else pkg_file, diff]
+    return None
+
 
 SCALE = 0.01
-# the zone/sky separator faces span 3882-5041 units; the biggest legitimate
-# BSP face (the street plates) spans 2967 — 3500 splits them cleanly
-MAX_SPAN = 3500.0
 
 
 def find_level_model(pkg):

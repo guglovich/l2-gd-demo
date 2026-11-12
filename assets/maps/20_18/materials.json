@@ -561,426 +561,1202 @@
    "O_DE_Azit01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -32
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco2a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco2a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -52
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_metal01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_metal01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -39
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
-    null,
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco2",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 16
+    }
    ],
    "O_DE_Azit02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -28
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_metal01"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco04"
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 16
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_metal01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -39
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -33
     }
    ],
    "O_DE_Bank": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_deco"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 16
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     }
    ],
    "O_DE_Bank_Set": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall05"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02a"
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco2",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -43
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco08"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -31
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco08",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -42
     }
    ],
    "O_DE_Board": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -32
     }
    ],
    "O_DE_Bridge": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -28
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "oren_dev_t",
+     "object": "O_chain",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 8,
+     "shader": {
+      "original": "Oren_DEV_T.O_chain_01",
+      "diffuse": "O_chain",
+      "output_blending": 1,
+      "two_sided": true,
+      "source": "Oren_DEV_T.utx Shader export[57]"
+     }
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_metal01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_metal01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -39
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -28
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_deco11",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 4,
+     "shader": {
+      "original": "Oren_DEV_T.DE_V_deco11_a",
+      "diffuse": "DE_V_deco11",
+      "two_sided": true,
+      "source": "Oren_DEV_T.utx Shader export[59]"
+     }
+    }
    ],
    "O_DE_Btm": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_stair"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_stair",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -68
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -47
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_stair_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_stair_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -69
     }
    ],
    "O_DE_Btm_Obj01": [
@@ -1155,666 +1931,1820 @@
    "O_DE_CH_Btm": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor01"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_metal01"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -47
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "oren_dev_t",
+     "object": "DE_V_fence",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_metal01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -39
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     }
    ],
    "O_DE_CH_body": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -57
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     }
    ],
    "O_DE_CH_btm_obj01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -28
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     }
    ],
    "O_DE_CH_mainstair": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     }
    ],
    "O_DE_CH_side": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -33
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -43
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     }
    ],
    "O_DE_CH_sidestair": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     }
    ],
    "O_DE_Center_obj": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -58
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
-    null,
-    null,
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_new_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 2
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_cube_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 7
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_cube_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 7
+    }
    ],
    "O_DE_H01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -30
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -33
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     }
    ],
    "O_DE_H02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -30
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     }
    ],
    "O_DE_H03": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -30
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     }
    ],
    "O_DE_H04": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -33
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -32
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -30
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     }
    ],
    "O_DE_Lamp01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
     },
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_cube_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 7
+    }
    ],
    "O_DE_Lamp02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco08"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco08",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -42
     },
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "DE_V_cube_deco3",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 7
+    }
    ],
    "O_DE_MT_Btm": [
     {
@@ -1856,188 +3786,497 @@
    "O_DE_MT_Out": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     },
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -34
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m08"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m08",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -60
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -35
     }
    ],
    "O_DE_MT_obj01": [
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -34
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -35
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -51
     }
    ],
    "O_DE_MT_obj02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -35
     },
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -34
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     }
    ],
    "O_DE_MT_obj03": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     },
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -35
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -34
     }
    ],
    "O_DE_MT_obj04": [
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m09"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m09",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -35
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -34
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     }
    ],
    "O_DE_Pir01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -28
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -31
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -13
     }
    ],
    "O_DE_Pir02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_deco10"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02"
+     "owner": "oren_dev_t",
+     "object": "O_chain",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -20
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_win02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -15
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_win02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -30
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -31
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco12"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco12",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -46
     }
    ],
    "O_DE_SH": [
@@ -2217,304 +4456,841 @@
    "O_DE_SH_Set": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall05"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall02a"
+     "owner": "oren_dev_t",
+     "object": "DE_V_roof_deco2",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall02a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -43
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco08"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -11
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -27
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco08",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -42
     }
    ],
    "O_DE_WH": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_in_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_in_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -24
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -26
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -19
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco04"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -33
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -14
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_floor"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_floor",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -23
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_ceiling"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_ceiling",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -25
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -31
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -12
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco2a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco2a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -52
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco02"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco02",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -32
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -16
     }
    ],
    "O_DE_fence01": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "oren_dev_t",
+     "object": "DE_V_fence",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     }
    ],
    "O_DE_fence02": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall04"
-    },
-    null,
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
-    },
-    {
-     "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall04",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "oren_dev_t",
+     "object": "DE_V_fence",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco03"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco03",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -8
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     }
    ],
    "O_DE_fence03": [
-    null,
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "oren_dev_t",
+     "object": "DE_V_fence",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     }
    ],
    "O_DE_fence04": [
-    null,
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "oren_dev_t",
+     "object": "DE_V_fence",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 9
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall05"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco4"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall05",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -4
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco4",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -21
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco13"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -17
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_deco01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco13",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -18
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco3a"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_deco01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -10
+    },
+    {
+     "package": "oren_dev_t",
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco3a",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -6
     }
    ],
    "O_DE_inlet": [
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m11"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m11",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -45
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m12"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m12",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -50
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m06"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m06",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -29
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m07"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m07",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -51
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -53
     }
    ],
    "O_De_01": [
@@ -2542,38 +5318,102 @@
    "O_De_02": [
     {
      "package": "oren_dev_t",
-     "object": "De_Statue001"
+     "owner": "Oren_DEV_T",
+     "object": "De_Statue001",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -49
     },
-    null
+    {
+     "package": "oren_dev_t",
+     "owner": "oren_dev_t",
+     "object": "De_Statue004",
+     "class": "Texture",
+     "kind": "export",
+     "outer_chain": [],
+     "raw": 6
+    }
    ],
    "O_De_03": [
     {
      "package": "oren_dev_t",
-     "object": "DE_V_roof_deco1"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_roof_deco1",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -5
     },
     {
      "package": "oren_dev_t",
-     "object": "O_dark_01"
+     "owner": "Oren_DEV_T",
+     "object": "O_dark_01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -22
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m11"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m11",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -45
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m12"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m12",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -50
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_wall01"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_wall01",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -7
     },
     {
      "package": "oren_dev_t",
-     "object": "De_Statue002"
+     "owner": "Oren_DEV_T",
+     "object": "De_Statue002",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -61
     },
     {
      "package": "oren_dev_t",
-     "object": "DE_V_m10"
+     "owner": "Oren_DEV_T",
+     "object": "DE_V_m10",
+     "class": "Texture",
+     "kind": "import",
+     "outer_chain": [
+      "Oren_DEV_T"
+     ],
+     "raw": -53
     }
    ],
    "O_DE_Etc_Bridge01": [
@@ -2848,7 +5688,7 @@
     },
     {
      "package": "oren_dev_t",
-     "object": "De_Statue002"
+     "object": "DE_statue002_s"
     }
    ]
   },
