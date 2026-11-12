@@ -4107,3 +4107,35 @@ umodel colors).
 **PENDING:** the corridor gap at (10850,17300) (the same no-floor family as
 the market square — the shaft?); the user's visual verification of the
 texture scales and the windows.
+
+## 2026-11-12 (32) — THE MODERN-PORT RULE + the tunnel/geodata fixes
+
+**THE USER'S DIRECTIVE (the rule added to AGENTS.md):** do NOT recreate the
+legacy client's outdated logic (the CSG brush carving, the 2000s level-design
+hacks) — for levels, effects, and everything else. From the old client take
+ONLY the correct meshes, the geodata, and the coordinates; build with modern
+Godot 4 means. Textures are NOT ported as PNG — they are CREATED with modern
+methods (procedural/3D/volumetric, no PNG), clean-room, 1:1 visual identity,
+verified by the mandatory comparison with the original.
+
+**Applied immediately:**
+- The CSG-carving emulation (the previous attempt) = REMOVED. The
+  subtractive brushes (CsgOper=2, 50 of 219 — the carved air incl. the tunnel
+  volumes and the giant zone separators) are simply not rendered; the ADD
+  brushes overlapping the small subtract volumes (the legacy carved-context
+  masonry housings, 43 brushes — the tunnel walls, the far-east ruins) are
+  not built either: the passages stay open, the walls = the native meshes
+  (the inlet, the terrain, the level BSP).
+- The carpet is BACK: O_DE_Btm_Obj01 (the 34x2.1-m carpet runner, DE_V_capet01
+  + the curb assembly) and Obj02/03 (the capet02 border ribbons) were in
+  _ROAD_STRIP_SKIP from the clean-room-road era — un-skipped (only O_DE_Btm
+  stays skipped).
+
+**PENDING (the next iteration, the fresh context):**
+1. The procedural texture system (the clean-room Godot shaders, no PNG) —
+   the pilot = the road materials (the cobble floor01, the carpet capet01/02,
+   the curbs) 1:1 vs the original.
+2. The spawn-terrain clamp buries the test camera inside the canyon tunnel
+   (the terrain = solid above the tunnel, has_terrain_surface = true) — the
+   user's build shows the tunnel fine; verify the spawn path.
+3. The tunnel interior = visually unverified (see 2).

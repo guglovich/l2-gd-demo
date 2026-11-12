@@ -165,3 +165,18 @@ Details: `Docs/craft-anything.md`.
   indexed element appears.
 - Terrain UVs use `su = 2 * layer.Scale.x / (128 * 128 * UScale)` and the
   matching V formula; masks use tile UV `0..1`.
+
+## The modern-port rule (the user's directive, 2026-11-12)
+
+- **Do NOT recreate the legacy client's outdated logic** — the CSG brush
+  carving, subtractive/additive volume emulation, the 2000s level-design
+  hacks. This covers levels, effects, and everything else.
+- From the old client we take ONLY: the correct meshes, the geodata, and
+  the coordinates. The levels are built with modern and optimized Godot 4
+  means (native nodes, materials, shaders, visibility ranges, LODs).
+- Textures are NOT ported verbatim as PNG files. They are CREATED with
+  modern methods (procedural/3D/volumetric Godot materials, no PNG), using
+  the clean-room approach with the condition of a 1:1 visual identity to
+  the original client.
+- Verification = the mandatory screenshot comparison against the original
+  (Docs/DE_village.png and the user's captures) for every new material.

@@ -2,286 +2,6 @@
  "schema": 2,
  "brushes": [
   {
-   "polys": "Polys21",
-   "location": [
-    262.98193399980664,
-    264366.0,
-    24473.219727039337
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 1,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 2,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 3,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 4,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 5,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 6,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 7,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 8,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 9,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 10,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 11,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 12,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 13,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 14,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 15,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 16,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 17,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 18,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 19,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 20,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 21,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 22,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 23,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 24,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 25,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 26,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 27,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 28,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 29,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 30,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 31,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 32,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 33,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 34,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 35,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 36,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 37,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 38,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 39,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 40,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 41,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 42,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 43,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 44,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 45,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 46,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 47,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 48,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 49,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 50,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 51,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 52,
-     "flags": 4194568,
-     "tex": null
-    },
-    {
-     "i": 53,
-     "flags": 4194568,
-     "tex": null
-    }
-   ]
-  },
-  {
    "polys": "Polys350",
    "location": [
     10873.6123046875,
@@ -496,7 +216,8 @@
      ],
      "prim": 22
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys353",
@@ -713,7 +434,8 @@
      ],
      "prim": 22
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys345",
@@ -894,7 +616,8 @@
      ],
      "prim": 18
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys348",
@@ -1075,7 +798,8 @@
      ],
      "prim": 18
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys377",
@@ -1175,7 +899,8 @@
      ],
      "prim": 9
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys22",
@@ -1249,155 +974,8 @@
       "DE_V_m12"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys20",
-   "location": [
-    4741.3076171875,
-    16168.66015625,
-    -4156.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 6,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 7,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    }
-   ]
-  },
-  {
-   "polys": "Polys325",
-   "location": [
-    4740.10302734375,
-    16150.15234375,
-    1539.840576171875
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 6,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ]
-    },
-    {
-     "i": 7,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ]
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys333",
@@ -1471,7 +1049,8 @@
       "oren_sylen_001_1"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys335",
@@ -1545,7 +1124,8 @@
       "oren_sylen_001_1"
      ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys331",
@@ -1619,7 +1199,8 @@
       "oren_sylen_001_1"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys328",
@@ -1693,7 +1274,8 @@
       "oren_sylen_001_1"
      ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys338",
@@ -1767,7 +1349,8 @@
       "oren_sylen_001_1"
      ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys313",
@@ -1831,7 +1414,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys360",
@@ -1895,71 +1479,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys43",
-   "location": [
-    26312.0,
-    10967.0,
-    -2598.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys14",
@@ -2017,7 +1538,8 @@
       "ZonePortal"
      ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys134",
@@ -2081,7 +1603,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys75",
@@ -2145,71 +1668,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys63",
-   "location": [
-    28479.0,
-    9024.0,
-    -2598.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys118",
@@ -2273,7 +1733,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys372",
@@ -2337,7 +1798,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys301",
@@ -2401,71 +1863,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys55",
-   "location": [
-    28016.0,
-    9364.0,
-    -4008.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys128",
@@ -2529,71 +1928,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys17",
-   "location": [
-    26527.9921875,
-    10388.009765625,
-    16871.03515625
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys124",
@@ -2657,7 +1993,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys323",
@@ -2721,7 +2058,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys288",
@@ -2785,7 +2123,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys363",
@@ -2849,71 +2188,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys67",
-   "location": [
-    28416.001953125,
-    12964.0029296875,
-    -4008.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys290",
@@ -2977,7 +2253,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys107",
@@ -2993,8 +2270,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3002,8 +2278,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3011,8 +2286,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3020,8 +2294,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3029,8 +2302,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3038,10 +2310,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys91",
@@ -3057,8 +2329,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3066,8 +2337,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3075,8 +2345,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3084,8 +2353,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3093,8 +2361,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3102,10 +2369,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys159",
@@ -3121,8 +2388,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3130,8 +2396,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3139,8 +2404,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3148,8 +2412,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3157,8 +2420,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3166,10 +2428,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys147",
@@ -3185,8 +2447,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3194,8 +2455,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3203,8 +2463,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3212,8 +2471,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3221,8 +2479,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3230,10 +2487,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys375",
@@ -3297,7 +2554,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys99",
@@ -3313,8 +2571,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3322,8 +2579,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3331,8 +2587,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3340,8 +2595,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3349,8 +2603,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3358,10 +2611,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys144",
@@ -3425,7 +2678,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys143",
@@ -3441,8 +2695,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3450,8 +2703,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3459,8 +2711,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3468,8 +2719,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3477,8 +2727,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3486,74 +2735,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys27",
-   "location": [
-    6296.04833984375,
-    20157.931640625,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys130",
@@ -3617,7 +2802,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys31",
@@ -3633,8 +2819,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3642,8 +2827,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3651,8 +2835,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3660,8 +2843,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3669,8 +2851,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in008"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3678,10 +2859,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in022"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys3977",
@@ -3745,7 +2926,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys127",
@@ -3761,8 +2943,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3770,8 +2951,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3779,8 +2959,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3788,8 +2967,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3797,8 +2975,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3806,10 +2983,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys135",
@@ -3825,8 +3002,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -3834,8 +3010,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -3843,8 +3018,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -3852,8 +3026,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -3861,8 +3034,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -3870,10 +3042,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys140",
@@ -3937,135 +3109,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys72",
-   "location": [
-    16729.99267578125,
-    13374.2138671875,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
-  },
-  {
-   "polys": "Polys28",
-   "location": [
-    26528.0,
-    11664.0,
-    -3102.0
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys138",
@@ -4129,7 +3174,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys103",
@@ -4145,8 +3191,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -4154,8 +3199,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -4163,8 +3207,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -4172,8 +3215,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -4181,8 +3223,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -4190,10 +3231,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys156",
@@ -4257,7 +3298,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys131",
@@ -4273,8 +3315,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -4282,8 +3323,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -4291,8 +3331,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -4300,8 +3339,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -4309,8 +3347,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -4318,10 +3355,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys3983",
@@ -4385,71 +3422,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys23",
-   "location": [
-    26528.0,
-    10400.0,
-    -3102.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in002"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys95",
@@ -4465,8 +3439,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -4474,8 +3447,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -4483,8 +3455,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -4492,8 +3463,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -4501,8 +3471,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -4510,10 +3479,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys163",
@@ -4529,8 +3498,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -4538,8 +3506,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -4547,8 +3514,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -4556,8 +3522,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -4565,8 +3530,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -4574,10 +3538,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys142",
@@ -4641,7 +3605,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys3993",
@@ -4705,7 +3670,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys136",
@@ -4769,7 +3735,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys122",
@@ -4833,7 +3800,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys132",
@@ -4897,7 +3865,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys120",
@@ -4961,7 +3930,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys158",
@@ -5025,7 +3995,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys155",
@@ -5041,8 +4012,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5050,8 +4020,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5059,8 +4028,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5068,8 +4036,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5077,8 +4044,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5086,10 +4052,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys111",
@@ -5105,8 +4071,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5114,8 +4079,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5123,8 +4087,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5132,8 +4095,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5141,8 +4103,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5150,10 +4111,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys16",
@@ -5193,7 +4154,8 @@
      "flags": 4194304,
      "tex": null
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys24",
@@ -5233,7 +4195,8 @@
      "flags": 4194304,
      "tex": null
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys35",
@@ -5249,8 +4212,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5258,8 +4220,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5267,8 +4228,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5276,8 +4236,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5285,8 +4244,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in008"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5294,10 +4252,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in022"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys139",
@@ -5313,8 +4271,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5322,8 +4279,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5331,8 +4287,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5340,8 +4295,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5349,8 +4303,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5358,10 +4311,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys154",
@@ -5425,7 +4378,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys3991",
@@ -5489,7 +4443,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys126",
@@ -5553,7 +4508,8 @@
      ],
      "prim": 5
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys151",
@@ -5569,8 +4525,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5578,8 +4533,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5587,8 +4541,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5596,8 +4549,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5605,8 +4557,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5614,10 +4565,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys94",
@@ -5633,8 +4584,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5642,8 +4592,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -5651,8 +4600,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -5660,8 +4608,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -5669,8 +4616,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -5678,10 +4624,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys3995",
@@ -5745,7 +4691,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys92",
@@ -5761,8 +4708,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5770,8 +4716,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -5779,8 +4724,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -5788,8 +4732,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -5797,8 +4740,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -5806,74 +4748,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys25",
-   "location": [
-    6239.71826171875,
-    19023.83203125,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys162",
@@ -5937,7 +4815,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys92",
@@ -5953,8 +4832,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -5962,8 +4840,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -5971,8 +4848,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -5980,8 +4856,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -5989,8 +4864,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -5998,10 +4872,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys150",
@@ -6065,7 +4939,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys164",
@@ -6129,7 +5004,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys58",
@@ -6145,8 +5021,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6154,8 +5029,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -6163,8 +5037,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -6172,8 +5045,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -6181,8 +5053,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -6190,10 +5061,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys46",
@@ -6209,8 +5080,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6218,8 +5088,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -6227,8 +5096,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -6236,8 +5104,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -6245,8 +5112,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -6254,10 +5120,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys152",
@@ -6321,7 +5187,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys59",
@@ -6337,8 +5204,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_t010"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6346,8 +5212,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -6355,8 +5220,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_t010"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -6364,8 +5228,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -6373,8 +5236,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in024"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -6382,10 +5244,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_004"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys148",
@@ -6449,7 +5311,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys166",
@@ -6513,7 +5376,8 @@
      ],
      "prim": 4
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys71",
@@ -6529,8 +5393,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_t010"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6538,8 +5401,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -6547,8 +5409,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_t010"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -6556,8 +5417,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -6565,8 +5425,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in024"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -6574,10 +5433,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_004"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys104",
@@ -6593,8 +5452,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 1,
@@ -6602,8 +5460,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 2,
@@ -6611,8 +5468,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 3,
@@ -6620,8 +5476,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 4,
@@ -6629,8 +5484,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -6638,10 +5492,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys47",
@@ -6657,8 +5511,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6666,8 +5519,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -6675,8 +5527,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -6684,8 +5535,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -6693,8 +5543,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in023"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -6702,138 +5551,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in022"
-     ],
-     "prim": 5
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys70",
-   "location": [
-    15426.33935546875,
-    13968.2939453125,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
-  },
-  {
-   "polys": "Polys32",
-   "location": [
-    6151.615966796875,
-    18119.013671875,
-    -3106.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys52",
@@ -6849,8 +5570,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6858,8 +5578,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -6867,8 +5586,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -6876,8 +5594,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -6885,8 +5602,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -6894,10 +5610,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys60",
@@ -6913,8 +5629,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6922,8 +5637,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -6931,8 +5645,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 3,
@@ -6940,8 +5653,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 4,
@@ -6949,8 +5661,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 5,
@@ -6958,10 +5669,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys62",
@@ -6977,8 +5688,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -6986,8 +5696,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -6995,8 +5704,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7004,8 +5712,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7013,8 +5720,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7022,10 +5728,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys102",
@@ -7041,8 +5747,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7050,8 +5755,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7059,8 +5763,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7068,8 +5771,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7077,8 +5779,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7086,10 +5787,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys54",
@@ -7105,8 +5806,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7114,8 +5814,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7123,8 +5822,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7132,8 +5830,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7141,8 +5838,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7150,10 +5846,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys56",
@@ -7169,8 +5865,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7178,8 +5873,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -7187,8 +5881,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -7196,8 +5889,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -7205,8 +5897,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -7214,10 +5905,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys106",
@@ -7233,8 +5924,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7242,8 +5932,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7251,8 +5940,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7260,8 +5948,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7269,8 +5956,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7278,10 +5964,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys64",
@@ -7297,8 +5983,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7306,8 +5991,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -7315,8 +5999,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -7324,8 +6007,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -7333,8 +6015,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -7342,74 +6023,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys80",
-   "location": [
-    17278.016845703125,
-    14530.5166015625,
-    -3258.1591796875
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys146",
@@ -7473,71 +6090,8 @@
      ],
      "prim": 5
     }
-   ]
-  },
-  {
-   "polys": "Polys74",
-   "location": [
-    15815.63720703125,
-    14342.7099609375,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys51",
@@ -7553,8 +6107,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7562,8 +6115,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7571,8 +6123,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7580,8 +6131,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7589,8 +6139,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in023"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7598,74 +6147,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in022"
-     ],
-     "prim": 5
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys29",
-   "location": [
-    6458.41943359375,
-    18649.4375,
-    -3106.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys96",
@@ -7681,8 +6166,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7690,8 +6174,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7699,8 +6182,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 3,
@@ -7708,8 +6190,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 4,
@@ -7717,8 +6198,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 5,
@@ -7726,74 +6206,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys36",
-   "location": [
-    5767.995361328125,
-    19327.6328125,
-    -3258.1591796875
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys98",
@@ -7809,8 +6225,7 @@
      "tex": [
       "l2_etc_textures",
       "ZonePortal"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 1,
@@ -7818,8 +6233,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 2,
@@ -7827,8 +6241,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -7836,8 +6249,7 @@
      "tex": [
       "l2_etc_textures",
       "ZonePortal"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -7845,8 +6257,7 @@
      "tex": [
       "l2_etc_textures",
       "ZonePortal"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 5,
@@ -7854,74 +6265,10 @@
      "tex": [
       "l2_etc_textures",
       "ZonePortal"
-     ],
-     "prim": null
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys82",
-   "location": [
-    16832.7119140625,
-    14886.4833984375,
-    -3258.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys50",
@@ -7937,8 +6284,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -7946,8 +6292,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -7955,8 +6300,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -7964,8 +6308,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -7973,8 +6316,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -7982,10 +6324,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys100",
@@ -8043,7 +6385,8 @@
       "ZonePortal"
      ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys90",
@@ -8059,8 +6402,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -8068,8 +6410,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -8077,8 +6418,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -8086,8 +6426,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -8095,8 +6434,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -8104,138 +6442,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
-  },
-  {
-   "polys": "Polys78",
-   "location": [
-    16856.806640625,
-    14317.46484375,
-    -3106.1591796875
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys76",
-   "location": [
-    15750.442138671875,
-    14873.1171875,
-    -3106.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
+   "csg": 2
   },
   {
    "polys": "Polys108",
@@ -8251,8 +6461,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -8260,8 +6469,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 2,
@@ -8269,8 +6477,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 3,
@@ -8278,8 +6485,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": null
+     ]
     },
     {
      "i": 4,
@@ -8287,8 +6493,7 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 5,
@@ -8296,10 +6501,10 @@
      "tex": [
       "oren_dev_t",
       "DE_V_m12"
-     ],
-     "prim": 3
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys3987",
@@ -8363,519 +6568,8 @@
      ],
      "prim": 3
     }
-   ]
-  },
-  {
-   "polys": "Polys44",
-   "location": [
-    7092.01953125,
-    17725.328125,
-    -3303.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys34",
-   "location": [
-    6189.212890625,
-    18922.673828125,
-    -3106.1591796875
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys84",
-   "location": [
-    16484.968505859375,
-    15541.7041015625,
-    -3303.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
-  },
-  {
-   "polys": "Polys88",
-   "location": [
-    16070.0400390625,
-    14860.8125,
-    -3303.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys86",
-   "location": [
-    16640.33984375,
-    15041.9677734375,
-    -3303.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys40",
-   "location": [
-    5199.060302734375,
-    17432.44921875,
-    -3303.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 4
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 5
-    }
-   ]
-  },
-  {
-   "polys": "Polys38",
-   "location": [
-    5845.314453125,
-    18087.6640625,
-    -3258.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 1,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 3,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
-  },
-  {
-   "polys": "Polys42",
-   "location": [
-    6393.6884765625,
-    18064.17578125,
-    -3303.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 2,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 4,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 5,
-     "flags": 4235264,
-     "tex": [
-      "oren_dev_t",
-      "DE_V_m12"
-     ],
-     "prim": 3
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys39",
@@ -8891,8 +6585,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_001_1"
-     ],
-     "prim": 0
+     ]
     },
     {
      "i": 1,
@@ -8900,8 +6593,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 1
+     ]
     },
     {
      "i": 2,
@@ -8909,8 +6601,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in002"
-     ],
-     "prim": 2
+     ]
     },
     {
      "i": 3,
@@ -8918,8 +6609,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_ai_008"
-     ],
-     "prim": 3
+     ]
     },
     {
      "i": 4,
@@ -8927,8 +6617,7 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in002"
-     ],
-     "prim": 4
+     ]
     },
     {
      "i": 5,
@@ -8936,10 +6625,10 @@
      "tex": [
       "sylen_temple_t",
       "oren_sylen_in002"
-     ],
-     "prim": 5
+     ]
     }
-   ]
+   ],
+   "csg": 2
   },
   {
    "polys": "Polys83",
@@ -9003,7 +6692,8 @@
      ],
      "prim": 3
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys79",
@@ -9058,62 +6748,8 @@
      ],
      "prim": null
     }
-   ]
-  },
-  {
-   "polys": "Polys87",
-   "location": [
-    26824.0,
-    10988.0,
-    -3753.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    },
-    {
-     "i": 1,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in016"
-     ],
-     "prim": 0
-    },
-    {
-     "i": 2,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_in016"
-     ],
-     "prim": 1
-    },
-    {
-     "i": 3,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_ai_004"
-     ],
-     "prim": 2
-    },
-    {
-     "i": 4,
-     "flags": 0,
-     "tex": [
-      "sylen_temple_t",
-      "oren_sylen_001_1"
-     ],
-     "prim": null
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys160",
@@ -9177,7 +6813,8 @@
      ],
      "prim": 1
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys178",
@@ -9195,7 +6832,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys168",
@@ -9213,7 +6851,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys174",
@@ -9231,7 +6870,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys170",
@@ -9249,25 +6889,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys123",
-   "location": [
-    28079.0,
-    12817.0,
-    -3656.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys292",
@@ -9285,7 +6908,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys299",
@@ -9303,7 +6927,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys318",
@@ -9321,7 +6946,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys224",
@@ -9339,7 +6965,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys296",
@@ -9357,7 +6984,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys258",
@@ -9375,7 +7003,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys188",
@@ -9393,7 +7022,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys182",
@@ -9411,7 +7041,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys286",
@@ -9429,7 +7060,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys278",
@@ -9447,7 +7079,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys184",
@@ -9465,7 +7098,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys194",
@@ -9483,7 +7117,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys208",
@@ -9501,7 +7136,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys180",
@@ -9519,7 +7155,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys260",
@@ -9537,7 +7174,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys256",
@@ -9555,7 +7193,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys222",
@@ -9573,7 +7212,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys214",
@@ -9591,61 +7231,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys112",
-   "location": [
-    17695.66357421875,
-    15229.3017578125,
-    -3222.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
-  },
-  {
-   "polys": "Polys114",
-   "location": [
-    16886.81689453125,
-    14402.2900390625,
-    -2896.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
-  },
-  {
-   "polys": "Polys68",
-   "location": [
-    6774.365234375,
-    18792.83984375,
-    -3222.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys370",
@@ -9663,61 +7250,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys343",
-   "location": [
-    16401.01953125,
-    15329.2421875,
-    -3398.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
-  },
-  {
-   "polys": "Polys340",
-   "location": [
-    6513.2099609375,
-    17603.1015625,
-    -3398.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
-  },
-  {
-   "polys": "Polys66",
-   "location": [
-    5414.556640625,
-    18746.56640625,
-    -3398.159423828125
-   ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys196",
@@ -9735,7 +7269,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys198",
@@ -9753,7 +7288,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys262",
@@ -9771,7 +7307,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys230",
@@ -9789,7 +7326,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys252",
@@ -9807,7 +7345,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys238",
@@ -9825,7 +7364,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys226",
@@ -9843,7 +7383,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys186",
@@ -9861,7 +7402,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys200",
@@ -9879,7 +7421,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys202",
@@ -9897,7 +7440,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys240",
@@ -9915,7 +7459,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys220",
@@ -9933,7 +7478,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys212",
@@ -9951,7 +7497,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys274",
@@ -9969,7 +7516,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys282",
@@ -9987,7 +7535,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys192",
@@ -10005,7 +7554,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys1385",
@@ -10020,7 +7570,8 @@
      "flags": 557096,
      "tex": null
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys270",
@@ -10038,7 +7589,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys280",
@@ -10056,7 +7608,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys236",
@@ -10074,7 +7627,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys218",
@@ -10092,7 +7646,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys232",
@@ -10110,7 +7665,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys228",
@@ -10128,7 +7684,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys248",
@@ -10146,7 +7703,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys242",
@@ -10164,7 +7722,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys204",
@@ -10182,7 +7741,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys210",
@@ -10200,7 +7760,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys190",
@@ -10218,7 +7779,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys294",
@@ -10236,7 +7798,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys276",
@@ -10254,25 +7817,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys116",
-   "location": [
-    6323.22802734375,
-    20508.90234375,
-    -2896.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys246",
@@ -10290,7 +7836,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys272",
@@ -10308,7 +7855,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys284",
@@ -10326,25 +7874,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys115",
-   "location": [
-    26376.0,
-    11017.0,
-    -3656.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys250",
@@ -10362,7 +7893,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys321",
@@ -10380,7 +7912,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys367",
@@ -10398,7 +7931,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys311",
@@ -10416,7 +7950,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys244",
@@ -10434,7 +7969,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys308",
@@ -10452,7 +7988,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys266",
@@ -10470,7 +8007,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys206",
@@ -10488,7 +8026,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys306",
@@ -10506,7 +8045,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys303",
@@ -10524,7 +8064,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys316",
@@ -10542,7 +8083,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys254",
@@ -10560,7 +8102,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys216",
@@ -10578,25 +8121,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys119",
-   "location": [
-    28091.0,
-    9257.0,
-    -3656.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys172",
@@ -10614,7 +8140,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys234",
@@ -10632,7 +8159,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys176",
@@ -10650,25 +8178,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys110",
-   "location": [
-    17631.4609375,
-    15035.587890625,
-    -3398.159423828125
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 67109129,
-     "tex": [
-      "l2_etc_textures",
-      "ZonePortal"
-     ]
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys264",
@@ -10686,7 +8197,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys268",
@@ -10704,7 +8216,8 @@
       "AntiPortal"
      ]
     }
-   ]
+   ],
+   "csg": 1
   },
   {
    "polys": "Polys365",
@@ -10722,22 +8235,8 @@
       "AntiPortal"
      ]
     }
-   ]
-  },
-  {
-   "polys": "Polys18",
-   "location": [
-    168.0,
-    264474.0,
-    24484.0
    ],
-   "faces": [
-    {
-     "i": 0,
-     "flags": 4194312,
-     "tex": null
-    }
-   ]
+   "csg": 1
   },
   {
    "polys": "Polys12",
@@ -10777,17 +8276,13 @@
      "flags": 0,
      "tex": null
     }
-   ]
+   ],
+   "csg": 1
   }
  ],
  "cover_z": [
   [
    88,
-   48,
-   75.89
-  ],
-  [
-   88,
    49,
    76.44
   ],
@@ -11190,11 +8685,6 @@
    88,
    129,
    76.44
-  ],
-  [
-   89,
-   48,
-   75.89
   ],
   [
    89,
@@ -11603,11 +9093,6 @@
   ],
   [
    90,
-   48,
-   75.89
-  ],
-  [
-   90,
    49,
    76.44
   ],
@@ -12013,11 +9498,6 @@
   ],
   [
    91,
-   48,
-   75.89
-  ],
-  [
-   91,
    49,
    76.44
   ],
@@ -12029,377 +9509,377 @@
   [
    91,
    51,
-   77.77
+   76.44
   ],
   [
    91,
    52,
-   77.77
+   76.44
   ],
   [
    91,
    53,
-   77.77
+   76.44
   ],
   [
    91,
    54,
-   77.77
+   76.44
   ],
   [
    91,
    55,
-   77.77
+   76.44
   ],
   [
    91,
    56,
-   77.77
+   76.44
   ],
   [
    91,
    57,
-   77.77
+   76.44
   ],
   [
    91,
    58,
-   77.77
+   76.44
   ],
   [
    91,
    59,
-   77.77
+   76.44
   ],
   [
    91,
    60,
-   77.77
+   76.44
   ],
   [
    91,
    61,
-   77.77
+   76.44
   ],
   [
    91,
    62,
-   77.77
+   76.44
   ],
   [
    91,
    63,
-   77.77
+   76.44
   ],
   [
    91,
    64,
-   77.77
+   76.44
   ],
   [
    91,
    65,
-   77.77
+   76.44
   ],
   [
    91,
    66,
-   77.77
+   76.44
   ],
   [
    91,
    67,
-   77.77
+   76.44
   ],
   [
    91,
    68,
-   77.77
+   76.44
   ],
   [
    91,
    69,
-   77.77
+   76.44
   ],
   [
    91,
    70,
-   77.77
+   76.44
   ],
   [
    91,
    71,
-   77.77
+   76.44
   ],
   [
    91,
    72,
-   77.77
+   76.44
   ],
   [
    91,
    73,
-   77.77
+   76.44
   ],
   [
    91,
    74,
-   77.77
+   76.44
   ],
   [
    91,
    75,
-   77.77
+   76.44
   ],
   [
    91,
    76,
-   77.77
+   76.44
   ],
   [
    91,
    77,
-   77.77
+   76.44
   ],
   [
    91,
    78,
-   77.77
+   76.44
   ],
   [
    91,
    79,
-   77.77
+   76.44
   ],
   [
    91,
    80,
-   77.77
+   76.44
   ],
   [
    91,
    81,
-   77.77
+   76.44
   ],
   [
    91,
    82,
-   77.77
+   76.44
   ],
   [
    91,
    83,
-   77.77
+   76.44
   ],
   [
    91,
    84,
-   77.77
+   76.44
   ],
   [
    91,
    85,
-   77.77
+   76.44
   ],
   [
    91,
    86,
-   77.77
+   76.44
   ],
   [
    91,
    87,
-   77.77
+   76.44
   ],
   [
    91,
    88,
-   77.77
+   76.44
   ],
   [
    91,
    89,
-   77.77
+   76.44
   ],
   [
    91,
    90,
-   77.77
+   76.44
   ],
   [
    91,
    91,
-   77.77
+   76.44
   ],
   [
    91,
    92,
-   77.77
+   76.44
   ],
   [
    91,
    93,
-   77.77
+   76.44
   ],
   [
    91,
    94,
-   77.77
+   76.44
   ],
   [
    91,
    95,
-   77.77
+   76.44
   ],
   [
    91,
    96,
-   77.77
+   76.44
   ],
   [
    91,
    97,
-   77.77
+   76.44
   ],
   [
    91,
    98,
-   77.77
+   76.44
   ],
   [
    91,
    99,
-   77.77
+   76.44
   ],
   [
    91,
    100,
-   77.77
+   76.44
   ],
   [
    91,
    101,
-   77.77
+   76.44
   ],
   [
    91,
    102,
-   77.77
+   76.44
   ],
   [
    91,
    103,
-   77.77
+   76.44
   ],
   [
    91,
    104,
-   77.77
+   76.44
   ],
   [
    91,
    105,
-   77.77
+   76.44
   ],
   [
    91,
    106,
-   77.77
+   76.44
   ],
   [
    91,
    107,
-   77.77
+   76.44
   ],
   [
    91,
    108,
-   77.77
+   76.44
   ],
   [
    91,
    109,
-   77.77
+   76.44
   ],
   [
    91,
    110,
-   77.77
+   76.44
   ],
   [
    91,
    111,
-   77.77
+   76.44
   ],
   [
    91,
    112,
-   77.77
+   76.44
   ],
   [
    91,
    113,
-   77.77
+   76.44
   ],
   [
    91,
    114,
-   77.77
+   76.44
   ],
   [
    91,
    115,
-   77.77
+   76.44
   ],
   [
    91,
    116,
-   77.77
+   76.44
   ],
   [
    91,
    117,
-   77.77
+   76.44
   ],
   [
    91,
    118,
-   77.77
+   76.44
   ],
   [
    91,
    119,
-   77.77
+   76.44
   ],
   [
    91,
    120,
-   77.77
+   76.44
   ],
   [
    91,
    121,
-   77.77
+   76.44
   ],
   [
    91,
    122,
-   77.77
+   76.44
   ],
   [
    91,
    123,
-   77.77
+   76.44
   ],
   [
    91,
    124,
-   77.77
+   76.44
   ],
   [
    91,
    125,
-   77.77
+   76.44
   ],
   [
    91,
@@ -12423,11 +9903,6 @@
   ],
   [
    92,
-   48,
-   75.89
-  ],
-  [
-   92,
    49,
    76.44
   ],
@@ -12439,7 +9914,7 @@
   [
    92,
    51,
-   77.77
+   76.44
   ],
   [
    92,
@@ -12833,11 +10308,6 @@
   ],
   [
    93,
-   48,
-   75.89
-  ],
-  [
-   93,
    49,
    76.44
   ],
@@ -12849,7 +10319,7 @@
   [
    93,
    51,
-   77.77
+   76.44
   ],
   [
    93,
@@ -13243,11 +10713,6 @@
   ],
   [
    94,
-   48,
-   75.89
-  ],
-  [
-   94,
    49,
    76.44
   ],
@@ -13259,7 +10724,7 @@
   [
    94,
    51,
-   77.77
+   76.44
   ],
   [
    94,
@@ -13653,11 +11118,6 @@
   ],
   [
    95,
-   48,
-   75.89
-  ],
-  [
-   95,
    49,
    76.44
   ],
@@ -13669,7 +11129,7 @@
   [
    95,
    51,
-   77.77
+   76.44
   ],
   [
    95,
@@ -14063,11 +11523,6 @@
   ],
   [
    96,
-   48,
-   75.89
-  ],
-  [
-   96,
    49,
    76.44
   ],
@@ -14079,7 +11534,7 @@
   [
    96,
    51,
-   77.77
+   76.44
   ],
   [
    96,
@@ -14473,11 +11928,6 @@
   ],
   [
    97,
-   48,
-   75.89
-  ],
-  [
-   97,
    49,
    76.44
   ],
@@ -14489,7 +11939,7 @@
   [
    97,
    51,
-   77.77
+   76.44
   ],
   [
    97,
@@ -14883,11 +12333,6 @@
   ],
   [
    98,
-   48,
-   75.89
-  ],
-  [
-   98,
    49,
    76.44
   ],
@@ -14899,7 +12344,7 @@
   [
    98,
    51,
-   77.77
+   76.44
   ],
   [
    98,
@@ -15293,11 +12738,6 @@
   ],
   [
    99,
-   48,
-   75.89
-  ],
-  [
-   99,
    49,
    76.44
   ],
@@ -15309,7 +12749,7 @@
   [
    99,
    51,
-   77.77
+   76.44
   ],
   [
    99,
@@ -15703,11 +13143,6 @@
   ],
   [
    100,
-   48,
-   75.89
-  ],
-  [
-   100,
    49,
    76.44
   ],
@@ -15719,7 +13154,7 @@
   [
    100,
    51,
-   77.77
+   76.44
   ],
   [
    100,
@@ -16113,11 +13548,6 @@
   ],
   [
    101,
-   48,
-   75.89
-  ],
-  [
-   101,
    49,
    76.44
   ],
@@ -16129,7 +13559,7 @@
   [
    101,
    51,
-   77.77
+   76.44
   ],
   [
    101,
@@ -16523,11 +13953,6 @@
   ],
   [
    102,
-   48,
-   75.89
-  ],
-  [
-   102,
    49,
    76.44
   ],
@@ -16539,7 +13964,7 @@
   [
    102,
    51,
-   77.77
+   76.44
   ],
   [
    102,
@@ -16933,11 +14358,6 @@
   ],
   [
    103,
-   48,
-   75.89
-  ],
-  [
-   103,
    49,
    76.44
   ],
@@ -16949,7 +14369,7 @@
   [
    103,
    51,
-   77.77
+   76.44
   ],
   [
    103,
@@ -17343,11 +14763,6 @@
   ],
   [
    104,
-   48,
-   75.89
-  ],
-  [
-   104,
    49,
    76.44
   ],
@@ -17359,7 +14774,7 @@
   [
    104,
    51,
-   77.77
+   76.44
   ],
   [
    104,
@@ -17753,11 +15168,6 @@
   ],
   [
    105,
-   48,
-   75.89
-  ],
-  [
-   105,
    49,
    76.44
   ],
@@ -17769,7 +15179,7 @@
   [
    105,
    51,
-   77.77
+   76.44
   ],
   [
    105,
@@ -18163,11 +15573,6 @@
   ],
   [
    106,
-   48,
-   75.89
-  ],
-  [
-   106,
    49,
    76.44
   ],
@@ -18179,7 +15584,7 @@
   [
    106,
    51,
-   77.77
+   76.44
   ],
   [
    106,
@@ -18573,11 +15978,6 @@
   ],
   [
    107,
-   48,
-   75.89
-  ],
-  [
-   107,
    49,
    76.44
   ],
@@ -18589,7 +15989,7 @@
   [
    107,
    51,
-   77.77
+   76.44
   ],
   [
    107,
@@ -18983,11 +16383,6 @@
   ],
   [
    108,
-   48,
-   75.89
-  ],
-  [
-   108,
    49,
    76.44
   ],
@@ -18999,7 +16394,7 @@
   [
    108,
    51,
-   77.77
+   76.44
   ],
   [
    108,
@@ -19393,11 +16788,6 @@
   ],
   [
    109,
-   48,
-   75.89
-  ],
-  [
-   109,
    49,
    76.44
   ],
@@ -19409,7 +16799,7 @@
   [
    109,
    51,
-   77.77
+   76.44
   ],
   [
    109,
@@ -19803,11 +17193,6 @@
   ],
   [
    110,
-   48,
-   75.89
-  ],
-  [
-   110,
    49,
    76.44
   ],
@@ -19819,7 +17204,7 @@
   [
    110,
    51,
-   77.77
+   76.44
   ],
   [
    110,
@@ -20213,11 +17598,6 @@
   ],
   [
    111,
-   48,
-   75.89
-  ],
-  [
-   111,
    49,
    76.44
   ],
@@ -20229,7 +17609,7 @@
   [
    111,
    51,
-   77.77
+   76.44
   ],
   [
    111,
@@ -20623,11 +18003,6 @@
   ],
   [
    112,
-   48,
-   75.89
-  ],
-  [
-   112,
    49,
    76.44
   ],
@@ -20639,7 +18014,7 @@
   [
    112,
    51,
-   77.77
+   76.44
   ],
   [
    112,
@@ -21033,11 +18408,6 @@
   ],
   [
    113,
-   48,
-   75.89
-  ],
-  [
-   113,
    49,
    76.44
   ],
@@ -21049,7 +18419,7 @@
   [
    113,
    51,
-   77.77
+   76.44
   ],
   [
    113,
@@ -21443,11 +18813,6 @@
   ],
   [
    114,
-   48,
-   75.89
-  ],
-  [
-   114,
    49,
    76.44
   ],
@@ -21459,7 +18824,7 @@
   [
    114,
    51,
-   77.77
+   76.44
   ],
   [
    114,
@@ -21853,11 +19218,6 @@
   ],
   [
    115,
-   48,
-   75.89
-  ],
-  [
-   115,
    49,
    76.44
   ],
@@ -21869,7 +19229,7 @@
   [
    115,
    51,
-   77.77
+   76.44
   ],
   [
    115,
@@ -22263,11 +19623,6 @@
   ],
   [
    116,
-   48,
-   75.89
-  ],
-  [
-   116,
    49,
    76.44
   ],
@@ -22279,7 +19634,7 @@
   [
    116,
    51,
-   77.77
+   76.44
   ],
   [
    116,
@@ -22673,11 +20028,6 @@
   ],
   [
    117,
-   48,
-   75.89
-  ],
-  [
-   117,
    49,
    76.44
   ],
@@ -22689,7 +20039,7 @@
   [
    117,
    51,
-   77.77
+   76.44
   ],
   [
    117,
@@ -23083,11 +20433,6 @@
   ],
   [
    118,
-   48,
-   75.89
-  ],
-  [
-   118,
    49,
    76.44
   ],
@@ -23099,7 +20444,7 @@
   [
    118,
    51,
-   77.77
+   76.44
   ],
   [
    118,
@@ -23493,11 +20838,6 @@
   ],
   [
    119,
-   48,
-   75.89
-  ],
-  [
-   119,
    49,
    76.44
   ],
@@ -23509,7 +20849,7 @@
   [
    119,
    51,
-   77.77
+   76.44
   ],
   [
    119,
@@ -23903,11 +21243,6 @@
   ],
   [
    120,
-   48,
-   75.89
-  ],
-  [
-   120,
    49,
    76.44
   ],
@@ -23919,7 +21254,7 @@
   [
    120,
    51,
-   77.77
+   76.44
   ],
   [
    120,
@@ -24313,11 +21648,6 @@
   ],
   [
    121,
-   48,
-   75.89
-  ],
-  [
-   121,
    49,
    76.44
   ],
@@ -24329,7 +21659,7 @@
   [
    121,
    51,
-   77.77
+   76.44
   ],
   [
    121,
@@ -24723,11 +22053,6 @@
   ],
   [
    122,
-   48,
-   75.89
-  ],
-  [
-   122,
    49,
    76.44
   ],
@@ -24739,7 +22064,7 @@
   [
    122,
    51,
-   77.77
+   76.44
   ],
   [
    122,
@@ -25133,11 +22458,6 @@
   ],
   [
    123,
-   48,
-   75.89
-  ],
-  [
-   123,
    49,
    76.44
   ],
@@ -25149,7 +22469,7 @@
   [
    123,
    51,
-   77.77
+   76.44
   ],
   [
    123,
@@ -25543,11 +22863,6 @@
   ],
   [
    124,
-   48,
-   75.89
-  ],
-  [
-   124,
    49,
    76.44
   ],
@@ -25559,7 +22874,7 @@
   [
    124,
    51,
-   77.77
+   76.44
   ],
   [
    124,
@@ -25953,11 +23268,6 @@
   ],
   [
    125,
-   48,
-   75.89
-  ],
-  [
-   125,
    49,
    76.44
   ],
@@ -25969,7 +23279,7 @@
   [
    125,
    51,
-   77.77
+   76.44
   ],
   [
    125,
@@ -26363,11 +23673,6 @@
   ],
   [
    126,
-   48,
-   75.89
-  ],
-  [
-   126,
    49,
    76.44
   ],
@@ -26379,7 +23684,7 @@
   [
    126,
    51,
-   77.77
+   76.44
   ],
   [
    126,
@@ -26773,11 +24078,6 @@
   ],
   [
    127,
-   48,
-   75.89
-  ],
-  [
-   127,
    49,
    76.44
   ],
@@ -26789,7 +24089,7 @@
   [
    127,
    51,
-   77.77
+   76.44
   ],
   [
    127,
@@ -27183,11 +24483,6 @@
   ],
   [
    128,
-   48,
-   75.89
-  ],
-  [
-   128,
    49,
    76.44
   ],
@@ -27199,7 +24494,7 @@
   [
    128,
    51,
-   77.77
+   76.44
   ],
   [
    128,
@@ -27593,11 +24888,6 @@
   ],
   [
    129,
-   48,
-   75.89
-  ],
-  [
-   129,
    49,
    76.44
   ],
@@ -27609,7 +24899,7 @@
   [
    129,
    51,
-   77.77
+   76.44
   ],
   [
    129,
@@ -28003,11 +25293,6 @@
   ],
   [
    130,
-   48,
-   75.89
-  ],
-  [
-   130,
    49,
    76.44
   ],
@@ -28019,7 +25304,7 @@
   [
    130,
    51,
-   77.77
+   76.44
   ],
   [
    130,
@@ -28413,11 +25698,6 @@
   ],
   [
    131,
-   48,
-   75.89
-  ],
-  [
-   131,
    49,
    76.44
   ],
@@ -28429,7 +25709,7 @@
   [
    131,
    51,
-   77.77
+   76.44
   ],
   [
    131,
@@ -28823,11 +26103,6 @@
   ],
   [
    132,
-   48,
-   75.89
-  ],
-  [
-   132,
    49,
    76.44
   ],
@@ -28839,7 +26114,7 @@
   [
    132,
    51,
-   77.77
+   76.44
   ],
   [
    132,
@@ -29233,11 +26508,6 @@
   ],
   [
    133,
-   48,
-   75.89
-  ],
-  [
-   133,
    49,
    76.44
   ],
@@ -29249,7 +26519,7 @@
   [
    133,
    51,
-   77.77
+   76.44
   ],
   [
    133,
@@ -29643,11 +26913,6 @@
   ],
   [
    134,
-   48,
-   75.89
-  ],
-  [
-   134,
    49,
    76.44
   ],
@@ -29659,7 +26924,7 @@
   [
    134,
    51,
-   77.77
+   76.44
   ],
   [
    134,
@@ -30053,11 +27318,6 @@
   ],
   [
    135,
-   48,
-   75.89
-  ],
-  [
-   135,
    49,
    76.44
   ],
@@ -30069,7 +27329,7 @@
   [
    135,
    51,
-   77.77
+   76.44
   ],
   [
    135,
@@ -30463,11 +27723,6 @@
   ],
   [
    136,
-   48,
-   75.89
-  ],
-  [
-   136,
    49,
    76.44
   ],
@@ -30479,7 +27734,7 @@
   [
    136,
    51,
-   77.77
+   76.44
   ],
   [
    136,
@@ -30873,11 +28128,6 @@
   ],
   [
    137,
-   48,
-   75.89
-  ],
-  [
-   137,
    49,
    76.44
   ],
@@ -30889,7 +28139,7 @@
   [
    137,
    51,
-   77.77
+   76.44
   ],
   [
    137,
@@ -31284,27 +28534,27 @@
   [
    138,
    44,
-   63.22
+   63.03
   ],
   [
    138,
    45,
-   63.22
+   63.03
   ],
   [
    138,
    46,
-   63.22
+   63.03
   ],
   [
    138,
    47,
-   63.22
+   63.03
   ],
   [
    138,
    48,
-   75.89
+   63.03
   ],
   [
    138,
@@ -31319,7 +28569,7 @@
   [
    138,
    51,
-   77.77
+   76.44
   ],
   [
    138,
@@ -31714,27 +28964,27 @@
   [
    139,
    44,
-   63.22
+   63.03
   ],
   [
    139,
    45,
-   63.22
+   63.03
   ],
   [
    139,
    46,
-   63.22
+   63.03
   ],
   [
    139,
    47,
-   63.22
+   63.03
   ],
   [
    139,
    48,
-   75.89
+   63.03
   ],
   [
    139,
@@ -31749,7 +28999,7 @@
   [
    139,
    51,
-   77.77
+   76.44
   ],
   [
    139,
@@ -32144,7 +29394,7 @@
   [
    140,
    44,
-   63.22
+   63.03
   ],
   [
    140,
@@ -32154,17 +29404,17 @@
   [
    140,
    46,
-   63.22
+   63.03
   ],
   [
    140,
    47,
-   63.22
+   63.03
   ],
   [
    140,
    48,
-   75.89
+   63.03
   ],
   [
    140,
@@ -32179,7 +29429,7 @@
   [
    140,
    51,
-   77.77
+   76.44
   ],
   [
    140,
@@ -32574,7 +29824,7 @@
   [
    141,
    44,
-   63.22
+   63.03
   ],
   [
    141,
@@ -32589,7 +29839,7 @@
   [
    141,
    48,
-   75.89
+   63.03
   ],
   [
    141,
@@ -32604,7 +29854,7 @@
   [
    141,
    51,
-   77.77
+   76.44
   ],
   [
    141,
@@ -32999,7 +30249,7 @@
   [
    142,
    44,
-   63.22
+   63.03
   ],
   [
    142,
@@ -33008,11 +30258,6 @@
   ],
   [
    142,
-   48,
-   75.89
-  ],
-  [
-   142,
    49,
    76.44
   ],
@@ -33024,7 +30269,7 @@
   [
    142,
    51,
-   77.77
+   76.44
   ],
   [
    142,
@@ -33419,12 +30664,12 @@
   [
    143,
    44,
-   63.22
+   63.03
   ],
   [
    143,
    45,
-   63.22
+   63.03
   ],
   [
    143,
@@ -33434,7 +30679,7 @@
   [
    143,
    48,
-   75.89
+   63.03
   ],
   [
    143,
@@ -33449,7 +30694,7 @@
   [
    143,
    51,
-   77.77
+   76.44
   ],
   [
    143,
@@ -33864,17 +31109,17 @@
   [
    144,
    46,
-   64.77
+   64.58
   ],
   [
    144,
    47,
-   64.77
+   64.58
   ],
   [
    144,
    48,
-   75.89
+   64.58
   ],
   [
    144,
@@ -33889,7 +31134,7 @@
   [
    144,
    51,
-   77.77
+   76.44
   ],
   [
    144,
@@ -34239,12 +31484,12 @@
   [
    144,
    121,
-   77.77
+   76.44
   ],
   [
    144,
    122,
-   77.77
+   76.44
   ],
   [
    144,
@@ -34294,12 +31539,12 @@
   [
    145,
    47,
-   64.77
+   64.58
   ],
   [
    145,
    48,
-   75.89
+   64.58
   ],
   [
    145,
@@ -34314,7 +31559,7 @@
   [
    145,
    51,
-   77.77
+   76.44
   ],
   [
    145,
@@ -34644,7 +31889,7 @@
   [
    145,
    117,
-   77.77
+   77.02
   ],
   [
    145,
@@ -34734,7 +31979,7 @@
   [
    146,
    48,
-   75.89
+   64.58
   ],
   [
    146,
@@ -34749,7 +31994,7 @@
   [
    146,
    51,
-   77.77
+   76.44
   ],
   [
    146,
@@ -35059,7 +32304,7 @@
   [
    146,
    113,
-   77.77
+   77.02
   ],
   [
    146,
@@ -35129,12 +32374,12 @@
   [
    146,
    127,
-   75.89
+   63.43
   ],
   [
    146,
    128,
-   75.89
+   63.43
   ],
   [
    146,
@@ -35164,17 +32409,12 @@
   [
    147,
    46,
-   64.77
+   64.58
   ],
   [
    147,
    47,
    60.32
-  ],
-  [
-   147,
-   48,
-   75.89
   ],
   [
    147,
@@ -35189,7 +32429,7 @@
   [
    147,
    51,
-   77.77
+   76.44
   ],
   [
    147,
@@ -35474,12 +32714,12 @@
   [
    147,
    108,
-   77.77
+   77.02
   ],
   [
    147,
    109,
-   77.77
+   77.02
   ],
   [
    147,
@@ -35604,12 +32844,7 @@
   [
    148,
    46,
-   64.77
-  ],
-  [
-   148,
-   48,
-   75.89
+   64.58
   ],
   [
    148,
@@ -35624,7 +32859,7 @@
   [
    148,
    51,
-   77.77
+   76.44
   ],
   [
    148,
@@ -35889,7 +33124,7 @@
   [
    148,
    104,
-   77.77
+   77.02
   ],
   [
    148,
@@ -35964,7 +33199,7 @@
   [
    148,
    119,
-   75.89
+   74.25
   ],
   [
    148,
@@ -36039,17 +33274,17 @@
   [
    149,
    46,
-   64.77
+   64.58
   ],
   [
    149,
    47,
-   64.77
+   64.58
   ],
   [
    149,
    48,
-   75.89
+   64.58
   ],
   [
    149,
@@ -36064,7 +33299,7 @@
   [
    149,
    51,
-   77.77
+   76.44
   ],
   [
    149,
@@ -36304,12 +33539,12 @@
   [
    149,
    99,
-   77.77
+   77.02
   ],
   [
    149,
    100,
-   77.77
+   77.02
   ],
   [
    149,
@@ -36458,11 +33693,6 @@
   ],
   [
    150,
-   48,
-   75.89
-  ],
-  [
-   150,
    49,
    76.44
   ],
@@ -36474,7 +33704,7 @@
   [
    150,
    51,
-   77.77
+   76.44
   ],
   [
    150,
@@ -36694,7 +33924,7 @@
   [
    150,
    95,
-   77.77
+   77.02
   ],
   [
    150,
@@ -36868,11 +34098,6 @@
   ],
   [
    151,
-   48,
-   75.89
-  ],
-  [
-   151,
    49,
    76.44
   ],
@@ -36884,7 +34109,7 @@
   [
    151,
    51,
-   77.77
+   76.44
   ],
   [
    151,
@@ -37084,7 +34309,7 @@
   [
    151,
    91,
-   77.77
+   77.02
   ],
   [
    151,
@@ -37278,11 +34503,6 @@
   ],
   [
    152,
-   48,
-   75.89
-  ],
-  [
-   152,
    49,
    76.44
   ],
@@ -37294,7 +34514,7 @@
   [
    152,
    51,
-   77.77
+   76.44
   ],
   [
    152,
@@ -37469,12 +34689,12 @@
   [
    152,
    86,
-   77.77
+   77.02
   ],
   [
    152,
    87,
-   77.77
+   77.02
   ],
   [
    152,
@@ -37688,11 +34908,6 @@
   ],
   [
    153,
-   48,
-   75.89
-  ],
-  [
-   153,
    49,
    76.44
   ],
@@ -37704,7 +34919,7 @@
   [
    153,
    51,
-   77.77
+   76.44
   ],
   [
    153,
@@ -37859,7 +35074,7 @@
   [
    153,
    82,
-   77.77
+   77.02
   ],
   [
    153,
@@ -38098,11 +35313,6 @@
   ],
   [
    154,
-   48,
-   75.89
-  ],
-  [
-   154,
    49,
    76.44
   ],
@@ -38114,7 +35324,7 @@
   [
    154,
    51,
-   77.77
+   76.44
   ],
   [
    154,
@@ -38249,7 +35459,7 @@
   [
    154,
    78,
-   77.77
+   77.02
   ],
   [
    154,
@@ -38508,11 +35718,6 @@
   ],
   [
    155,
-   48,
-   75.89
-  ],
-  [
-   155,
    49,
    76.44
   ],
@@ -38524,7 +35729,7 @@
   [
    155,
    51,
-   77.77
+   76.44
   ],
   [
    155,
@@ -38634,12 +35839,12 @@
   [
    155,
    73,
-   77.77
+   77.02
   ],
   [
    155,
    74,
-   77.77
+   77.02
   ],
   [
    155,
@@ -38918,11 +36123,6 @@
   ],
   [
    156,
-   48,
-   75.89
-  ],
-  [
-   156,
    49,
    76.44
   ],
@@ -38934,7 +36134,7 @@
   [
    156,
    51,
-   77.77
+   76.44
   ],
   [
    156,
@@ -39024,7 +36224,7 @@
   [
    156,
    69,
-   77.77
+   77.02
   ],
   [
    156,
@@ -39328,11 +36528,6 @@
   ],
   [
    157,
-   48,
-   75.89
-  ],
-  [
-   157,
    49,
    76.44
   ],
@@ -39344,7 +36539,7 @@
   [
    157,
    51,
-   77.77
+   76.44
   ],
   [
    157,
@@ -39409,12 +36604,12 @@
   [
    157,
    64,
-   77.77
+   77.02
   ],
   [
    157,
    65,
-   77.77
+   77.02
   ],
   [
    157,
@@ -39738,11 +36933,6 @@
   ],
   [
    158,
-   48,
-   75.89
-  ],
-  [
-   158,
    49,
    76.44
   ],
@@ -39754,7 +36944,7 @@
   [
    158,
    51,
-   77.77
+   76.44
   ],
   [
    158,
@@ -40148,11 +37338,6 @@
   ],
   [
    159,
-   48,
-   75.89
-  ],
-  [
-   159,
    49,
    76.44
   ],
@@ -40164,7 +37349,7 @@
   [
    159,
    51,
-   77.77
+   76.44
   ],
   [
    159,
@@ -40558,11 +37743,6 @@
   ],
   [
    160,
-   48,
-   75.89
-  ],
-  [
-   160,
    49,
    76.44
   ],
@@ -40574,7 +37754,7 @@
   [
    160,
    51,
-   77.77
+   76.44
   ],
   [
    160,
@@ -40968,11 +38148,6 @@
   ],
   [
    161,
-   48,
-   75.89
-  ],
-  [
-   161,
    49,
    76.44
   ],
@@ -40984,7 +38159,7 @@
   [
    161,
    51,
-   77.77
+   76.44
   ],
   [
    161,
@@ -41378,11 +38553,6 @@
   ],
   [
    162,
-   48,
-   75.89
-  ],
-  [
-   162,
    49,
    76.44
   ],
@@ -41394,7 +38564,7 @@
   [
    162,
    51,
-   77.77
+   76.44
   ],
   [
    162,
@@ -41788,11 +38958,6 @@
   ],
   [
    163,
-   48,
-   75.89
-  ],
-  [
-   163,
    49,
    76.44
   ],
@@ -41804,7 +38969,7 @@
   [
    163,
    51,
-   77.77
+   76.44
   ],
   [
    163,
@@ -42198,11 +39363,6 @@
   ],
   [
    164,
-   48,
-   75.89
-  ],
-  [
-   164,
    49,
    76.44
   ],
@@ -42214,7 +39374,7 @@
   [
    164,
    51,
-   77.77
+   76.44
   ],
   [
    164,
@@ -42608,11 +39768,6 @@
   ],
   [
    165,
-   48,
-   75.89
-  ],
-  [
-   165,
    49,
    76.44
   ],
@@ -42624,7 +39779,7 @@
   [
    165,
    51,
-   77.77
+   76.44
   ],
   [
    165,
@@ -43018,11 +40173,6 @@
   ],
   [
    166,
-   48,
-   75.89
-  ],
-  [
-   166,
    49,
    76.44
   ],
@@ -43034,7 +40184,7 @@
   [
    166,
    51,
-   77.77
+   76.44
   ],
   [
    166,
@@ -43428,11 +40578,6 @@
   ],
   [
    167,
-   48,
-   75.89
-  ],
-  [
-   167,
    49,
    76.44
   ],
@@ -43444,7 +40589,7 @@
   [
    167,
    51,
-   77.77
+   76.44
   ],
   [
    167,
@@ -43838,11 +40983,6 @@
   ],
   [
    168,
-   48,
-   75.89
-  ],
-  [
-   168,
    49,
    76.44
   ],
@@ -43854,7 +40994,7 @@
   [
    168,
    51,
-   77.77
+   76.44
   ],
   [
    168,
@@ -44248,11 +41388,6 @@
   ],
   [
    169,
-   48,
-   75.89
-  ],
-  [
-   169,
    49,
    76.44
   ],
@@ -44264,7 +41399,7 @@
   [
    169,
    51,
-   77.77
+   76.44
   ],
   [
    169,
@@ -44658,11 +41793,6 @@
   ],
   [
    170,
-   48,
-   75.89
-  ],
-  [
-   170,
    49,
    76.44
   ],
@@ -44674,377 +41804,377 @@
   [
    170,
    51,
-   77.77
+   76.44
   ],
   [
    170,
    52,
-   77.77
+   76.44
   ],
   [
    170,
    53,
-   77.77
+   76.44
   ],
   [
    170,
    54,
-   77.77
+   76.44
   ],
   [
    170,
    55,
-   77.77
+   76.44
   ],
   [
    170,
    56,
-   77.77
+   76.44
   ],
   [
    170,
    57,
-   77.77
+   76.44
   ],
   [
    170,
    58,
-   77.77
+   76.44
   ],
   [
    170,
    59,
-   77.77
+   76.44
   ],
   [
    170,
    60,
-   77.77
+   76.44
   ],
   [
    170,
    61,
-   77.77
+   76.44
   ],
   [
    170,
    62,
-   77.77
+   76.44
   ],
   [
    170,
    63,
-   77.77
+   76.44
   ],
   [
    170,
    64,
-   77.77
+   76.44
   ],
   [
    170,
    65,
-   77.77
+   76.44
   ],
   [
    170,
    66,
-   77.77
+   76.44
   ],
   [
    170,
    67,
-   77.77
+   76.44
   ],
   [
    170,
    68,
-   77.77
+   76.44
   ],
   [
    170,
    69,
-   77.77
+   76.44
   ],
   [
    170,
    70,
-   77.77
+   76.44
   ],
   [
    170,
    71,
-   77.77
+   76.44
   ],
   [
    170,
    72,
-   77.77
+   76.44
   ],
   [
    170,
    73,
-   77.77
+   76.44
   ],
   [
    170,
    74,
-   77.77
+   76.44
   ],
   [
    170,
    75,
-   77.77
+   76.44
   ],
   [
    170,
    76,
-   77.77
+   76.44
   ],
   [
    170,
    77,
-   77.77
+   76.44
   ],
   [
    170,
    78,
-   77.77
+   76.44
   ],
   [
    170,
    79,
-   77.77
+   76.44
   ],
   [
    170,
    80,
-   77.77
+   76.44
   ],
   [
    170,
    81,
-   77.77
+   76.44
   ],
   [
    170,
    82,
-   77.77
+   76.44
   ],
   [
    170,
    83,
-   77.77
+   76.44
   ],
   [
    170,
    84,
-   77.77
+   76.44
   ],
   [
    170,
    85,
-   77.77
+   76.44
   ],
   [
    170,
    86,
-   77.77
+   63.43
   ],
   [
    170,
    87,
-   77.77
+   63.43
   ],
   [
    170,
    88,
-   77.77
+   63.43
   ],
   [
    170,
    89,
-   77.77
+   63.43
   ],
   [
    170,
    90,
-   77.77
+   63.43
   ],
   [
    170,
    91,
-   77.77
+   63.43
   ],
   [
    170,
    92,
-   77.77
+   63.43
   ],
   [
    170,
    93,
-   77.77
+   63.43
   ],
   [
    170,
    94,
-   77.77
+   63.43
   ],
   [
    170,
    95,
-   77.77
+   63.43
   ],
   [
    170,
    96,
-   77.77
+   63.43
   ],
   [
    170,
    97,
-   77.77
+   63.43
   ],
   [
    170,
    98,
-   77.77
+   63.43
   ],
   [
    170,
    99,
-   77.77
+   63.43
   ],
   [
    170,
    100,
-   77.77
+   63.43
   ],
   [
    170,
    101,
-   77.77
+   63.43
   ],
   [
    170,
    102,
-   77.77
+   63.43
   ],
   [
    170,
    103,
-   77.77
+   76.44
   ],
   [
    170,
    104,
-   77.77
+   76.44
   ],
   [
    170,
    105,
-   77.77
+   76.44
   ],
   [
    170,
    106,
-   77.77
+   76.44
   ],
   [
    170,
    107,
-   77.77
+   76.44
   ],
   [
    170,
    108,
-   77.77
+   76.44
   ],
   [
    170,
    109,
-   77.77
+   76.44
   ],
   [
    170,
    110,
-   77.77
+   76.44
   ],
   [
    170,
    111,
-   77.77
+   76.44
   ],
   [
    170,
    112,
-   77.77
+   76.44
   ],
   [
    170,
    113,
-   77.77
+   76.44
   ],
   [
    170,
    114,
-   77.77
+   76.44
   ],
   [
    170,
    115,
-   77.77
+   76.44
   ],
   [
    170,
    116,
-   77.77
+   76.44
   ],
   [
    170,
    117,
-   77.77
+   76.44
   ],
   [
    170,
    118,
-   77.77
+   76.44
   ],
   [
    170,
    119,
-   77.77
+   76.44
   ],
   [
    170,
    120,
-   77.77
+   76.44
   ],
   [
    170,
    121,
-   77.77
+   76.44
   ],
   [
    170,
    122,
-   77.77
+   76.44
   ],
   [
    170,
    123,
-   77.77
+   76.44
   ],
   [
    170,
    124,
-   77.77
+   76.44
   ],
   [
    170,
    125,
-   77.77
+   76.44
   ],
   [
    170,
@@ -45065,11 +42195,6 @@
    170,
    129,
    76.44
-  ],
-  [
-   171,
-   48,
-   75.89
   ],
   [
    171,
@@ -45478,11 +42603,6 @@
   ],
   [
    172,
-   48,
-   75.89
-  ],
-  [
-   172,
    49,
    76.44
   ],
@@ -45885,11 +43005,6 @@
    172,
    129,
    76.44
-  ],
-  [
-   173,
-   48,
-   75.89
   ],
   [
    173,
@@ -46298,11 +43413,6 @@
   ],
   [
    174,
-   48,
-   75.89
-  ],
-  [
-   174,
    49,
    76.44
   ],
@@ -46705,416 +43815,6 @@
    174,
    129,
    76.44
-  ],
-  [
-   175,
-   48,
-   75.89
-  ],
-  [
-   175,
-   49,
-   75.89
-  ],
-  [
-   175,
-   50,
-   75.89
-  ],
-  [
-   175,
-   51,
-   75.89
-  ],
-  [
-   175,
-   52,
-   75.89
-  ],
-  [
-   175,
-   53,
-   75.89
-  ],
-  [
-   175,
-   54,
-   75.89
-  ],
-  [
-   175,
-   55,
-   75.89
-  ],
-  [
-   175,
-   56,
-   75.89
-  ],
-  [
-   175,
-   57,
-   75.89
-  ],
-  [
-   175,
-   58,
-   75.89
-  ],
-  [
-   175,
-   59,
-   75.89
-  ],
-  [
-   175,
-   60,
-   75.89
-  ],
-  [
-   175,
-   61,
-   75.89
-  ],
-  [
-   175,
-   62,
-   75.89
-  ],
-  [
-   175,
-   63,
-   75.89
-  ],
-  [
-   175,
-   64,
-   75.89
-  ],
-  [
-   175,
-   65,
-   75.89
-  ],
-  [
-   175,
-   66,
-   75.89
-  ],
-  [
-   175,
-   67,
-   75.89
-  ],
-  [
-   175,
-   68,
-   75.89
-  ],
-  [
-   175,
-   69,
-   75.89
-  ],
-  [
-   175,
-   70,
-   75.89
-  ],
-  [
-   175,
-   71,
-   75.89
-  ],
-  [
-   175,
-   72,
-   75.89
-  ],
-  [
-   175,
-   73,
-   75.89
-  ],
-  [
-   175,
-   74,
-   75.89
-  ],
-  [
-   175,
-   75,
-   75.89
-  ],
-  [
-   175,
-   76,
-   75.89
-  ],
-  [
-   175,
-   77,
-   75.89
-  ],
-  [
-   175,
-   78,
-   75.89
-  ],
-  [
-   175,
-   79,
-   75.89
-  ],
-  [
-   175,
-   80,
-   75.89
-  ],
-  [
-   175,
-   81,
-   75.89
-  ],
-  [
-   175,
-   82,
-   75.89
-  ],
-  [
-   175,
-   83,
-   75.89
-  ],
-  [
-   175,
-   84,
-   75.89
-  ],
-  [
-   175,
-   85,
-   75.89
-  ],
-  [
-   175,
-   86,
-   75.89
-  ],
-  [
-   175,
-   87,
-   75.89
-  ],
-  [
-   175,
-   88,
-   75.89
-  ],
-  [
-   175,
-   89,
-   75.89
-  ],
-  [
-   175,
-   90,
-   75.89
-  ],
-  [
-   175,
-   91,
-   75.89
-  ],
-  [
-   175,
-   92,
-   75.89
-  ],
-  [
-   175,
-   93,
-   75.89
-  ],
-  [
-   175,
-   94,
-   75.89
-  ],
-  [
-   175,
-   95,
-   75.89
-  ],
-  [
-   175,
-   96,
-   75.89
-  ],
-  [
-   175,
-   97,
-   75.89
-  ],
-  [
-   175,
-   98,
-   75.89
-  ],
-  [
-   175,
-   99,
-   75.89
-  ],
-  [
-   175,
-   100,
-   75.89
-  ],
-  [
-   175,
-   101,
-   75.89
-  ],
-  [
-   175,
-   102,
-   75.89
-  ],
-  [
-   175,
-   103,
-   75.89
-  ],
-  [
-   175,
-   104,
-   75.89
-  ],
-  [
-   175,
-   105,
-   75.89
-  ],
-  [
-   175,
-   106,
-   75.89
-  ],
-  [
-   175,
-   107,
-   75.89
-  ],
-  [
-   175,
-   108,
-   75.89
-  ],
-  [
-   175,
-   109,
-   75.89
-  ],
-  [
-   175,
-   110,
-   75.89
-  ],
-  [
-   175,
-   111,
-   75.89
-  ],
-  [
-   175,
-   112,
-   75.89
-  ],
-  [
-   175,
-   113,
-   75.89
-  ],
-  [
-   175,
-   114,
-   75.89
-  ],
-  [
-   175,
-   115,
-   75.89
-  ],
-  [
-   175,
-   116,
-   75.89
-  ],
-  [
-   175,
-   117,
-   75.89
-  ],
-  [
-   175,
-   118,
-   75.89
-  ],
-  [
-   175,
-   119,
-   75.89
-  ],
-  [
-   175,
-   120,
-   75.89
-  ],
-  [
-   175,
-   121,
-   75.89
-  ],
-  [
-   175,
-   122,
-   75.89
-  ],
-  [
-   175,
-   123,
-   75.89
-  ],
-  [
-   175,
-   124,
-   75.89
-  ],
-  [
-   175,
-   125,
-   75.89
-  ],
-  [
-   175,
-   126,
-   75.89
-  ],
-  [
-   175,
-   127,
-   75.89
-  ],
-  [
-   175,
-   128,
-   75.89
-  ],
-  [
-   175,
-   129,
-   75.89
   ]
  ]
 }

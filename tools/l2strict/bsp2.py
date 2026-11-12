@@ -349,6 +349,23 @@ def parse_model_surfs(pkg, midx):
     return {"surfs": surfs, "vec": vec, "pts": pts, "n_nodes": nnodes}
 
 
+def _brush_overlaps_sub(br, polys_objs, sub_boxes):
+    P = polys_objs.get(br["polys"])
+    if not P or not sub_boxes:
+        return False
+    loc = br["location"]
+    vs = [v for pr in P for v in pr["verts"]]
+    xs = [v[0] + loc[0] for v in vs]
+    ys = [v[1] + loc[1] for v in vs]
+    zs = [v[2] + loc[2] for v in vs]
+    bx = (min(xs), max(xs), min(ys), max(ys), min(zs), max(zs))
+    for x1, x2, y1, y2, z1, z2 in sub_boxes:
+        if bx[0] <= x2 and bx[1] >= x1 and bx[2] <= y2 and \
+                bx[3] >= y1 and bx[4] <= z2 and bx[5] >= z1:
+            return True
+    return False
+
+
 def main():
     map_path, asset_dir, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
     pkg = Package(map_path)
@@ -406,6 +423,10 @@ def main():
         if pname not in polys_objs:
             continue
         origin = [loc[k] - pivot[k] for k in range(3)]
+        # CsgOper: 1 = CSG_Add (solid), 2 = CSG_Subtract (the carved AIR —
+        # the engine renders the subtraction result, never the brush itself)
+        csg = props.get("CsgOper")
+        csg = int(csg) if isinstance(csg, int) else 1
         # per-face textures: surf(owner == this brush, iBrushPoly == poly idx)
         # (the surf owner ref = the Brush ACTOR's export index + 1, NOT the
         # Brush property which points to the brush's Model)
@@ -463,7 +484,8 @@ def main():
             })
             if axes is not None:
                 pr["uv_axes"] = axes
-        brushes.append({"polys": pname, "location": origin, "faces": faces})
+        brushes.append({"polys": pname, "location": origin, "faces": faces,
+                        "csg": csg})
 
     # 3) export glTF per Polys: renderable faces only. A face renders iff it
     # has a surf texture, is not a marker (AntiPortal/ZonePortal) and carries
@@ -482,14 +504,53 @@ def main():
         return True
 
     os.makedirs(out_dir, exist_ok=True)
+    # The subtractive brushes (CsgOper=2) = the carved AIR per the map data;
+    # per the modern-port rule we do NOT emulate the legacy CSG carving —
+    # they are simply not rendered. The ADD brushes that overlap a small
+    # subtract volume = the legacy carved-context housings (the masonry
+    # boxes around the carved passages) — they are not built either: the
+    # passage stays open and the surrounding native meshes (the inlet, the
+    # terrain, the level BSP) provide the walls.
+    sub_boxes = []
+    for br in brushes:
+        if br.get("csg") != 2:
+            continue
+        P = polys_objs.get(br["polys"])
+        if not P:
+            continue
+        loc = br["location"]
+        vs = [v for pr in P for v in pr["verts"]]
+        xs = [v[0] + loc[0] for v in vs]
+        ys = [v[1] + loc[1] for v in vs]
+        zs = [v[2] + loc[2] for v in vs]
+        if (max(xs) - min(xs)) > 1500 or (max(ys) - min(ys)) > 1500:
+            continue  # the giant zone/sky separators
+        sub_boxes.append((min(xs), max(xs), min(ys), max(ys), min(zs), max(zs)))
+
+    def overlaps_sub(bxs):
+        for x1, x2, y1, y2, z1, z2 in sub_boxes:
+            if bxs[0] <= x2 and bxs[1] >= x1 and bxs[2] <= y2 and \
+                    bxs[3] >= y1 and bxs[4] <= z2 and bxs[5] >= z1:
+                return True
+        return False
+
+    brushes = [br for br in brushes if br.get("csg") == 2 or not
+               _brush_overlaps_sub(br, polys_objs, sub_boxes)]
+
     exported = []
     tex_of_poly = {}
+    csg_of = {}
     for br in brushes:
+        csg_of[br["polys"]] = br.get("csg", 1)
         for f in br["faces"]:
             tex_of_poly[(br["polys"], f["i"])] = f["tex"]
     for pname in sorted(polys_objs.keys()):
-        prims = [pr for pr in polys_objs[pname]
-                 if face_renderable(pr, tex_of_poly.get((pname, pr["i"])))]
+        prims = []
+        if csg_of.get(pname, 1) != 2:
+            for pr in polys_objs[pname]:
+                if not face_renderable(pr, tex_of_poly.get((pname, pr["i"]))):
+                    continue
+                prims.append(pr)
         # the zone/sky separator brushes: huge spanning boxes (7.4k-11k units)
         # whose textured faces would hang giant slabs over the valley. The
         # biggest legitimate brush spans 4184 units (Polys17, the east
