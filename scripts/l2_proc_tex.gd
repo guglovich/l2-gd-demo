@@ -37,6 +37,14 @@ static var _pbr_shader: Shader = null
 static var _an_shader: Shader = null
 static var _cache := {}
 
+## TRUE transparency-mask textures (the lattice grates — the center-plaza
+## floor and the fences). NOT a blanket rule: most L2 alphas are
+## specular/blend masks (the carpet family must stay opaque).
+const ALPHA_CUTOUT := [
+	"oren_dev_t:Iron_net",
+	"oren_dev_t:DE_V_fence",
+]
+
 static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 	var p := "%s/%s/Texture/%s.%s" % [TEX_ROOT, pkg.to_lower(), obj, suffix]
 	if ResourceLoader.exists(p):
@@ -80,6 +88,7 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("uv_is_texels", uv_is_texels)
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
+	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
 	return m
 
 static func _analytic_material(cfg: Dictionary, uv_is_texels: bool) -> Material:

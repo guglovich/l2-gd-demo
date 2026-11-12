@@ -29,10 +29,20 @@ import os
 import struct
 import sys
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from l2_probe import Package  # noqa: E402
 from l2_props import read_object  # noqa: E402
+import disp  # noqa: E402  (the height-map displacement helper)
+
+# displacement grid: texel steps per texture family + the per-face cap
+DISP_STEP_TEXELS = {
+    "DE_V_floor01": 8.0, "DE_V_floor02": 8.0, "oren_sylen_001_1": 8.0,
+    "DE_V_m12": 16.0, "O_dark_01": 16.0,
+}
+DISP_MAX_POINTS = 8000
 
 SCALE = 0.01
 CELL = 128.0
@@ -157,16 +167,20 @@ def resolve_tex(pkg, ref, shaders):
     return None
 
 
-def write_gltf(path, name, prims, prim_idx_of):
+def write_gltf(path, name, prims, prim_idx_of, tex_of=None, texroot=None):
     """Write the renderable polys as one prim per poly.
 
     prims = the polys to render (already filtered by flags), prim_idx_of maps
-    a raw poly index to its glTF prim index."""
+    a raw poly index to its glTF prim index. tex_of/texroot: when given, an
+    additional displaced mesh (<name>_D.gltf) is written from the texture
+    height maps — REAL polygon relief (disp.py); prim i stays aligned with
+    the flat mesh (non-displaceable prims carry a flat copy)."""
     blob = bytearray()
     buffer_views = []
     accessors = []
     materials = []
     mesh_prims = []
+    ditems = []
     for pi, prim in enumerate(prims):
         pts = prim["verts"]
         if len(pts) < 3:
@@ -213,6 +227,35 @@ def write_gltf(path, name, prims, prim_idx_of):
         materials.append({"name": f"m{prim['i']}", "pbrMetallicRoughness":
                           {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
                           "doubleSided": True})
+        # displaced-prim bookkeeping (REAL polygon relief, disp.py): same
+        # prim order as the flat mesh
+        if tex_of is not None and texroot is not None:
+            gpos = [[v[0] * SCALE, v[2] * SCALE, v[1] * SCALE] for v in pts]
+            guv = [[sum((v[k] - ubase[k]) * U[k] for k in range(3)),
+                    sum((v[k] - ubase[k]) * V[k] for k in range(3))] for v in pts]
+            tex = tex_of.get(prim["i"])
+            ditem = None
+            if tex:
+                h, pom = disp.height_field(texroot, tex[0], tex[1])
+                if h is not None and pom > 0.02:
+                    d = disp.displace_poly(
+                        gpos, guv, h, pom,
+                        max_points=DISP_MAX_POINTS, step0=DISP_STEP_TEXELS.get(tex[1], 8.0))
+                    if d:
+                        ditem = {"pos": d[0], "uv": d[1], "nrm": d[2], "idx": d[3]}
+            if ditem is None:
+                # flat copy keeps the prim aligned with the flat mesh
+                a = np.array(gpos, dtype=np.float64)
+                nv = np.cross(a[1] - a[0], a[2] - a[0])
+                ln = np.linalg.norm(nv)
+                nrm = nv / ln if ln > 1e-9 else np.array([0.0, 1.0, 0.0])
+                nrms = np.tile(nrm, (len(gpos), 1))
+                fidx = []
+                for k in range(1, len(gpos) - 1):
+                    fidx.extend([0, k + 1, k])
+                ditem = {"pos": a, "uv": np.array(guv), "nrm": nrms,
+                         "idx": np.asarray(fidx, dtype=np.int64)}
+            ditems.append(ditem)
         # material index = the emitted-prim index, NOT the loop pi: degenerate
         # prims above `continue` without emitting, so pi drifts past the
         # materials array ("Index material = N out of bounds" import failure).
@@ -223,6 +266,13 @@ def write_gltf(path, name, prims, prim_idx_of):
         prim_idx_of[prim["i"]] = len(mesh_prims) - 1
     if not mesh_prims:
         return False
+    # the displaced render mesh (prim-aligned); failure is non-fatal — the
+    # flat mesh stays the render+collision fallback
+    if tex_of is not None and texroot is not None and ditems:
+        try:
+            disp.write_displaced_gltf(path, name, ditems)
+        except Exception as e:
+            print(f"  displacement failed for {name}: {e}")
     gltf = {
         "asset": {"version": "2.0", "generator": "l2godot bsp2"},
         "scene": 0, "scenes": [{"nodes": [0]}],
@@ -566,7 +616,10 @@ def main():
                 prims = []
         prim_idx_of = {}
         path = os.path.join(out_dir, f"BSP_{pname}")
-        if not write_gltf(path, f"BSP_{pname}", prims, prim_idx_of):
+        tex_of_prim = {pr["i"]: tex_of_poly.get((pname, pr["i"]))
+                       for pr in prims if tex_of_poly.get((pname, pr["i"]))}
+        if not write_gltf(path, f"BSP_{pname}", prims, prim_idx_of,
+                          tex_of=tex_of_prim, texroot=os.path.join(asset_dir, "textures")):
             continue
         exported.append(pname)
         for br in brushes:
@@ -581,6 +634,8 @@ def main():
         base, ext = os.path.splitext(fn)
         if ext not in (".gltf", ".bin") or not base.startswith("BSP_"):
             continue
+        if base.endswith("_D"):  # the displaced variant shares the fate
+            base = base[:-2]
         if base[4:] not in exported:  # file base = "BSP_" + polys name
             os.remove(os.path.join(out_dir, fn))
 

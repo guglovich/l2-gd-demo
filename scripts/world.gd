@@ -545,14 +545,32 @@ func _build_bsp() -> void:
 	var mat_cache := {}
 	var surfaces: Array = lb.get("surfaces", [])
 	var textured := 0
-	for si in range(mesh.get_surface_count()):
+	# The displaced render mesh (REAL polygon relief from the height maps,
+	# tools/l2strict/disp.py): same prim order = same surfaces mapping. The
+	# collision stays on the FLAT mesh (walkable plate, physics cost).
+	var render_mesh: Mesh = mesh
+	var dgp := "%s/meshes_bsp/LevelBSP_D.gltf" % MAP_DIR
+	if ResourceLoader.exists(dgp):
+		var dscene: PackedScene = load(dgp)
+		if dscene != null:
+			var droot := dscene.instantiate()
+			var dmesh: Mesh = null
+			for c in droot.get_children():
+				if c is MeshInstance3D:
+					dmesh = c.mesh
+					break
+			droot.free()
+			if dmesh != null and dmesh.get_surface_count() == mesh.get_surface_count():
+				render_mesh = dmesh
+				print("levelbsp: displaced render mesh active")
+	for si in range(render_mesh.get_surface_count()):
 		if si < surfaces.size() and surfaces[si].get("tex") != null:
-			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
+			render_mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
 			textured += 1
 		else:
-			mesh.surface_set_material(si, _bsp_grey())
+			render_mesh.surface_set_material(si, _bsp_grey())
 	var mi := MeshInstance3D.new()
-	mi.mesh = mesh
+	mi.mesh = render_mesh
 	world.add_child(mi)
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()
@@ -603,6 +621,22 @@ func _build_bsp_brushes() -> void:
 		if mesh == null:
 			skipped += 1
 			continue
+		# displaced render mesh when present (REAL polygon relief, disp.py);
+		# prim i stays aligned with the flat mesh, collision = flat trimesh
+		var render_mesh := mesh
+		var dgp := "%s/meshes_bsp/BSP_%s_D.gltf" % [MAP_DIR, polys]
+		if ResourceLoader.exists(dgp):
+			var dscene: PackedScene = load(dgp)
+			if dscene != null:
+				var droot := dscene.instantiate()
+				var dmesh: Mesh = null
+				for c in droot.get_children():
+					if c is MeshInstance3D:
+						dmesh = c.mesh
+						break
+				droot.free()
+				if dmesh != null and dmesh.get_surface_count() == mesh.get_surface_count():
+					render_mesh = dmesh
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
 		# per-face materials: prim index -> texture (null prim = not rendered)
 		var prim_tex := {}
@@ -610,13 +644,13 @@ func _build_bsp_brushes() -> void:
 			if f.get("prim") != null and f.get("tex") != null:
 				prim_tex[int(f["prim"])] = f["tex"]
 		var mi := MeshInstance3D.new()
-		mi.mesh = mesh
+		mi.mesh = render_mesh
 		mi.position = pos
-		for si in range(mesh.get_surface_count()):
+		for si in range(render_mesh.get_surface_count()):
 			if prim_tex.has(si):
-				mesh.surface_set_material(si, _bsp_material(prim_tex[si], mat_cache))
+				render_mesh.surface_set_material(si, _bsp_material(prim_tex[si], mat_cache))
 			else:
-				mesh.surface_set_material(si, m)
+				render_mesh.surface_set_material(si, m)
 		world.add_child(mi)
 		var body := StaticBody3D.new()
 		var col := CollisionShape3D.new()
