@@ -609,15 +609,51 @@ func _build_bsp_brushes() -> void:
 		for f in faces:
 			if f.get("prim") != null and f.get("tex") != null:
 				prim_tex[int(f["prim"])] = f["tex"]
-		var mi := MeshInstance3D.new()
-		mi.mesh = mesh
-		mi.position = pos
+		# build the material list first, then SPLIT the alpha-cutout surfaces
+		# (the lattice grates) into their OWN MeshInstance with shadow casting
+		# OFF: the thin grate sits ~3 mm above the plate below, and its
+		# hole-shaped shadow map produced full-surface shadow acne (the
+		# "streaks" that broke the location in the reverted attempt)
+		var mats: Array = []
 		for si in range(mesh.get_surface_count()):
 			if prim_tex.has(si):
-				mesh.surface_set_material(si, _bsp_material(prim_tex[si], mat_cache))
+				mats.append(_bsp_material(prim_tex[si], mat_cache))
 			else:
-				mesh.surface_set_material(si, m)
-		world.add_child(mi)
+				mats.append(m)
+		var grate_idx: Array[int] = []
+		for si in range(mats.size()):
+			var mm: Material = mats[si]
+			if mm is ShaderMaterial and mm.get_shader_parameter("use_alpha") == true:
+				grate_idx.append(si)
+		var mi := MeshInstance3D.new()
+		mi.position = pos
+		if grate_idx.is_empty() or grate_idx.size() == mesh.get_surface_count():
+			for si in range(mesh.get_surface_count()):
+				mesh.surface_set_material(si, mats[si])
+			if not grate_idx.is_empty():
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			mi.mesh = mesh
+			world.add_child(mi)
+		else:
+			var am := ArrayMesh.new()
+			for si in range(mesh.get_surface_count()):
+				if si in grate_idx:
+					continue
+				am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
+						mesh.surface_get_arrays(si))
+				am.surface_set_material(am.get_surface_count() - 1, mats[si])
+			var gm := ArrayMesh.new()
+			for si in grate_idx:
+				gm.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,
+						mesh.surface_get_arrays(si))
+				gm.surface_set_material(gm.get_surface_count() - 1, mats[si])
+			mi.mesh = am
+			world.add_child(mi)
+			var gi := MeshInstance3D.new()
+			gi.mesh = gm
+			gi.position = pos
+			gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			world.add_child(gi)
 		var body := StaticBody3D.new()
 		var col := CollisionShape3D.new()
 		var shape := mesh.create_trimesh_shape()

@@ -4368,3 +4368,32 @@ shapes, levelbsp 17/17 textured, brushes 48 built / 334 textured surfaces).
 
 **THE STABLE BASELINE IS NOW FIXATED (7d031e8). Any next experiment starts
 from it and lands only after per-face visual verification.**
+
+## 2026-11-13 (39) — the plaza lattice, take two: SMALL verified steps from
+## the stable baseline (the user: "продолжаем с сетки. 3D потом")
+
+**The same goal as the reverted attempt, rebuilt from the 6db6282 baseline
+with the DEVLOG-38 lessons applied:**
+1. texgen: the alpha-preservation code restored, but ONLY Iron_net +
+   DE_V_fence regenerated (a 2-file diff instead of re-rolling all 223).
+2. The PBR shader: `use_alpha` + alpha-scissor discard — a uniform defaulting
+   to FALSE, so nothing changes until a material opts in; in alpha mode the
+   height-AO is off (A is the mask, not height).
+3. L2ProcTex.ALPHA_CUTOUT whitelist (Iron_net, DE_V_fence) — the carpets'
+   specular-mask alphas stay opaque.
+4. **THE STREAK FIX: the alpha-cutout surfaces are SPLIT into their own
+   MeshInstance with `cast_shadow = OFF`** (_build_bsp_brushes). Root cause of
+   the reverted attempt's breakage: the thin grate sits ~3 mm above the plate
+   below, and its hole-shaped shadow map at that offset produced full-surface
+   shadow acne across the plaza (radial streaks). Without cast shadows the
+   grate still RECEIVES light normally.
+
+**Verification:** the plaza near view shows the clean lattice grid (no
+streaks; the statue's hand shadow falls across the grate like in the
+original); the far view shows the grate pattern with no moire; the spawn view
+is pixel-identical to the approved baseline (no regressions). The floor
+profile is untouched (the grate plate stays walkable, collision = the flat
+trimesh).
+
+**NEXT (the user's order): the true 3D-geometry (displacement) design — from
+this verified state, one test face at a time.**
