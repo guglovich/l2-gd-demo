@@ -3898,3 +3898,21 @@ authentic floor (BSP:Polys353 at −46.01, ny=1.0); the temple approach grid
 75/80 ok (was ~all gaps); the center grid gaps 26 → 13 (the remaining ones:
 the tower base strip 11862-12015/16567-17100 and the north band
 11400-11862/17367-17500). Spawn screenshot = no visual regression.
+
+## 2026-11-12 (27) — the BSP meshes CONFIRMED by the user (visual check passed)
+
+The user checked the render: "меши появились" — the BSP geometry renders
+in the world. The iteration is closed as DONE:
+- the Brush→Model→Polys blob-ref pairing + _build_bsp in world.gd;
+- portal boxes (0x400000-majority) skipped, invisible-flag trim = collision
+  only, 45 visible/collidable BSP brushes;
+- the temple and the streets geodata verified by profiles (entry 26).
+
+NEXT (the queue before the texture stage):
+1. The 0x400000 flag semantics: 89 brushes skipped — verify none of them
+   hides a needed floor (the remaining 13 grid gaps: the tower base strip
+   11862-12015/16567-17100, the north band 11400-11862/17367-17500).
+2. The BSP textures: the polys' materials live in the Model FBspSurf
+   records (0x44-B on-disk, contains a Texture object ref) — parse them
+   per-surf, map surf→poly, replace the neutral grey placeholder.
+3. Then the user's texture stage (BSP + statics).
