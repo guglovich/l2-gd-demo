@@ -4333,3 +4333,38 @@ collision shapes.
 **PENDING (unchanged):** the lighting-stage specular/gloss tuning; the
 terrain under the temple street + the canyon-tunnel floor (DEVLOG 33);
 market square + far-east verdicts.
+
+## 2026-11-13 (38) — ROLLBACK to the stable baseline (the user's urgent
+## request): the lattice + displacement attempt broke the location
+
+**THE USER'S REPORT:** after 335d73b/79b335d the whole location broke — dark
+streaky surfaces across the roads and the plaza, while the houses kept their
+previous (flat) textures. Verdict: roll back to the last STABLE state first,
+fixate it, and only then design the lattice/3D-geometry idea from that
+baseline.
+
+**DONE:** `git revert` of 335d73b + 79b335d -> commits a70977f + 7d031e8.
+The stable baseline = **6db6282** (the client-derived PBR textures with the
+parallax offsets disabled — the state the user verified as "looks like the
+original"). All 49 *_D displaced meshes removed, .godot import caches
+cleaned, re-import clean (only the 17 pre-existing non-fatal warnings). The
+verification render reproduces the approved look exactly (spawn view: the
+cobble, the carpet+braid curbs, the towers; 795 statics, 128 collision
+shapes, levelbsp 17/17 textured, brushes 48 built / 334 textured surfaces).
+
+**WHAT THE FAILED ATTEMPT TAUGHT US (for the future redesign):**
+1. The whole-Location displacement rollout in one step was wrong — one small
+   face must be verified first (the project rule).
+2. The displaced grids degenerated on the BIG faces: the 8000-point cap
+   raised the step to 30+ texels on the 39-m street slabs, and the huge
+   negative UV offsets (u ~ -30000..-80000 texels) put the height sampling
+   and the lattice pattern into the precision/aliasing mud — the streaky
+   surfaces the user saw.
+3. The alpha-cutout lattice moire at distance needs a proper solution
+   (alpha-to-coverage) and the through-hole interior needs its own lighting
+   pass — not a same-day add-on.
+4. Statics were never in the displacement scope — hence "houses with the
+   same flat textures" against the broken BSP everywhere.
+
+**THE STABLE BASELINE IS NOW FIXATED (7d031e8). Any next experiment starts
+from it and lands only after per-face visual verification.**
