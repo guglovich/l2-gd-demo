@@ -647,12 +647,8 @@ func _build_meshes() -> void:
 		var mr = actor.get("mesh")
 		if mr == null or not (mr is Dictionary): continue
 		var key := "%s:%s" % [mr["package"], mr["object"]]
-		# The road-strip family (Btm_Obj01/02/03) = the curb boxes decoded
-		# from the variable-length packed records. Their unpacked shape (a
-		# 2-m-thick box) renders as raised walls over the road; in the
-		# original the border strips are flush inlays. Skip the render and
-		# the collision until the packed decompressor yields the real thin
-		# slabs — the road surface = the Bridge deck below.
+		# Nothing is skipped from the road family anymore (see the note on
+		# _ROAD_STRIP_SKIP): the skips were merged-accessor-era artifacts.
 		if key in _ROAD_STRIP_SKIP:
 			continue
 		var mesh := _get_mesh(key)
@@ -784,10 +780,15 @@ func _get_mesh(key: String) -> Mesh:
 			continue
 		var tpkg: String = t.get("package", "")
 		var tobj: String = t.get("object", "")
-		# MODERN-PORT RULE: procedural clean-room shader first. NOTE: the
-		# shader must also see through the shader-chain diffuse (materials.json
-		# already resolved Shader->diffuse, e.g. DE_capet_il -> DE_V_capet).
-		var pm := L2ProcTex.material_for(tpkg, tobj, false)
+		# MODERN-PORT RULE: the client-derived PBR shader for every texture
+		# with a generated set (generic lookup). Foliage is EXCLUDED — it
+		# needs the alpha-scissor StandardMaterial3D path below (the PBR
+		# shader has no alpha support).
+		var is_foliage_pkg := "tree" in parts[0].to_lower() \
+				or parts[0].begins_with("Field_Deco") or parts[0].begins_with("field_deco")
+		var pm: Material = null
+		if not is_foliage_pkg:
+			pm = L2ProcTex.material_for(tpkg, tobj, false)
 		if pm != null:
 			mesh.surface_set_material(si, pm)
 			continue
@@ -852,13 +853,12 @@ func _get_mesh(key: String) -> Mesh:
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
 # Предвычислено анализатором геометрии glTF.
-# The road-strip family skipped from the render/collision: the curb boxes
-# decoded from the variable-length packed records render as 2-m-thick walls
-# over the road; the original has them as flush border inlays. Skipped until
-# the packed decompressor yields the real thin slabs.
-var _ROAD_STRIP_SKIP := [
-	"Oren_DEV_S:O_DE_Btm",  # the 49-m terraced wall blocking the houses
-]
+# The road-strip skip list is EMPTY since 2026-11-13: the "2-m-thick wall"
+# shapes and the "49-m terraced ring" were artifacts of the broken
+# merged-accessor staging; the re-staged meshes carry the true per-prim
+# geometry (O_DE_Btm = a ~0.6-m curb/step piece, not a ring). Nothing in the
+# road family is skipped anymore.
+var _ROAD_STRIP_SKIP := []
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",

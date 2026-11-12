@@ -4299,3 +4299,37 @@ run + import); the lighting-stage specular/gloss tuning; the terrain under
 the temple street (present=1 leftover heights below the real slab) and the
 canyon-tunnel floor missing from every source (DEVLOG 33); market square +
 far-east verdicts.
+
+## 2026-11-13 (36) — texgen rolled out to ALL textures + the curbs added
+
+**BATCH TEXGEN (the user's "поехали"):** texgen ran over ALL 223 staged
+textures (13 packages) — 446 generated PBR files (pbr_albedo + pbr_normal per
+texture), 0 errors, Godot import clean (892 artifacts). The per-texture
+RELIEF table keeps the tuned road values; everything else uses the defaults
+(pom 0.04 / normal 1.6; the parallax stays disabled per the seams fix).
+
+**GENERIC PBR LOOKUP (L2ProcTex):** material_for() no longer requires a
+CONFIG entry — ANY texture with a generated set gets the client-derived PBR
+shader; tile_px is taken from the generated texture itself. CONFIG now only
+carries pom overrides + the analytic fallback modes. The static-material loop
+EXCLUDES the foliage packages (tree / Field_Deco) from the PBR path — they
+keep the alpha-scissor StandardMaterial3D (the PBR shader has no alpha
+support).
+
+**THE CURBS (the user's task #2):** audited the whole road family — every
+Oren_DEV_S catalog mesh is placed and staged; no curb statics are missing.
+The curb visuals (thorn braid + woven ribbons) = Obj01 prim1 (DE_capet_il ->
+DE_V_capet) + Obj02/03 (capet02) — all rendering with PBR sets now. The last
+skipped road mesh O_DE_Btm was UN-SKIPPED: the old "49-m terraced wall
+blocking the houses" was a merged-accessor-era artifact — the re-staged mesh
+is a ~0.6-m curb/step piece at (11375,16872,-4951.9), 5 m below the deck, no
+road impact. _ROAD_STRIP_SKIP is now EMPTY (795 statics placed, was 794).
+
+**Verification:** the spawn render (X=7400 Y=17650) is clean with the PBR
+materials everywhere (cobble, carpet+braid curbs, towers, ruins) — no
+regressions, no seam swim (the UV offsets stay disabled), 795 statics + 128
+collision shapes.
+
+**PENDING (unchanged):** the lighting-stage specular/gloss tuning; the
+terrain under the temple street + the canyon-tunnel floor (DEVLOG 33);
+market square + far-east verdicts.

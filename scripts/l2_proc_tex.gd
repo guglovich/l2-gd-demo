@@ -43,38 +43,43 @@ static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 		return load(p)
 	return null
 
-## Returns a material for a texture: client-derived PBR (POM) when the
-## generated set exists, the analytic fallback otherwise. null = unknown
-## texture (the caller keeps its own placeholder).
+## Returns a material for a texture. GENERIC (2026-11-13): any texture with a
+## generated PBR set gets the client-derived PBR shader — tile_px is taken
+## from the generated texture itself; CONFIG only carries per-texture pom
+## overrides (0.0 everywhere since the seams fix) and the analytic fallback
+## mode. null = no PBR set (the caller keeps its own placeholder).
 ## uv_is_texels: BSP glTFs carry raw texel UVs, UModel statics 0..1 per tile.
 static func material_for(pkg: String, obj: String, uv_is_texels: bool) -> Material:
 	var key := "%s:%s" % [pkg.to_lower(), obj]
-	var cfg: Variant = CONFIG.get(key)
-	if cfg == null:
-		return null
 	var ck := "%s|%s" % [key, "t" if uv_is_texels else "u"]
 	if _cache.has(ck):
 		return _cache[ck]
-	var m := _pbr_material(key, cfg, uv_is_texels)
-	if m == null:
+	var m := _pbr_material(pkg.to_lower(), obj, key, uv_is_texels)
+	var cfg: Variant = CONFIG.get(key)
+	if m == null and cfg != null:
 		m = _analytic_material(cfg, uv_is_texels)
 	_cache[ck] = m
 	return m
 
-static func _pbr_material(key: String, cfg: Dictionary, uv_is_texels: bool) -> Material:
-	var alb := _find_pbr(key.get_slice(":", 0), key.get_slice(":", 1), "pbr_albedo.png")
-	var nrm := _find_pbr(key.get_slice(":", 0), key.get_slice(":", 1), "pbr_normal.png")
+static func _pbr_material(pkg_l: String, obj: String, key: String,
+		uv_is_texels: bool) -> Material:
+	var alb := _find_pbr(pkg_l, obj, "pbr_albedo.png")
+	var nrm := _find_pbr(pkg_l, obj, "pbr_normal.png")
 	if alb == null or nrm == null:
 		return null
 	if _pbr_shader == null:
 		_pbr_shader = load(PBR_SHADER_PATH)
+	var pom := 0.0
+	var cfg: Variant = CONFIG.get(key)
+	if cfg != null:
+		pom = float(cfg["pom"])
 	var m := ShaderMaterial.new()
 	m.shader = _pbr_shader
 	m.set_shader_parameter("albedo_tex", alb)
 	m.set_shader_parameter("normal_tex", nrm)
 	m.set_shader_parameter("uv_is_texels", uv_is_texels)
-	m.set_shader_parameter("tile_px", cfg["tile"])
-	m.set_shader_parameter("pom_scale", float(cfg["pom"]))
+	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
+	m.set_shader_parameter("pom_scale", pom)
 	return m
 
 static func _analytic_material(cfg: Dictionary, uv_is_texels: bool) -> Material:
