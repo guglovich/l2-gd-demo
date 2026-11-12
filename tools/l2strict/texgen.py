@@ -63,19 +63,7 @@ def sobel_normal(height: np.ndarray, strength: float) -> np.ndarray:
 def generate(path: str, out_dir: str) -> None:
     obj = os.path.splitext(os.path.basename(path))[0]
     pom, nstrength = RELIEF.get(obj, DEFAULT_RELIEF)
-    src = Image.open(path)
-    # PRESERVE the source alpha: lattice/grate textures (Iron_net, DE_V_fence)
-    # carry a real transparency mask — the cutout holes are part of the
-    # material. When the source has a meaningful mask, albedo A = the SOURCE
-    # mask (the runtime applies alpha-scissor); otherwise A = the height field.
-    has_mask = False
-    src_a = None
-    if src.mode == "RGBA":
-        sa = np.asarray(src)[..., 3].astype(np.float32) / 255.0
-        if sa.min() < 0.98:
-            has_mask = True
-            src_a = sa
-    im = src.convert("RGB")
+    im = Image.open(path).convert("RGB")
     rgb = np.asarray(im).astype(np.float32) / 255.0
     h, w = rgb.shape[:2]
 
@@ -89,8 +77,7 @@ def generate(path: str, out_dir: str) -> None:
     # roughness: dark painted areas = rougher (0.95), bright = smoother (0.65)
     rough = 0.65 + 0.30 * (1.0 - height_n)
 
-    achan = src_a if has_mask else height_n
-    albedo = np.dstack([rgb, achan])
+    albedo = np.dstack([rgb, height_n])          # RGBA, A = height
     Image.fromarray((albedo * 255.0).astype(np.uint8), "RGBA").save(
         os.path.join(out_dir, f"{obj}.pbr_albedo.png"))
     nrm = np.dstack([normal, rough])
@@ -100,10 +87,9 @@ def generate(path: str, out_dir: str) -> None:
     # sidecar json so the runtime reads the tuned values per texture.
     import json
     side = os.path.join(out_dir, f"{obj}.pbr.json")
-    json.dump({"pom": pom, "normal_strength": nstrength, "tile": [w, h],
-               "alpha_mask": has_mask},
+    json.dump({"pom": pom, "normal_strength": nstrength, "tile": [w, h]},
               open(side, "w"))
-    print(f"{obj}: {w}x{h} pom={pom} nstrength={nstrength} alpha_mask={has_mask}")
+    print(f"{obj}: {w}x{h} pom={pom} nstrength={nstrength}")
 
 
 def main() -> None:

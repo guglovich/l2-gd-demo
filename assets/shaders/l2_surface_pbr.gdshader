@@ -20,10 +20,6 @@ uniform int pom_steps : hint_range(4, 32) = 16;
 uniform float relief_gain = 1.0; // extra normal strength multiplier
 uniform float rough_gain : hint_range(0.0, 1.0) = 0.9;
 uniform float detail = 0.0;      // optional world-space grain (0 = pure client)
-uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net, DE_V_fence
-                                 // — the lattice grates). NOT set for the carpet
-                                 // family: their alpha is a specular/blend mask.
-uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
 
 // ---- simplex noise (Ashima public-domain; only used when detail > 0) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -108,9 +104,6 @@ void fragment() {
 	}
 
 	vec4 alb = texture(albedo_tex, uv_final);
-	if (use_alpha && alb.a < alpha_scissor) {
-		discard;   // the grate holes are see-through
-	}
 	vec3 nrm = texture(normal_tex, uv_final).rgb * 2.0 - 1.0;
 	float rough = texture(normal_tex, uv_final).a;
 	if (detail > 0.0) {
@@ -123,13 +116,8 @@ void fragment() {
 	ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
 	// crevice shading from the height channel — scaled by the POM depth so
 	// the flat weaves (pom ~0.012) keep the client's own painted shading
-	// without double-darkening it. In alpha-cutout mode A is the transparency
-	// mask, not height — no AO from it.
-	if (use_alpha) {
-		AO = 1.0;
-	} else {
-		AO = mix(1.0, clamp(0.55 + 0.45 * alb.a, 0.0, 1.0),
-				clamp(pom_scale * 20.0, 0.0, 1.0));
-	}
+	// without double-darkening it
+	AO = mix(1.0, clamp(0.55 + 0.45 * alb.a, 0.0, 1.0),
+			clamp(pom_scale * 20.0, 0.0, 1.0));
 	AO_LIGHT_AFFECT = 0.6;
 }

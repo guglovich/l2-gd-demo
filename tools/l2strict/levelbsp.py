@@ -32,12 +32,9 @@ import os
 import struct
 import sys
 
-import numpy as np
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from l2_probe import Package  # noqa: E402
-import disp  # noqa: E402  (the height-map displacement helper)
 
 # The temple street = TWO GIANT CSG-merged DE_V_floor01 slabs spanning 3882
 # and 5041 units (x 6343..10225 / 9836..14877) — the earlier MAX_SPAN 3500
@@ -45,13 +42,6 @@ import disp  # noqa: E402  (the height-map displacement helper)
 # zone/sky separator boxes span 7.4k-11k units (bsp2 measurement), so 7000
 # keeps the street slabs and still drops the zone boxes.
 MAX_SPAN = 7000.0
-
-# displacement grid (disp.py): texel steps per texture + the per-face cap
-DISP_STEP_TEXELS = {
-    "DE_V_floor01": 8.0, "DE_V_floor02": 8.0, "oren_sylen_001_1": 8.0,
-    "DE_V_m12": 16.0, "O_dark_01": 16.0,
-}
-DISP_MAX_POINTS = 8000
 
 
 def read_compact(d, p):
@@ -274,7 +264,6 @@ def main():
     materials = []
     mesh_prims = []
     surfaces = []
-    ditems = []
     for key in sorted(groups.keys()):
         tex = surf_tex_of_group[key]
         si = len(mesh_prims)
@@ -282,10 +271,6 @@ def main():
         uvs = []
         idx = []
         vbase = 0
-        h, pom = disp.height_field(asset_dir + "/textures", tex[0], tex[1])
-        displaceable = h is not None and pom > 0.02
-        dpos, duv, dnrm, didx = [], [], [], []
-        dvbase = 0
         for poly, uv in groups[key]:
             for v in poly:
                 pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
@@ -294,36 +279,8 @@ def main():
             for k in range(1, n - 1):
                 idx.extend([vbase, vbase + k + 1, vbase + k])
             vbase += n
-            if displaceable:
-                gpos = [[v[0] * SCALE, v[2] * SCALE, v[1] * SCALE] for v in poly]
-                guv = [[u, w] for u, w in uv]
-                d = disp.displace_poly(gpos, guv, h, pom,
-                                       max_points=DISP_MAX_POINTS,
-                                       step0=DISP_STEP_TEXELS.get(tex[1], 8.0))
-                if d:
-                    dpos.append(d[0]); duv.append(d[1]); dnrm.append(d[2])
-                    didx.append(d[3] + dvbase)
-                    dvbase += len(d[0])
-                    continue
-            # flat copy fallback keeps this poly in the displaced mesh
-            a = np.array([[v[0] * SCALE, v[2] * SCALE, v[1] * SCALE] for v in poly])
-            nv = np.cross(a[1] - a[0], a[2] - a[0])
-            ln = np.linalg.norm(nv)
-            nn = nv / ln if ln > 1e-9 else np.array([0.0, 1.0, 0.0])
-            dpos.append(a)
-            duv.append(np.array([[u, w] for u, w in uv]))
-            dnrm.append(np.tile(nn, (len(a), 1)))
-            fidx = []
-            for k in range(1, n - 1):
-                fidx.extend([0, k + 1, k])
-            didx.append(np.asarray(fidx, dtype=np.int64) + dvbase)
-            dvbase += len(a)
         if not idx:
             continue
-        if dpos:
-            ditems.append({"pos": np.concatenate(dpos), "uv": np.concatenate(duv),
-                           "nrm": np.concatenate(dnrm),
-                           "idx": np.concatenate(didx)})
         pb = struct.pack(f"<{len(pos)}f", *pos)
         buffer_views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(pb)})
         blob.extend(pb)
@@ -362,14 +319,6 @@ def main():
     }
     json.dump(gltf, open(os.path.join(out_dir, "LevelBSP.gltf"), "w"))
     open(os.path.join(out_dir, "LevelBSP.bin"), "wb").write(bytes(blob))
-    # the displaced render mesh (same prim order = same surfaces list)
-    if ditems:
-        try:
-            ok = disp.write_displaced_gltf(os.path.join(out_dir, "LevelBSP"),
-                                           "LevelBSP", ditems)
-            print("LevelBSP_D:", "written" if ok else "skipped")
-        except Exception as e:
-            print("LevelBSP_D failed:", e)
     json.dump({"schema": 1, "surfaces": surfaces},
               open(os.path.join(asset_dir, "levelbsp.json"), "w"), indent=1)
     print(f"LevelBSP: {len(mesh_prims)} surfaces, {len(blob)} bytes")
