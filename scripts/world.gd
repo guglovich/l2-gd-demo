@@ -474,9 +474,32 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 ## the Polys reference is a compact object index inside the Model blob; see
 ## tools/l2strict/bsp2.py). Placed like static meshes: game (x, y, z) ->
 ## godot (x, z-up->y, y-width->z) * 0.01, no rotation (every 20_18 brush
-## has Rotation 0). Collision = full trimesh with backface. The polys'
-## textures live in the Model's FBspSurf records (not yet parsed) — the
-## render uses a neutral stone placeholder until that stage.
+## has Rotation 0). Collision = full trimesh with backface.
+## Textures (RE 2026-11-12, fnd_13/fnd_14): the level Model's FBspSurf
+## records carry the per-face material (surf +0x00 objref; the L2 compact
+## decoder in Core.dll negates the FULL magnitude) and map to brush polys by
+## (owner Brush, iBrushPoly = raw poly index). bsp2 writes per-face "tex"
+## and the prim index into bsp.json; faces without a surf keep the neutral
+## stone placeholder.
+func _bsp_material(tex: Array, cache: Dictionary) -> StandardMaterial3D:
+	var key := "%s:%s" % [tex[0], tex[1]]
+	if cache.has(key):
+		return cache[key]
+	var m := StandardMaterial3D.new()
+	var tp := _find_texture_path(tex[0], tex[1])
+	if tp != "":
+		var img := Image.new()
+		if img.load(tp) == OK:
+			m.albedo_texture = ImageTexture.create_from_image(img)
+		else:
+			print("bsp: texture failed to load ", tp)
+	else:
+		print("bsp: texture not staged ", key)
+	m.roughness = 0.95
+	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	cache[key] = m
+	return m
+
 func _build_bsp() -> void:
 	var brushes: Array = bsp_data.get("brushes", [])
 	var built := 0
@@ -485,30 +508,23 @@ func _build_bsp() -> void:
 	m.albedo_color = Color(0.32, 0.31, 0.30)
 	m.roughness = 0.95
 	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	var mat_cache := {}
+	var textured_surfaces := 0
 	var portal := 0
-	var invisible := 0
 	for br in brushes:
 		var polys: String = br.get("polys", "")
 		var loc: Array = br.get("location", [0, 0, 0])
-		var flags: Array = br.get("poly_flags", [])
+		var faces: Array = br.get("faces", [])
 		# 0x400000 (L2 licensee flag = portal/zone separator): the sky/zone
 		# boxes over the village carry it on most faces. The engine treats
 		# portal brushes as non-solid zone boundaries — skip them entirely.
 		var portal_faces := 0
-		for f in flags:
-			if int(f) & 0x400000 != 0:
+		for f in faces:
+			if int(f.get("flags", 0)) & 0x400000 != 0:
 				portal_faces += 1
-		if flags.size() > 0 and portal_faces * 2 >= flags.size():
+		if faces.size() > 0 and portal_faces * 2 >= faces.size():
 			portal += 1
 			continue
-		# 0x1 = PF_Invisible: collision-only walls (the street trim).
-		var any_visible := false
-		for f in flags:
-			if int(f) & 0x1 == 0:
-				any_visible = true
-				break
-		if not any_visible:
-			invisible += 1
 		var gp := "%s/meshes_bsp/BSP_%s.gltf" % [MAP_DIR, polys]
 		if not ResourceLoader.exists(gp):
 			skipped += 1
@@ -528,13 +544,20 @@ func _build_bsp() -> void:
 			skipped += 1
 			continue
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
-		if any_visible:
-			var mi := MeshInstance3D.new()
-			mi.mesh = mesh
-			mi.position = pos
-			for si in range(mesh.get_surface_count()):
+		# per-face materials: prim index -> texture (null prim = not rendered)
+		var prim_tex := {}
+		for f in faces:
+			if f.get("prim") != null and f.get("tex") != null:
+				prim_tex[int(f["prim"])] = f["tex"]
+		var mi := MeshInstance3D.new()
+		mi.mesh = mesh
+		mi.position = pos
+		for si in range(mesh.get_surface_count()):
+			if prim_tex.has(si):
+				mesh.surface_set_material(si, _bsp_material(prim_tex[si], mat_cache))
+			else:
 				mesh.surface_set_material(si, m)
-			world.add_child(mi)
+		world.add_child(mi)
 		var body := StaticBody3D.new()
 		var col := CollisionShape3D.new()
 		var shape := mesh.create_trimesh_shape()
@@ -545,7 +568,9 @@ func _build_bsp() -> void:
 		body.set_meta("mesh_key", "BSP:" + polys)
 		world.add_child(body)
 		built += 1
-	print("bsp brushes built ", built, ", portal-skipped ", portal, ", invisible(collision-only) ", invisible, ", skipped ", skipped)
+		textured_surfaces += prim_tex.size()
+	print("bsp brushes built ", built, ", portal-skipped ", portal, ", skipped ", skipped,
+		", textured surfaces ", textured_surfaces, ", unique materials ", mat_cache.size())
 
 
 func _build_clean_room_road() -> void:

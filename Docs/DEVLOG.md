@@ -3916,3 +3916,57 @@ NEXT (the queue before the texture stage):
    records (0x44-B on-disk, contains a Texture object ref) — parse them
    per-surf, map surf→poly, replace the neutral grey placeholder.
 3. Then the user's texture stage (BSP + statics).
+
+## 2026-11-12 (28) — the BSP textures APPLIED (the per-face materials)
+
+**The texture source — cracked (engine RE, MCP findings fnd_13/fnd_14):**
+- `myLevel` -> **Model500** (2.5 MB = the level BSP; 219 brush models are 72-B
+  stubs, 38 mid models unused by brushes). The FBspSurf records live in
+  Model500's Surfs array.
+- **The L2 FCompactIndex decoder (Core.dll 0x1015cfb0)**: sign = bit 0x80 of
+  the FIRST byte; magnitude = (b0 & 0x3F) | (cont << 6). All our old decoders
+  were wrong on negatives: single-byte off by one (-n-1 instead of -n) AND
+  negative multi-byte (imports >= 64, first byte 0xC0|low6) decoded as
+  POSITIVE. That misdecode made every import ref garbage — the surf materials
+  looked like "Package Insect_Day" instead of the real textures.
+- **FBspSurf file record**: objref MATERIAL (+0x00), dword PolyFlags (+0x04),
+  5 compacts [pBase, pNormal, pTextureU, pTextureV, iBrushPoly], objref owner
+  Brush (+0x1c), 16-B plane, float lightmap scale, int. Surfs map to brush
+  polys by (owner Brush = the Brush ACTOR export idx+1, iBrushPoly = the raw
+  poly index). FPoly file record confirmed: compact NumVertices, 4 FVectors
+  (Base/Normal/TU/TV), verts, dword flags, objref Actor, objref Material,
+  FName Item, compact iLink, compact iBrushPoly, 2 dwords.
+- Validated on Brush902/Polys353: surfs 495-509 = iBrushPoly 0,1,10..22, all
+  materials = Oren_DEV_T.DE_V_floor01.
+
+**bsp2.py rewritten** (schema 2): the compact decoder fixed; parses ALL polys
+(raw-index stable); parses the level Model surfs; bsp.json brushes carry
+`faces: [{i, prim, flags, tex}]` (tex = [staged package, object]); glTF prims
+= renderable faces only (the old 0x4000000|0x1|0x80 filter + skip the
+AntiPortal/ZonePortal marker textures; NOT 0x400000 — ordinary wall faces
+carry it too and must render). The 0x1/invisible faces stay out of the glTF
+(collision-only trim) as before. cover_z unchanged (7267 cells = the old
+count). Texture staging additions: sylen_temple_t.oren_sylen_001_1/in008/
+in016/in022, oren_dev_t.Iron_net (umodel -png; NOTE the relative -out resolves
+to $HOME).
+
+**world.gd `_build_bsp()`**: per-face materials via bsp.json faces ->
+`_bsp_material()` (StandardMaterial3D + albedo_texture, roughness 0.95, cull
+disabled; cache per texture; grey placeholder for the 263 faces without a
+surf texture).
+
+**Result:** 742/1005 faces textured (DE_V_m12 x212 walls, DE_V_floor01 x121
+street floors, O_dark_01 x110, oren_sylen_001_1 x98 temple, DE_V_floor02 x30,
+oren_sylen_in002 x30 + the rest); 248 surfaces textured in the 45 built
+brushes, 15 unique materials, zero missing/staged-failed. Floor profile at
+the spawn street band unchanged (BSP:Polys353 -46.01, ny=1.0, every step);
+portal-skipped 89 and skipped 85 = identical to the pre-texture run.
+Spawn screenshots: tmp/l2/20_18/shots/shot1.png, shot2.png — user to compare
+against Docs/DE_village.png.
+
+**NEXT (the queue):**
+1. The user's visual check of the BSP textures vs the original.
+2. The UV orientation: the BSP UVs use the FPoly base/TU/TV dirs — verify
+   scale/repeat vs the original (the temple walls are the best reference).
+3. The 13 residual center-grid gaps (the 0x400000 flag semantics check) and
+   then the statics texture stage.

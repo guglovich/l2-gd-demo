@@ -1,16 +1,31 @@
 #!/usr/bin/env python3
-"""Export BSP brush geometry (Polys objects) of a decrypted L2 map.
+"""Export BSP brush geometry (Polys objects) of a decrypted L2 map, WITH the
+authentic per-face textures from the level Model's FBspSurf records.
 
 Outputs (into ASSET_DIR):
   meshes_bsp/BSP_<Polys>.gltf/.bin  — local space, meters, Godot axes
-  bsp.json — {brushes, materials, cover_cells}
-    cover_cells: [row, col] cells of the 128-unit terrain grid whose area is
-    covered by a brush polygon in world (x,y) — used by world.gd to keep
-    terrain holes open ONLY above actual cave geometry.
+  bsp.json — {schema:2, brushes:[{polys, location, faces}], cover_z}
+    faces: [{i, prim, flags, tex}] — i = raw poly index inside the Polys
+    object, prim = index into the glTF mesh's surfaces (null = not rendered),
+    tex = [package, object] or null.
+
+The texture path (RE 2026-11-12, findings fnd_13/fnd_14):
+  Level.myLevel -> the level Model (Model500) -> Surfs[]; each FBspSurf file
+  record = {objref MATERIAL, dword PolyFlags, 5 compacts
+  [pBase, pNormal, pTextureU, pTextureV, iBrushPoly], objref owner Brush,
+  16 B plane, float lightmap scale, int}. Surfs map to brush polys by
+  (owner Brush, iBrushPoly = raw poly index). Validated on Brush902/Polys353:
+  the street-floor surfs 495-509 carry iBrushPoly 0,1,10..22 and materials
+  Oren_DEV_T.DE_V_floor01.
+
+The compact-index decoder (Core.dll ??6@YAAAVFArchive@@AAV0@AAVFCompactIndex@@@Z
+@0x1015cfb0): sign = bit 0x80 of the FIRST byte; magnitude = (b0 & 0x3F) |
+(continuation << 6). Negatives are NOT -n-1, and negative MULTI-BYTE values
+(imports >= 64) exist (first byte = 0xC0|low6). The old decoders misdecoded
+every import ref by one and every import >= 64 as positive.
 """
 import json
 import os
-import re
 import struct
 import sys
 
@@ -23,31 +38,43 @@ SCALE = 0.01
 CELL = 128.0
 
 
+def read_compact(d, p):
+    """The authentic L2 FCompactIndex decode (Core.dll 0x1015cfb0).
+
+    Sign = bit 0x80 of the first byte; magnitude = (b0 & 0x3F) | (cont << 6)
+    with 0x80-marked continuation bytes of 7 bits each. Negative multi-byte
+    values (first byte 0xC0|low6) decode negative as a whole.
+    """
+    b0 = d[p]
+    p += 1
+    mag = b0 & 0x3F
+    if b0 & 0x40:
+        sh = 6
+        while True:
+            b = d[p]
+            p += 1
+            mag |= (b & 0x7F) << sh
+            sh += 7
+            if not b & 0x80:
+                break
+    return (-mag if b0 & 0x80 else mag), p
+
+
 def parse_polys(d, size):
+    """Parse a Polys object: ALL polys, each with its raw index (no filtering).
+
+    FPoly file record (RE 2026-11-12, fnd_14): compact NumVertices, FVector
+    Base/Normal/TextureU/TextureV, N x FVector, dword Flags, objref Actor,
+    objref Material, FName Item, compact iLink, compact iBrushPoly,
+    dword LightMapScale, dword licensee int.
+    """
     r = 1  # props: None terminator
     num = struct.unpack_from("<i", d, r)[0]
-    r += 4
-    r += 4  # max
-
-    def cidx(rr):
-        b = d[rr]
-        if b & 0x40:
-            v = b & 0x3F
-            sh = 6
-            rr += 1
-            while True:
-                b = d[rr]
-                rr += 1
-                v |= (b & 0x7F) << sh
-                sh += 7
-                if not b & 0x80:
-                    break
-            return (-(v + 1) if b & 0x80 else v), rr
-        return (-(b & 0x3F) - 1) if b & 0x80 else (b & 0x3F), rr + 1
+    r += 8  # Num + Max ints (UPolys::Serialize writes two dwords)
 
     polys = []
-    for _ in range(num):
-        vc, r = cidx(r)
+    for i in range(num):
+        vc, r = read_compact(d, r)
         base = struct.unpack_from("<3f", d, r)
         r += 12
         normal = struct.unpack_from("<3f", d, r)
@@ -57,34 +84,50 @@ def parse_polys(d, size):
         tv = struct.unpack_from("<3f", d, r)
         r += 12
         verts = []
-        for _ in range(vc):
+        ok = True
+        for _ in range(max(0, vc)):
+            if r + 12 > len(d):
+                ok = False
+                break
             verts.append(struct.unpack_from("<3f", d, r))
             r += 12
         flags = struct.unpack_from("<I", d, r)[0]
         r += 4
-        actor, r = cidx(r)
-        mat, r = cidx(r)
-        item, r = cidx(r)
-        link, r = cidx(r)
-        bpoly, r = cidx(r)
-        r += 4   # LightMapScale
-        r += 4   # trailing i32
-        if vc < 3:
+        r, _ = read_compact(d, r)[1], None
+        r, _ = read_compact(d, r)[1], None
+        r, _ = read_compact(d, r)[1], None
+        r, _ = read_compact(d, r)[1], None
+        r, _ = read_compact(d, r)[1], None
+        r += 8
+        if not ok:
             continue
-        if flags & (0x04000000 | 0x00000001 | 0x00000080):
-            continue  # portal / invisible / fake backdrop
         polys.append({
-            "verts": verts, "normal": normal, "tu": tu, "tv": tv,
-            "base": base, "flags": flags, "mat": mat,
+            "i": i, "verts": verts, "normal": normal, "tu": tu, "tv": tv,
+            "base": base, "flags": flags,
         })
     return polys
 
 
-def resolve_mat(pkg, ref, shaders):
+def resolve_tex(pkg, ref, shaders):
+    """Resolve an object ref to a staged [package, object] texture pair.
+
+    With the authentic compact decode the surf/polys material refs hit
+    Texture/Shader imports exactly (findings fnd_13/fnd_14)."""
     if not isinstance(ref, int) or ref == 0:
         return None
     if ref > 0:
-        return [None, pkg.name(pkg.exports[ref - 1][3])]
+        j = ref - 1
+        if j >= pkg.export_count:
+            return None
+        cls = pkg.class_of_export(j)
+        nm = pkg.name(pkg.exports[j][3])
+        if cls in ("Texture",):
+            return [None, nm]
+        if cls == "Shader":
+            diff = shaders.get(f"::{nm}") or shaders.get(nm)
+            if diff:
+                return [None, diff]
+        return None
     imp = -ref - 1
     if not (0 <= imp < len(pkg.imports)):
         return None
@@ -105,16 +148,20 @@ def resolve_mat(pkg, ref, shaders):
         if pkg.name(o_cn) == "Package":
             break
         cur = o_pk
-    if cls not in ("Texture", "Shader"):
-        return None
+    if cls == "Texture":
+        return [pkg_file.lower() if pkg_file else pkg_file, obj]
     if cls == "Shader":
-        diff = shaders.get(f"{pkg_file}::{obj}")
+        diff = shaders.get(f"{pkg_file}::{obj}") if pkg_file else None
         if diff:
-            return diff
-    return [pkg_file.lower() if pkg_file else pkg_file, obj]
+            return [pkg_file.lower() if pkg_file else pkg_file, diff]
+    return None
 
 
-def write_gltf(path, name, prims):
+def write_gltf(path, name, prims, prim_idx_of):
+    """Write the renderable polys as one prim per poly.
+
+    prims = the polys to render (already filtered by flags), prim_idx_of maps
+    a raw poly index to its glTF prim index."""
     blob = bytearray()
     buffer_views = []
     accessors = []
@@ -122,6 +169,8 @@ def write_gltf(path, name, prims):
     mesh_prims = []
     for pi, prim in enumerate(prims):
         pts = prim["verts"]
+        if len(pts) < 3:
+            continue  # degenerate: the face stays in bsp.json (prim null)
         base = prim["base"]
         udir = tuple(prim["tu"][k] - base[k] for k in range(3))
         vdir = tuple(prim["tv"][k] - base[k] for k in range(3))
@@ -160,12 +209,13 @@ def write_gltf(path, name, prims):
                           "count": len(idx), "type": "SCALAR"})
         while len(blob) % 4:
             blob.append(0)
-        materials.append({"name": f"m{pi}", "pbrMetallicRoughness":
+        materials.append({"name": f"m{prim['i']}", "pbrMetallicRoughness":
                           {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
                           "doubleSided": True})
         mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
                                           "TEXCOORD_0": len(accessors) - 2},
                            "indices": len(accessors) - 1, "material": pi, "mode": 4})
+        prim_idx_of[prim["i"]] = len(mesh_prims) - 1
     if not mesh_prims:
         return False
     gltf = {
@@ -185,41 +235,19 @@ def write_gltf(path, name, prims):
 def model_polys_ref(pkg, midx, loc, pivot, polys_parse):
     """The Brush->Model->Polys link. The L2 UModel::Serialize does NOT carry
     the stock-UE2 `Ar << Polys` at the head; the reference is a compact
-    object index (export+1) inside the Model's binary blob (found by RE
-    2026-11-12: Model954 blob holds compact 2260 = Polys370+1 at offset 55).
-    Blobs can contain several compact values that decode into Polys exports
-    (bbox floats coincide); the true one is picked by placing the geometry
-    with origin = Location - PrePivot and requiring the brush Location to
-    fall inside the resulting world bbox (+/-150)."""
+    object index (export+1) inside the Model's binary blob (Model954 holds
+    compact 2260 = Polys370+1). Blobs can contain several compact values
+    that decode into Polys exports; the true one is picked by placing the
+    geometry with origin = Location - PrePivot and requiring the brush
+    Location to fall inside the resulting world bbox (+/-150)."""
     cls, sup, pk, nm, fl, size, off = pkg.exports[midx]
     d = pkg.data[off:off + size]
     cands = []
     p = 0
     while p < len(d):
-        b = d[p]
-        if b & 0x40:
-            v = b & 0x3F
-            sh = 6
-            q = p
-            ok = True
-            while True:
-                q += 1
-                if q >= len(d):
-                    ok = False
-                    break
-                b2 = d[q]
-                v |= (b2 & 0x7F) << sh
-                sh += 7
-                if not b2 & 0x80:
-                    break
-            if ok:
-                cands.append((p, v))
-                p = q + 1
-            else:
-                p += 1
-        else:
-            cands.append((p, b & 0x3F if not b & 0x80 else -(b & 0x3F) - 1))
-            p += 1
+        v, q = read_compact(d, p)
+        cands.append((p, v))
+        p = q if q > p else p + 1
     refs = []
     for p, v in cands:
         j = v - 1
@@ -242,12 +270,97 @@ def model_polys_ref(pkg, midx, loc, pivot, polys_parse):
     return refs[-1][1]
 
 
+def find_level_model(pkg):
+    """Find the level's BSP Model: scan every Level object's blob for compact
+    object refs that resolve to a big Model export; take the biggest."""
+    best = None
+    for i in range(pkg.export_count):
+        if pkg.class_of_export(i) != "Level":
+            continue
+        fl, size, off = pkg.exports[i][4], pkg.exports[i][5], pkg.exports[i][6]
+        d = pkg.data[off:off + size]
+        p = 0
+        while p < len(d):
+            try:
+                v, q = read_compact(d, p)
+            except IndexError:
+                break
+            if v > 0:
+                j = v - 1
+                if j < pkg.export_count and pkg.class_of_export(j) == "Model" \
+                        and pkg.exports[j][5] > 100:
+                    if best is None or pkg.exports[j][5] > pkg.exports[best][5]:
+                        best = j
+            p = q if q > p else p + 1
+    return best
+
+
+def parse_model_surfs(pkg, midx):
+    """Parse the level Model's Surfs array.
+
+    Model file layout (RE 2026-11-12, fnd_14): props + FBox(25 B) + 4 dwords
+    + Vectors TArray + Points TArray + Nodes TArray (FBspNode records) +
+    Surfs TArray (FBspSurf records) + ... Each FBspSurf = {objref MATERIAL,
+    dword PolyFlags, 5 compacts [pBase, pNormal, pTextureU, pTextureV,
+    iBrushPoly], objref owner Brush, 16 B plane, float, int}."""
+    off, size = pkg.exports[midx][6], pkg.exports[midx][5]
+    d = pkg.data[off:off + size]
+
+    def rc(p):
+        return read_compact(d, p)
+
+    p = 1 + 25 + 16  # props(None) + FBox(Min,Max,IsValid) + 4 dwords
+    n, p = rc(p)
+    vec = [struct.unpack_from("<3f", d, p + i * 12) for i in range(n)]
+    p += n * 12
+    n2, p = rc(p)
+    pts = [struct.unpack_from("<3f", d, p + i * 12) for i in range(n2)]
+    p += n2 * 12
+    nnodes, p = rc(p)
+
+    def node_skip(p):
+        p += 16 + 8 + 1  # 4 dwords + 8 B + 1 byte
+        for _ in range(7):  # compacts +0x18 +0x1c +0x20 +0x24 +0x28 +0x4c +0x50
+            _, p = rc(p)
+        p += 32 + 3 + 8 + 12  # 8 dwords + 3 bytes
+        return p
+
+    for _ in range(nnodes):
+        p = node_skip(p)
+    nsurf, p = rc(p)
+    surfs = []
+    for _ in range(nsurf):
+        mat, p = rc(p)
+        flags = struct.unpack_from("<I", d, p)[0]
+        p += 4
+        idx = []
+        for _ in range(5):
+            v, p = rc(p)
+            idx.append(v)
+        owner, p = rc(p)
+        p += 24
+        surfs.append({"mat": mat, "flags": flags, "poly": idx[4], "owner": owner})
+    return {"surfs": surfs, "vec": vec, "pts": pts, "n_nodes": nnodes}
+
+
 def main():
     map_path, asset_dir, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
     pkg = Package(map_path)
     shaders = json.load(open(os.path.join(asset_dir, "shader_diffuse.json")))
 
-    # 1) parse every Polys object (local-space polygons)
+    # 0) the level Model + its surfs (the texture source)
+    midx = find_level_model(pkg)
+    model = parse_model_surfs(pkg, midx) if midx is not None else {"surfs": []}
+    if midx is None:
+        print("WARNING: no level Model found — no textures")
+    surfs_by_owner = {}
+    for s in model["surfs"]:
+        surfs_by_owner.setdefault(s["owner"], []).append(s)
+    print(f"level model: export {midx}, {len(model['surfs'])} surfs, "
+          f"{len(model['vec'])} vecs, {len(model['pts'])} pts, "
+          f"{model.get('n_nodes', '?')} nodes")
+
+    # 1) parse every Polys object (local-space polygons, ALL of them)
     polys_objs = {}
     polys_parse = {}
     for i in range(pkg.export_count):
@@ -263,8 +376,7 @@ def main():
             print(f"polys {name}: {e}")
 
     # 2) brushes: Location (- PrePivot) + Polys via the compact ref inside
-    # the Model blob (the name pairing ModelN/PolysN only holds for ~166 of
-    # 249 brush-like actors; the street-floor brushes are NOT name-paired)
+    # the Model blob; faces from the level surfs (owner brush + iBrushPoly)
     brushes = []
     for i in range(pkg.export_count):
         if pkg.class_of_export(i) != "Brush":
@@ -287,25 +399,58 @@ def main():
         if pname not in polys_objs:
             continue
         origin = [loc[k] - pivot[k] for k in range(3)]
-        flags = [pr["flags"] for pr in polys_objs[pname]]
-        brushes.append({"polys": pname, "location": origin, "poly_flags": flags})
+        # per-face textures: surf(owner == this brush, iBrushPoly == poly idx)
+        # (the surf owner ref = the Brush ACTOR's export index + 1, NOT the
+        # Brush property which points to the brush's Model)
+        surf_tex = {}
+        surf_flags = {}
+        for s in surfs_by_owner.get(i + 1, []):
+            if s["poly"] not in surf_tex:
+                surf_tex[s["poly"]] = s["mat"]
+                surf_flags[s["poly"]] = s["flags"]
+        faces = []
+        for pr in polys_objs[pname]:
+            k = pr["i"]
+            tex_ref = surf_tex.get(k, None)
+            faces.append({
+                "i": k,
+                "flags": surf_flags.get(k, pr["flags"]),
+                "tex": resolve_tex(pkg, tex_ref, shaders),
+            })
+        brushes.append({"polys": pname, "location": origin, "faces": faces})
 
-    # 3) export glTF per Polys + collect surface material refs
+    # 3) export glTF per Polys: renderable faces only (the SAME filter the
+    # old parse used: fake backdrop 0x4000000, invisible 0x1, fake 0x80 —
+    # NOT 0x400000, which ordinary wall faces also carry; plus the faces
+    # whose material is the AntiPortal/ZonePortal marker textures)
+    def face_renderable(pr, tex):
+        if pr["flags"] & (0x4000000 | 0x1 | 0x80):
+            return False
+        if tex and tex[1] in ("AntiPortal", "ZonePortal"):
+            return False
+        return True
+
     os.makedirs(out_dir, exist_ok=True)
-    mat_refs = {}
     exported = []
-    for pname, prims in sorted(polys_objs.items()):
-        refs = [resolve_mat(pkg, pr["mat"], shaders) for pr in prims]
+    tex_of_poly = {}
+    for br in brushes:
+        for f in br["faces"]:
+            tex_of_poly[(br["polys"], f["i"])] = f["tex"]
+    for pname in sorted(polys_objs.keys()):
+        prims = [pr for pr in polys_objs[pname]
+                 if face_renderable(pr, tex_of_poly.get((pname, pr["i"])))]
+        prim_idx_of = {}
         path = os.path.join(out_dir, f"BSP_{pname}")
-        if not write_gltf(path, f"BSP_{pname}", prims):
+        if not write_gltf(path, f"BSP_{pname}", prims, prim_idx_of):
             continue
         exported.append(pname)
-        mat_refs[f"BSP:{pname}"] = refs
+        for br in brushes:
+            if br["polys"] == pname:
+                for f in br["faces"]:
+                    f["prim"] = prim_idx_of.get(f["i"])
+    # faces of unexported polys: prim stays null
 
-    # 4) coverage raster: world-space triangles -> 128u cells, tracking the
-    # HIGHEST brush-plane height (meters) per cell within a sane world range.
-    # Cells with valid cover stay open (cave below); cells whose only cover
-    # is junk (Z out of range) get closed with interpolated terrain.
+    # 4) coverage raster (unchanged semantics: HIGHEST walkable brush height)
     cover_z = {}
     for b in brushes:
         prims = polys_objs.get(b["polys"])
@@ -320,7 +465,7 @@ def main():
             ys = [p[1] for p in pts3]
             zs = [p[2] for p in pts3]
             if max(zs) < -12000.0 or min(zs) > 12000.0:
-                continue  # junk coordinates
+                continue
             c_lo = max(0, int(min(xs) // CELL))
             c_hi = min(255, int(max(xs) // CELL))
             r_lo = max(0, int(min(ys) // CELL))
@@ -335,7 +480,7 @@ def main():
             nz = e1[0] * e2[1] - e1[1] * e2[0]
             norm = abs(nx) + abs(ny) + abs(nz)
             if norm < 1e-9 or abs(nz) / norm < 0.05:
-                continue  # near-vertical wall: no walkable ground
+                continue
             inv_nz = 1.0 / nz
             for cc in range(c_lo, c_hi + 1):
                 for rr in range(r_lo, r_hi + 1):
@@ -350,20 +495,23 @@ def main():
                         continue
                     z_game = z0 - (nx * (px - x0) + ny * (py - y0)) * inv_nz
                     if z_game < -12000.0 or z_game > 8000.0:
-                        continue  # plane explodes here (near-vertical edge)
+                        continue
                     z_val = z_game * SCALE
                     prev = cover_z.get((rr, cc))
                     if prev is None or z_val > prev:
                         cover_z[(rr, cc)] = z_val
 
+    # stats
+    with_tex = sum(1 for b in brushes for f in b["faces"] if f["tex"])
+    total_faces = sum(len(b["faces"]) for b in brushes)
     json.dump({
-        "schema": 1,
+        "schema": 2,
         "brushes": brushes,
-        "materials": mat_refs,
         "cover_z": [[r, c, round(z, 2)] for (r, c), z in sorted(cover_z.items())],
     }, open(os.path.join(asset_dir, "bsp.json"), "w"), indent=1)
     print(f"polys objects: {len(polys_objs)}, exported glTF: {len(exported)}, "
-          f"brushes: {len(brushes)}, cover cells: {len(cover_z)}")
+          f"brushes: {len(brushes)}, faces: {total_faces} "
+          f"(textured {with_tex}), cover cells: {len(cover_z)}")
 
 
 if __name__ == "__main__":
