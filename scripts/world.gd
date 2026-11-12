@@ -491,6 +491,9 @@ func _bsp_material(tex: Array, cache: Dictionary) -> StandardMaterial3D:
 		var img := Image.new()
 		if img.load(tp) == OK:
 			m.albedo_texture = ImageTexture.create_from_image(img)
+			# The BSP UVs are TEXELS (1 texel per world unit): scale them by
+			# 1/texture size so one tile = the texture's own pixel size.
+			m.uv1_scale = Vector3(1.0 / img.get_width(), 1.0 / img.get_height(), 1.0)
 		else:
 			print("bsp: texture failed to load ", tp)
 	else:
@@ -500,31 +503,83 @@ func _bsp_material(tex: Array, cache: Dictionary) -> StandardMaterial3D:
 	cache[key] = m
 	return m
 
-func _build_bsp() -> void:
-	var brushes: Array = bsp_data.get("brushes", [])
-	var built := 0
-	var skipped := 0
+func _bsp_grey() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = Color(0.32, 0.31, 0.30)
 	m.roughness = 0.95
 	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	return m
+
+func _build_bsp() -> void:
+	# The level BSP rendered DIRECTLY from the level Model's Surfs+Nodes
+	# (tools/l2strict/levelbsp.py, RE 2026-11-12): the engine's own CSG
+	# geometry — includes the CSG-split faces the brush reconstruction
+	# cannot produce (the junction floors, the curb assemblies). One mesh,
+	# one surface per material, UVs = texels (scaled per texture size).
+	# Collision = the same mesh trimesh with backface (authentic: the level
+	# BSP IS the engine's collision world).
+	var lb := _load_json(MAP_DIR + "/levelbsp.json")
+	var gp := "%s/meshes_bsp/LevelBSP.gltf" % MAP_DIR
+	if lb.is_empty() or not ResourceLoader.exists(gp):
+		print("levelbsp: missing, falling back to brushes")
+		_build_bsp_brushes()
+		return
+	var scene: PackedScene = load(gp)
+	if scene == null:
+		print("levelbsp: load failed")
+		return
+	var root := scene.instantiate()
+	var mesh: Mesh = null
+	for c in root.get_children():
+		if c is MeshInstance3D:
+			mesh = c.mesh
+			break
+	root.free()
+	if mesh == null:
+		return
+	var mat_cache := {}
+	var surfaces: Array = lb.get("surfaces", [])
+	var textured := 0
+	for si in range(mesh.get_surface_count()):
+		if si < surfaces.size() and surfaces[si].get("tex") != null:
+			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
+			textured += 1
+		else:
+			mesh.surface_set_material(si, _bsp_grey())
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	world.add_child(mi)
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	var shape := mesh.create_trimesh_shape()
+	shape.backface_collision = true
+	col.shape = shape
+	body.add_child(col)
+	body.set_meta("mesh_key", "LevelBSP")
+	world.add_child(body)
+	print("levelbsp: surfaces ", mesh.get_surface_count(), ", textured ", textured,
+		", unique materials ", mat_cache.size())
+	# The level Model covers only the designer-built zone geometry (the
+	# temple court, the valley); the streets/buildings live in the Brush
+	# actors — render BOTH sources.
+	_build_bsp_brushes()
+
+func _build_bsp_brushes() -> void:
+	var brushes: Array = bsp_data.get("brushes", [])
+	var built := 0
+	var skipped := 0
+	var m := _bsp_grey()
 	var mat_cache := {}
 	var textured_surfaces := 0
-	var portal := 0
 	for br in brushes:
 		var polys: String = br.get("polys", "")
 		var loc: Array = br.get("location", [0, 0, 0])
 		var faces: Array = br.get("faces", [])
-		# 0x400000 (L2 licensee flag = portal/zone separator): the sky/zone
-		# boxes over the village carry it on most faces. The engine treats
-		# portal brushes as non-solid zone boundaries — skip them entirely.
-		var portal_faces := 0
-		for f in faces:
-			if int(f.get("flags", 0)) & 0x400000 != 0:
-				portal_faces += 1
-		if faces.size() > 0 and portal_faces * 2 >= faces.size():
-			portal += 1
-			continue
+		# NOTE: no brush-level portal skip anymore. The old 0x400000-majority
+		# rule wrongly dropped ~77 real brushes (the road curbs + cobble
+		# patches + valley walls) — 0x400000 is carried by ordinary faces
+		# too. The zone/sky boxes drop out naturally: bsp2 emits prims only
+		# for faces WITH a surf texture, and the zone boxes have none.
 		var gp := "%s/meshes_bsp/BSP_%s.gltf" % [MAP_DIR, polys]
 		if not ResourceLoader.exists(gp):
 			skipped += 1
@@ -569,7 +624,7 @@ func _build_bsp() -> void:
 		world.add_child(body)
 		built += 1
 		textured_surfaces += prim_tex.size()
-	print("bsp brushes built ", built, ", portal-skipped ", portal, ", skipped ", skipped,
+	print("bsp brushes built ", built, ", skipped ", skipped,
 		", textured surfaces ", textured_surfaces, ", unique materials ", mat_cache.size())
 
 

@@ -3970,3 +3970,67 @@ against Docs/DE_village.png.
    scale/repeat vs the original (the temple walls are the best reference).
 3. The 13 residual center-grid gaps (the 0x400000 flag semantics check) and
    then the statics texture stage.
+
+## 2026-11-12 (29) — the curbs restored + the BSP UVs fixed + the level BSP rendered
+
+**The user's two reports:** (1) the curb gaps along the carpet strips are
+CORRECT layout — the original has a curb there, find its texture; (2) the
+temple-side path = broken, "the textures way up and glitched", rebuild the
+meshes.
+
+**1. THE CURBS — found and restored.** The old 0x400000-majority skip dropped
+~77 REAL brushes: 25 street-level curb/cobble boxes (DE_V_floor02 +
+O_dark_01 + DE_V_wall07 textures — the surf materials, already in bsp.json)
+along ALL the roads + the valley canyon walls. 0x400000 is carried by
+ordinary wall/street faces too — the flag-based portal rule was wrong.
+world.gd now renders every brush; the zone/sky boxes drop out by geometry
+instead (bsp2 skips glTF for polys spanning > 5000 units; the biggest
+legitimate brush = 4184).
+
+**2. THE UV BUG — the root of the beige slabs.** bsp2 computed the BSP UVs
+as dot/|U|^2 — one tile stretched over a 20+ m plate (the |U| magnitudes in
+the FPoly records are 19k-20k junk). Fixed: 1 texel per world unit along the
+surface U/V axes, baked as texels into the glTF; world.gd scales the material
+by 1/texture size. Also: faces without a level surf now fall back to the
+FPoly's OWN material slot (+0xF8) — the CSG merges coplanar brush faces into
+one surf (iBrushPoly points at the first poly only), so the street plates'
+staircase segments were texture-less before.
+
+**3. THE LEVEL BSP RENDERED DIRECTLY (new tools/l2strict/levelbsp.py).**
+The brush reconstruction cannot produce the CSG-split faces. The level Model
+(Model500, found via Level -> compact ref) carries the engine's own merged
+geometry. Decoded fully (MCP findings fnd_13/14 + this session):
+- node record: 4 floats (the plane inline), 2 ints, 1 byte, 7 compacts
+  (c0 = iVertexPool), 16+16 B, 3 bytes (byte[2] = **NumVertices** —
+  validated 774/774 surf polygons on their node planes), 2+3 ints;
+- the surf polygon = Points[Verts[pool .. pool+NumVertices].iVertex];
+- surf UVs: u = dot(P - pBase, pTextureU) in texels (|pU| = 0.5..4 = the UE
+  texel scale);
+- the vert pairs are COMPACTS (not u16+i32); the surf owner compact is
+  variable-length (a fixed +24 skip desynced the parse).
+LevelBSP.gltf = 643 drawn surfs in 17 material surfaces. NOTE: Model500
+covers only the designer-built zone geometry (the temple court, the valley)
+— the streets live in the Brush actors, so world.gd renders BOTH sources;
+collision = both trimeshes.
+
+**Result:** the temple-path beige slabs are gone; the road = carpet runners
+(DE_V_capet02, the Btm_Obj02/03 ribbons) + the cobble with authentic scale;
+the curbs render along all the roads; the temple court floor (floor01 at
+-45.82) restored from the level BSP. Floor profiles unchanged at the spawn
+street (Polys353 -46.01). Grid: the tower strip 5 gaps -> 7 ok + 5 gap; the
+north band still 11 gap.
+
+**PENDING (the next iteration):**
+1. The market square (11400-11862/17367-17500) + the tower strip: NO floor
+   geometry exists in ANY source (brushes, level BSP, statics) — the layers
+   there = MT_In canopy / O_De_03 pit slope / MT_Btm shaft only. The pit may
+   be OPEN by design (the giant-tree shaft) — needs the user's original
+   reference to decide.
+2. The dark fields left of the road = the plate faces in shadow (lighting —
+   NOT this stage) + z-fighting risk: the plate's overlapping coplanar
+   staircase segments (poly0/2/4/6/8) now all render — if the original
+   dropped the hidden ones, the render should too.
+3. The building roofs render white/grey — verify their textures vs the
+   original.
+4. The UV scale (1 texel/unit) = the default UE density — the user should
+   verify the pattern scale vs the original.

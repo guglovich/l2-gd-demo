@@ -1,0 +1,107 @@
+{
+ "schema": 1,
+ "surfaces": [
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_floor01"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_floor02"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_m12"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_wall01"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_wall07"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "Iron_net"
+   ]
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "O_dark_01"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_001_1"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_ai_004"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_ai_008"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in002"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in008"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in016"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in022"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in023"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in024"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_t010"
+   ]
+  }
+ ]
+}

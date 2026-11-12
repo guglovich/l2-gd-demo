@@ -93,17 +93,17 @@ def parse_polys(d, size):
             r += 12
         flags = struct.unpack_from("<I", d, r)[0]
         r += 4
-        r, _ = read_compact(d, r)[1], None
-        r, _ = read_compact(d, r)[1], None
-        r, _ = read_compact(d, r)[1], None
-        r, _ = read_compact(d, r)[1], None
-        r, _ = read_compact(d, r)[1], None
+        _, r = read_compact(d, r)   # +0xF4 Actor objref
+        poly_mat, r = read_compact(d, r)   # +0xF8 the FPoly's OWN Material
+        _, r = read_compact(d, r)   # +0xFC Item (FName)
+        _, r = read_compact(d, r)   # +0x104 iLink
+        _, r = read_compact(d, r)   # +0x108 iBrushPoly
         r += 8
         if not ok:
             continue
         polys.append({
             "i": i, "verts": verts, "normal": normal, "tu": tu, "tv": tv,
-            "base": base, "flags": flags,
+            "base": base, "flags": flags, "poly_mat": poly_mat,
         })
     return polys
 
@@ -178,12 +178,20 @@ def write_gltf(path, name, prims, prim_idx_of):
         vv = sum(c * c for c in vdir)
         if uu < 1e-9 or vv < 1e-9:
             continue
+        uu_s = uu ** 0.5
+        vv_s = vv ** 0.5
         pos = []
         uvs = []
         for v in pts:
             pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
-            u = sum((v[k] - base[k]) * udir[k] for k in range(3)) / uu
-            w = sum((v[k] - base[k]) * vdir[k] for k in range(3)) / vv
+            # L2 BSP texture mapping: 1 texel per world unit along the
+            # surface's U/V axes (the |U| magnitude in the file varies
+            # per brush and carries no scale — dividing by |U|^2 (the UE
+            # formula) stretched one tile over a 20+ m street plate).
+            # The UVs are TEXELS here; world.gd scales them by
+            # 1/texture_size per material.
+            u = sum((v[k] - base[k]) * udir[k] for k in range(3)) / uu_s
+            w = sum((v[k] - base[k]) * vdir[k] for k in range(3)) / vv_s
             uvs.extend([u, w])
         idx = []
         for k in range(1, len(pts) - 1):
@@ -411,7 +419,12 @@ def main():
         faces = []
         for pr in polys_objs[pname]:
             k = pr["i"]
+            # texture priority: the level surf's material, else the FPoly's
+            # own authored material (the CSG may have dropped the surf but
+            # the poly still knows its texture)
             tex_ref = surf_tex.get(k, None)
+            if tex_ref is None or tex_ref == 0:
+                tex_ref = pr.get("poly_mat")
             faces.append({
                 "i": k,
                 "flags": surf_flags.get(k, pr["flags"]),
@@ -419,14 +432,19 @@ def main():
             })
         brushes.append({"polys": pname, "location": origin, "faces": faces})
 
-    # 3) export glTF per Polys: renderable faces only (the SAME filter the
-    # old parse used: fake backdrop 0x4000000, invisible 0x1, fake 0x80 —
-    # NOT 0x400000, which ordinary wall faces also carry; plus the faces
-    # whose material is the AntiPortal/ZonePortal marker textures)
+    # 3) export glTF per Polys: renderable faces only. A face renders iff it
+    # has a surf texture, is not a marker (AntiPortal/ZonePortal) and carries
+    # none of: invisible 0x1, fake backdrop 0x80, old-portal 0x4000000.
+    # NOT 0x400000 — ordinary wall/street faces carry it and must render.
+    # The texture requirement also drops the CSG-dropped coincident faces
+    # (no surf -> hidden under the neighboring textured face) and the
+    # zone/sky boxes (all their faces are tex-less markers).
     def face_renderable(pr, tex):
+        if tex is None:
+            return False
         if pr["flags"] & (0x4000000 | 0x1 | 0x80):
             return False
-        if tex and tex[1] in ("AntiPortal", "ZonePortal"):
+        if tex[1] in ("AntiPortal", "ZonePortal"):
             return False
         return True
 
@@ -439,6 +457,15 @@ def main():
     for pname in sorted(polys_objs.keys()):
         prims = [pr for pr in polys_objs[pname]
                  if face_renderable(pr, tex_of_poly.get((pname, pr["i"])))]
+        # the zone/sky separator brushes: huge spanning boxes (7.4k-11k units)
+        # whose textured faces would hang giant slabs over the valley. The
+        # biggest legitimate brush spans 4184 units (Polys17, the east
+        # ruins) — 5000 splits them cleanly.
+        if prims:
+            xs = [v[0] for pr in polys_objs[pname] for v in pr["verts"]]
+            ys = [v[1] for pr in polys_objs[pname] for v in pr["verts"]]
+            if (max(xs) - min(xs)) > 5000 or (max(ys) - min(ys)) > 5000:
+                prims = []
         prim_idx_of = {}
         path = os.path.join(out_dir, f"BSP_{pname}")
         if not write_gltf(path, f"BSP_{pname}", prims, prim_idx_of):

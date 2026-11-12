@@ -1,0 +1,259 @@
+#!/usr/bin/env python3
+"""Render the LEVEL BSP directly from the decrypted map's level Model.
+
+The brush reconstruction (bsp2.py) misses the CSG-split faces: the level
+Model (found via Level -> compact ref) carries the engine's own merged
+geometry — Surfs + Nodes + the FVert pool. RE 2026-11-12 (fnd_13/14/15):
+
+  Model file layout: props(None) + FBox(25 B) + 4 dwords
+    + Vectors TArray + Points TArray + Nodes TArray + Surfs TArray
+    + Verts TArray (compact pairs: iVertex, iSide) + ints + 24-B stream + ...
+
+  FBspSurf file record: objref MATERIAL, dword PolyFlags, 5 compacts
+  [pBase(point), pNormal(vec), pTextureU(vec), pTextureV(vec), iBspNode],
+  objref owner Brush, 16-B plane, float lightmap scale, int.
+
+  FBspNode file record: 4 floats (the plane inline), 2 ints, 1 byte,
+  7 compacts (c0 = iVertexPool, c4 = iSurf), 16 B + 16 B, 3 bytes
+  (byte[2] = NumVertices!), 2 ints, 3 ints.
+
+  The surf's polygon = Points[Verts[pool .. pool+NumVertices].iVertex].
+  Validated: 774/774 surf polygons lie on their node planes.
+
+  UVs: u = dot(P - pBase, pTextureU) in TEXELS (|pU| = 0.5..4 = the UE
+  editor texel scale); world.gd scales by 1/texture_size per material.
+
+Output (into ASSET_DIR):
+  meshes_bsp/LevelBSP.gltf/.bin — one surface per material, meters, Godot axes
+  levelbsp.json — {"surfaces": [{"tex": [pkg, obj] | null}]}
+"""
+import json
+import os
+import struct
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from l2_probe import Package  # noqa: E402
+from bsp2 import read_compact, resolve_tex  # noqa: E402
+
+SCALE = 0.01
+# the zone/sky separator faces span 3882-5041 units; the biggest legitimate
+# BSP face (the street plates) spans 2967 — 3500 splits them cleanly
+MAX_SPAN = 3500.0
+
+
+def find_level_model(pkg):
+    best = None
+    for i in range(pkg.export_count):
+        if pkg.class_of_export(i) != "Level":
+            continue
+        fl, size, off = pkg.exports[i][4], pkg.exports[i][5], pkg.exports[i][6]
+        d = pkg.data[off:off + size]
+        p = 0
+        while p < len(d):
+            try:
+                v, q = read_compact(d, p)
+            except IndexError:
+                break
+            if v > 0:
+                j = v - 1
+                if j < pkg.export_count and pkg.class_of_export(j) == "Model" \
+                        and pkg.exports[j][5] > 100:
+                    if best is None or pkg.exports[j][5] > pkg.exports[best][5]:
+                        best = j
+            p = q if q > p else p + 1
+    return best
+
+
+def parse_level_model(pkg, midx):
+    off, size = pkg.exports[midx][6], pkg.exports[midx][5]
+    d = pkg.data[off:off + size]
+    p = 1 + 25 + 16  # props(None) + FBox(Min,Max,IsValid) + 4 dwords
+    n, p = read_compact(d, p)
+    vec = [struct.unpack_from("<3f", d, p + i * 12) for i in range(n)]
+    p += n * 12
+    n2, p = read_compact(d, p)
+    pts = [struct.unpack_from("<3f", d, p + i * 12) for i in range(n2)]
+    p += n2 * 12
+    nn, p = read_compact(d, p)
+
+    def node_fields(p):
+        q = p
+        plane = struct.unpack_from("<4f", d, q)
+        q += 16 + 8 + 1
+        cs = []
+        for _ in range(7):
+            v, q = read_compact(d, q)
+            cs.append(v)
+        q += 16 + 16
+        nvert = d[q + 2]
+        q += 3 + 8 + 12
+        return {"cs": cs, "nvert": nvert, "end": q}
+
+    nodes = []
+    for _ in range(nn):
+        nd = node_fields(p)
+        nodes.append(nd)
+        p = nd["end"]
+    nsurf, p = read_compact(d, p)
+    surfs = []
+    for _ in range(nsurf):
+        mat, p = read_compact(d, p)
+        flags = struct.unpack_from("<I", d, p)[0]
+        p += 4
+        idx = []
+        for _ in range(5):
+            v, p = read_compact(d, p)
+            idx.append(v)
+        _, p = read_compact(d, p)  # the owner Brush objref (variable length)
+        p += 24  # 16-B plane + float lightmap scale + int
+        surfs.append({"mat": mat, "flags": flags, "idx": idx})
+    nvert, p = read_compact(d, p)
+    verts = []
+    for _ in range(nvert):
+        iv, p = read_compact(d, p)
+        isd, p = read_compact(d, p)
+        verts.append((iv, isd))
+    return {"vec": vec, "pts": pts, "nodes": nodes, "surfs": surfs, "verts": verts}
+
+
+def main():
+    map_path, asset_dir, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
+    pkg = Package(map_path)
+    shaders = json.load(open(os.path.join(asset_dir, "shader_diffuse.json")))
+
+    midx = find_level_model(pkg)
+    if midx is None:
+        print("no level Model found")
+        return
+    M = parse_level_model(pkg, midx)
+    print(f"level model export {midx}: {len(M['vec'])} vecs, {len(M['pts'])} pts, "
+          f"{len(M['nodes'])} nodes, {len(M['surfs'])} surfs, {len(M['verts'])} verts")
+
+    vec, pts, nodes, verts = M["vec"], M["pts"], M["nodes"], M["verts"]
+    os.makedirs(out_dir, exist_ok=True)
+
+    # group the renderable surfs by resolved texture; each group = a surface
+    groups = {}          # tex_key -> list of polygons [(verts3d, uvs)]
+    stats = {"hidden": 0, "marker": 0, "span": 0, "nomat": 0, "drawn": 0}
+    surf_tex_of_group = {}
+    for s in M["surfs"]:
+        tex = resolve_tex(pkg, s["mat"], shaders)
+        if s["flags"] & (0x1 | 0x80 | 0x4000000):
+            stats["hidden"] += 1
+            continue
+        if tex and tex[1] in ("AntiPortal", "ZonePortal"):
+            stats["marker"] += 1
+            continue
+        if not tex:
+            stats["nomat"] += 1
+            continue
+        ni = s["idx"][4]
+        if not (0 <= ni < len(nodes)):
+            stats["nomat"] += 1
+            continue
+        nd = nodes[ni]
+        pool, cnt = nd["cs"][0], nd["nvert"]
+        if cnt < 3 or pool + cnt > len(verts):
+            stats["nomat"] += 1
+            continue
+        poly = []
+        ok = True
+        for k in range(cnt):
+            vi = verts[pool + k][0]
+            if not (0 <= vi < len(pts)):
+                ok = False
+                break
+            poly.append(pts[vi])
+        if not ok:
+            stats["nomat"] += 1
+            continue
+        xs = [v[0] for v in poly]
+        ys = [v[1] for v in poly]
+        if (max(xs) - min(xs)) > MAX_SPAN or (max(ys) - min(ys)) > MAX_SPAN:
+            stats["span"] += 1
+            continue
+        base = pts[s["idx"][0]]
+        U = vec[s["idx"][2]]
+        V = vec[s["idx"][3]]
+        uvs = []
+        for v in poly:
+            uvs.append((sum((v[k] - base[k]) * U[k] for k in range(3)),
+                        sum((v[k] - base[k]) * V[k] for k in range(3))))
+        key = tuple(tex)
+        groups.setdefault(key, []).append((poly, uvs))
+        surf_tex_of_group[key] = tex
+        stats["drawn"] += 1
+    print("surfs: drawn %d, hidden %d, marker %d, no-material %d, huge-span %d"
+          % (stats["drawn"], stats["hidden"], stats["marker"], stats["nomat"], stats["span"]))
+
+    # build the glTF: one primitive per texture group
+    blob = bytearray()
+    buffer_views = []
+    accessors = []
+    materials = []
+    mesh_prims = []
+    surfaces = []
+    for key in sorted(groups.keys()):
+        tex = surf_tex_of_group[key]
+        si = len(mesh_prims)
+        pos = []
+        uvs = []
+        idx = []
+        vbase = 0
+        for poly, uv in groups[key]:
+            for v in poly:
+                pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
+            uvs.extend([u for u, w in uv])
+            n = len(poly)
+            for k in range(1, n - 1):
+                idx.extend([vbase, vbase + k + 1, vbase + k])
+            vbase += n
+        if not idx:
+            continue
+        pb = struct.pack(f"<{len(pos)}f", *pos)
+        buffer_views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(pb)})
+        blob.extend(pb)
+        accessors.append({"bufferView": len(buffer_views) - 1, "componentType": 5126,
+                          "count": len(pos) // 3, "type": "VEC3",
+                          "min": [min(pos[0::3]), min(pos[1::3]), min(pos[2::3])],
+                          "max": [max(pos[0::3]), max(pos[1::3]), max(pos[2::3])]})
+        ub = struct.pack(f"<{len(uvs)}f", *uvs)
+        buffer_views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(ub)})
+        blob.extend(ub)
+        accessors.append({"bufferView": len(buffer_views) - 1, "componentType": 5126,
+                          "count": len(uvs) // 2, "type": "VEC2"})
+        ib = struct.pack(f"<{len(idx)}I", *idx)
+        buffer_views.append({"buffer": 0, "byteOffset": len(blob), "byteLength": len(ib)})
+        blob.extend(ib)
+        accessors.append({"bufferView": len(buffer_views) - 1, "componentType": 5125,
+                          "count": len(idx), "type": "SCALAR"})
+        while len(blob) % 4:
+            blob.append(0)
+        materials.append({"name": f"m{si}", "pbrMetallicRoughness":
+                          {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
+                          "doubleSided": True})
+        mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
+                                          "TEXCOORD_0": len(accessors) - 2},
+                           "indices": len(accessors) - 1, "material": si, "mode": 4})
+        surfaces.append({"tex": list(tex)})
+
+    gltf = {
+        "asset": {"version": "2.0", "generator": "l2godot levelbsp"},
+        "scene": 0, "scenes": [{"nodes": [0]}],
+        "nodes": [{"mesh": 0, "name": "LevelBSP"}],
+        "meshes": [{"name": "LevelBSP", "primitives": mesh_prims}],
+        "materials": materials,
+        "accessors": accessors, "bufferViews": buffer_views,
+        "buffers": [{"uri": "LevelBSP.bin", "byteLength": len(blob)}],
+    }
+    json.dump(gltf, open(os.path.join(out_dir, "LevelBSP.gltf"), "w"))
+    open(os.path.join(out_dir, "LevelBSP.bin"), "wb").write(bytes(blob))
+    json.dump({"schema": 1, "surfaces": surfaces},
+              open(os.path.join(asset_dir, "levelbsp.json"), "w"), indent=1)
+    print(f"LevelBSP: {len(mesh_prims)} surfaces, {len(blob)} bytes")
+
+
+if __name__ == "__main__":
+    main()
