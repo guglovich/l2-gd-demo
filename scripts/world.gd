@@ -28,7 +28,6 @@ func _ready() -> void:
 	_build_terrain()
 	_build_meshes()
 	_build_bsp()
-	_build_clean_room_road()
 	_build_lights()
 	_spawn_player()
 	print("world built in ", (Time.get_ticks_msec() - started) / 1000.0, " s")
@@ -627,109 +626,6 @@ func _build_bsp_brushes() -> void:
 	print("bsp brushes built ", built, ", skipped ", skipped,
 		", textured surfaces ", textured_surfaces, ", unique materials ", mat_cache.size())
 
-
-func _build_clean_room_road() -> void:
-	var origin := Vector2(9059.0, 17388.0)   # the Obj01 actor (the map data)
-	var dir := Vector2(0.97638, -0.21590)    # the yaw -2272
-	var right := Vector2(-dir.y, dir.x)
-	var actor_z := -4508.0                  # the Obj01 actor z, cm
-	var half_w := 500.0
-	var carpet_w := 128.0
-	# the profile: (the local x from, to, the h from, to) in cm - the Obj01
-	# slab's own map-data profile (the top plate / the slope / the bottom)
-	var segs := [
-		[-1762.47, -1304.83, 103.48, 103.48],
-		[-1304.83, -553.26, 103.48, -102.87],
-		[-553.26, 1651.04, -102.87, -62.0],
-		# the east flat continues to the east bridge (the world x ~10670..14720):
-		# the original Obj01 slab ends at +1651 but the road floor must reach
-		# the far bridge, else the east village = the void (the falls)
-		# the octagon plaza (Center_obj at the local lx ~2376) breaks the road:
-		# the east street resumes behind it AT THE LAMP LEVEL: all Lamp01s
-		# stand at z -4473.4 = the village street is FLAT -44.73 (the actor
-		# z -4508 => the local h = +34.6), the bridge = the dip below it
-		[3080.0, 3600.0, -62.0, 34.6],
-		[3600.0, 5800.0, 34.6, 34.6],
-	]
-	var mats := {}
-	for tex in [["carpet", "oren_dev_t", "DE_V_capet01"], ["cobble", "oren_dev_t", "DE_V_floor01"], ["rail", "oren_dev_t", "DE_V_wall05"]]:
-		var tp := "%s/textures/%s/Texture/%s.png" % [MAP_DIR, tex[1], tex[2]]
-		if not FileAccess.file_exists(tp):
-			print("clean-room road: missing texture ", tp)
-			return
-		var img := Image.new()
-		img.load(tp)
-		var m := StandardMaterial3D.new()
-		m.albedo_texture = ImageTexture.create_from_image(img)
-		m.roughness = 0.95
-		m.cull_mode = StandardMaterial3D.CULL_DISABLED
-		mats[tex[0]] = m
-
-	# The band layout per segment: on the bridge/east flat (lx <= 1651) the
-	# cobble shoulders flank the carpet; on the village street (lx > 1651)
-	# the carpet road is flanked by the PLAZA stone (floor01) at the same
-	# level, separated by the small border step.
-	var bodies := {}
-	for seg_i in range(segs.size()):
-		var seg = segs[seg_i]
-		var street: bool = seg[0] >= 1651.04 or seg_i == 3
-		var bands := []
-		if street:
-			bands = [["carpet", -200.0, 200.0], ["cobble", -600.0, -200.0], ["cobble", 200.0, 600.0]]
-		else:
-			bands = [["cobble", -half_w, -carpet_w], ["carpet", -carpet_w, carpet_w], ["cobble", carpet_w, half_w]]
-		for b in bands:
-			var st := SurfaceTool.new()
-			st.begin(Mesh.PRIMITIVE_TRIANGLES)
-			var w0: float = b[1]
-			var w1: float = b[2]
-			var lx0: float = seg[0]
-			var lx1: float = seg[1]
-			var h0: float = seg[2]
-			var h1: float = seg[3]
-			var u0: float
-			var u1: float
-			var p00 := _road_pt(origin, dir, right, lx0, w0, actor_z + h0)
-			var p10 := _road_pt(origin, dir, right, lx1, w0, actor_z + h1)
-			var p01 := _road_pt(origin, dir, right, lx0, w1, actor_z + h0)
-			var p11 := _road_pt(origin, dir, right, lx1, w1, actor_z + h1)
-			# the original UV densities (from the staged glTF): the carpet =
-			# one repeat across (u 0..1 over +-128) and ~1.18 m along (the
-			# Obj01 v range -29..1); the cobble = ~1.2 m tiles (the deck's
-			# +-20 over its span)
-			var tile: float = 118.0 if b[0] == "carpet" else 120.0
-			if b[0] == "carpet":
-				u0 = (w0 + 128.0) / 256.0
-				u1 = (w1 + 128.0) / 256.0
-			else:
-				u0 = w0 / 120.0
-				u1 = w1 / 120.0
-			var along0: float = lx0 / tile
-			var along1: float = lx1 / tile
-			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
-			st.set_uv(Vector2(u0, along1)); st.add_vertex(p10)
-			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
-			st.set_uv(Vector2(u0, along0)); st.add_vertex(p00)
-			st.set_uv(Vector2(u1, along1)); st.add_vertex(p11)
-			st.set_uv(Vector2(u1, along0)); st.add_vertex(p01)
-			st.generate_normals()
-			var mesh := ArrayMesh.new()
-			st.commit(mesh)
-			var mi := MeshInstance3D.new()
-			mi.mesh = mesh
-			var count := mesh.get_surface_count()
-			for si in range(count):
-				mesh.surface_set_material(si, mats[b[0]])
-			world.add_child(mi)
-			var shape := mesh.create_trimesh_shape()
-			shape.backface_collision = true
-			var body := StaticBody3D.new()
-			var col := CollisionShape3D.new()
-			col.shape = shape
-			body.add_child(col)
-			body.set_meta("mesh_key", "clean_room_road")
-			world.add_child(body)
-	print("clean-room road built: the wide flush deck + the carpet band")
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:

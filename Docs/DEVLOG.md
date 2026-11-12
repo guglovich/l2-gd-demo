@@ -4034,3 +4034,42 @@ north band still 11 gap.
    original.
 4. The UV scale (1 texel/unit) = the default UE density — the user should
    verify the pattern scale vs the original.
+
+## 2026-11-12 (30) — the three user-reported bugs: the tunnel, the floating road, the main road
+
+**1. The village exit tunnel "closed by a texture" = THE MERGED-PRIM IMPORT
+BUG family-wide.** The blocker = O_DE_MT_obj04 (the tree-root pieces at the
+canyon mouth). Per-prim audit vs the UModel reference: **36 of 43 staged
+meshes had the catalog bug #1** — every primitive shared ONE giant merged
+accessor (2x106 duplicated verts for MT_obj04 vs the true 53+55 split). ALL
+36 re-staged from tmp/l2/20_18/umodel (the O_De_01 precedent): the glTF+bin
+copied under the staged name, materials.json filled with the real per-material
+textures (the umodel material names = the texture names; DE_statue002_s
+resolved via shader_diffuse.json -> De_Statue002), asset_map
+primitive_material_indices = the umodel per-prim indices. The collision.json
+files stay valid (the collision triangles come from the raw file stream, not
+the staged glTF order). The tunnel = now the hanging roots (an opening below);
+the spawn view = the authentic carved canyon passage.
+
+**2. The floating sloped road = the clean-room road REMOVED entirely.** The
+user: the road must be LOWER than the floor with the curbs between. The
+experiment (L2_NO_CLEANROOM) proved the whole corridor is covered by the
+authentic BSP: Polys3977 (-44.05, the bridge), Polys3987 (-44.57..-45.99, the
+bridge slope), Polys3983 (-46.12, the village street), Polys377, Polys353 —
+0 NO-HIT along x 7000..14700. The clean-room deck floated 0.7-1.3 m ABOVE the
+authentic plates and sloped up toward the center. Deleted the call + the
+function. The curbs (-45.87, 14 cm above the street) are exactly the
+original's floor-above-path arrangement.
+
+**3. The main road from the temple = FIXED by 2 (the striped tilted slabs in
+the user's screenshot = the removed clean-room road segments).** The corridor
+profile: Polys363/353/Btm_Obj02 at -46.01..-46.11 continuous; the pit
+(O_De_03) visible between the plates = the authentic shaft.
+
+**PENDING:**
+- The green/red edge strips at the tunnel road = the O_DE_Bridge + the BSP
+  plate edge faces — verify the material mapping vs the original.
+- The market square + the tower strip = no floor in any source (the shaft may
+  be open by design) — the user's verdict pending.
+- The windows render teal/pink flat quads (DE_V_win?) — verify vs the original.
+- The temple path UV scale (1 texel/unit) — the user's visual check.
