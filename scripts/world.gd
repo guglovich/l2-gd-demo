@@ -13,6 +13,7 @@ var terrain_present: PackedByteArray = PackedByteArray()
 var map_data := {}
 var materials_data := {}
 var asset_map_data := {}
+var bsp_data := {}
 var _mesh_cache := {}
 var _shape_cache := {}
 
@@ -26,6 +27,7 @@ func _ready() -> void:
 	_build_environment()
 	_build_terrain()
 	_build_meshes()
+	_build_bsp()
 	_build_clean_room_road()
 	_build_lights()
 	_spawn_player()
@@ -280,6 +282,7 @@ func _load_data() -> void:
 	map_data = _load_json(MAP_DIR + "/map.json")
 	materials_data = _load_json(MAP_DIR + "/materials.json")
 	asset_map_data = _load_json(MAP_DIR + "/asset_map.json")
+	bsp_data = _load_json(MAP_DIR + "/bsp.json")
 	var td := _load_json(MAP_DIR + "/terrain/terrain.json")
 	terrain_width = int(td["source_height_size"][0])
 	terrain_grid_height = int(td["source_height_size"][1])
@@ -467,6 +470,84 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 ## profile = the Obj01 slab's own map-data profile widened to the full
 ## road width; the center band = the carpet (capet01), the side bands =
 ## the cobble (DE_V_floor02); the low rails at the edges; flush.
+## The level BSP geometry (Brush -> Model -> Polys, engine RE 2026-11-12:
+## the Polys reference is a compact object index inside the Model blob; see
+## tools/l2strict/bsp2.py). Placed like static meshes: game (x, y, z) ->
+## godot (x, z-up->y, y-width->z) * 0.01, no rotation (every 20_18 brush
+## has Rotation 0). Collision = full trimesh with backface. The polys'
+## textures live in the Model's FBspSurf records (not yet parsed) — the
+## render uses a neutral stone placeholder until that stage.
+func _build_bsp() -> void:
+	var brushes: Array = bsp_data.get("brushes", [])
+	var built := 0
+	var skipped := 0
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(0.32, 0.31, 0.30)
+	m.roughness = 0.95
+	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	var portal := 0
+	var invisible := 0
+	for br in brushes:
+		var polys: String = br.get("polys", "")
+		var loc: Array = br.get("location", [0, 0, 0])
+		var flags: Array = br.get("poly_flags", [])
+		# 0x400000 (L2 licensee flag = portal/zone separator): the sky/zone
+		# boxes over the village carry it on most faces. The engine treats
+		# portal brushes as non-solid zone boundaries — skip them entirely.
+		var portal_faces := 0
+		for f in flags:
+			if int(f) & 0x400000 != 0:
+				portal_faces += 1
+		if flags.size() > 0 and portal_faces * 2 >= flags.size():
+			portal += 1
+			continue
+		# 0x1 = PF_Invisible: collision-only walls (the street trim).
+		var any_visible := false
+		for f in flags:
+			if int(f) & 0x1 == 0:
+				any_visible = true
+				break
+		if not any_visible:
+			invisible += 1
+		var gp := "%s/meshes_bsp/BSP_%s.gltf" % [MAP_DIR, polys]
+		if not ResourceLoader.exists(gp):
+			skipped += 1
+			continue
+		var scene: PackedScene = load(gp)
+		if scene == null:
+			skipped += 1
+			continue
+		var root := scene.instantiate()
+		var mesh: Mesh = null
+		for c in root.get_children():
+			if c is MeshInstance3D:
+				mesh = c.mesh
+				break
+		root.free()
+		if mesh == null:
+			skipped += 1
+			continue
+		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
+		if any_visible:
+			var mi := MeshInstance3D.new()
+			mi.mesh = mesh
+			mi.position = pos
+			for si in range(mesh.get_surface_count()):
+				mesh.surface_set_material(si, m)
+			world.add_child(mi)
+		var body := StaticBody3D.new()
+		var col := CollisionShape3D.new()
+		var shape := mesh.create_trimesh_shape()
+		shape.backface_collision = true
+		col.shape = shape
+		body.add_child(col)
+		body.position = pos
+		body.set_meta("mesh_key", "BSP:" + polys)
+		world.add_child(body)
+		built += 1
+	print("bsp brushes built ", built, ", portal-skipped ", portal, ", invisible(collision-only) ", invisible, ", skipped ", skipped)
+
+
 func _build_clean_room_road() -> void:
 	var origin := Vector2(9059.0, 17388.0)   # the Obj01 actor (the map data)
 	var dir := Vector2(0.97638, -0.21590)    # the yaw -2272

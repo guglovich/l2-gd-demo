@@ -3854,3 +3854,47 @@ ref found) — decoding the link needs an engine.dll RE of
 `UModel::Serialize` (fnd_next). BlockingVolume = walls only (checked).
 StaticMeshInstance (651) = per-instance vertex colors, not placements
 (correctly dropped).
+
+## 2026-11-12 (26) — the Shilen Temple fully analyzed + the BSP brush↔Polys link CRACKED
+
+**The temple (O_DE_CH_* cluster, south of the village, 10800-11400 / 14300-15300):**
+all 8 meshes staged with materials; authentic collision subsets 100% plane-valid
+(the new extractor). Geodata verified by profiles:
+- mainstair: 30 authentic step levels −46.13→−43.81, ny=1.0, climbs from the
+  Btm_Obj03 forecourt (−46.11) ✓ walkable;
+- sidestairs (east/west): the same step ladder −46.0→−43.72 ✓;
+- CH_Btm platform −43.72 (extends INTO the hall), CH_btm_obj01 inner steps
+  −43.72→−42.55, the hall gallery −40.30 (CH_body −4030), the altar tiers
+  −38.8/−36.7, the deep ledge −47.28;
+- CH_body has NO floor between −42.55 and −41.29 — the hall floor = the
+  CH_Btm platform; the −40.3 tier is the gallery.
+(The sylentemple_* package = the separate Silent Temple ruins in the far
+east x 26000-30500 — NOT the village temple.)
+
+**The Brush→Model→Polys link — SOLVED (engine RE):**
+- The L2 `UModel::Serialize` (engine.dll 0x1030cac7) does NOT carry the
+  stock-UE2 `Ar << Polys` at the head. The reference is a COMPACT object
+  index (export+1) inside the 72-B Model blob (Model954 holds compact
+  2260 = Polys370+1 at offset 55). UPrimitive::Serialize first writes the
+  local bbox (6 floats — the z family matches the polys).
+- The old bsp2 name-pairing (ModelN↔PolysN) matched only 166/249 brush-like
+  actors — the street-floor brushes were never name-paired. The blob-ref
+  pairing (with loc-inside-world-bbox disambiguation for the few multi-
+  candidate blobs) pairs ALL 219 brushes. bsp2.py moved to tools/l2strict/
+  and regenerated: 171 glTFs, bsp.json with per-brush poly_flags.
+- Placement: origin = Location − PrePivot; ALL 20_18 brushes have Rotation 0.
+  The glTF convention is now the statics one (x, z→y, y→z).
+- Flag semantics (empirical): poly flag 0x1 = invisible (collision-only
+  street trim, 85 brushes), flag 0x400000 on a majority of faces = the
+  zone-portal/sky boxes (89 skipped — they sit above the tree canopy and
+  must not block anything), the rest (45) render + collide.
+
+**world.gd `_build_bsp()`** builds the BSP: render = neutral stone
+placeholder (the polys' textures live in the Model FBspSurf records — the
+next stage), collision = full trimesh with backface.
+
+**Result:** the spawn street band (13100-13500 / 17100-17300) now has its
+authentic floor (BSP:Polys353 at −46.01, ny=1.0); the temple approach grid
+75/80 ok (was ~all gaps); the center grid gaps 26 → 13 (the remaining ones:
+the tower base strip 11862-12015/16567-17100 and the north band
+11400-11862/17367-17500). Spawn screenshot = no visual regression.
