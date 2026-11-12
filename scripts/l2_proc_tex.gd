@@ -14,17 +14,23 @@ const TEX_ROOT := "res://assets/maps/20_18/textures"
 
 ## tex key "pkg:obj" -> config. pkg = staged (lower-case) package dir.
 ##   tile: texture pixel size (texel-UV normalization + statics unit-UV)
-##   pom: visual depth in meters (the POM strength, config-only tweaks)
+##   pom: visual depth in meters for the UV-offset parallax. DISABLED (0.0)
+##     everywhere 2026-11-13: at the surface joints the effective offsets
+##     differ between neighbors (different pom and meters-per-tile), so the
+##     textures visibly "walk" sideways at the seams while the camera moves
+##     (the user's floating-seams bug, upper village entrance). The volumetric
+##     look stays via normals/roughness/AO; re-enable per texture ONLY after
+##     a verified seam-consistent scheme (uniform effective offsets).
 ##   mode: the analytic fallback mode (see l2_procedural.gdshader header)
 const CONFIG := {
-	"oren_dev_t:DE_V_floor01": {"tile": Vector2(256, 256), "pom": 0.055, "mode": 0},
-	"oren_dev_t:DE_V_floor02": {"tile": Vector2(256, 256), "pom": 0.04, "mode": 1},
-	"oren_dev_t:DE_V_m12": {"tile": Vector2(512, 512), "pom": 0.06, "mode": 2},
-	"oren_dev_t:O_dark_01": {"tile": Vector2(512, 512), "pom": 0.05, "mode": 3},
-	"sylen_temple_t:oren_sylen_001_1": {"tile": Vector2(256, 256), "pom": 0.05, "mode": 4},
-	"oren_dev_t:DE_V_capet01": {"tile": Vector2(256, 256), "pom": 0.012, "mode": 5},
-	"oren_dev_t:DE_V_capet02": {"tile": Vector2(256, 256), "pom": 0.012, "mode": 6},
-	"oren_dev_t:DE_V_capet": {"tile": Vector2(128, 256), "pom": 0.012, "mode": 7},
+	"oren_dev_t:DE_V_floor01": {"tile": Vector2(256, 256), "pom": 0.0, "mode": 0},
+	"oren_dev_t:DE_V_floor02": {"tile": Vector2(256, 256), "pom": 0.0, "mode": 1},
+	"oren_dev_t:DE_V_m12": {"tile": Vector2(512, 512), "pom": 0.0, "mode": 2},
+	"oren_dev_t:O_dark_01": {"tile": Vector2(512, 512), "pom": 0.0, "mode": 3},
+	"sylen_temple_t:oren_sylen_001_1": {"tile": Vector2(256, 256), "pom": 0.0, "mode": 4},
+	"oren_dev_t:DE_V_capet01": {"tile": Vector2(256, 256), "pom": 0.0, "mode": 5},
+	"oren_dev_t:DE_V_capet02": {"tile": Vector2(256, 256), "pom": 0.0, "mode": 6},
+	"oren_dev_t:DE_V_capet": {"tile": Vector2(128, 256), "pom": 0.0, "mode": 7},
 }
 
 static var _pbr_shader: Shader = null

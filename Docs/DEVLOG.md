@@ -4266,3 +4266,36 @@ No more POM artifacts after the offset-mapping fix.
 **NEXT:** extend texgen to ALL staged textures (the generator is generic —
 one batch run + Godot import), then the user's visual pass on POM depth per
 texture (config-only).
+
+## 2026-11-13 (35) — THE USER'S VERDICT + the floating-seams fix
+
+**THE USER'S VERDICT: the client-derived PBR textures "выглядят как в
+оригинале"** — approved; the remaining pass (specular/gloss/matte fine-tuning)
+belongs to the later lighting stage. Recorded here and committed.
+
+**THE FLOATING-SEAMS BUG (the user's report: on the upper village-entrance
+section the textures seem to walk sideways at the joints while the camera
+moves)** — root cause: the offset-mapping UV shift. Neighboring surfaces at a
+joint carry DIFFERENT effective offsets (different pom depth: carpet 1.2 cm
+vs cobble 5.5 cm — and different meters-per-tile between the texel-UV BSP and
+the unit-UV statics), so the pattern on each side of a seam slides by its own
+amount as the view direction changes — the textures visibly "walk" relative
+to each other.
+
+**FIX: the UV-offset parallax is DISABLED (pom 0.0 in L2ProcTex.CONFIG for
+all 8 road textures).** The offset path stays in the shader (config-only
+re-enable), but textures are now strictly bound to their UVs — no view-driven
+pattern motion is possible anywhere. The volumetric look that the user
+approved is preserved via the normal maps + roughness + height AO; the
+parallax may be re-enabled per texture only after a verified seam-consistent
+scheme (uniform effective offsets across neighbors — not attempted now).
+
+**Verification:** a render from the user's exact report viewpoint
+(L2_SPAWN=7616,17709,-4404) reproduces the approved look; with the offsets at
+zero the seam swim is impossible by construction (no view-dependent UV term).
+
+**PENDING (unchanged):** extend texgen over ALL staged textures (one batch
+run + import); the lighting-stage specular/gloss tuning; the terrain under
+the temple street (present=1 leftover heights below the real slab) and the
+canyon-tunnel floor missing from every source (DEVLOG 33); market square +
+far-east verdicts.
