@@ -4435,3 +4435,50 @@ coincident vertices — the visual check is the proof).
 surfaces in the shader by dominant-axis selection — the terrace/stair normals
 flip the axis and produce interference swirls; the canonical projection at
 export keeps the real surf axes and is seam-free.
+
+## 2026-11-13 (41) — the "textures turned to garbage" regression: the
+## canonical family key must be the FULL (U,V) pair, not U alone
+
+**User report:** at the village entrance (game 7666,17666, the road south of
+the bridge) the textures became garbage — the road/cobble surfaces render as
+1D plank-like stripes. Reproduced at L2_SPAWN=7666,17666,-4404.5 yaw 0.
+
+**Root cause (measured, not guessed):** the canonical texture projection
+(ec54d… ecd54e4) keyed texture direction families by the rounded **U**
+vector only. Faces that share the U direction but have DIFFERENT V axes
+(walls vs floors — e.g. DE_V_floor01 used on both) were forced onto the
+family's (U,V). The forced V is not perpendicular to those faces' planes
+(dot(V,N) != 0), so the V coordinate goes (nearly) constant across the
+face — the V UV span collapses. Span-diff 5e632b6 -> ecd54e4: **70 brush
+prims lost their V span** (BSP_Polys118..BSP_Polys3995, e.g. Polys3977
+prim4: 869x1614 -> 869x0) = the 1D stretch the user saw.
+
+**Fix (both exporters):** the family key is the rounded (U, V) pair —
+bsp2.py `key2 = (pkg, tex, round(U), round(V))`, levelbsp.py
+`dk = (round(U), round(V))`. Coplanar seam faces share BOTH axes and
+differ only in the base pan, so the стык fix survives untouched; faces of
+different orientation were never seam sources and now keep their own axes.
+
+**Verification:**
+- span-diff worktree vs the approved baseline 5e632b6 over all changed
+  brush bins: **0 prims differing** (offsets shift — the intended origin
+  projection — spans identical);
+- render at the user's position (7666,17666 yaw 0): cobble again, matches
+  the baseline except the intended tile-phase shift (side-by-side crop in
+  tmp/seam_check/crop_compare.png);
+- spawn view: normal, cobble road + ornament strips, no stripes.
+
+**Re-confirmed tool quirk:** after regenerating the glTFs the first
+verification screenshot was STILL striped — the Godot import cache did not
+refresh. Deleting `assets/maps/20_18/meshes_bsp/*.import` and
+`.godot/imported/` + full `godot --headless --import` fixed it (AGENTS.md
+warning applies to CHANGED files too, not only valid=false stamps).
+
+**PENDING (logged, deliberately NOT fixed in this task):** levelbsp.py's
+prim loop emits only the U component into TEXCOORD_0
+(`uvs.extend([u for u, w in uv])` drops V) — the LevelBSP UV accessor has
+HALF the vertex count (POS 588 / UV 294 on prim0), so vertices read
+mis-paired UVs. Present since the LevelBSP introduction (identical in the
+approved baseline and current state), and the visible street renders from
+brush geometry on top, so it has been invisible. Fixing it changes what the
+LevelBSP surfaces sample — needs its own small step + visual verdict.

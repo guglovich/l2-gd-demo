@@ -271,7 +271,12 @@ def main():
         for poly, uvs, base, U, V in entries:
             if sum(x * x for x in U) < 1e-6:
                 continue
-            dk = tuple(round(x, 3) for x in U)
+            # Family key = the FULL (U,V) pair, not U alone: faces sharing the
+            # U direction can have different V axes (floor vs wall), and
+            # forcing the family V onto them makes one UV axis constant
+            # across the face -> 1D texture stretch (the "мусор" regression,
+            # 2026-11-13). Coplanar seam faces share BOTH axes.
+            dk = (tuple(round(x, 3) for x in U), tuple(round(x, 3) for x in V))
             if canon_key is None:
                 canon_key = dk
                 canon = (U, V)
@@ -283,7 +288,7 @@ def main():
             continue
         new_entries = []
         for poly, uvs, base, U, V in entries:
-            dk = tuple(round(x, 3) for x in U)
+            dk = (tuple(round(x, 3) for x in U), tuple(round(x, 3) for x in V))
             Uc, Vc = canon if dk == canon_key else (U, V)
             nuvs = []
             for v in poly:

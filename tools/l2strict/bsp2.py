@@ -572,7 +572,14 @@ def main():
         U2 = ax[1]
         if sum(x * x for x in U2) < 1e-6:
             continue
-        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in U2))
+        # The family key is the FULL (U,V) pair, not U alone: a floor face and
+        # a wall face can share the U direction with different V axes, and
+        # forcing the family V onto such a face makes dot(V,N) != 0 -> one UV
+        # axis goes constant across the face -> 1D texture stretch (the
+        # "мусор" regression, 2026-11-13). Coplanar seam faces share BOTH
+        # axes and differ only in the base pan, so the стык fix survives.
+        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in U2),
+                tuple(round(x, 3) for x in ax[2]))
         tex_axes.setdefault(key2, (U2, ax[2]))
     for (pname2, i2), t2 in tex_of_poly.items():
         if not t2 or t2[1] not in CANON_UV_TEXS:
@@ -580,7 +587,8 @@ def main():
         pr2 = prim_of.get((pname2, i2))
         if pr2 is None or "uv_axes" not in pr2:
             continue
-        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in pr2["uv_axes"][1]))
+        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in pr2["uv_axes"][1]),
+                tuple(round(x, 3) for x in pr2["uv_axes"][2]))
         ca = tex_axes.get(key2)
         if ca:
             pr2["uv_axes"] = ((0.0, 0.0, 0.0), ca[0], ca[1])
