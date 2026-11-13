@@ -548,6 +548,43 @@ def main():
         csg_of[br["polys"]] = br.get("csg", 1)
         for f in br["faces"]:
             tex_of_poly[(br["polys"], f["i"])] = f["tex"]
+
+    # CANONICAL TEXTURE PROJECTION for the chaotic stone textures: all faces
+    # of one texture share ONE (U,V) projection through the global origin.
+    # The per-surf texture pans made coplanar faces tile with phase
+    # mismatches — the visible "стык" on the road plates — and produced the
+    # -30000..-80000-texel UV offsets. Aligned art (carpets, the ornament
+    # medallions) keeps its own axes.
+    CANON_UV_TEXS = {"DE_V_floor01", "O_dark_01", "DE_V_m12",
+                     "oren_sylen_001_1", "DE_V_floor02"}
+    prim_of = {}
+    for pname2, prims2 in polys_objs.items():
+        for pr2 in prims2:
+            prim_of[(pname2, pr2["i"])] = pr2
+    tex_axes = {}
+    for (pname2, i2), t2 in tex_of_poly.items():
+        if not t2 or t2[1] not in CANON_UV_TEXS:
+            continue
+        pr2 = prim_of.get((pname2, i2))
+        ax = pr2.get("uv_axes") if pr2 else None
+        if not ax:
+            continue
+        U2 = ax[1]
+        if sum(x * x for x in U2) < 1e-6:
+            continue
+        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in U2))
+        tex_axes.setdefault(key2, (U2, ax[2]))
+    for (pname2, i2), t2 in tex_of_poly.items():
+        if not t2 or t2[1] not in CANON_UV_TEXS:
+            continue
+        pr2 = prim_of.get((pname2, i2))
+        if pr2 is None or "uv_axes" not in pr2:
+            continue
+        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in pr2["uv_axes"][1]))
+        ca = tex_axes.get(key2)
+        if ca:
+            pr2["uv_axes"] = ((0.0, 0.0, 0.0), ca[0], ca[1])
+
     for pname in sorted(polys_objs.keys()):
         prims = []
         if csg_of.get(pname, 1) != 2:

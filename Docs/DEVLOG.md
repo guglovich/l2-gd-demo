@@ -4397,3 +4397,41 @@ trimesh).
 
 **NEXT (the user's order): the true 3D-geometry (displacement) design — from
 this verified state, one test face at a time.**
+
+## 2026-11-13 (40) — the texture "стык" (tiled-plate seams) fixed by the
+## canonical texture projection
+
+**THE USER'S REPORT:** the textures are not continuous — a visible seam where
+two coplanar plate faces meet (the dark plates flanking the carpet corridor).
+
+**ROOT CAUSE:** every BSP face took its texture axes from ITS OWN surf —
+the per-surf texture pan (base point) made coplanar faces of one plate tile
+with phase mismatches, so the pattern jumped at every face boundary. The
+offsets also produced the -30000..-80000-texel UV magnitudes.
+
+**FAILED ATTEMPT FIRST (recorded honestly):** world-space planar mapping in
+the shader (world_uv) — the axis-flip at non-axis-aligned normals wrecked the
+terraced stairs with interference swirls. Reverted before commit.
+
+**THE FIX (in the pipeline, both exporters):** CANONICAL TEXTURE PROJECTION
+for the chaotic stone textures (floor01, dark01, m12, sylen_001_1, floor02):
+all faces of one texture share ONE (U,V) direction family and project through
+the GLOBAL ORIGIN (u = dot(P, Uc), base = 0). Coplanar faces tile with zero
+phase mismatch; the UV magnitudes collapse to sane values. Families are
+keyed by the rounded U direction (rotated faces keep their own family —
+the chaotic patterns are mirror/rotation tolerant). Aligned art (carpets,
+the ornament medallions, the grate) keeps its own axes. Implemented in
+bsp2.py (brush faces) and levelbsp.py (the level slabs) so slabs and brushes
+project consistently.
+
+**Verification:** the west-facing render from the user's exact report point
+(10741,16930,-4628.9) matches their screenshot framing and the dark plate is
+now uniform (no hard texture-change line); the spawn view is unchanged from
+the approved baseline; the numerics: cross-brush shared-vertex UV continuity
+= no phase mismatches (the plates join at T-junctions, so the check found no
+coincident vertices — the visual check is the proof).
+
+**The world_uv experiment taught:** do not project chaotically-textured
+surfaces in the shader by dominant-axis selection — the terrace/stair normals
+flip the axis and produce interference swirls; the canonical projection at
+export keeps the real surf axes and is seam-free.

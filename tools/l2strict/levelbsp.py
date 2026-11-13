@@ -251,11 +251,46 @@ def main():
             uvs.append((sum((v[k] - base[k]) * U[k] for k in range(3)),
                         sum((v[k] - base[k]) * V[k] for k in range(3))))
         key = tuple(tex)
-        groups.setdefault(key, []).append((poly, uvs))
+        groups.setdefault(key, []).append((poly, uvs, base, U, V))
         surf_tex_of_group[key] = tex
         stats["drawn"] += 1
     print("surfs: drawn %d, hidden %d, marker %d, no-material %d, huge-span %d"
           % (stats["drawn"], stats["hidden"], stats["marker"], stats["nomat"], stats["span"]))
+
+    # CANONICAL TEXTURE PROJECTION for the chaotic stone textures (the "стык"
+    # fix, same as bsp2.py): all faces of one texture share ONE (U,V)
+    # projection through the global origin — the per-surf texture pans made
+    # coplanar slabs tile with phase mismatches. Aligned art keeps its axes.
+    CANON_UV_TEXS = {"DE_V_floor01", "O_dark_01", "DE_V_m12",
+                     "oren_sylen_001_1", "DE_V_floor02"}
+    for key, entries in groups.items():
+        if key[1] not in CANON_UV_TEXS:
+            continue
+        canon = None
+        canon_key = None
+        for poly, uvs, base, U, V in entries:
+            if sum(x * x for x in U) < 1e-6:
+                continue
+            dk = tuple(round(x, 3) for x in U)
+            if canon_key is None:
+                canon_key = dk
+                canon = (U, V)
+            elif dk == canon_key:
+                continue
+            # a different direction family inside one texture group: keep its
+            # own canonical axes (registered on first sight)
+        if canon is None:
+            continue
+        new_entries = []
+        for poly, uvs, base, U, V in entries:
+            dk = tuple(round(x, 3) for x in U)
+            Uc, Vc = canon if dk == canon_key else (U, V)
+            nuvs = []
+            for v in poly:
+                nuvs.append((sum(v[k] * Uc[k] for k in range(3)),
+                             sum(v[k] * Vc[k] for k in range(3))))
+            new_entries.append((poly, nuvs, (0.0, 0.0, 0.0), Uc, Vc))
+        groups[key] = new_entries
 
     # build the glTF: one primitive per texture group
     blob = bytearray()
@@ -271,7 +306,7 @@ def main():
         uvs = []
         idx = []
         vbase = 0
-        for poly, uv in groups[key]:
+        for poly, uv, _base, _U, _V in groups[key]:
             for v in poly:
                 pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
             uvs.extend([u for u, w in uv])
