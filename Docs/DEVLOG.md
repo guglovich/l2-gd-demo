@@ -4482,3 +4482,62 @@ mis-paired UVs. Present since the LevelBSP introduction (identical in the
 approved baseline and current state), and the visible street renders from
 brush geometry on top, so it has been invisible. Fixing it changes what the
 LevelBSP surfaces sample — needs its own small step + visual verdict.
+
+## 2026-11-13 (42) — the joint × light problem and the 3D-geometry
+## experiment (the user picked path C: straight to real geometry)
+
+**The user's report:** the plate/carpet joints exist in the original client
+too, but there the light does not treat the two sides separately — in our
+port the sun "works on each texture separately", which is why the joint is
+noticeable. A matte "baked" BSP-material experiment (specular_gain=0,
+relief_gain=0) was REJECTED by the user ("baked static lighting is not
+needed") and reverted; the discussion produced path C — prepare the height
+pipeline for real polygon displacement (normals from real geometry are
+continuous across the joints by construction).
+
+**The experiment unit:** the BSP walkway brush Polys3977 (all 6 faces
+DE_V_floor01, canonical UVs) at the village entrance (game 7666,17666) —
+the area of the user's earlier seam reports.
+
+**disp.py recovered from git (79b335d) and FIXED — three real bugs:**
+1. AFFINE-FIT TRANSPOSE: `world = iX @ M[:,:2].T + M[:,2]` used the rows of
+   M where the columns are the world axes (M solves A@M=verts). Latent since
+   the first attempt: it only worked for faces whose UV base sat at the
+   world origin; the canonical UVs exposed it (the horizontal faces came out
+   ~5-6 m off-plane). Now `world = [u,v,1] @ M`, Bu=M[0,:], Bv=M[1,:].
+2. THE PAINT-VS-FORM HEIGHT: the albedo A channel is PAINTED shading —
+   displacing it at texel resolution re-rendered the painted crevices as a
+   physical ~45° sawtooth (the whole face blotchy-dark). The displacement
+   height field now gets a strong gaussian (form_blur 14 px, sidecar-
+   configurable) — normals/geometry encode the LARGE forms (cobble domes),
+   the paint stays in the albedo. This is the same paint≠form rule from the
+   A/B discussion, now applied to geometry.
+3. UPWARD-ONLY DISPLACEMENT (0..pom, the plate plane = the mortar level):
+   the old ±pom made the surface DIP below the coplanar LevelBSP slab
+   underneath, exposing the slab's broken UV stream as black blobs; the
+   upward-only form also removes the coplanar z-fight the flat baseline had.
+   PLUS the winding fix: Godot generates flat normals from the triangle
+   winding and does NOT flip them for backfaces of cull_disabled custom
+   shaders — the lattice winding is now oriented outward via the face-
+   centroid-minus-brush-center hint, else the whole displaced plate rendered
+   unlit-black.
+
+**Integration (experiment-gated):** `L2_DISP_BRUSH=<polys>[,…]` makes bsp2
+emit <name>_D.gltf ONLY for the named brushes (normal builds pass
+tex_of=None and prune stale _D files); world.gd renders BSP_<polys>_D.gltf
+for that brush while the collision stays on the flat trimesh (the relief is
+0..5.5 cm). Also: _screenshot_flow now waits 90 physics frames — the fixed
+10-frame shot captured the spawn mid-fall with the camera lerping, so the
+same state produced jittering framings that broke A/B pixel diffs.
+
+**Verified:** the displaced walkway renders real cobble relief — the stones
+catch the sun, micro-shadows from the geometry, the arch shadow falls
+naturally, the joints with the ornament strip and the neighbor plates are
+clean; the spawn view is unchanged. A/B crops: tmp/seam_check/ab_side.png
+(left flat, right displaced).
+
+**PENDING (logged):** the LevelBSP slabs are COPLANAR with the brush plates
+(z-fight shimmer in the flat baseline — the dark patches the user reported
+as "стыки") and the LevelBSP UV stream is broken (half-size TEXCOORD_0, the
+V component dropped — DEVLOG-41). The plates' own 3D-geometry rollout
+(per-face verdicts) and these two items share the same root region.

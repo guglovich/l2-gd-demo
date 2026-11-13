@@ -255,7 +255,13 @@ func _screenshot_flow() -> void:
 	print("SCREENSHOT_FLOW ENTERED, dir=", d)
 	for i in 10:
 		await get_tree().process_frame
-	print("SCREENSHOT_FLOW 10 FRAMES DONE")
+	# settle: the spawn falls ~1 m to the floor while the third-person camera
+	# lerps after it — a fixed 10-frame shot captured mid-settle, so the same
+	# state produced jittering framings run-to-run (broke the A/B pixel
+	# diffs). A fixed 90-physics-frame wait is deterministic and enough.
+	for i in 90:
+		await get_tree().physics_frame
+	print("SCREENSHOT_FLOW settled (90 physics frames)")
 	await RenderingServer.frame_post_draw
 	var cam = get_viewport().get_camera_3d()
 	print("DEBUG camera global_pos: ", cam.global_position if cam else "no camera")
@@ -589,6 +595,13 @@ func _build_bsp_brushes() -> void:
 		if not ResourceLoader.exists(gp):
 			skipped += 1
 			continue
+		# The displaced variant (<name>_D.gltf, the 3D-geometry experiment):
+		# RENDER the height-displaced mesh — its real polygons give the true
+		# geometric sun response, continuous across the joints. Collision
+		# stays on the FLAT mesh's trimesh (the relief is ±few cm).
+		var gdp := "%s/meshes_bsp/BSP_%s_D.gltf" % [MAP_DIR, polys]
+		if ResourceLoader.exists(gdp):
+			gp = gdp
 		var scene: PackedScene = load(gp)
 		if scene == null:
 			skipped += 1
