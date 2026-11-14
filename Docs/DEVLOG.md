@@ -4895,3 +4895,30 @@ a51b955 look.
 
 If the entrance still looks wrong after the restart: point at the exact
 surface — L2_TRACE_BOX identifies the mesh/texture precisely.
+
+## 2026-11-14 (54) — the bisect verdict: HEAD = pixel-identical to a51b955;
+## the dark renders were the STALE IMPORT CACHE
+
+The visual bisect at the user's descent view (8484,17511, yaw 32768):
+- 149275f / ede3c12 / c5733c1 / a51b955: the descent SUNLIT, textures bright
+- the "HEAD" renders: DARK
+
+The full diff a51b955..HEAD = ONLY the L2_BRIGHT diagnostic fix (world.gd,
+18 lines) + DEVLOG. The normal scene = identical. The re-render of HEAD
+after a FRESH `rm -rf .godot/imported` + full import = **pixel-identical to
+a51b955 (mean diff 0.0)** — including the master state (5930c45, which
+differs from 525cfcc by the DEVLOG only).
+
+**Root cause of the dark renders: the STALE .godot/imported cache.** Several
+verification renders today ran without a fresh reimport after the
+checkout/script edits — they rendered the OLD compiled shaders/state. The
+bisect's "dark HEAD" was one of those.
+
+**The harness rule (now hard):** EVERY verification render runs after
+`rm -rf .godot/imported` + the full import. No exceptions. The renders
+without it are void.
+
+**The state:** master = the a51b955 look (pixel-identical): the entrance
+road = Obj01's cobble+plates+carpets as authored, the descent sunlit, the
+dark01 texture restored, L2_BRIGHT fixed, the wheel zoom + the camera
+collision live. The user's game session needs a RESTART to load it.
