@@ -45,34 +45,14 @@ const ALPHA_CUTOUT := [
 	"oren_dev_t:DE_V_fence",
 ]
 
-## World-space UV (tiles per meter) for DE_V_floor01 — THE road texture (the
-## user's mandate v2: one texture, one scale over the whole road A->B).
-## Applied to both layers (statics + BSP) — the shader overrides the authored
-## UVs on horizontal faces, so every road piece samples one continuous
-## world-anchored texture.
-const WORLD_UV := {
-	"oren_dev_t:DE_V_floor01": 0.78125,
-}
-
-## The road-mesh family whose horizontal O_dark_01 faces are part of the road
-## A->B (the dark plates on the road/plaza): their horizontal faces sample
-## the floor01 cobble via the shader's road samplers (M1: one texture).
-## O_dark_01 on the mountains (O_DE_MT_Out / O_DE_MT_obj*) is NOT road —
-## it keeps its own texture there.
-const ROAD_STONES := [
-	"oren_dev_t:O_dark_01",
-	"oren_dev_t:DE_V_floor01",
-]
-
-## Texture substitution for the "one continuous road texture" directive:
-## the static road pieces (O_DE_Btm_Obj01) use DE_V_floor while the BSP
-## plates underneath use DE_V_floor01 — two different cobble images, and the
-## boundary between the layers reads as a "стык". All road cobble now uses
-## the floor01 PBR set (the user: "текстуру наложить одну сплошную на всю
-## дорогу").
-const TEXTURE_SUBSTITUTE := {
-	"oren_dev_t:DE_V_floor": "oren_dev_t:DE_V_floor01",
-}
+## The road texture mechanisms (world-uv, the road samplers, the texture
+## substitutions) are ROLLED BACK (the user's verdict 2026-11-14: the
+## texture variety at the entrance was lost — "нехватка текстур"). The road
+## pieces render their AUTHORED textures and UVs again. Any future seam work
+## must not substitute the authored textures.
+const WORLD_UV := {}
+const ROAD_STONES := []
+const TEXTURE_SUBSTITUTE := {}
 
 static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 	var p := "%s/%s/Texture/%s.%s" % [TEX_ROOT, pkg.to_lower(), obj, suffix]

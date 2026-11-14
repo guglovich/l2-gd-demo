@@ -4922,3 +4922,27 @@ without it are void.
 road = Obj01's cobble+plates+carpets as authored, the descent sunlit, the
 dark01 texture restored, L2_BRIGHT fixed, the wheel zoom + the camera
 collision live. The user's game session needs a RESTART to load it.
+
+## 2026-11-14 (55) — ALL road texture mechanisms rolled back; the authored
+## textures restored; the honest state report
+
+The user: "текстуры не вернул, плохо откатил по git". The response: ALL the
+road texture mechanisms EMPTIED (TEXTURE_SUBSTITUTE, ROAD_STONES, WORLD_UV
+= {}) — the road pieces render their AUTHORED textures and UVs again
+(DE_V_floor cobble, O_dark_01 plates, wall05 plates, capet carpets — as the
+original meshes assign). The world-uv/substitution era is fully closed.
+
+The verified state (the renders match the user's screenshot — the same
+build, the same view): the descent (8484,17511) = Obj01's ramp: the carpet
+strip + the cobble, the sunlit patches up the ramp; the entrance
+(7666,17666) = the cobble + the carpet strip viewed across. No white/void
+surfaces, no garbage stripes — the textures present everywhere.
+
+**What is needed to go further: the ORIGINAL reference at the disputed
+spot.** The user's complaints reference the original client's look; the
+only original references available = the user's captures. The next
+iteration: the user screenshots the ORIGINAL client at the disputed spot
+(e.g. the descent at 8484,17511) — then the side-by-side comparison
+identifies the exact texture/property difference, and the targeted fix
+follows. Guessing without the reference = the loop this whole session
+fought.
