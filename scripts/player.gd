@@ -22,7 +22,13 @@ var dest_marker: MeshInstance3D
 func _init() -> void:
 	if OS.get_environment("L2_VIEW_YAW") != "":
 		yaw = float(OS.get_environment("L2_VIEW_YAW"))
+	if OS.get_environment("L2_ZOOM") != "":
+		cam_zoom = clampf(float(OS.get_environment("L2_ZOOM")), 0.35, 2.6)
 var pitch := -0.35
+# Mouse-wheel camera zoom (the classic L2 camera distance): 1.0 = default,
+# the wheel scales the whole pivot->camera offset so the pitch angle holds.
+# L2_ZOOM=<float> overrides it at spawn (the screenshot-verification hook).
+var cam_zoom := 1.0
 var cam_pivot: Node3D
 var cam: Camera3D
 
@@ -117,6 +123,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		yaw -= event.relative.x * 0.003
 		pitch = clampf(pitch - event.relative.y * 0.003, -1.2, 0.4)
 	elif event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		# wheel zoom: up = closer, down = farther (clamped)
+		cam_zoom = clampf(cam_zoom * 0.88, 0.35, 2.6)
+	elif event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		cam_zoom = clampf(cam_zoom * 1.14, 0.35, 2.6)
+	elif event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_LEFT:
 		# click-to-move: cast through the click position onto the world,
 		# set the destination, the character runs there in a straight line
@@ -136,6 +149,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if OS.get_environment("L2_DEBUG_CAM") == "":
 		cam_pivot.rotation = Vector3(pitch, yaw, 0)
+		cam.position = Vector3(0, 2.4, 4.4) * cam_zoom
+		# camera collision (the classic L2 behavior): zooming out must not
+		# push the camera into rocks/walls — pull it to the first hit
+		var desired := cam.global_position
+		var cq := PhysicsRayQueryParameters3D.create(
+				cam_pivot.global_position + Vector3(0, 1.2, 0), desired)
+		cq.exclude = [get_rid()]
+		var chit := get_world_3d().direct_space_state.intersect_ray(cq)
+		if chit:
+			var hp: Vector3 = chit.get("position")
+			cam.global_position = hp + (cam_pivot.global_position + Vector3(0, 1.2, 0) \
+					- hp).normalized() * 0.25
 	var input := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var dir := Vector3.ZERO
 	var moving := false

@@ -4541,3 +4541,40 @@ clean; the spawn view is unchanged. A/B crops: tmp/seam_check/ab_side.png
 as "стыки") and the LevelBSP UV stream is broken (half-size TEXCOORD_0, the
 V component dropped — DEVLOG-41). The plates' own 3D-geometry rollout
 (per-face verdicts) and these two items share the same root region.
+
+## 2026-11-14 (43) — the 3D iteration verdict: reverted; the mouse-wheel
+## zoom implemented; the carpet verified whole
+
+**The user's verdict on the one-brush displacement experiment (DEVLOG-42):**
+the seams remained AND part of the carpet was lost — a failed iteration.
+The cause: the ornament carpet strip lies a few mm ABOVE the plates; the
+upward-only displaced plate (0..5.5 cm) rose over it and hid the carpet
+where it crossed the walkway — the carpet ended in a hard horizontal cut at
+the displaced-plate boundary (the user's screenshot at 7482,17753). AND:
+3D floor geometry is NOT needed unless a strong camera zoom exists — the
+relief is invisible at the normal play distance.
+
+**Done:**
+1. The displaced BSP_Polys3977_D.* REMOVED from the staged assets (the
+   carpet verified whole at the user's exact viewpoint after the revert —
+   the ornament strip runs continuously under the arch shadow). The disp.py
+   pipeline + the L2_DISP_BRUSH gate STAY in the tree, default-off, for the
+   potential zoom-era reuse; normal builds prune stale _D files.
+2. THE MOUSE-WHEEL ZOOM (the user's order): cam_zoom multiplies the whole
+   pivot->camera offset (0, 2.4, 4.4) — the pitch angle holds, the classic
+   L2 behavior. Wheel up = closer (x0.88), down = farther (x1.14), clamp
+   0.35..2.6 (over-the-shoulder .. ~11 m). L2_ZOOM=<float> = the spawn-time
+   verification hook for screenshots.
+3. CAMERA COLLISION: zooming out pushed the camera INTO the rocks (the
+   2.6 render at the street showed the rock interior). A ray from the
+   pivot's chest height to the desired camera position pulls the camera
+   0.25 m in front of the first hit — the classic L2 pull-in.
+
+**Verified:** L2_ZOOM 0.4 / 1.0 / 2.6 at the street view (7482,17753,
+yaw -Y): close = over-the-shoulder, default = unchanged framing, far = the
+camera pulls in front of the rocks (the wide street + carpet view the user
+showed). tmp/seam_check/zoomc_*.png.
+
+**Next (the user's order): the joints (стыки)** — the LevelBSP slabs
+coplanar under the brush plates (the z-fight shimmer) + the broken LevelBSP
+UV stream (half-size TEXCOORD_0, DEVLOG-41/42).
