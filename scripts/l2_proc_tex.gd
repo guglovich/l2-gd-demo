@@ -60,6 +60,7 @@ const WORLD_UV := {
 ## O_dark_01 on the mountains (O_DE_MT_Out / O_DE_MT_obj*) is NOT road —
 ## it keeps its own texture there.
 const ROAD_STONES := [
+	"oren_dev_t:O_dark_01",
 	"oren_dev_t:DE_V_floor01",
 ]
 
