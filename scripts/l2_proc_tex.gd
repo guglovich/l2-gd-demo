@@ -45,20 +45,24 @@ const ALPHA_CUTOUT := [
 	"oren_dev_t:DE_V_fence",
 ]
 
-## World-space UV (tiles per meter) for the chaotic stone textures on the
-## STATIC road pieces (the shader overrides the authored UVs on horizontal
-## faces). The static road pieces carry authored per-piece UVs — the pattern
-## density/phase jumped at the piece boundaries (the "стык" the user
-## reported; the visible road is the O_DE_Btm_Obj01 / O_DE_MT_In statics,
-## NOT the BSP plates underneath). Densities measured from the original
-## meshes: O_DE_MT_In O_dark_01 ~66.9 texels/m (512 px tile),
-## O_DE_Btm DE_V_floor01 200 texels/m (256 px tile); DE_V_floor assumed the
-## same author scale as floor01. Carpets/ornaments are aligned art — they
-## keep their authored UVs.
+## World-space UV (tiles per meter) for DE_V_floor01 — THE road texture (the
+## user's mandate v2: one texture, one scale over the whole road A->B).
+## Applied to both layers (statics + BSP) — the shader overrides the authored
+## UVs on horizontal faces, so every road piece samples one continuous
+## world-anchored texture.
 const WORLD_UV := {
-	"oren_dev_t:O_dark_01": 0.1307,
 	"oren_dev_t:DE_V_floor01": 0.78125,
 }
+
+## The road-mesh family whose horizontal O_dark_01 faces are part of the road
+## A->B (the dark plates on the road/plaza): their horizontal faces sample
+## the floor01 cobble via the shader's road samplers (M1: one texture).
+## O_dark_01 on the mountains (O_DE_MT_Out / O_DE_MT_obj*) is NOT road —
+## it keeps its own texture there.
+const ROAD_STONES := [
+	"oren_dev_t:O_dark_01",
+	"oren_dev_t:DE_V_floor01",
+]
 
 ## Texture substitution for the "one continuous road texture" directive:
 ## the static road pieces (O_DE_Btm_Obj01) use DE_V_floor while the BSP
@@ -82,17 +86,22 @@ static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 ## overrides (0.0 everywhere since the seams fix) and the analytic fallback
 ## mode. null = no PBR set (the caller keeps its own placeholder).
 ## uv_is_texels: BSP glTFs carry raw texel UVs, UModel statics 0..1 per tile.
-static func material_for(pkg: String, obj: String, uv_is_texels: bool) -> Material:
+## road = the mesh belongs to the road A->B family: its horizontal road-stone
+## faces sample the ONE road texture (floor01) via the shader's road
+## samplers, at the single road scale (0.78125 tiles/m).
+static func material_for(pkg: String, obj: String, uv_is_texels: bool,
+		road: bool = false) -> Material:
 	var key := "%s:%s" % [pkg.to_lower(), obj]
 	if TEXTURE_SUBSTITUTE.has(key):
 		key = TEXTURE_SUBSTITUTE[key]
 		var parts := key.split(":")
 		pkg = parts[0]
 		obj = parts[1]
-	var ck := "%s|%s" % [key, "t" if uv_is_texels else "u"]
+	var ck := "%s|%s|%s" % [key, "t" if uv_is_texels else "u",
+			"r" if road else "s"]
 	if _cache.has(ck):
 		return _cache[ck]
-	var m := _pbr_material(pkg.to_lower(), obj, key, uv_is_texels)
+	var m := _pbr_material(pkg.to_lower(), obj, key, uv_is_texels, road)
 	var cfg: Variant = CONFIG.get(key)
 	if m == null and cfg != null:
 		m = _analytic_material(cfg, uv_is_texels)
@@ -100,7 +109,7 @@ static func material_for(pkg: String, obj: String, uv_is_texels: bool) -> Materi
 	return m
 
 static func _pbr_material(pkg_l: String, obj: String, key: String,
-		uv_is_texels: bool) -> Material:
+		uv_is_texels: bool, road: bool) -> Material:
 	var alb := _find_pbr(pkg_l, obj, "pbr_albedo.png")
 	var nrm := _find_pbr(pkg_l, obj, "pbr_normal.png")
 	if alb == null or nrm == null:
@@ -119,16 +128,20 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
 	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
-	# world-space UV for the road stones on BOTH layers: the visible road is
-	# a MIX of the static pieces (O_DE_Btm_Obj01 = DE_V_floor + carpets) and
-	# the BSP plates showing through between them — with different authored
-	# textures/densities the layer boundary itself reads as a "стык". One
-	# world projection with one density per texture makes every horizontal
-	# face of these textures sample ONE continuous texture regardless of
-	# which layer draws it. Walls/slopes keep their own UVs (the shader's
-	# horizontal guard).
-	if WORLD_UV.has(key):
-		m.set_shader_parameter("world_uv_scale", float(WORLD_UV[key]))
+	# M2 (the user's mandate v2): ONE road scale everywhere — 0.78125 tiles/m
+	# (200 texels/m of DE_V_floor01) on every road face of both layers.
+	# M1: whenever the world-uv override can fire, the road samplers MUST be
+	# bound (they carry the ONE road cobble = floor01) — an unbound sampler
+	# samples WHITE (the white-plaza regression 2026-11-14: the BSP floor01
+	# plates had world_uv but no road samplers).
+	if WORLD_UV.has(key) or (road and ROAD_STONES.has(key)):
+		m.set_shader_parameter("world_uv_scale", 0.78125)
+		var r_alb := _find_pbr("oren_dev_t", "DE_V_floor01", "pbr_albedo.png")
+		var r_nrm := _find_pbr("oren_dev_t", "DE_V_floor01", "pbr_normal.png")
+		if r_alb != null:
+			m.set_shader_parameter("road_albedo_tex", r_alb)
+		if r_nrm != null:
+			m.set_shader_parameter("road_normal_tex", r_nrm)
 	return m
 
 static func _analytic_material(cfg: Dictionary, uv_is_texels: bool) -> Material:

@@ -4779,3 +4779,58 @@ and orientation-unified).
 
 **Task 4: the gates A-E + the meta-gate codified in AGENTS.md** (the
 pre-commit protocol for any shader/material/geometry fix).
+
+## 2026-11-14 (49) — the road A->B UNIFIED per the user's mandate v2
+## (one texture, one scale, one plane, world-uv; creation, not debugging)
+
+**The user's mandate** (AGENT_PROMPT_road_unified.md): the road from A to B
+is ONE plane at ONE height with ONE texture, seamless, ending at the stairs
+B; the seam before B is the original's own flaw that we do NOT carry over.
+Unify, do not surgically preserve; no per-boundary iterations.
+
+**The implementation (one pass):**
+- M1: ONE texture — DE_V_floor01 — on every horizontal road face of every
+  road piece. The shader gained the road samplers (road_albedo_tex /
+  road_normal_tex = the floor01 PBR set); on the road-mesh family
+  (O_DE_Btm, O_DE_Btm_Obj01/02/03, O_DE_MT_In, O_DE_MT_Btm) the horizontal
+  O_dark_01 faces sample the floor01 cobble when the world-uv override
+  fires. O_dark_01 on the mountains (MT_Out / MT_obj*) keeps its own
+  texture. The DE_V_floor -> DE_V_floor01 substitution stays.
+- M2: ONE scale — world_uv_scale = 0.78125 (200 texels/m) on both layers.
+- M3: one plane per section — the redundant UNDER-layer plates HIDDEN
+  (render + collision): Polys3977 (under Obj01, the upper street) and
+  Polys3987 (under Obj01's descent ramp) — verified covered by the hide
+  test renders (no holes at 7482,17753 and on the ramp at 8200). Polys3983
+  is KEPT: it is the PRIMARY surface in its own segments (hiding it opens a
+  pit at x 8719 — the hide test caught it). The lower-street pair
+  Polys350 (top) / Polys3983 (bottom) keeps its 11 cm step — that step is
+  the ORIGINAL's own terraced geometry; flattening it = the forbidden
+  geometry rebuild (DON'T 4).
+- M4: world-uv = the continuity by construction.
+- M5: the only boundaries left on the road = the 11 cm steps at x 8954 and
+  x 9983 (the Polys350/Polys3983 pair edges — the original's own geometry,
+  removal forbidden by DON'T 4) and the stairs at B.
+
+**The camera-rotation bug (fixed first):** fragment VERTEX is VIEW-space
+even with world_vertex_coords — the world-uv override sampled view
+coordinates (the texture rotated with the camera) and its horizontal guard
+almost never fired. The world position now travels through the `wpos`
+varying written in vertex().
+
+**The white-plaza regression caught and fixed en route:** an unbound
+sampler samples WHITE — the BSP floor01 plates had world_uv but no road
+samplers (road=false on the BSP path). The road samplers are now bound on
+EVERY material that sets world_uv_scale.
+
+**Gate report:**
+- Pre stale-cache: rm -rf .godot + the full reimport + the HUD updated = yes
+- Gate A: compile-errors=0, pink-pixels=0 -> green
+- Gate F: Sobel edge-detect over the four road sections (7450 / 8450 /
+  9450 / 10400): thin cross-road seam lines = 0 in ALL of them (the only
+  edges = the carpet borders running along the road, the shadows, the
+  curbs). The x=8450 camera fell into the PRE-EXISTING canyon hole
+  (Z=-4649.9 with and without the hide — the DEVLOG-33 pending item, not
+  caused by this change) -> green for the road
+- The spawn plaza (the center octagon): renders clean (the white-plaza
+  regression fixed), the lattice intact
+- Next: the user's in-game confirmation

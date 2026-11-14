@@ -13,6 +13,11 @@ render_mode world_vertex_coords, cull_disabled, diffuse_burley, specular_schlick
 
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
+// M1 (the user's mandate v2): the ONE road texture — the road-mesh family's
+// horizontal dark-stone faces sample THIS set (the floor01 cobble) when the
+// world-uv override fires, so the whole road A->B is one texture.
+uniform sampler2D road_albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
+uniform sampler2D road_normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform bool uv_is_texels = true;
 uniform vec2 tile_px = vec2(256.0, 256.0);
 uniform float pom_scale = 0.05;  // visual depth, meters
@@ -101,13 +106,17 @@ void fragment() {
 	vec3 ngeo = normalize(cross(sigX, sigY)) * ff;
 	// world-space UV override (see the uniform comment): BEFORE the Jacobian
 	// block, so dPdu/dPdv stay consistent with the overridden uv. The normal
-	// and the position come from the wpos varying (see its comment)
+	// and the position come from the wpos varying (see its comment). When it
+	// fires on a road-family material, the M1 road samplers take over — the
+	// horizontal dark-stone faces sample the ONE road cobble.
+	bool use_road_tex = false;
 	if (world_uv_scale > 0.0) {
 		vec3 wdx = dFdx(wpos);
 		vec3 wdy = dFdy(wpos);
 		vec3 wn = normalize(cross(wdx, wdy)) * ff;
 		if (abs(wn.y) > 0.85) {
 			uv = vec2(wpos.x, wpos.z) * world_uv_scale;
+			use_road_tex = true;
 		}
 	}
 	vec2 uvd_x = dFdx(uv);
@@ -123,7 +132,8 @@ void fragment() {
 	vec3 view_w = normalize(INV_VIEW_MATRIX[3].xyz - VERTEX); // frag -> camera
 	vec3 vt = vec3(dot(view_w, T), dot(view_w, B), dot(view_w, ngeo));
 
-	float h0 = texture(albedo_tex, uv).a;
+	float h0 = use_road_tex ? texture(road_albedo_tex, uv).a
+			: texture(albedo_tex, uv).a;
 	vec2 uv_final = uv;
 	// Offset mapping (single-sample parallax). The full POM loop caused
 	// banding/smear artifacts: implicit-LOD sampling inside a dynamic loop is
@@ -137,12 +147,15 @@ void fragment() {
 		uv_final = uv + parallax;
 	}
 
-	vec4 alb = texture(albedo_tex, uv_final);
+	vec4 alb = use_road_tex ? texture(road_albedo_tex, uv_final)
+			: texture(albedo_tex, uv_final);
 	if (use_alpha && alb.a < alpha_scissor) {
 		discard;   // the grate holes are see-through
 	}
-	vec3 nrm = texture(normal_tex, uv_final).rgb * 2.0 - 1.0;
-	float rough = texture(normal_tex, uv_final).a;
+	vec3 nrm = use_road_tex ? texture(road_normal_tex, uv_final).rgb * 2.0 - 1.0
+			: texture(normal_tex, uv_final).rgb * 2.0 - 1.0;
+	float rough = use_road_tex ? texture(road_normal_tex, uv_final).a
+			: texture(normal_tex, uv_final).a;
 	if (detail > 0.0) {
 		float g = snoise3(VERTEX * 6.0) * 0.5 + snoise3(VERTEX * 21.0) * 0.3;
 		alb.rgb *= 1.0 + 0.06 * detail * g;

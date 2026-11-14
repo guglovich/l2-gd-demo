@@ -624,6 +624,15 @@ func _build_bsp_brushes() -> void:
 			skipped += 1
 			continue
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
+		# M3 (the user's mandate v2, hide-redundant): these BSP road plates sit
+		# 10 cm BELOW the static road (O_DE_Btm_Obj01 + carpets + curbs) and
+		# their edges peeked through the static pieces' gaps — the visible
+		# "стык" lines. The statics cover their footprints completely (verified
+		# by the L2_HIDE_BSP test renders: no holes at the bridge approach, the
+		# descent ramp). Polys3983/Polys350 (the lower street pair) are NOT
+		# hidden — 3983 is the PRIMARY surface in its 3983-only segments.
+		if polys in HIDE_ROAD_UNDERLAYER:
+			continue
 		# per-face materials: prim index -> texture (null prim = not rendered)
 		var prim_tex := {}
 		for f in faces:
@@ -844,7 +853,8 @@ func _get_mesh(key: String) -> Mesh:
 				or parts[0].begins_with("Field_Deco") or parts[0].begins_with("field_deco")
 		var pm: Material = null
 		if not is_foliage_pkg:
-			pm = L2ProcTex.material_for(tpkg, tobj, false)
+			pm = L2ProcTex.material_for(tpkg, tobj, false,
+					ROAD_MESHES.has(parts[1]))
 		if pm != null:
 			mesh.surface_set_material(si, pm)
 			continue
@@ -915,6 +925,17 @@ func _get_mesh(key: String) -> Mesh:
 # geometry (O_DE_Btm = a ~0.6-m curb/step piece, not a ring). Nothing in the
 # road family is skipped anymore.
 var _ROAD_STRIP_SKIP := []
+## M3 (the user's mandate v2): the redundant UNDER-layer road plates — fully
+## covered by the static road above (the hide-redundant test renders: no
+## holes). Polys3983 stays: it is the PRIMARY road surface in its own
+## segments (x 8646..8954 / 9983..10394 — hiding it opens a pit).
+const HIDE_ROAD_UNDERLAYER := ["Polys3977", "Polys3987"]
+## M1: the road-mesh family — their horizontal road-stone faces sample the
+## ONE road texture (floor01) via the shader road samplers.
+const ROAD_MESHES := [
+	"O_DE_Btm", "O_DE_Btm_Obj01", "O_DE_Btm_Obj02", "O_DE_Btm_Obj03",
+	"O_DE_MT_In", "O_DE_MT_Btm",
+]
 var _down_floor_meshes := [
 	"Door_Set_S:DE_Agit01_door", "Door_Set_S:DE_Agit02_door",
 	"Field_Deco_Artifact_S:world_obj17", "Field_Deco_Artifact_S:world_obj18",
