@@ -43,6 +43,33 @@ no server, no mobs. Native Linux target (no Wine), test machine: this Arch box.
   prints every surface hit (height, normal, owning mesh) along a line.
   Always cross-check suspicious visual findings with floor profiles.
 
+## GOLDEN BASELINE (2026-11-15) — the approved road look; do not regress it
+
+- **The commit: 54dadb9, the git tag: `golden-road-20261115`.** The baseline
+  renders: `Docs/baseline/*.png` + `Docs/baseline/MANIFEST.md` (the exact
+  reproduction commands for the five named viewports).
+- **The state:** the road pieces render their AUTHORED textures and UVs
+  (no world-uv, no substitutions, no road samplers); Polys3977/3987 hidden
+  (hide-redundant); the wheel zoom + the camera collision live; L2_BRIGHT
+  works.
+- **ANY change to the road/floor visuals is verified by the pixel-diff
+  against the baseline renders at the SAME camera** (the fresh
+  `rm -rf .godot/imported` + the full import before every render — the
+  renders without it are VOID). A deviation beyond the noise at a baseline
+  viewport = the regression, not "verified".
+- **The forbidden moves** (each cost real iterations 2026-11-13–15):
+  substituting the authored road textures (dark01/wall05 → floor01 stripped
+  the texture variety — rejected); the world-uv override on the road (the
+  progressive degradation of the authored mapping across 149275f/ede3c12/
+  a51b955); the road-piece height offsets without the user's approval of
+  the visual result; the road geometry rebuild (rolled back twice:
+  cce5af0, 45a4d10).
+- **The texture-variety rule:** the entrance/descent texture variety
+  (DE_V_floor cobble + O_dark_01 plates + wall05 plates + capet carpets, as
+  the original meshes assign) is the USER-APPROVED look. One-texture
+  unification of the road was tried (064b0a8, the mandate v2) and
+  rejected — do not repeat without a new explicit order.
+
 ## Verification harness (MANDATORY pre-commit protocol for shader /
 ## material / geometry fixes — established 2026-11-14 after the "fix not
 ## visible" loop repeated 4 times)

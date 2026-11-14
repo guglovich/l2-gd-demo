@@ -4818,3 +4818,29 @@ The seam (стык) task: CLOSED (the user will redefine). The recorded
 lesson: the road texture experiments (the canonical scale unification, the
 world-uv, the substitutions) progressively degraded the authored look —
 the golden build = the authored textures.
+
+## 2026-11-15 (57) — THE GOLDEN BASELINE MARKED PERMANENTLY
+
+The user confirmed the restored state ("наконец вернули то состояние") and
+ordered it marked so it is never lost again: "такое количество итераций мы
+не можем себе позволять каждый раз".
+
+**Done:**
+1. The git tag: **`golden-road-20261115`** on 54dadb9 (the annotated tag —
+   `git tag -l` / `git show golden-road-20261115`).
+2. The baseline renders saved to the repo: `Docs/baseline/*.png` — the five
+   named viewports (the upper street, the entrance road, the descent, the
+   stairway plaza, the spawn plaza) with `Docs/baseline/MANIFEST.md` = the
+   exact reproduction commands.
+3. AGENTS.md: the new section "GOLDEN BASELINE" — the approved look, the
+   verification rule (the pixel-diff against the baseline renders at the
+   same cameras after the fresh reimport), and THE FORBIDDEN MOVES (each
+   burned-token lesson recorded): no authored-texture substitutions, no
+   world-uv on the road, no height offsets without the user's approval of
+   the visual result, no road geometry rebuilds.
+
+**The verification protocol for any road/floor visual change:** render at
+the baseline cameras (the fresh reimport first) → pixel-diff vs
+`Docs/baseline/*.png` → any deviation beyond the noise = the regression,
+not "verified". The baselines = the ground truth; the DEVLOG text = the
+explanation.
