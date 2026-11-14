@@ -559,6 +559,13 @@ func _build_bsp() -> void:
 			mesh.surface_set_material(si, _bsp_grey())
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
+	# RENDER 1 cm below the collision: the LevelBSP slabs are COPLANAR with
+	# the brush road plates (the z-fight shimmer the user reported as
+	# "стыки"). 1 cm down hides the slabs under the plates while every
+	# levelbsp-only area (the temple court, the valley) still renders — the
+	# road reads as ONE continuous texture from curb to curb. The collision
+	# body below stays at the authentic height.
+	mi.position = Vector3(0, -0.01, 0)
 	world.add_child(mi)
 	var body := StaticBody3D.new()
 	var col := CollisionShape3D.new()

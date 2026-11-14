@@ -314,7 +314,12 @@ def main():
         for poly, uv, _base, _U, _V in groups[key]:
             for v in poly:
                 pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
-            uvs.extend([u for u, w in uv])
+            # BOTH components per vertex: the old `uvs.extend([u for u, w in
+            # uv])` dropped V, leaving the UV accessor at HALF the vertex
+            # count — vertices read mis-paired UVs (the LevelBSP slabs
+            # sampled garbage wherever they were visible, DEVLOG-41/42).
+            for u, w in uv:
+                uvs.extend([u, w])
             n = len(poly)
             for k in range(1, n - 1):
                 idx.extend([vbase, vbase + k + 1, vbase + k])

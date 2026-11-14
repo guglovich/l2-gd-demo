@@ -4578,3 +4578,35 @@ showed). tmp/seam_check/zoomc_*.png.
 **Next (the user's order): the joints (стыки)** — the LevelBSP slabs
 coplanar under the brush plates (the z-fight shimmer) + the broken LevelBSP
 UV stream (half-size TEXCOORD_0, DEVLOG-41/42).
+
+## 2026-11-14 (44) — THE ROAD AS ONE CONTINUOUS TEXTURE (the user's joint
+## solution: merge the meshes, one texture over the whole road)
+
+**The user's directive:** the seam problem is easier to solve by merging
+the meshes — one continuous texture over the whole road; the curbs on the
+sides and the stairs at the end are the physical borders (they already
+exist). Also: the zoom works as needed; the floor 3D effect is visible only
+at the far zoom — not needed for now.
+
+**The implementation** (the canonical projection already gives every road
+face of one texture a single world-aligned UV space — what remained were
+two defects):
+1. THE LEVELBSP UV STREAM FIXED (the DEVLOG-41/42 pending item): the prim
+   loop emitted only the U component into TEXCOORD_0 — the UV accessor had
+   HALF the vertex count (POS 588 / UV 294) and the vertices read
+   mis-paired UVs. Now both components are emitted (588 = 588 verified).
+   The LevelBSP slabs sample the same canonical texture space as the
+   brushes.
+2. THE COPLANAR Z-FIGHT REMOVED: the LevelBSP render mesh sits 1 cm below
+   the collision (mi.position.y = -0.01 in world.gd _build_bsp) — the slabs
+   hide under the brush plates and still render in every levelbsp-only area
+   (the temple court, the valley). The road reads as ONE continuous texture
+   from curb to curb; the collision body keeps the authentic height.
+
+**Verified:** the user's road view (10636,17048, the stairway plaza): the
+carpet strip runs continuously, the cobble plates read as one surface, NO
+z-fight (frame-to-frame diff = 0 changing pixels), the stairs/lattice area
+textured correctly; the spawn view unchanged.
+
+**Note:** the floor 3D displacement stays default-off (DEVLOG-42/43) —
+visible only at the far zoom; revisit together with the zoom-era polish.
