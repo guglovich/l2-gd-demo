@@ -257,39 +257,85 @@ def main():
     print("surfs: drawn %d, hidden %d, marker %d, no-material %d, huge-span %d"
           % (stats["drawn"], stats["hidden"], stats["marker"], stats["nomat"], stats["span"]))
 
+    def _face_normal(verts):
+        """Newell's method — robust for polygon fans where the first three
+        vertices can be nearly collinear (a cross of v0..v2 is garbage
+        there and poisoned the orientation buckets)"""
+        nx = ny = nz = 0.0
+        n = len(verts)
+        for i in range(n):
+            a = verts[i]
+            b = verts[(i + 1) % n]
+            nx += (a[1] - b[1]) * (a[2] + b[2])
+            ny += (a[2] - b[2]) * (a[0] + b[0])
+            nz += (a[0] - b[0]) * (a[1] + b[1])
+        ln = (nx * nx + ny * ny + nz * nz) ** 0.5
+        if ln < 1e-9:
+            return None
+        return (nx / ln, ny / ln, nz / ln)
+
+    def _in_plane(U, V, N):
+        """the axes must lie (nearly) in the face plane, else the mapping
+        collapses to 1D (the "мусор" stretch)"""
+        for A in (U, V):
+            ln = sum(x * x for x in A) ** 0.5
+            if ln < 1e-9:
+                return False
+            if abs(sum(A[k] * N[k] for k in range(3)) / ln) > 0.1:
+                return False
+        return True
+
     # CANONICAL TEXTURE PROJECTION for the chaotic stone textures (the "стык"
     # fix, same as bsp2.py): all faces of one texture share ONE (U,V)
-    # projection through the global origin — the per-surf texture pans made
-    # coplanar slabs tile with phase mismatches. Aligned art keeps its axes.
+    # projection through the global origin. 2026-11-14 (the user: "one
+    # continuous texture over the whole road"): the phase continuity was not
+    # enough — the road plates carried DIFFERENT texel scales of the same
+    # texture, and the pattern density jumped at the plate boundaries.
+    # The family is chosen per (texture, ORIENTATION CLASS): the faces are
+    # bucketed by their quantized face normal, and each orientation class
+    # gets its own DOMINANT (U,V). Picking one family per texture globally
+    # let a wall family win (floor01: 5 wall faces of 116) and left the
+    # horizontal slabs at their own half-scale — the стык on the main road.
     CANON_UV_TEXS = {"DE_V_floor01", "O_dark_01", "DE_V_m12",
                      "oren_sylen_001_1", "DE_V_floor02"}
     for key, entries in groups.items():
         if key[1] not in CANON_UV_TEXS:
             continue
-        canon = None
-        canon_key = None
+        counts = {}
+        axes_of = {}
         for poly, uvs, base, U, V in entries:
-            if sum(x * x for x in U) < 1e-6:
+            if sum(x * x for x in U) < 1e-6 or len(poly) < 3:
                 continue
-            # Family key = the FULL (U,V) pair, not U alone: faces sharing the
-            # U direction can have different V axes (floor vs wall), and
-            # forcing the family V onto them makes one UV axis constant
-            # across the face -> 1D texture stretch (the "мусор" regression,
-            # 2026-11-13). Coplanar seam faces share BOTH axes.
+            N = _face_normal(poly)
+            if N is None or not _in_plane(U, V, N):
+                continue
+            nk = tuple(round(x, 1) for x in N)
             dk = (tuple(round(x, 3) for x in U), tuple(round(x, 3) for x in V))
-            if canon_key is None:
-                canon_key = dk
-                canon = (U, V)
-            elif dk == canon_key:
-                continue
-            # a different direction family inside one texture group: keep its
-            # own canonical axes (registered on first sight)
-        if canon is None:
+            ck = (nk, dk)
+            counts[ck] = counts.get(ck, 0) + 1
+            axes_of.setdefault(ck, (U, V))
+        if not counts:
             continue
+        # dominant (U,V) per orientation bucket
+        best = {}
+        for (nk, dk), c in counts.items():
+            if c > best.get(nk, (0, None))[0]:
+                best[nk] = (c, dk)
+        print(f"  canon {key[1]}: {len(best)} orientation classes: "
+              + ", ".join(f"{nk} -> {dk[0]}x{dk[1]} (n={c})"
+                          for nk, (c, dk) in sorted(best.items(),
+                                                    key=lambda kv: str(kv[0]))))
         new_entries = []
         for poly, uvs, base, U, V in entries:
-            dk = (tuple(round(x, 3) for x in U), tuple(round(x, 3) for x in V))
-            Uc, Vc = canon if dk == canon_key else (U, V)
+            Uc, Vc = U, V
+            if len(poly) >= 3:
+                N = _face_normal(poly)
+                if N is not None:
+                    nk = tuple(round(x, 1) for x in N)
+                    if nk in best:
+                        cand = axes_of[(nk, best[nk][1])]
+                        if _in_plane(cand[0], cand[1], N):
+                            Uc, Vc = cand
             nuvs = []
             for v in poly:
                 nuvs.append((sum(v[k] * Uc[k] for k in range(3)),

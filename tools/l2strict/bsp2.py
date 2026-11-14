@@ -618,43 +618,98 @@ def main():
     # mismatches — the visible "стык" on the road plates — and produced the
     # -30000..-80000-texel UV offsets. Aligned art (carpets, the ornament
     # medallions) keeps its own axes.
+    #
+    # 2026-11-14 (the user: "one continuous texture over the whole road"):
+    # the phase continuity was not enough — the road plates carried
+    # DIFFERENT texel scales of the same texture (floor01 at ~195 texels/m
+    # dominant but also 97.5 and 53.7; floor02 390 vs 97.5; sylen 200 vs
+    # 250), and the pattern density jumped at the plate boundaries. The
+    # family is chosen per (texture, ORIENTATION CLASS): faces are bucketed
+    # by the quantized face normal, each orientation class gets its own
+    # DOMINANT (U,V). A single per-texture family let a wall family win
+    # (the levelbsp floor01: 5 wall faces of 116) and left the horizontal
+    # slabs at their own half-scale — the стык on the main road. Forcing
+    # axes not in the face plane was the "мусор" regression (2026-11-13).
     CANON_UV_TEXS = {"DE_V_floor01", "O_dark_01", "DE_V_m12",
                      "oren_sylen_001_1", "DE_V_floor02"}
     prim_of = {}
     for pname2, prims2 in polys_objs.items():
         for pr2 in prims2:
             prim_of[(pname2, pr2["i"])] = pr2
-    tex_axes = {}
+
+    def _face_normal(verts):
+        """Newell's method — robust for polygon fans where the first three
+        vertices can be nearly collinear (a cross of v0..v2 is garbage
+        there and poisoned the orientation buckets)"""
+        if not verts or len(verts) < 3:
+            return None
+        nx = ny = nz = 0.0
+        n = len(verts)
+        for i in range(n):
+            a = verts[i]
+            b = verts[(i + 1) % n]
+            nx += (a[1] - b[1]) * (a[2] + b[2])
+            ny += (a[2] - b[2]) * (a[0] + b[0])
+            nz += (a[0] - b[0]) * (a[1] + b[1])
+        ln = (nx * nx + ny * ny + nz * nz) ** 0.5
+        if ln < 1e-9:
+            return None
+        return (nx / ln, ny / ln, nz / ln)
+
+    def _in_plane(U, V, N):
+        """the axes must lie (nearly) in the face plane, else the mapping
+        collapses to 1D (the "мусор" stretch)"""
+        for A in (U, V):
+            ln = sum(x * x for x in A) ** 0.5
+            if ln < 1e-9:
+                return False
+            if abs(sum(A[k] * N[k] for k in range(3)) / ln) > 0.1:
+                return False
+        return True
+
+    counts = {}
+    axes_of = {}
     for (pname2, i2), t2 in tex_of_poly.items():
         if not t2 or t2[1] not in CANON_UV_TEXS:
             continue
         pr2 = prim_of.get((pname2, i2))
         ax = pr2.get("uv_axes") if pr2 else None
-        if not ax:
+        if not ax or not pr2.get("verts") or len(pr2["verts"]) < 3:
             continue
-        U2 = ax[1]
+        U2, V2 = ax[1], ax[2]
         if sum(x * x for x in U2) < 1e-6:
             continue
-        # The family key is the FULL (U,V) pair, not U alone: a floor face and
-        # a wall face can share the U direction with different V axes, and
-        # forcing the family V onto such a face makes dot(V,N) != 0 -> one UV
-        # axis goes constant across the face -> 1D texture stretch (the
-        # "мусор" regression, 2026-11-13). Coplanar seam faces share BOTH
-        # axes and differ only in the base pan, so the стык fix survives.
-        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in U2),
-                tuple(round(x, 3) for x in ax[2]))
-        tex_axes.setdefault(key2, (U2, ax[2]))
+        N2 = _face_normal(pr2["verts"])
+        if N2 is None or not _in_plane(U2, V2, N2):
+            continue
+        nk = tuple(round(x, 1) for x in N2)
+        ck = (t2[0], t2[1], nk, tuple(round(x, 3) for x in U2),
+              tuple(round(x, 3) for x in V2))
+        counts[ck] = counts.get(ck, 0) + 1
+        axes_of.setdefault(ck, (U2, V2))
+    # dominant (U,V) per (texture, orientation bucket)
+    best = {}
+    for (pkg2, tex2, nk, du, dv), c in counts.items():
+        bk = (pkg2, tex2, nk)
+        if c > best.get(bk, (0, None))[0]:
+            best[bk] = (c, (du, dv))
     for (pname2, i2), t2 in tex_of_poly.items():
         if not t2 or t2[1] not in CANON_UV_TEXS:
             continue
         pr2 = prim_of.get((pname2, i2))
-        if pr2 is None or "uv_axes" not in pr2:
+        if pr2 is None or "uv_axes" not in pr2 or not pr2.get("verts") \
+                or len(pr2["verts"]) < 3:
             continue
-        key2 = (t2[0], t2[1], tuple(round(x, 3) for x in pr2["uv_axes"][1]),
-                tuple(round(x, 3) for x in pr2["uv_axes"][2]))
-        ca = tex_axes.get(key2)
-        if ca:
-            pr2["uv_axes"] = ((0.0, 0.0, 0.0), ca[0], ca[1])
+        N2 = _face_normal(pr2["verts"])
+        if N2 is None:
+            continue
+        nk = tuple(round(x, 1) for x in N2)
+        bk = (t2[0], t2[1], nk)
+        if bk in best:
+            du, dv = best[bk][1]
+            U2, V2 = axes_of[(bk[0], bk[1], nk, du, dv)]
+            if _in_plane(U2, V2, N2):
+                pr2["uv_axes"] = ((0.0, 0.0, 0.0), U2, V2)
 
     for pname in sorted(polys_objs.keys()):
         prims = []

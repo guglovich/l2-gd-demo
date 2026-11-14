@@ -4610,3 +4610,46 @@ textured correctly; the spawn view unchanged.
 
 **Note:** the floor 3D displacement stays default-off (DEVLOG-42/43) —
 visible only at the far zoom; revisit together with the zoom-era polish.
+
+## 2026-11-14 (45) — the REAL seam root: per-texture scale unification
+
+**The user: the seam is still there.** The numeric inventory of the road
+faces (per-triangle texel/m density over the brush glTFs) found the actual
+cause: the plates of ONE texture carried DIFFERENT texel scales —
+DE_V_floor01 mostly ~195-200 texels/m but also 97.5 (2x coarser stones) and
+53.7; DE_V_floor02 390 dominant vs 97.5; O_dark_01 scattered 92..105;
+oren_sylen_001_1 200 vs 250. The canonical projection unified the PHASE
+(the origin projection) but the pattern DENSITY still jumped at the plate
+boundaries — that is the visible "стык" (the user's "merge the meshes, one
+texture over the whole road").
+
+**The fix (both exporters):** the canonical family is chosen per (texture,
+ORIENTATION CLASS): faces are bucketed by the quantized face normal
+(Newell's method — the first-three-vertex cross produced garbage normals
+for sliver fan polygons and poisoned the buckets), and each orientation
+class gets its own DOMINANT (most frequent) rounded (U,V). A single
+per-texture family let a wall family win (the levelbsp floor01: a 5-face
+wall family of 116) and left the horizontal slabs at half-scale. Faces of
+other orientations keep their own axes, and an in-plane guard (|dot(axis,
+normal)| <= 0.1 of the axis length) applies at BOTH counting and
+application time — forcing axes not in the face plane was the "мусор"
+1D-stretch regression (2026-11-13).
+
+**Discovery en route:** the level-model (LevelBSP) surf axes are
+INHERENTLY SKEWED for ~half of the floor01 faces (e.g. a vertical V on a
+horizontal slab — the mapping is near-1D by the engine's own data; no slot
+interpretation of the FBspSurf record fixes it). Those slabs are hidden
+under the brush plates in the original too, so their skew is invisible —
+they stay hidden in our port (the 1 cm lowering, DEVLOG-44) and keep their
+own axes.
+
+**Verified numerically:** the per-triangle density histogram over the
+visible brush plates collapses to ONE family per texture (floor01 = 200,
+floor02 = 400, dark01 = 100 texels/m); the stretched-triangle scan = 0 in
+the brushes (416 remain, ALL inside the hidden LevelBSP slabs' own skew
+axes); the phase continuity through the origin projection is exact by
+construction (adjacent plates share boundary points -> identical UVs).
+Visual: the reported seam views (7666,17666 and the stairway plaza
+10636,17048) show a uniform stone pattern across the plates and the
+continuous carpet; the spawn view is normal (its framing differs from the
+pre-zoom baseline only by the approved camera pull-in, a6639ca).
