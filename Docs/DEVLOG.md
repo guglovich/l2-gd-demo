@@ -4835,33 +4835,22 @@ EVERY material that sets world_uv_scale.
   regression fixed), the lattice intact
 - Next: the user's in-game confirmation
 
-### 2026-11-14 (50) — road height unified (the user's surgical mandate v3)
-- H (основание ступенек B) = **-46.115**, измерено = floor-profile у
-  stairway plaza (x 10636, y 17219): O_DE_Btm -46.115 ny=1.00; Polys3983
-  -46.120 (5 мм от H — в допуске 1 см)
-- Сдвинуто: рендер+коллизия = Polys350 **-0.102 м** (BSP-плита рендерилась
-  на -46.013 — 10.2 см над плоскостью) и O_DE_Btm **-0.098 м** (статик-база:
-  её тёмноплитный уступ wall05 рендерился на -46.017 — 9.8 см над
-  плоскостью; механизм = ROAD_HEIGHT_OFFSETS в world.gd, общий `pos` для
-  меша и коллизии). Статик-верхняя улица (-44.045) не тронута — v3: «двигать
-  меньшинство мешей»
-- Профиль A→B (каждый 1 м, y=17700, 37 колонн): верх ходовой грани =
-  -46.115..-46.120; отклонений > 0.5 см = **0**; текстуры = {DE_V_floor01}
-  на всех колоннах (замена из 49-й реально доходит до рендера —
-  верифицировано тем же проходом через face_tex/мету)
-- Sobel по точкам дефекта: x 8954 = 0 линий, x 9500 = 0, x 9983 = 0 (плюс
-  4 секции из 49-й: 0). Заподлицо у ступенек B: площадь = -46.115 = H ✓
-  (допуск 1 см соблюдён)
-- In-game: подтверждение пользователя = жду
-- Next: DONE (если юзер подтвердит); иначе — стоп-репорт пары мешей
+## 2026-11-14 (51) — REVERTED the height unification (50) per the user's
+## verdict: "стык на месте, но потеряли текстуры при входе в деревню"
 
-**Классификация из 48-й ОТМЕНЕНА (по мандату v3):** ступени на x 8954/9983
-были НЕ «геометрией оригинала» — это расслоение порта (нижний
-BSP-подслой/плита на 10-11 см выше/ниже ходовой плоскости). Выровнено
-офсетами рендер+коллизия. Террасированный спуск (Obj01-пандус −44.05→−46.11)
-— реальная геометрия дороги, не тронут.
+The v3 iteration (52ba990: the Polys350/O_DE_Btm height offsets + the
+wall05 -> floor01 road-stone substitution) did NOT remove the seam and
+STRIPPED the dark-plate textures at the village entrance (the wall05 road
+faces became floor01 cobble — the entrance lost its texture variety).
+Reverted entirely (f80d90b). The state = the 49th iteration (one texture
+floor01 via world-uv on the road cobbles, the dark01/wall05 plates keep
+their own textures, the camera-rotation bug fixed, Polys3977/3987 hidden).
 
-**Два бага по пути:** (1) duplicate `var parts` в _texture_for_surface
-(мой BSP-патч продублировал объявление) — parse error, весь world.gd не
-грузился; (2) bsp.json tex = МАССИВ [package, object] — `.get()` на массиве
-ронял печать (tex= пустой). Оба исправлены.
+**The task is CLOSED pending redefinition by the user** ("изменим задачу").
+The recorded facts for the next attempt: the visible seam before B = the
+10-11 cm geometric ledges at the piece boundaries (Polys350 vs Polys3983/
+Btm at x ~9500 and ~10394, measured -46.013 vs -46.115/-46.120); the
+texture layer is unified (one cobble image, one scale, world-anchored).
+The height offsets (49→50) remove the ledges but change the plate textures'
+appearance balance — the user rejected that trade. Whatever comes next
+must remove the ledges WITHOUT substituting the dark-plate textures.
