@@ -45,6 +45,31 @@ const ALPHA_CUTOUT := [
 	"oren_dev_t:DE_V_fence",
 ]
 
+## World-space UV (tiles per meter) for the chaotic stone textures on the
+## STATIC road pieces (the shader overrides the authored UVs on horizontal
+## faces). The static road pieces carry authored per-piece UVs — the pattern
+## density/phase jumped at the piece boundaries (the "стык" the user
+## reported; the visible road is the O_DE_Btm_Obj01 / O_DE_MT_In statics,
+## NOT the BSP plates underneath). Densities measured from the original
+## meshes: O_DE_MT_In O_dark_01 ~66.9 texels/m (512 px tile),
+## O_DE_Btm DE_V_floor01 200 texels/m (256 px tile); DE_V_floor assumed the
+## same author scale as floor01. Carpets/ornaments are aligned art — they
+## keep their authored UVs.
+const WORLD_UV := {
+	"oren_dev_t:O_dark_01": 0.1307,
+	"oren_dev_t:DE_V_floor01": 0.78125,
+}
+
+## Texture substitution for the "one continuous road texture" directive:
+## the static road pieces (O_DE_Btm_Obj01) use DE_V_floor while the BSP
+## plates underneath use DE_V_floor01 — two different cobble images, and the
+## boundary between the layers reads as a "стык". All road cobble now uses
+## the floor01 PBR set (the user: "текстуру наложить одну сплошную на всю
+## дорогу").
+const TEXTURE_SUBSTITUTE := {
+	"oren_dev_t:DE_V_floor": "oren_dev_t:DE_V_floor01",
+}
+
 static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 	var p := "%s/%s/Texture/%s.%s" % [TEX_ROOT, pkg.to_lower(), obj, suffix]
 	if ResourceLoader.exists(p):
@@ -59,6 +84,11 @@ static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 ## uv_is_texels: BSP glTFs carry raw texel UVs, UModel statics 0..1 per tile.
 static func material_for(pkg: String, obj: String, uv_is_texels: bool) -> Material:
 	var key := "%s:%s" % [pkg.to_lower(), obj]
+	if TEXTURE_SUBSTITUTE.has(key):
+		key = TEXTURE_SUBSTITUTE[key]
+		var parts := key.split(":")
+		pkg = parts[0]
+		obj = parts[1]
 	var ck := "%s|%s" % [key, "t" if uv_is_texels else "u"]
 	if _cache.has(ck):
 		return _cache[ck]
@@ -89,6 +119,16 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
 	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
+	# world-space UV for the road stones on BOTH layers: the visible road is
+	# a MIX of the static pieces (O_DE_Btm_Obj01 = DE_V_floor + carpets) and
+	# the BSP plates showing through between them — with different authored
+	# textures/densities the layer boundary itself reads as a "стык". One
+	# world projection with one density per texture makes every horizontal
+	# face of these textures sample ONE continuous texture regardless of
+	# which layer draws it. Walls/slopes keep their own UVs (the shader's
+	# horizontal guard).
+	if WORLD_UV.has(key):
+		m.set_shader_parameter("world_uv_scale", float(WORLD_UV[key]))
 	return m
 
 static func _analytic_material(cfg: Dictionary, uv_is_texels: bool) -> Material:

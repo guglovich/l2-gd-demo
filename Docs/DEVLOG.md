@@ -4653,3 +4653,50 @@ Visual: the reported seam views (7666,17666 and the stairway plaza
 10636,17048) show a uniform stone pattern across the plates and the
 continuous carpet; the spawn view is normal (its framing differs from the
 pre-zoom baseline only by the approved camera pull-in, a6639ca).
+
+## 2026-11-14 (46) — the seam's TRUE layer: the visible road is the
+## STATIC meshes; world-space UV for the road stones
+
+**The user: the seams are still there — maybe the project was not rebuilt.**
+The floor profile at the user's three seam spots shows the truth: the
+walkable road there is the STATIC meshes — Oren_DEV_S:O_DE_Btm_Obj01
+(-44.045, 10 cm ABOVE the BSP:Polys3977 plates at -44.15), O_DE_MT_In (the
+plaza dark plates), O_DE_MT_Btm. ALL the previous seam fixes (canonical
+projection, LevelBSP UV, the 1 cm lowering) worked on the BSP layer —
+HIDDEN under the statics at those spots. The user was right.
+
+The trace box over the road pixels: the road is a MIX — 868 px
+BSP:Polys3977 + 192 px Oren_DEV_S:O_DE_Btm_Obj01 + O_DE_Bridge: the static
+pieces and the BSP plates alternate, with different authored textures
+(Obj01's cobble = DE_V_floor vs the BSP plates' DE_V_floor01) and per-piece
+UV phases — the seams the user sees.
+
+**The fix (shader-side world-space UV):**
+1. l2_surface_pbr.gdshader gains `uniform float world_uv_scale` (tiles per
+   meter, 0 = off): horizontal faces (|world normal y| > 0.85) sample
+   uv = world (x, z) * scale — one continuous texture across every piece
+   and BOTH layers; walls/slopes keep their authored UVs (the axis-flip
+   swirls of the failed world_uv experiment avoided — no dominant-axis
+   selection, the road is flat).
+2. L2ProcTex.WORLD_UV (tiles/m, measured from the original meshes):
+   O_dark_01 = 0.1307 (66.9 texels/m, O_DE_MT_In), DE_V_floor01 = 0.78125
+   (200 texels/m, O_DE_Btm), applied to BOTH layers — the density
+   difference between the static and BSP dark plates (66.9 vs 97.5) would
+   still seam at the layer boundary.
+3. L2ProcTex.TEXTURE_SUBSTITUTE: DE_V_floor -> DE_V_floor01 — the static
+   cobble pieces used a DIFFERENT cobble image than the BSP plates; per the
+   user's directive ("текстуру наложить одну сплошную на всю дорогу") all
+   road cobble now uses the floor01 PBR set. Carpets/ornaments are aligned
+   art and keep their authored UVs.
+
+**Verified:** the trace-box road region renders with a uniform cobble
+pattern (the previous diagonal pattern jump at the piece boundary is gone),
+the carpet strip is continuous, the plate/carpet boundaries are the only
+remaining edges (legitimate texture transitions). 141k pixels changed when
+the world-uv was extended to the BSP layer (the override works). The
+shader/substitution verified through the material path (world_uv_scale
+0.78125 / 0.1307 present on the materials).
+
+**Note:** a floor-profile caveat — the road pixels near piece boundaries
+can raycast to EITHER layer (the statics sit 10 cm above); both layers now
+sample the same texture space, so the ray's winner does not matter.

@@ -25,6 +25,13 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
+// World-space UV for the chaotic stone textures on the STATIC road pieces:
+// tiles per meter (0 = off). The static road pieces carry authored per-piece
+// UVs — the pattern density/phase jumped at the piece boundaries (the "стык"
+// the user reported). Horizontal faces (|world normal y| > 0.85) sample
+// u = world_x * scale, v = world_z * scale — one continuous texture across
+// every piece; walls/slopes (stairs, terraces) keep their authored UVs.
+uniform float world_uv_scale = 0.0;
 
 // ---- simplex noise (Ashima public-domain; only used when detail > 0) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -81,6 +88,11 @@ void fragment() {
 	vec3 sigY = dFdy(VERTEX);
 	float ff = FRONT_FACING ? 1.0 : -1.0;
 	vec3 ngeo = normalize(cross(sigX, sigY)) * ff;
+	// world-space UV override (see the uniform comment): BEFORE the Jacobian
+	// block, so dPdu/dPdv stay consistent with the overridden uv
+	if (world_uv_scale > 0.0 && abs(ngeo.y) > 0.85) {
+		uv = vec2(VERTEX.x, VERTEX.z) * world_uv_scale;
+	}
 	vec2 uvd_x = dFdx(uv);
 	vec2 uvd_y = dFdy(uv);
 	float mdet = uvd_x.x * uvd_y.y - uvd_x.y * uvd_y.x;
