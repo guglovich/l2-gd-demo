@@ -45,15 +45,6 @@ const ALPHA_CUTOUT := [
 	"oren_dev_t:DE_V_fence",
 ]
 
-## The road texture mechanisms (world-uv, the road samplers, the texture
-## substitutions) are ROLLED BACK (the user's verdict 2026-11-14: the
-## texture variety at the entrance was lost — "нехватка текстур"). The road
-## pieces render their AUTHORED textures and UVs again. Any future seam work
-## must not substitute the authored textures.
-const WORLD_UV := {}
-const ROAD_STONES := []
-const TEXTURE_SUBSTITUTE := {}
-
 static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 	var p := "%s/%s/Texture/%s.%s" % [TEX_ROOT, pkg.to_lower(), obj, suffix]
 	if ResourceLoader.exists(p):
@@ -66,22 +57,12 @@ static func _find_pbr(pkg: String, obj: String, suffix: String) -> Texture2D:
 ## overrides (0.0 everywhere since the seams fix) and the analytic fallback
 ## mode. null = no PBR set (the caller keeps its own placeholder).
 ## uv_is_texels: BSP glTFs carry raw texel UVs, UModel statics 0..1 per tile.
-## road = the mesh belongs to the road A->B family: its horizontal road-stone
-## faces sample the ONE road texture (floor01) via the shader's road
-## samplers, at the single road scale (0.78125 tiles/m).
-static func material_for(pkg: String, obj: String, uv_is_texels: bool,
-		road: bool = false) -> Material:
+static func material_for(pkg: String, obj: String, uv_is_texels: bool) -> Material:
 	var key := "%s:%s" % [pkg.to_lower(), obj]
-	if TEXTURE_SUBSTITUTE.has(key):
-		key = TEXTURE_SUBSTITUTE[key]
-		var parts := key.split(":")
-		pkg = parts[0]
-		obj = parts[1]
-	var ck := "%s|%s|%s" % [key, "t" if uv_is_texels else "u",
-			"r" if road else "s"]
+	var ck := "%s|%s" % [key, "t" if uv_is_texels else "u"]
 	if _cache.has(ck):
 		return _cache[ck]
-	var m := _pbr_material(pkg.to_lower(), obj, key, uv_is_texels, road)
+	var m := _pbr_material(pkg.to_lower(), obj, key, uv_is_texels)
 	var cfg: Variant = CONFIG.get(key)
 	if m == null and cfg != null:
 		m = _analytic_material(cfg, uv_is_texels)
@@ -89,7 +70,7 @@ static func material_for(pkg: String, obj: String, uv_is_texels: bool,
 	return m
 
 static func _pbr_material(pkg_l: String, obj: String, key: String,
-		uv_is_texels: bool, road: bool) -> Material:
+		uv_is_texels: bool) -> Material:
 	var alb := _find_pbr(pkg_l, obj, "pbr_albedo.png")
 	var nrm := _find_pbr(pkg_l, obj, "pbr_normal.png")
 	if alb == null or nrm == null:
@@ -108,20 +89,6 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
 	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
-	# M2 (the user's mandate v2): ONE road scale everywhere — 0.78125 tiles/m
-	# (200 texels/m of DE_V_floor01) on every road face of both layers.
-	# M1: whenever the world-uv override can fire, the road samplers MUST be
-	# bound (they carry the ONE road cobble = floor01) — an unbound sampler
-	# samples WHITE (the white-plaza regression 2026-11-14: the BSP floor01
-	# plates had world_uv but no road samplers).
-	if WORLD_UV.has(key) or (road and ROAD_STONES.has(key)):
-		m.set_shader_parameter("world_uv_scale", 0.78125)
-		var r_alb := _find_pbr("oren_dev_t", "DE_V_floor01", "pbr_albedo.png")
-		var r_nrm := _find_pbr("oren_dev_t", "DE_V_floor01", "pbr_normal.png")
-		if r_alb != null:
-			m.set_shader_parameter("road_albedo_tex", r_alb)
-		if r_nrm != null:
-			m.set_shader_parameter("road_normal_tex", r_nrm)
 	return m
 
 static func _analytic_material(cfg: Dictionary, uv_is_texels: bool) -> Material:

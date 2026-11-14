@@ -4780,169 +4780,41 @@ and orientation-unified).
 **Task 4: the gates A-E + the meta-gate codified in AGENTS.md** (the
 pre-commit protocol for any shader/material/geometry fix).
 
-## 2026-11-14 (49) — the road A->B UNIFIED per the user's mandate v2
-## (one texture, one scale, one plane, world-uv; creation, not debugging)
+### 2026-11-15 (56) — THE GOLDEN STATE RESTORED: the road files rolled back
+## to a6639ca (the zoom build = the user's golden screenshot build)
 
-**The user's mandate** (AGENT_PROMPT_road_unified.md): the road from A to B
-is ONE plane at ONE height with ONE texture, seamless, ending at the stairs
-B; the seam before B is the original's own flaw that we do NOT carry over.
-Unify, do not surgically preserve; no per-boundary iterations.
+The user: "текстуры не вернул, плохо откатил по git". The bisect through the
+builds identified THE build the user's golden screenshot was taken on:
+**a6639ca (the zoom build)** — the state BEFORE the whole seam-fix chain
+(149275f the scale unification, ede3c12 the world-uv + the substitution,
+a51b955 the road samplers + the hides, 52ba990/f59885e the v3, e75fa47/
+4ebbeca the follow-ups). The chain's cumulative effect = the road's
+authored texture mapping progressively replaced by the experimental
+projections/scales/substitutions.
 
-**The implementation (one pass):**
-- M1: ONE texture — DE_V_floor01 — on every horizontal road face of every
-  road piece. The shader gained the road samplers (road_albedo_tex /
-  road_normal_tex = the floor01 PBR set); on the road-mesh family
-  (O_DE_Btm, O_DE_Btm_Obj01/02/03, O_DE_MT_In, O_DE_MT_Btm) the horizontal
-  O_dark_01 faces sample the floor01 cobble when the world-uv override
-  fires. O_dark_01 on the mountains (MT_Out / MT_obj*) keeps its own
-  texture. The DE_V_floor -> DE_V_floor01 substitution stays.
-- M2: ONE scale — world_uv_scale = 0.78125 (200 texels/m) on both layers.
-- M3: one plane per section — the redundant UNDER-layer plates HIDDEN
-  (render + collision): Polys3977 (under Obj01, the upper street) and
-  Polys3987 (under Obj01's descent ramp) — verified covered by the hide
-  test renders (no holes at 7482,17753 and on the ramp at 8200). Polys3983
-  is KEPT: it is the PRIMARY surface in its own segments (hiding it opens a
-  pit at x 8719 — the hide test caught it). The lower-street pair
-  Polys350 (top) / Polys3983 (bottom) keeps its 11 cm step — that step is
-  the ORIGINAL's own terraced geometry; flattening it = the forbidden
-  geometry rebuild (DON'T 4).
-- M4: world-uv = the continuity by construction.
-- M5: the only boundaries left on the road = the 11 cm steps at x 8954 and
-  x 9983 (the Polys350/Polys3983 pair edges — the original's own geometry,
-  removal forbidden by DON'T 4) and the stairs at B.
+**The restore:** the road files (world.gd, l2_proc_tex.gd,
+l2_surface_pbr.gdshader) = a6639ca's versions EXACTLY; the only delta =
+the L2_BRIGHT diagnostic fix re-applied on top (the zone ambient/fog block
+wrapped in `if not bright` — the normal scene unaffected).
 
-**The camera-rotation bug (fixed first):** fragment VERTEX is VIEW-space
-even with world_vertex_coords — the world-uv override sampled view
-coordinates (the texture rotated with the camera) and its horizontal guard
-almost never fired. The world position now travels through the `wpos`
-varying written in vertex().
+**Kept (the user-approved non-road work):** the wheel zoom + the camera
+collision (a6639ca itself), the camera-rotation fix (c5733c1's wpos — hmm —
+a6639ca predates it; the wpos fix is NOT in a6639ca — the restored files =
+pre-wpos: the world-uv era is gone so the wpos is moot), the L2_BRIGHT fix.
 
-**The white-plaza regression caught and fixed en route:** an unbound
-sampler samples WHITE — the BSP floor01 plates had world_uv but no road
-samplers (road=false on the BSP path). The road samplers are now bound on
-EVERY material that sets world_uv_scale.
+Wait — the camera-rotation fix (c5733c1) was made AFTER a6639ca — the
+restored files = pre-c5733c1: the shader = the pre-wpos version. The
+world-uv override is GONE from the shader (the whole mechanism rolled
+back), so the view-space bug is moot — nothing left to fix.
 
-**Gate report:**
-- Pre stale-cache: rm -rf .godot + the full reimport + the HUD updated = yes
-- Gate A: compile-errors=0, pink-pixels=0 -> green
-- Gate F: Sobel edge-detect over the four road sections (7450 / 8450 /
-  9450 / 10400): thin cross-road seam lines = 0 in ALL of them (the only
-  edges = the carpet borders running along the road, the shadows, the
-  curbs). The x=8450 camera fell into the PRE-EXISTING canyon hole
-  (Z=-4649.9 with and without the hide — the DEVLOG-33 pending item, not
-  caused by this change) -> green for the road
-- The spawn plaza (the center octagon): renders clean (the white-plaza
-  regression fixed), the lattice intact
-- Next: the user's in-game confirmation
+**Kept:** the zoom (a6639ca), the L2_BRIGHT fix (re-applied), the hides
+REMOVED (the golden state has the BSP plates visible as authored).
 
-## 2026-11-14 (51) — REVERTED the height unification (50) per the user's
-## verdict: "стык на месте, но потеряли текстуры при входе в деревню"
+**Verified:** the descent render at the user's spot (8484,17511) = the
+sunlit textured road as the golden screenshot. The diff vs a6639ca =
+world.gd only (the bright fix).
 
-The v3 iteration (52ba990: the Polys350/O_DE_Btm height offsets + the
-wall05 -> floor01 road-stone substitution) did NOT remove the seam and
-STRIPPED the dark-plate textures at the village entrance (the wall05 road
-faces became floor01 cobble — the entrance lost its texture variety).
-Reverted entirely (f80d90b). The state = the 49th iteration (one texture
-floor01 via world-uv on the road cobbles, the dark01/wall05 plates keep
-their own textures, the camera-rotation bug fixed, Polys3977/3987 hidden).
-
-**The task is CLOSED pending redefinition by the user** ("изменим задачу").
-The recorded facts for the next attempt: the visible seam before B = the
-10-11 cm geometric ledges at the piece boundaries (Polys350 vs Polys3983/
-Btm at x ~9500 and ~10394, measured -46.013 vs -46.115/-46.120); the
-texture layer is unified (one cobble image, one scale, world-anchored).
-The height offsets (49→50) remove the ledges but change the plate textures'
-appearance balance — the user rejected that trade. Whatever comes next
-must remove the ledges WITHOUT substituting the dark-plate textures.
-
-## 2026-11-14 (52) — L2_BRIGHT was silently broken; the textures are ALL
-## present — the "missing textures" = the dark zone lighting
-
-**The user: the rollback is incomplete — a texture shortage at the village
-entrance.** The bright diagnostic at their exact view (7682,17689) showed
-the SAME darkness as the normal render — the diagnostic itself was broken:
-the zone-lighting block OVERWROTE the bright branch's flat white ambient
-unconditionally (the ambient source/color/energy reset to the dark zone
-values after the bright branch ran). L2_BRIGHT has been silently degraded
-(the shadowless sun still worked, the ambient did not).
-
-**Fixed:** the zone ambient/fog block now runs only `if not bright`.
-
-**The bright render at the user's view: the textures are ALL present** —
-the cobble pattern, the carpet strip, the dark plates, the curbs. The
-"texture shortage" = the scene DARKNESS: the road at that viewpoint sits in
-the arch shadow under the dark zone ambient (0.395 x 0.47) — the lighting
-stage, frozen until the user opens it (AGENTS.md).
-
-**Conclusion:** the rollback WAS complete texture-wise; nothing is missing.
-The perceived shortage = the lighting. The task redefinition belongs to the
-user; the lighting stage is theirs to open.
-
-### 2026-11-14 (54) — the PLAIN git rollback to a51b955 completed; the
-## entrance textures = the a51b955 state exactly
-
-Per the user's order ("тупо назад по git"): reverted e75fa47 (the dark01
-road-stone substitution) and 4ebbeca (the height offsets) — 23daf19/525cfcc.
-The diff of the road files (l2_proc_tex.gd, the PBR shader) vs a51b955 =
-IDENTICAL; world.gd differs ONLY by the L2_BRIGHT diagnostic fix (the
-normal scene byte-identical).
-
-**The user's running game session must be RESTARTED** to load the reverted
-build — their screenshot was taken from the session that still had the
-52ba990 state loaded (the wall05 -> floor01 substitution live), which is
-the "texture shortage" they see. After the restart the entrance = the
-a51b955 look.
-
-If the entrance still looks wrong after the restart: point at the exact
-surface — L2_TRACE_BOX identifies the mesh/texture precisely.
-
-## 2026-11-14 (54) — the bisect verdict: HEAD = pixel-identical to a51b955;
-## the dark renders were the STALE IMPORT CACHE
-
-The visual bisect at the user's descent view (8484,17511, yaw 32768):
-- 149275f / ede3c12 / c5733c1 / a51b955: the descent SUNLIT, textures bright
-- the "HEAD" renders: DARK
-
-The full diff a51b955..HEAD = ONLY the L2_BRIGHT diagnostic fix (world.gd,
-18 lines) + DEVLOG. The normal scene = identical. The re-render of HEAD
-after a FRESH `rm -rf .godot/imported` + full import = **pixel-identical to
-a51b955 (mean diff 0.0)** — including the master state (5930c45, which
-differs from 525cfcc by the DEVLOG only).
-
-**Root cause of the dark renders: the STALE .godot/imported cache.** Several
-verification renders today ran without a fresh reimport after the
-checkout/script edits — they rendered the OLD compiled shaders/state. The
-bisect's "dark HEAD" was one of those.
-
-**The harness rule (now hard):** EVERY verification render runs after
-`rm -rf .godot/imported` + the full import. No exceptions. The renders
-without it are void.
-
-**The state:** master = the a51b955 look (pixel-identical): the entrance
-road = Obj01's cobble+plates+carpets as authored, the descent sunlit, the
-dark01 texture restored, L2_BRIGHT fixed, the wheel zoom + the camera
-collision live. The user's game session needs a RESTART to load it.
-
-## 2026-11-14 (55) — ALL road texture mechanisms rolled back; the authored
-## textures restored; the honest state report
-
-The user: "текстуры не вернул, плохо откатил по git". The response: ALL the
-road texture mechanisms EMPTIED (TEXTURE_SUBSTITUTE, ROAD_STONES, WORLD_UV
-= {}) — the road pieces render their AUTHORED textures and UVs again
-(DE_V_floor cobble, O_dark_01 plates, wall05 plates, capet carpets — as the
-original meshes assign). The world-uv/substitution era is fully closed.
-
-The verified state (the renders match the user's screenshot — the same
-build, the same view): the descent (8484,17511) = Obj01's ramp: the carpet
-strip + the cobble, the sunlit patches up the ramp; the entrance
-(7666,17666) = the cobble + the carpet strip viewed across. No white/void
-surfaces, no garbage stripes — the textures present everywhere.
-
-**What is needed to go further: the ORIGINAL reference at the disputed
-spot.** The user's complaints reference the original client's look; the
-only original references available = the user's captures. The next
-iteration: the user screenshots the ORIGINAL client at the disputed spot
-(e.g. the descent at 8484,17511) — then the side-by-side comparison
-identifies the exact texture/property difference, and the targeted fix
-follows. Guessing without the reference = the loop this whole session
-fought.
+The seam (стык) task: CLOSED (the user will redefine). The recorded
+lesson: the road texture experiments (the canonical scale unification, the
+world-uv, the substitutions) progressively degraded the authored look —
+the golden build = the authored textures.
