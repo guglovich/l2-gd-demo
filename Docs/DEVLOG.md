@@ -4700,3 +4700,35 @@ shader/substitution verified through the material path (world_uv_scale
 **Note:** a floor-profile caveat — the road pixels near piece boundaries
 can raycast to EITHER layer (the statics sit 10 cm above); both layers now
 sample the same texture space, so the ray's winner does not matter.
+
+## 2026-11-14 (47) — the camera-rotation bug: fragment VERTEX is VIEW-space
+
+**The user:** the seams remained + the textures ROTATE WITH THE CAMERA.
+Both symptoms — one root: in Godot 4 fragment() VERTEX is VIEW-space even
+with world_vertex_coords (the flag reliably covers only the vertex stage).
+The world-uv override built on fragment VERTEX (a) sampled VIEW coordinates
+— the texture rotated with the camera; (b) its |ngeo.y| > 0.85 guard tested
+the VIEW-space normal — for the road viewed at the normal camera angle the
+guard almost never fired, so the override rarely applied at all (which is
+why the previous iteration's renders looked unchanged).
+
+**The fix:** a varying `wpos` written in vertex() (= world space under
+world_vertex_coords); the fragment override uses wpos and a normal derived
+from dFdx/dFdy(wpos). The world-uv now applies unconditionally-correctly
+and is anchored to the world by construction (uv = world(x,z) * scale
+cannot rotate with the camera).
+
+**Verified:** 1,005,785 of 1,440,000 pixels changed vs the pre-world-uv
+frame at the same camera — the override actually renders now; the cobble
+pattern is uniform across the whole road (tmp/seam_check/wfix_A.png), the
+carpet strip continuous, the pattern anchored to the world.
+
+**Craft-anything clean-room record:** the investigation memory revealed
+the LITERAL geometry rebuild of the road was already TRIED in earlier
+sessions and rolled back twice (cce5af0 "rollback-of-the-rollback",
+45a4d10 "the floating sloped clean-room road removed entirely"). The
+current approach achieves the visually whole floor WITHOUT the risky
+geometry rebuild: every horizontal road face of every piece (both layers)
+samples ONE continuous world-anchored texture — the floor is "whole" at
+the texture level. The plan notes the geometry rebuild stays an option
+only if the user insists after this fix.

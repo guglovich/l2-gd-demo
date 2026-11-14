@@ -33,6 +33,13 @@ uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
 // every piece; walls/slopes (stairs, terraces) keep their authored UVs.
 uniform float world_uv_scale = 0.0;
 
+// World-space position via varying: VERTEX in fragment() is VIEW-space even
+// with world_vertex_coords (the flag reliably covers only the vertex stage).
+// The world-uv override built on fragment VERTEX sampled view coordinates —
+// the texture rotated with the camera (the user's report 2026-11-14) and the
+// horizontal-face guard almost never fired. wpos is the guaranteed world pos.
+varying vec3 wpos;
+
 // ---- simplex noise (Ashima public-domain; only used when detail > 0) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
 vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -81,6 +88,10 @@ float snoise3(vec3 v) {
 	return 42.0 * dot(m * m, vec4(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
 }
 
+void vertex() {
+	wpos = VERTEX;  // world_vertex_coords: world space in the vertex stage
+}
+
 void fragment() {
 	vec2 uv = uv_is_texels ? UV / tile_px : UV;   // 0..1 per tile
 	// per-pixel tangent basis from the screen Jacobian (no mesh tangents)
@@ -89,9 +100,15 @@ void fragment() {
 	float ff = FRONT_FACING ? 1.0 : -1.0;
 	vec3 ngeo = normalize(cross(sigX, sigY)) * ff;
 	// world-space UV override (see the uniform comment): BEFORE the Jacobian
-	// block, so dPdu/dPdv stay consistent with the overridden uv
-	if (world_uv_scale > 0.0 && abs(ngeo.y) > 0.85) {
-		uv = vec2(VERTEX.x, VERTEX.z) * world_uv_scale;
+	// block, so dPdu/dPdv stay consistent with the overridden uv. The normal
+	// and the position come from the wpos varying (see its comment)
+	if (world_uv_scale > 0.0) {
+		vec3 wdx = dFdx(wpos);
+		vec3 wdy = dFdy(wpos);
+		vec3 wn = normalize(cross(wdx, wdy)) * ff;
+		if (abs(wn.y) > 0.85) {
+			uv = vec2(wpos.x, wpos.z) * world_uv_scale;
+		}
 	}
 	vec2 uvd_x = dFdx(uv);
 	vec2 uvd_y = dFdy(uv);
