@@ -4732,3 +4732,50 @@ geometry rebuild: every horizontal road face of every piece (both layers)
 samples ONE continuous world-anchored texture — the floor is "whole" at
 the texture level. The plan notes the geometry rebuild stays an option
 only if the user insists after this fix.
+
+## 2026-11-14 (48) — the road seam FINALIZED: world-UV declared final; the
+## verification harness installed; every remaining joint classified
+
+**Iteration report (the gates protocol):**
+- Гейт A: compile-errors=0 (gateD_stderr.log, gateA_final.log), pink-pixels=0 -> green
+- Гейт B: viewport=7482,17753/yaw49152/zoom0.4, diff=1,005,785 px vs the
+  pre-world-uv frame, direction=expected (the world-uv applied) -> green
+- Гейт C: trace-box at 7482,17753 -> the road pixels = BSP:Polys3977
+  (868) + Oren_DEV_S:O_DE_Btm_Obj01 (192) + O_DE_MT_Btm (16) + O_DE_Bridge
+  (174) -> the fix targeted BOTH layers (statics + BSP) -> green
+- Гейт D: branch = the world-uv override; hot-pink coverage = exactly the
+  horizontal road faces of every piece (near and far), the carpet strip /
+  walls / arches / terrain clean; 0 compile errors with the assert in ->
+  green; the debug output removed after verification
+- Гейт E: lint — the world-uv block reads only `wpos` (varying); the 5
+  remaining VERTEX reads in fragment are the view-space POM/TBN block (not
+  world-effects); terrain.gdshader does not exist in the tree -> green
+- Мета: memory query "road geometry rebuild attempted?" -> YES, twice,
+  rolled back (cce5af0, 45a4d10) -> the UV-sample solution stands
+
+**Task 1: world-UV is FINAL.** The road seam is resolved at the UV-sample
+level (world_uv_scale + the DE_V_floor -> DE_V_floor01 substitution); the
+geometry rebuild stays off (2 prior rollbacks).
+
+**Task 2: the coverage inventory.** Every road static's road-stone textures
+carry world_uv_scale: O_DE_Btm (DE_V_floor01), O_DE_Btm_Obj01 (DE_V_floor
+-> floor01 via the substitution), O_DE_MT_In + O_DE_MT_Btm (O_dark_01).
+O_DE_Bridge carries NO road-stone textures (walls/decos/metal/chain —
+aligned art) — nothing to cover. The BSP road stones (floor01/floor02/
+dark01/m12/sylen) — floor01 + dark01 via WORLD_UV, floor02/m12/sylen via
+the export-time canonical projection (their visible areas are single-layer
+and orientation-unified).
+
+**Task 3: the remaining joints classified (each = one of а/б/в):**
+- (в) ACCEPTED legitimate transitions: plate<->carpet texture boundary;
+  curb edges; the stair/terrace steps; flat->slope transitions (sloped
+  faces keep authored UVs — the horizontal guard); the cobble->dark-stone
+  plate boundary (different textures by design, as in the original).
+- (б) meshes without world_uv_scale: none left for the road stones (the
+  inventory above).
+- (a) stale cache: if a seam is reported that does not match this
+  classification — first `rm -rf .godot` + full reimport before touching
+  any code (the user's "maybe you did not rebuild" was exactly this class).
+
+**Task 4: the gates A-E + the meta-gate codified in AGENTS.md** (the
+pre-commit protocol for any shader/material/geometry fix).

@@ -43,6 +43,48 @@ no server, no mobs. Native Linux target (no Wine), test machine: this Arch box.
   prints every surface hit (height, normal, owning mesh) along a line.
   Always cross-check suspicious visual findings with floor profiles.
 
+## Verification harness (MANDATORY pre-commit protocol for shader /
+## material / geometry fixes — established 2026-11-14 after the "fix not
+## visible" loop repeated 4 times)
+
+An iteration counts as "verified" ONLY with all five gates green (numbers
+in the DEVLOG entry), plus the meta-gate before any rebuild:
+
+- **Gate A — the shader actually compiled.** Godot silently falls back when
+  a shader fails to compile (2026-11-06: an undeclared identifier → fallback
+  → ALL edits invisible). Capture the FULL render stderr and require 0
+  lines matching `shader error|compile` — and 0 hot-pink leftovers after a
+  gate-D run. "Verified by render" without this = invalid.
+- **Gate B — pixel diff at the USER'S NAMED viewport** (fixed camera, e.g.
+  7482,17753 / 7666,17666 / 10636,17048 / spawn): ≥ 1000 changed pixels AND
+  the direction matches the expectation. No pixel movement → no commit →
+  no "verified".
+- **Gate C — trace-box BEFORE writing the fix** (`L2_TRACE_BOX`): which
+  mesh / layer (BSP vs static) / texture does each road pixel hit? Fix ONLY
+  the layer the trace names. 2026-11-13–14: three iterations were spent
+  fixing the BSP layer while the visible road was the static meshes
+  (O_DE_Btm_Obj01 sits 10 cm ABOVE the BSP plates).
+- **Gate D — assert the branch fires.** Any conditional in a shader (e.g.
+  a horizontal-face guard): temporarily set `ALBEDO = vec3(1.0, 0.2, 0.8);`
+  on the taken branch, screenshot, verify the coverage matches the expected
+  region and nowhere else, THEN remove the debug output.
+- **Gate E — lint: world-space effects read NO VERTEX/NORMAL in
+  fragment().** In Godot 4 fragment VERTEX/NORMAL are VIEW-space even with
+  `world_vertex_coords`. World effects read ONLY `varying vec3 wpos` written
+  in vertex(), with the normal via `normalize(cross(dFdx(wpos),
+  dFdy(wpos)))`. (2026-11-14: a view-space normal guard made the world-uv
+  override almost never fire.)
+- **Meta-gate — query the memory BEFORE any "redo X from scratch / clean
+  room".** Check craft-anything investigation memory + DEVLOG for "was X
+  attempted → rolled back?". The road geometry rebuild was attempted twice
+  and rolled back (cce5af0, 45a4d10) — the seam is solved at the UV-sample
+  level (world_uv_scale + TEXTURE_SUBSTITUTE), not at the vertex level.
+
+Reimport trap (both bit us): after regenerating glTFs delete
+`assets/maps/20_18/meshes_bsp/*.import` AND after shader edits delete
+`assets/shaders/*.import`, then `rm -rf .godot/imported` + a full
+`godot --headless --import` — the cache does not reliably refresh.
+
 ## Tool peculiarities (discovered the hard way)
 
 - L2 `.unr`/`.usx` here are `Lineage2Ver111` (XOR 0xAC after a 28-byte
