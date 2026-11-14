@@ -1063,13 +1063,17 @@ func _build_environment() -> void:
 	#   AmbientVector (0.395) x AmbientBrightness (60/255) = dark ambient
 	#   DistanceFogColor BGRA 23 1d 18 00 = RGB(24, 29, 35) dark blue
 	#   DistanceFogStart 100 units (1 m) / End 10000 units (100 m)
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.395, 0.395, 0.395)
-	env.ambient_light_energy = 60.0 / 255.0 * 2.0
-	env.fog_mode = Environment.FOG_MODE_DEPTH
-	env.fog_light_color = Color8(24, 29, 35)
-	env.fog_depth_begin = 1.0
-	env.fog_depth_end = 100.0
+	# ONLY for the normal scene: these lines used to OVERWRITE the bright
+	# diagnostic's flat white ambient unconditionally (L2_BRIGHT silently
+	# stopped working — the 2026-11-14 texture-check renders were useless).
+	if not bright:
+		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+		env.ambient_light_color = Color(0.395, 0.395, 0.395)
+		env.ambient_light_energy = 60.0 / 255.0 * 2.0
+		env.fog_mode = Environment.FOG_MODE_DEPTH
+		env.fog_light_color = Color8(24, 29, 35)
+		env.fog_depth_begin = 1.0
+		env.fog_depth_end = 100.0
 	env.fog_depth_curve = 1.0
 	env.fog_sky_affect = 0.0
 	env.fog_enabled = true

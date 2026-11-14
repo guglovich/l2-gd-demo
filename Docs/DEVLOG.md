@@ -4854,3 +4854,26 @@ texture layer is unified (one cobble image, one scale, world-anchored).
 The height offsets (49→50) remove the ledges but change the plate textures'
 appearance balance — the user rejected that trade. Whatever comes next
 must remove the ledges WITHOUT substituting the dark-plate textures.
+
+## 2026-11-14 (52) — L2_BRIGHT was silently broken; the textures are ALL
+## present — the "missing textures" = the dark zone lighting
+
+**The user: the rollback is incomplete — a texture shortage at the village
+entrance.** The bright diagnostic at their exact view (7682,17689) showed
+the SAME darkness as the normal render — the diagnostic itself was broken:
+the zone-lighting block OVERWROTE the bright branch's flat white ambient
+unconditionally (the ambient source/color/energy reset to the dark zone
+values after the bright branch ran). L2_BRIGHT has been silently degraded
+(the shadowless sun still worked, the ambient did not).
+
+**Fixed:** the zone ambient/fog block now runs only `if not bright`.
+
+**The bright render at the user's view: the textures are ALL present** —
+the cobble pattern, the carpet strip, the dark plates, the curbs. The
+"texture shortage" = the scene DARKNESS: the road at that viewpoint sits in
+the arch shadow under the dark zone ambient (0.395 x 0.47) — the lighting
+stage, frozen until the user opens it (AGENTS.md).
+
+**Conclusion:** the rollback WAS complete texture-wise; nothing is missing.
+The perceived shortage = the lighting. The task redefinition belongs to the
+user; the lighting stage is theirs to open.
