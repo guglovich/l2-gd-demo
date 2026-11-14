@@ -4877,3 +4877,21 @@ stage, frozen until the user opens it (AGENTS.md).
 **Conclusion:** the rollback WAS complete texture-wise; nothing is missing.
 The perceived shortage = the lighting. The task redefinition belongs to the
 user; the lighting stage is theirs to open.
+
+### 2026-11-14 (54) — the PLAIN git rollback to a51b955 completed; the
+## entrance textures = the a51b955 state exactly
+
+Per the user's order ("тупо назад по git"): reverted e75fa47 (the dark01
+road-stone substitution) and 4ebbeca (the height offsets) — 23daf19/525cfcc.
+The diff of the road files (l2_proc_tex.gd, the PBR shader) vs a51b955 =
+IDENTICAL; world.gd differs ONLY by the L2_BRIGHT diagnostic fix (the
+normal scene byte-identical).
+
+**The user's running game session must be RESTARTED** to load the reverted
+build — their screenshot was taken from the session that still had the
+52ba990 state loaded (the wall05 -> floor01 substitution live), which is
+the "texture shortage" they see. After the restart the entrance = the
+a51b955 look.
+
+If the entrance still looks wrong after the restart: point at the exact
+surface — L2_TRACE_BOX identifies the mesh/texture precisely.
