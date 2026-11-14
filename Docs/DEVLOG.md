@@ -4877,25 +4877,3 @@ stage, frozen until the user opens it (AGENTS.md).
 **Conclusion:** the rollback WAS complete texture-wise; nothing is missing.
 The perceived shortage = the lighting. The task redefinition belongs to the
 user; the lighting stage is theirs to open.
-
-### 2026-11-14 (53) — the divider before B ELIMINATED (the restored v3
-## height offsets, WITHOUT the texture substitution)
-
-The v3 height offsets were CORRECT — only the wall05->floor01 texture
-substitution was wrong (the user's rejection). Restored: Polys350
-(render+collision) -0.102 m and O_DE_Btm -0.098 m — the wall05 dark-plate
-textures PRESERVED (the plates lowered WITH their texture).
-
-**Verified (the height profile along y=17700, x 8650..10500):**
-- x 8650..9450: Polys3983 -46.120 (5 mm from the plane)
-- x 9500..9600: O_DE_Btm -46.115 (EXACT — the former wall05 ledge lowered)
-- x 9650..10450: Polys350 -46.115 (EXACT — lowered)
-- H = -46.115; the road plane deviations > 0.5 cm = **0**
-- The Sobel at x 8954/9500/9983: 0 thin cross-road lines
-- The render at the former divider (9550,17690): the warm lamp-lit cobble,
-  the wall05 dark-plate texture present, no ledges, no seams
-- The flush at B: the plaza floor = -46.115 = H (0 cm)
-
-The DEVLOG-48 classification stays revoked: the steps were the port's layer
-artifacts. The textures: dark01/wall05/floor01 ALL present (the variety
-restored by e75fa47).
