@@ -62,6 +62,7 @@ const WORLD_UV := {
 const ROAD_STONES := [
 	"oren_dev_t:O_dark_01",
 	"oren_dev_t:DE_V_floor01",
+	"oren_dev_t:DE_V_wall05",
 ]
 
 ## Texture substitution for the "one continuous road texture" directive:

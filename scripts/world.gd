@@ -130,7 +130,11 @@ func _green_trace_flow() -> void:
 
 
 func _surface_for_face(mesh_key: String, fid: int) -> int:
-	var mesh := _get_mesh(mesh_key)
+	var mesh: Mesh = null
+	if mesh_key.begins_with("BSP:"):
+		mesh = _bsp_mesh_cache.get(mesh_key)
+	else:
+		mesh = _get_mesh(mesh_key)
 	if mesh == null or fid < 0:
 		return -1
 	var acc := 0
@@ -147,6 +151,16 @@ func _surface_for_face(mesh_key: String, fid: int) -> int:
 func _texture_for_surface(mesh_key: String, surf: int) -> String:
 	if surf < 0:
 		return "?"
+	if mesh_key.begins_with("BSP:"):
+		var arr = _bsp_surf_tex.get(mesh_key)
+		if arr == null or surf >= arr.size() or arr[surf] == null:
+			return "?"
+		var t = arr[surf]
+		# bsp.json tex values are [package, object] ARRAYS — calling .get()
+		# on them throws and truncates the print line (tex= empty)
+		if t is Array:
+			return "%s:%s" % [t[0], t[1]]
+		return "?" if t == null else str(t)
 	var parts := mesh_key.split(":")
 	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
 	var info = asset_map_data.get("meshes", {}).get(mesh_key, {})
@@ -191,9 +205,16 @@ func _floor_profile_flow() -> void:
 			if col is Node:
 				var node := col as Node
 				owner_name = str(node.get_meta("mesh_key")) if node.has_meta("mesh_key") else node.name
-			print("t=%.2f game(%.0f,%.0f) y=%.3f ny=%.2f via %s" % [
+			# the hit face's texture (the v3 verification: one pass logs the
+			# height AND the texture)
+			var tex_s := "?"
+			var fid := int(hit.get("face_index", -1))
+			if fid >= 0:
+				tex_s = _texture_for_surface(owner_name,
+						_surface_for_face(owner_name, fid))
+			print("t=%.2f game(%.0f,%.0f) y=%.3f ny=%.2f via %s tex=%s" % [
 				t, origin.x / UNIT_SCALE, origin.z / UNIT_SCALE,
-				hit.get("position").y, hit.get("normal").y, owner_name])
+				hit.get("position").y, hit.get("normal").y, owner_name, tex_s])
 			n += 1
 			# step the origin just below this hit to reveal stacked surfaces
 			cur_y = hit.get("position").y - 0.01
@@ -624,6 +645,8 @@ func _build_bsp_brushes() -> void:
 			skipped += 1
 			continue
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
+		if ROAD_HEIGHT_OFFSETS.has(polys):
+			pos.y += float(ROAD_HEIGHT_OFFSETS[polys])
 		# M3 (the user's mandate v2, hide-redundant): these BSP road plates sit
 		# 10 cm BELOW the static road (O_DE_Btm_Obj01 + carpets + curbs) and
 		# their edges peeked through the static pieces' gaps — the visible
@@ -691,6 +714,14 @@ func _build_bsp_brushes() -> void:
 		body.add_child(col)
 		body.position = pos
 		body.set_meta("mesh_key", "BSP:" + polys)
+		# the collision trimesh = the ORIGINAL mesh (prim order) — cache the
+		# mesh + the per-surface textures so the floor-profile can log the
+		# texture of every hit face
+		_bsp_mesh_cache["BSP:" + polys] = mesh
+		var surf_tex_arr: Array = []
+		for si in range(mesh.get_surface_count()):
+			surf_tex_arr.append(prim_tex.get(si))
+		_bsp_surf_tex["BSP:" + polys] = surf_tex_arr
 		world.add_child(body)
 		built += 1
 		textured_surfaces += prim_tex.size()
@@ -712,6 +743,7 @@ func _build_meshes() -> void:
 		var mr = actor.get("mesh")
 		if mr == null or not (mr is Dictionary): continue
 		var key := "%s:%s" % [mr["package"], mr["object"]]
+		var parts: Array = key.split(":")
 		# Nothing is skipped from the road family anymore (see the note on
 		# _ROAD_STRIP_SKIP): the skips were merged-accessor-era artifacts.
 		if key in _ROAD_STRIP_SKIP:
@@ -733,6 +765,13 @@ func _build_meshes() -> void:
 		# -4508, O_DE_Btm -4952). Experimental shift pending engine-RE of the
 		# discrepancy.
 		inst.position = Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)
+		# v3: the road-height alignment — the static road pieces not at the
+		# road plane H = -46.115 shift by the measured delta (the O_DE_Btm
+		# dark-plate top renders 9.8 cm ABOVE the plane — the divider before
+		# B; the render and the body share `inst.position`, so the collision
+		# moves with it)
+		if ROAD_HEIGHT_OFFSETS.has(parts[1]):
+			inst.position.y += float(ROAD_HEIGHT_OFFSETS[parts[1]])
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2]))
 		inst.scale = Vector3.ONE * float(actor.get("draw_scale", 1.0))
 		world.add_child(inst)
@@ -925,11 +964,21 @@ func _get_mesh(key: String) -> Mesh:
 # geometry (O_DE_Btm = a ~0.6-m curb/step piece, not a ring). Nothing in the
 # road family is skipped anymore.
 var _ROAD_STRIP_SKIP := []
+## The BSP meshes + their per-surface textures, for the floor-profile texture
+## logging (the same resolution the trace-box does for the statics).
+var _bsp_mesh_cache := {}
+var _bsp_surf_tex := {}
 ## M3 (the user's mandate v2): the redundant UNDER-layer road plates — fully
 ## covered by the static road above (the hide-redundant test renders: no
 ## holes). Polys3983 stays: it is the PRIMARY road surface in its own
 ## segments (x 8646..8954 / 9983..10394 — hiding it opens a pit).
 const HIDE_ROAD_UNDERLAYER := ["Polys3977", "Polys3987"]
+## v3 (the user's surgical mandate): ONE road height H = -46.115 (the stair
+## base at B, measured: O_DE_Btm -46.115 / Polys3983 -46.120 / Obj01's tail
+## -46.11 — flush within 1 cm). Polys350 renders 10.2 cm ABOVE the plane
+## (-46.013) — the divider before B. Lower it to H (render + collision move
+## together via the shared `pos`).
+const ROAD_HEIGHT_OFFSETS := { "Polys350": -0.102, "O_DE_Btm": -0.098 }
 ## M1: the road-mesh family — their horizontal road-stone faces sample the
 ## ONE road texture (floor01) via the shader road samplers.
 const ROAD_MESHES := [
