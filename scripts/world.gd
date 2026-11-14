@@ -624,6 +624,11 @@ func _build_bsp_brushes() -> void:
 			skipped += 1
 			continue
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
+		# v3 (restored WITHOUT the texture substitution): Polys350 renders
+		# 10.2 cm ABOVE the road plane (-46.013 vs -46.115) — the divider
+		# before B. Lower render+collision to the plane; wall05 stays.
+		if polys == "Polys350":
+			pos.y -= 0.102
 		# M3 (the user's mandate v2, hide-redundant): these BSP road plates sit
 		# 10 cm BELOW the static road (O_DE_Btm_Obj01 + carpets + curbs) and
 		# their edges peeked through the static pieces' gaps — the visible
@@ -733,6 +738,12 @@ func _build_meshes() -> void:
 		# -4508, O_DE_Btm -4952). Experimental shift pending engine-RE of the
 		# discrepancy.
 		inst.position = Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)
+		# v3 (restored WITHOUT the texture substitution): the O_DE_Btm wall05
+		# dark-plate ledge renders 9.8 cm ABOVE the road plane (-46.017 vs
+		# -46.115) at x 9500-9600 — the divider before B. The base mesh shifts
+		# down; its side walls sink below the road edge (invisible).
+		if key == "Oren_DEV_S:O_DE_Btm":
+			inst.position.y -= 0.098
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2]))
 		inst.scale = Vector3.ONE * float(actor.get("draw_scale", 1.0))
 		world.add_child(inst)
