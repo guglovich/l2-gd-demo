@@ -129,15 +129,18 @@ func _make_crosshair() -> void:
 ## animation Run_Hand_FDarkElf injected by tools/psa_to_gltf.py into every
 ## part's glTF (rotation+translation channels).
 const CHAR_TEX_ROOT := "res://assets/character/fdarkelf/Texture"
-const CHAR_PARTS := [
-	# [mesh name, texture object, alpha-cutout]
-	["FDarkElf_m000_u", "FDarkElf_m000_t1000_u", false],
-	["FDarkElf_m000_l", "FDarkElf_m000_t1000_l", false],
-	["FDarkElf_m000_b", "FDarkElf_m000_t1000_b", false],
-	["FDarkElf_m000_g", "FDarkElf_m000_t1000_g", false],
-	["FDarkElf_m000_f", "FDarkElf_m000_t00_f", false],
-	["FDarkElf_m000_m00_ah", "FDarkElf_m000_t00_m00_ah_ori", true],
-]
+## The unified single-skeleton character (tools/build_character.py): one
+## skin, one animation player, the six client meshes as skinned meshes.
+const CHAR_SCENE := "res://assets/character/FDarkElf_base.gltf"
+## The mesh name -> [texture object, alpha-cutout] for the material pass.
+const CHAR_MAT_MAP := {
+	"FDarkElf_m000_u": ["FDarkElf_m000_t1000_u", false],
+	"FDarkElf_m000_l": ["FDarkElf_m000_t1000_l", false],
+	"FDarkElf_m000_b": ["FDarkElf_m000_t1000_b", false],
+	"FDarkElf_m000_g": ["FDarkElf_m000_t1000_g", false],
+	"FDarkElf_m000_f": ["FDarkElf_m000_t00_f", false],
+	"FDarkElf_m000_m00_ah": ["FDarkElf_m000_t00_m00_ah_ori", true],
+}
 ## The full hair = FDarkElf_m000_m00_bh: its own 13-bone skeleton (Hair01-13,
 ## the client's hair physics) whose bind is in body space — it cannot play the
 ## Bip01 run clip, so it is attached to the Bip01_head bone via BoneAttachment3D
@@ -165,9 +168,17 @@ var _face_open: Texture2D
 var _face_closed: Texture2D
 var _blink_t := 2.0
 var _blink_closed := false
+var _scale_hold_ms := 0  # the HUD shows the calibration value for 2.5 s
 var _pbr_shader: Shader
 
 func _load_character() -> void:
+	# THE CLEAN-ROOM CHARACTER (the modern-port rule): the L2 client's
+	# six-separately-animated-parts hack (six skeletons, six animation
+	# players — the face "sliding off the head" at every animation) is
+	# replaced by ONE unified glTF: one skeleton, one skin, one animation
+	# player, the six client meshes as plain skinned meshes (tools/
+	# build_character.py merges the UModel exports). A part desync is
+	# structurally impossible now.
 	var char_scale := CHAR_SCALE
 	if OS.get_environment("L2_CHAR_SCALE") != "":
 		char_scale = float(OS.get_environment("L2_CHAR_SCALE"))
@@ -178,80 +189,70 @@ func _load_character() -> void:
 	add_child(rig)
 	if _pbr_shader == null:
 		_pbr_shader = load("res://assets/shaders/l2_surface_pbr.gdshader")
-	for part in CHAR_PARTS:
-		# diagnostic: render only one part (L2_CHAR_ONLY=<mesh name>)
-		var only := OS.get_environment("L2_CHAR_ONLY")
-		if only != "" and only != part[0]:
-			continue
-		var path := "res://assets/character/%s.gltf" % part[0]
-		if not ResourceLoader.exists(path):
-			continue
-		var scene: PackedScene = load(path)
-		var inst := scene.instantiate()
-		rig.add_child(inst)
-		# the client-derived PBR material on every surface (the glTF carries
-		# only dummy materials — UModel does not bind L2 character textures)
+	var inst: Node = (load(CHAR_SCENE) as PackedScene).instantiate()
+	inst.name = "Character"
+	rig.add_child(inst)
+	# one skeleton, one animation player
+	for sk in inst.find_children("*", "Skeleton3D", true, false):
+		_char_skels.append(sk)
+	for ap in inst.find_children("*", "AnimationPlayer", true, false):
+		var lib = ap.get_animation_library("")  # untyped: Variant return
+		for a in lib.get_animation_list():
+			lib.get_animation(a).loop_mode = Animation.LOOP_LINEAR
+		_anim_players.append(ap)
+	# the client-derived PBR materials per mesh (the glTF carries only dummy
+	# materials — UModel does not bind L2 character textures); the mesh names
+	# identify the parts
+	for mi in inst.find_children("*", "MeshInstance3D", true, false):
+		# the imported MeshInstance node names are the clean part names
+		# (the mesh resource name carries the "FDarkElf_base_" file prefix)
+		var mesh_name: String = str(mi.name)
+		var cfg: Array = CHAR_MAT_MAP.get(mesh_name, ["FDarkElf_m000_t1000_u", false])
+		var tex_obj: String = cfg[0]
 		var mat := ShaderMaterial.new()
 		mat.shader = _pbr_shader
 		mat.set_shader_parameter("albedo_tex",
-				load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, part[1]]))
+				load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, tex_obj]))
 		mat.set_shader_parameter("normal_tex",
-				load("%s/%s.pbr_normal.png" % [CHAR_TEX_ROOT, part[1]]))
+				load("%s/%s.pbr_normal.png" % [CHAR_TEX_ROOT, tex_obj]))
 		mat.set_shader_parameter("uv_is_texels", false)
 		mat.set_shader_parameter("pom_scale", 0.0)
-		mat.set_shader_parameter("use_alpha", part[2])
-		if part[2]:
+		mat.set_shader_parameter("use_alpha", cfg[1])
+		if cfg[1]:
 			# the hair: alpha-SCISSOR, not alpha blend — the hair textures'
 			# alpha is binary (bh: 80% of pixels > 0.6, 19% < 0.1) and the
-			# alpha blend made the strands 40% see-through from behind (the
-			# user's transparency bug, 2026-11-15); scissor keeps the strand
-			# cores opaque and discards the gaps
+			# alpha blend made the strands 40% see-through from behind
+			# (the user's transparency bug, 2026-11-15)
 			var hm := StandardMaterial3D.new()
-			hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, part[1]])
+			hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, tex_obj])
 			hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 			hm.alpha_scissor_threshold = 0.5
 			hm.roughness = 0.55
 			hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 			hm.cull_mode = BaseMaterial3D.CULL_BACK
-			for mi in inst.find_children("*", "MeshInstance3D", true, false):
-				for s in mi.mesh.get_surface_count():
-					mi.set_surface_override_material(s, hm)
+			for s in mi.mesh.get_surface_count():
+				mi.set_surface_override_material(s, hm)
 		else:
-			for mi in inst.find_children("*", "MeshInstance3D", true, false):
-				for s in mi.mesh.get_surface_count():
-					mi.set_surface_override_material(s, mat)
-		# the injected run animation, one AnimationPlayer per part; all parts
-		# share the same skeleton and the same clip so they stay in sync
-		for sk in inst.find_children("*", "Skeleton3D", true, false):
-			_char_skels.append(sk)
-		for ap in inst.find_children("*", "AnimationPlayer", true, false):
-			var lib = ap.get_animation_library("")  # untyped: Variant return
-			for a in lib.get_animation_list():
-				lib.get_animation(a).loop_mode = Animation.LOOP_LINEAR
-			_anim_players.append(ap)
+			for s in mi.mesh.get_surface_count():
+				mi.set_surface_override_material(s, mat)
+		if mesh_name == "FDarkElf_m000_f":
+			_face_mat = mat
+			_face_open = load("%s/FDarkElf_m000_t00_f.pbr_albedo.png" % CHAR_TEX_ROOT)
+			_face_closed = load("%s/FDarkElf_m000_t00_f1.pbr_albedo.png" % CHAR_TEX_ROOT)
 	_attach_full_hair()
 
 func _attach_full_hair() -> void:
-	# the bh hair rides the Bip01_head bone (BoneAttachment3D): its own bind
-	# is in body space, so the correction = inv(head bind global) * bh bind
-	# (identity — the bh root is the body-space origin)
-	var only := OS.get_environment("L2_CHAR_ONLY")
-	if only != "" and only != CHAR_HAIR[0]:
-		return
+	# the bh hair (its own 13-bone physics skeleton, bind in body space)
+	# rides the Bip01_head bone of the single character skeleton via
+	# BoneAttachment3D with the inv-bind correction — the same way the
+	# client attaches its hair bones to the head
 	var hair_scene: PackedScene = load("res://assets/character/%s.gltf" % CHAR_HAIR[0])
 	if hair_scene == null:
 		return
-	# find the upper part's skeleton (any part's skeleton works — all identical)
-	var skel: Skeleton3D = null
-	var head_bind := Transform3D.IDENTITY
-	for c in rig.get_children():
-		var sk: Skeleton3D = c.find_children("*", "Skeleton3D", true, false)[0]
-		skel = sk
-		var bi: int = sk.find_bone("Bip01_head")
-		head_bind = sk.get_bone_global_pose(bi)  # rig-local (skeleton root = rig child)
-		break
+	var skel: Skeleton3D = _char_skels[0] if _char_skels.size() > 0 else null
 	if skel == null:
 		return
+	var head_bind := skel.get_bone_global_pose(skel.find_bone("Bip01_head"))
 	var attach := BoneAttachment3D.new()
 	attach.name = "HairAttach"
 	attach.bone_idx = skel.find_bone("Bip01_head")
@@ -262,7 +263,6 @@ func _attach_full_hair() -> void:
 	# bone's bind space; Hair01 then rides every head pose
 	attach.add_child(inst)
 	inst.transform = head_bind.affine_inverse() * Transform3D.IDENTITY
-	# the hair material: alpha-blend strands (see the ah material above)
 	var hm := StandardMaterial3D.new()
 	hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, CHAR_HAIR[1]])
 	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
@@ -299,6 +299,8 @@ func _attach_full_hair() -> void:
 		dbg_timer.start()
 
 func _char_run(active: bool) -> void:
+	if OS.get_environment("L2_ANIM_FRAME") != "":
+		return  # the frozen-frame diagnostic overrides the state machine
 	if active:
 		_idle_since_ms = -1  # the idle timer restarts on the next idle frame
 		for ap in _anim_players:
@@ -349,9 +351,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		# the current multiplier prints to the console for the DEVLOG
 		if event.keycode == KEY_EQUAL:
 			rig.scale = rig.scale * 1.05
+			_scale_hold_ms = Time.get_ticks_msec() + 2500
 			print("CHAR_SCALE %.2f (height ~%.2f m)" % [rig.scale.x, 0.444 * rig.scale.x])
 		elif event.keycode == KEY_MINUS:
 			rig.scale = rig.scale * 0.95
+			_scale_hold_ms = Time.get_ticks_msec() + 2500
 			print("CHAR_SCALE %.2f (height ~%.2f m)" % [rig.scale.x, 0.444 * rig.scale.x])
 
 func _physics_process(delta: float) -> void:
@@ -443,7 +447,10 @@ func _physics_process(delta: float) -> void:
 		DisplayServer.window_set_title(
 			"L2 20_18  X=%.0f Y=%.0f Z=%.1f" % [g.x, g.z, g.y])
 		if _coord_label:
-			_coord_label.text = "X=%.0f  Y=%.0f  Z=%.1f" % [g.x, g.z, g.y]
+			if Time.get_ticks_msec() < _scale_hold_ms:
+				_coord_label.text = "CHAR SCALE %.2f = %.2f m  (+/-)" % [rig.scale.x, 0.444 * rig.scale.x]
+			else:
+				_coord_label.text = "X=%.0f  Y=%.0f  Z=%.1f" % [g.x, g.z, g.y]
 	if terrain:
 		var game_x: float = position.x / 0.01
 		var game_y: float = position.z / 0.01

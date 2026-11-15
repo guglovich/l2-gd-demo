@@ -5062,3 +5062,42 @@ interactive calibration is in place: the =/- keys adjust the rig scale by
 5% live and print the multiplier + the resulting height; L2_CHAR_SCALE
 overrides the default for the screenshot runs. THE USER CALIBRATES AND
 REPORTS THE NUMBER; the constant gets fixed then.
+
+## DEVLOG-64 (2026-11-15): THE CLEAN-ROOM CHARACTER — ONE SKELETON
+
+**The user's verdict:** the face slides in EVERY animation (their
+screenshots: the face mask jutting out of the hair in the calm Wait and
+the AtkWait), and the fix is the modern-port rule: build the character the
+native Godot way, clean-room, because the L2 face system was a hack ("в
+Lineage 2 явно костыли были, да и схожие баги иногда в оригинальной
+игре").
+
+**THE STRUCTURAL FIX — tools/build_character.py:** the L2 client
+assembles the character from six separately-animated skeletal parts (six
+skeletons, six animation players, six desync chances). The tool merges
+the UModel part exports into ONE unified glTF (`FDarkElf_base.gltf`):
+one skeleton (the donor = the upper part), one skin, ONE animation
+player, the six client meshes as plain skinned mesh nodes referencing the
+shared skin (the joint orders asserted identical across the parts). A
+part desync is now structurally impossible.
+
+**player.gd** rebuilt on the single scene: one AnimationPlayer runs
+Run/AtkWait/Wait; the materials assign per MeshInstance by the node name
+(the mesh resource names carry the "FDarkElf_base_" prefix — the node
+names are the clean part names); the blink and the bh hair attach work as
+before but on the single skeleton.
+
+**Import pitfalls fixed on the way:** (1) the merged mesh nodes must be
+listed in scenes[0].nodes — orphan nodes are silently dropped by the
+importer (the first build rendered only the torso); (2) the material
+identification uses the NODE names, not the mesh resource names.
+
+**The scale calibration visibility:** the +/− keys now ALSO show the
+current scale and the resulting height on the in-game HUD label for 2.5 s
+(the user runs windowed without a console). L2_CHAR_SCALE still overrides
+the default for the screenshot runs.
+
+**Verified:** the unified bind (the full body, the hair on the head), the
+autorun (7400 → 8640, the calm Wait on arrival), the frozen run frame 4
+(the stride, the 0.35 head nod, the face in profile), the Wait/AtkWait
+idles. 0 script errors.
