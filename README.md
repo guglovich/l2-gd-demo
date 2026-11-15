@@ -43,9 +43,13 @@ Example: `L2_BRIGHT=1 godot --path .`
 
 ## Rebuild everything
 
+The pipeline is client-agnostic: `--source-root` is any UE2.5-era
+Lineage 2 client directory — the decrypt/extract stage finds the packages
+inside it.
+
 ```bash
 python3 -m tools.l2strict build \
-  --source-root /Games/ElmoreX3 \
+  --source-root /path/to/l2-client \
   --work-dir tmp/l2/20_18 \
   --map 20_18 \
   --neighbor 21_18 --neighbor 20_19 --neighbor 21_19 \
