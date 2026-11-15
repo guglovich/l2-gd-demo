@@ -4844,3 +4844,42 @@ the baseline cameras (the fresh reimport first) → pixel-diff vs
 `Docs/baseline/*.png` → any deviation beyond the noise = the regression,
 not "verified". The baselines = the ground truth; the DEVLOG text = the
 explanation.
+
+## DEVLOG-58 (2026-11-15): THE CODE PUSHED TO GITHUB — guglovich/l2-gd-demo
+
+**The user's order:** push our code and the Godot project to
+https://github.com/guglovich/l2-gd-demo; do NOT push the screenshots and
+the tools we did not create.
+
+**What was done:**
+
+1. `.gitignore` extended: `Docs/**/*.png` (ALL screenshots/renders stay
+   local — incl. the golden baselines and DE_village.png; they are
+   regenerable and the baseline protocol lives in MANIFEST.md), the
+   third-party/vendored tools, `notify.log`, `.zcode/`, `__pycache__/`.
+2. Untracked (git rm --cached, the files stay on disk):
+   - third-party tools: `tools/l2redat.exe`, `tools/GeodataConverter_02_01_01/`,
+     `tools/L2UE_Explorer_v1.091/`, `tools/craft-anything-0.2.0/` (vendored),
+     `tools/[273]_high_five/` (the client geodata dumps), `tools/__pycache__/`.
+   - screenshots: all 19 PNGs under Docs/.
+3. **History rewritten** (git filter-branch --index-filter over all 148
+   commits + both tags) so none of the above paths exist in ANY pushed
+   commit. Verified: zero matches for the forbidden paths in the full
+   `git log --all --name-only` after the rewrite; refs/original removed,
+   reflog expired, gc --prune=now. The commit hashes changed (148/148) —
+   the old DEVLOG hashes are pre-rewrite; the TAG
+   `golden-road-20261115` now = **92ead99** (was 54dadb9) and marks the
+   SAME tree content (only the excluded files differ).
+4. Pushed: master → origin (2928 files on the remote), both tags.
+   Remote verified via the API: `tools/` contains ONLY our tools
+   (l2strict, ghidra runner, l2_*.py, export shell scripts);
+   `Docs/baseline/` contains ONLY MANIFEST.md.
+
+**The repo layout note:** the ~146 MB pack is our generated assets
+(`assets/maps/20_18` meshes + `assets/textures` client-derived PNG sets —
+the pipeline outputs, regenerable but pushed so the project builds from a
+clone). tmp/, analysis/, the RE vendored tools and all screenshots are
+local-only.
+
+**Status:** the task is done. The golden-baseline protocol, AGENTS.md and
+DEVLOG stay the source of truth; the remote is the backup/visibility copy.
