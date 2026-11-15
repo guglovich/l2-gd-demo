@@ -15,6 +15,7 @@ var _last_title_ms := 0
 var _coord_label: Label
 var move_target: Vector3
 var has_target := false
+var _target_time := 0.0  # seconds since the current click-to-move target was set
 var rig: Node3D
 var dest_marker: MeshInstance3D
 
@@ -98,6 +99,7 @@ func _ready() -> void:
 	# run animation mid-stride (L2_AUTORUN=1)
 	if OS.get_environment("L2_AUTORUN") == "1":
 		has_target = true
+		_target_time = 0.0
 		move_target = position + Vector3(12.0, 0.0, 0.0)
 		dest_marker.visible = true
 
@@ -146,6 +148,7 @@ const CHAR_SCALE := 3.6
 const RUN_ANIM := "Run_Hand_FDarkElf"
 
 var _anim_players: Array = []
+var _char_skels: Array = []
 var _pbr_shader: Shader
 
 func _load_character() -> void:
@@ -179,13 +182,15 @@ func _load_character() -> void:
 		mat.set_shader_parameter("pom_scale", 0.0)
 		mat.set_shader_parameter("use_alpha", part[2])
 		if part[2]:
-			# the hair: alpha-BLEND strands (the client renders the hair
-			# FinalBlend translucent); alpha-scissor discards most of the
-			# thin strands — verified 2026-11-15
+			# the hair: alpha-SCISSOR, not alpha blend — the hair textures'
+			# alpha is binary (bh: 80% of pixels > 0.6, 19% < 0.1) and the
+			# alpha blend made the strands 40% see-through from behind (the
+			# user's transparency bug, 2026-11-15); scissor keeps the strand
+			# cores opaque and discards the gaps
 			var hm := StandardMaterial3D.new()
 			hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, part[1]])
-			hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-			hm.alpha_scissor_threshold = 0.0
+			hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			hm.alpha_scissor_threshold = 0.5
 			hm.roughness = 0.55
 			hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 			hm.cull_mode = BaseMaterial3D.CULL_BACK
@@ -198,6 +203,8 @@ func _load_character() -> void:
 					mi.set_surface_override_material(s, mat)
 		# the injected run animation, one AnimationPlayer per part; all parts
 		# share the same skeleton and the same clip so they stay in sync
+		for sk in inst.find_children("*", "Skeleton3D", true, false):
+			_char_skels.append(sk)
 		for ap in inst.find_children("*", "AnimationPlayer", true, false):
 			var lib = ap.get_animation_library("")  # untyped: Variant return
 			for a in lib.get_animation_list():
@@ -239,7 +246,8 @@ func _attach_full_hair() -> void:
 	# the hair material: alpha-blend strands (see the ah material above)
 	var hm := StandardMaterial3D.new()
 	hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, CHAR_HAIR[1]])
-	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	hm.alpha_scissor_threshold = 0.5
 	hm.roughness = 0.55
 	hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
 	for mi in inst.find_children("*", "MeshInstance3D", true, false):
@@ -265,7 +273,7 @@ func _attach_full_hair() -> void:
 				var bi: int = sk.find_bone("Bip01_head")
 				var gp: Vector3 = (sk.global_transform * sk.get_bone_global_pose(bi)).origin
 				var ap: AnimationPlayer = c.find_children("*", "AnimationPlayer", true, false)[0]
-				line += " %s[%.3f %.2f %.2f %.2f]" % [c.name.get_slice("_", 3) if c.name.begins_with("FDarkElf_m000_") else str(c.name), ap.current_animation_position, gp.x, gp.y, gp.z]
+				line += " %s[%.3f %.2f %.2f %.2f] realv=%.2f tgt_t=%.1f" % [c.name.get_slice("_", 3) if c.name.begins_with("FDarkElf_m000_") else str(c.name), ap.current_animation_position, gp.x, gp.y, gp.z, get_real_velocity().length(), _target_time]
 			print(line))
 		add_child(dbg_timer)
 		dbg_timer.start()
@@ -276,7 +284,13 @@ func _char_run(active: bool) -> void:
 			if ap.current_animation != RUN_ANIM:
 				ap.play(RUN_ANIM)
 		elif ap.is_playing():
-			ap.stop()  # back to the bind pose until the idle clip is injected
+			ap.stop()
+			
+			# AnimationPlayer.stop() leaves the bone poses at the last frame;
+			# the explicit rest reset returns the character to the bind pose
+			# (until the idle clip is injected)
+			for sk in _char_skels:
+				sk.reset_bone_poses()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
@@ -303,6 +317,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if hit:
 			move_target = hit.position
 			has_target = true
+			_target_time = 0.0
 			dest_marker.global_position = move_target + Vector3(0, 0.05, 0)
 			dest_marker.visible = true
 	elif event.is_action_pressed("ui_cancel"):
@@ -339,6 +354,7 @@ func _physics_process(delta: float) -> void:
 		rotation.y = lerp_angle(rotation.y, atan2(-dir.x, -dir.z), 10.0 * delta)
 		moving = true
 	elif has_target:
+		_target_time += delta
 		# click-to-move: run straight to the destination until close
 		var to_t := move_target - position
 		to_t.y = 0.0
@@ -353,10 +369,13 @@ func _physics_process(delta: float) -> void:
 			has_target = false
 			dest_marker.visible = false
 		# blocked (a wall/house between): the real displacement is ~zero while
-		# the run animation plays — drop the target and stand (the user's
-		# "дефолт стойка в режиме бега" bug, 2026-11-15)
-		if moving and get_real_velocity().length() < 0.5:
+		# the run animation plays — drop the target and stand. The 0.5 s grace
+		# period is REQUIRED: on the first frames get_real_velocity() still
+		# returns the previous frame's zero and the check would kill every
+		# fresh target instantly (the "character does not move" bug, 2026-11-15)
+		if moving and _target_time > 0.5 and get_real_velocity().length() < 0.5:
 			has_target = false
+			_target_time = 0.0
 			dest_marker.visible = false
 			velocity.x = 0
 			velocity.z = 0

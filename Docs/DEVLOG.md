@@ -4977,3 +4977,29 @@ L2_ANIM_FRAME, L2_AUTORUN.
 (t00_f1), the exact scale confirmation vs the original client, the hair
 physics (the client animates the 13 hair bones — ours is a static bind,
 fine without wind/physics).
+
+## DEVLOG-61 (2026-11-15): follow-up fixes after the user's re-test
+
+1. **"при просмотре сзади работает прозрачность"** — the hair materials
+   (ah + bh) switched from TRANSPARENCY_ALPHA to ALPHA_SCISSOR
+   (threshold 0.5): the hair textures' alpha is effectively binary
+   (bh: 80% of pixels > 0.6, 19% < 0.1) and the alpha blend made the
+   strand mass ~40% see-through from behind. Scissor keeps the strand
+   cores fully opaque and discards the gaps.
+2. **"персонаж не двигается"** — the blocked-detection added in DEVLOG-60
+   killed EVERY fresh target on its first frame: get_real_velocity()
+   returns the PREVIOUS move_and_slide result (zero before the first
+   step), so the check fired immediately. Fix: a 0.5 s grace period
+   (_target_time accumulates while has_target; the check requires
+   _target_time > 0.5).
+3. **the run pose stuck after stopping** — AnimationPlayer.stop() does NOT
+   restore the bone poses; added Skeleton3D.reset_bone_poses() in
+   _char_run(false) (the skeleton list is collected in _load_character;
+   the missing collection was itself a bug — the empty _char_skels array
+   aborted the stop branch with an out-of-bounds error and made the reset
+   a no-op). Verified: the autorun run ends in the upright bind pose.
+
+Verification renders: the bind from behind (opaque hair), the autorun
+arrival (X 7400 → 8640, standing pose in both shots, 0 script errors),
+the frozen run frame 4 (the clip still plays while moving, the hair rides
+the head).
