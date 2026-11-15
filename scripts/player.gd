@@ -52,6 +52,11 @@ func _ready() -> void:
 			# the opposite side (character front when facing east)
 			cam.position = Vector3(2.4, 1.5, 0.001)
 			cam.rotation = Vector3(-0.05, PI / 2, 0)
+		elif OS.get_environment("L2_DEBUG_CAM") == "macro":
+			# head close-up at the calibrated scale (the character ~0.44 m)
+			cam.position = Vector3(-0.75, 0.42, 0.001)
+			cam.rotation = Vector3(-0.05, -PI / 2, 0)
+			cam.fov = 40
 		else:
 			cam.position = Vector3(0, 30, 0.001)
 			cam.rotation = Vector3(-1.55, 0, 0)
@@ -148,10 +153,11 @@ const CHAR_MAT_MAP := {
 ## head shows only the dark backside of the face texture and the small ah tuft
 ## reads as a "displaced face" (the user's bug report, 2026-11-15).
 const CHAR_HAIR := ["FDarkElf_m000_m00_bh", "FDarkElf_m000_t00_m00_bh_ori"]
-## The L2 skeletal meshes are stored below world scale; the retail collision
-## height of the DE female = 37.5 dat units ≈ 160 cm → scale 3.6 (was 4.0 =
-## 1.78 m, the user: "рост и размеры превышены", 2026-11-15).
-const CHAR_SCALE := 3.6
+## The user's live calibration with the +/- keys (2026-11-15): the mesh
+## renders at its stored scale — the character height ≈ 0.44 m as exported
+## (scale 1.0). The dat collision_height 37.5 does NOT translate to cm the
+## way the earlier estimates assumed.
+const CHAR_SCALE := 1.0
 const RUN_ANIM := "Run_Hand_FDarkElf"
 ## The two standing animations from the client: the calm Wait (barely moves)
 ## and the weapon-ready AtkWait (the livelier stance played right after the

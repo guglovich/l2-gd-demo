@@ -5101,3 +5101,24 @@ the default for the screenshot runs.
 autorun (7400 → 8640, the calm Wait on arrival), the frozen run frame 4
 (the stride, the 0.35 head nod, the face in profile), the Wait/AtkWait
 idles. 0 script errors.
+
+## DEVLOG-65 (2026-11-15): the face fix for the idles + the user's scale
+
+**"в обычной стойке тоже проблема со съезжающим лицом"** — the root cause
+of the whole face-sag family: the head bone tracks in ALL the L2 clips
+over-rotate (the run 41-46°, the Wait/Stand 20-31° from the bind — the
+character looks at the ground), and the rigidly attached bh hair swings
+with the head — the hair ends up over the face and the face reads as
+"sliding". The clean fix: the Bip01_head channels are skipped in the
+IDLES too (the head keeps the bind orientation = looking forward; the
+hair stays behind; the face always visible). The Run keeps the 0.35 head
+blend (the slight nod). Re-injected: Run = 168 channels (the blended
+head), Wait/AtkWait = 166 (the head skipped). Verified in the macro
+profile render: the face fully visible, the hair behind the head.
+
+**The user's scale calibration:** "рост персонажа примерно 0.44, пока
+сделаем так" — CHAR_SCALE 3.6 → 1.0 (the mesh renders at its stored
+scale, the height ≈ 0.44 m). The dat collision_height 37.5 does not map
+to cm the way the earlier estimates assumed; the user's live comparison
+against the original client is the ground truth. The +/- keys and
+L2_CHAR_SCALE stay for the future re-calibration.
