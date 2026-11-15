@@ -38,7 +38,7 @@ def load(path):
     return g
 
 
-def copy_mesh(g, out, mesh_index, buffer_offset):
+def copy_mesh(g, out, mesh_index, buffer_offset, bin_data, bind_bone_joint=None):
     """Copy mesh `mesh_index` (+ its accessors/bufferViews) from g into out.
 
     Returns the new mesh index in out. The accessor indices inside the mesh
@@ -64,6 +64,29 @@ def copy_mesh(g, out, mesh_index, buffer_offset):
                 out["accessors"].append(acc)
                 acc_map[ai] = len(out["accessors"]) - 1
             new_attrs[attr] = acc_map[ai]
+        if bind_bone_joint is not None:
+            # re-bind every vertex to one bone: JOINTS_0 = the bone x4,
+            # WEIGHTS_0 = (1, 0, 0, 0) in the source's component format
+            for attr, values_fn in (("JOINTS_0",
+                                     lambda acc0: [bind_bone_joint] * 4),
+                                    ("WEIGHTS_0", values_for_weights)):
+                acc0 = g["accessors"][prim["attributes"][attr]]
+                values = values_fn(acc0)
+                while len(bin_data) % 4:
+                    bin_data.append(0)
+                ct = acc0["componentType"]
+                n = acc0["count"]
+                fmt = {5126: "f", 5121: "B", 5123: "H", 5125: "I"}[ct]
+                blob = b"".join(struct.pack("<" + fmt, v) for v in values) * n
+                out["bufferViews"].append({"buffer": 0,
+                                           "byteOffset": len(bin_data),
+                                           "byteLength": len(blob)})
+                bin_data += blob
+                out["accessors"].append({"bufferView": len(out["bufferViews"]) - 1,
+                                         "componentType": ct,
+                                         "count": n,
+                                         "type": acc0["type"]})
+                new_attrs[attr] = len(out["accessors"]) - 1
         new_prim = {"attributes": new_attrs, "mode": prim.get("mode", 4)}
         if "indices" in prim:
             ii = prim["indices"]
@@ -88,10 +111,21 @@ def copy_mesh(g, out, mesh_index, buffer_offset):
     return len(out["meshes"]) - 1
 
 
+def values_for_weights(acc0):
+    # normalized UBYTE weights: 1.0 = 255; floats: 1.0
+    return [255, 0, 0, 0] if acc0["componentType"] == 5121 else [1.0, 0.0, 0.0, 0.0]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", required=True, help="the donor part (skeleton + animations)")
     ap.add_argument("--parts", nargs="+", required=True, help="the other parts to merge")
+    ap.add_argument("--bind", default="",
+                    help="mesh_name=bone_name pairs: re-bind ALL vertices of "
+                    "that mesh to the given bone (weight 1.0). The L2 face "
+                    "mesh carries a dummy all-on-root skin (in the client it "
+                    "is an attached rigid mesh, not skinned) — it must be "
+                    "bound to Bip01_head or it swings with the root")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -110,6 +144,11 @@ def main():
         "animations": [dict(a) for a in base.get("animations", [])],
         "materials": [dict(m) for m in base.get("materials", [])],
     }
+    bind_map = {}
+    for pair in args.bind.split(","):
+        if "=" in pair:
+            k, v = pair.split("=", 1)
+            bind_map[k.strip()] = v.strip()
     bin_data = bytearray(base["_bin"])
     scene_nodes = list(out["scenes"][0]["nodes"])
     # the merged part meshes ride the base skin (skin 0)
@@ -125,7 +164,11 @@ def main():
         # pad to 4
         while len(bin_data) % 4:
             bin_data.append(0)
-        mi = copy_mesh(part, out, 0, buf_off)
+        bind_joint = None
+        for mesh_name, bone_name in bind_map.items():
+            if part["_name"] == mesh_name:
+                bind_joint = base_names.index(bone_name)
+        mi = copy_mesh(part, out, 0, buf_off, bin_data, bind_joint)
         out["nodes"].append({"name": part["_name"], "mesh": mi, "skin": 0})
         scene_nodes.append(len(out["nodes"]) - 1)
         print(f"merged {part['_name']}: mesh {mi}, node {len(out['nodes'])-1}, "

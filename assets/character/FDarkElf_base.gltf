@@ -1506,12 +1506,12 @@
       "POSITION": 532,
       "NORMAL": 533,
       "TANGENT": 534,
-      "JOINTS_0": 535,
-      "WEIGHTS_0": 536,
+      "JOINTS_0": 538,
+      "WEIGHTS_0": 539,
       "TEXCOORD_0": 537
      },
      "mode": 4,
-     "indices": 538,
+     "indices": 540,
      "material": 0
     }
    ]
@@ -1521,15 +1521,15 @@
    "primitives": [
     {
      "attributes": {
-      "POSITION": 539,
-      "NORMAL": 540,
-      "TANGENT": 541,
-      "JOINTS_0": 542,
-      "WEIGHTS_0": 543,
-      "TEXCOORD_0": 544
+      "POSITION": 541,
+      "NORMAL": 542,
+      "TANGENT": 543,
+      "JOINTS_0": 544,
+      "WEIGHTS_0": 545,
+      "TEXCOORD_0": 546
      },
      "mode": 4,
-     "indices": 545,
+     "indices": 547,
      "material": 0
     }
    ]
@@ -4932,11 +4932,23 @@
   {
    "bufferView": 538,
    "componentType": 5123,
+   "count": 199,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 539,
+   "componentType": 5121,
+   "count": 199,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 540,
+   "componentType": 5123,
    "count": 1032,
    "type": "SCALAR"
   },
   {
-   "bufferView": 539,
+   "bufferView": 541,
    "min": [
     -0.0181408,
     0.368378,
@@ -4952,38 +4964,38 @@
    "type": "VEC3"
   },
   {
-   "bufferView": 540,
+   "bufferView": 542,
    "componentType": 5126,
    "count": 38,
    "type": "VEC3"
   },
   {
-   "bufferView": 541,
+   "bufferView": 543,
    "componentType": 5126,
    "count": 38,
    "type": "VEC4"
   },
   {
-   "bufferView": 542,
+   "bufferView": 544,
    "componentType": 5123,
    "count": 38,
    "type": "VEC4"
   },
   {
-   "bufferView": 543,
+   "bufferView": 545,
    "normalized": true,
    "componentType": 5121,
    "count": 38,
    "type": "VEC4"
   },
   {
-   "bufferView": 544,
+   "bufferView": 546,
    "componentType": 5126,
    "count": 38,
    "type": "VEC2"
   },
   {
-   "bufferView": 545,
+   "bufferView": 547,
    "componentType": 5123,
    "count": 138,
    "type": "SCALAR"
@@ -7682,49 +7694,59 @@
   },
   {
    "buffer": 0,
+   "byteOffset": 740648,
+   "byteLength": 1592
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 742240,
+   "byteLength": 796
+  },
+  {
+   "buffer": 0,
    "byteOffset": 600484,
    "byteLength": 2064
   },
   {
    "buffer": 0,
-   "byteOffset": 746300,
+   "byteOffset": 748688,
    "byteLength": 456
   },
   {
    "buffer": 0,
-   "byteOffset": 746756,
+   "byteOffset": 749144,
    "byteLength": 456
   },
   {
    "buffer": 0,
-   "byteOffset": 747212,
+   "byteOffset": 749600,
    "byteLength": 608
   },
   {
    "buffer": 0,
-   "byteOffset": 747820,
+   "byteOffset": 750208,
    "byteLength": 304
   },
   {
    "buffer": 0,
-   "byteOffset": 748124,
+   "byteOffset": 750512,
    "byteLength": 152
   },
   {
    "buffer": 0,
-   "byteOffset": 748276,
+   "byteOffset": 750664,
    "byteLength": 304
   },
   {
    "buffer": 0,
-   "byteOffset": 746024,
+   "byteOffset": 748412,
    "byteLength": 276
   }
  ],
  "buffers": [
   {
    "uri": "FDarkElf_base.bin",
-   "byteLength": 874740
+   "byteLength": 877128
   }
  ],
  "animations": [

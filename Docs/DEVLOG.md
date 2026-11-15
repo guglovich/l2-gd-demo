@@ -5122,3 +5122,39 @@ scale, the height ≈ 0.44 m). The dat collision_height 37.5 does not map
 to cm the way the earlier estimates assumed; the user's live comparison
 against the original client is the ground truth. The +/- keys and
 L2_CHAR_SCALE stay for the future re-calibration.
+
+## DEVLOG-66 (2026-11-15): THE FACE DETACHMENT ROOT CAUSE — THE DUMMY SKIN
+
+**The user:** the face slides at EVERY animation (not just some) — dig with
+craft-anything (the clean-room method). The brief was written into the
+craft-anything investigation (analysis/l2-godot.cany, the plan is updated
+there).
+
+**THE ROOT CAUSE (numeric):** the L2 face mesh FDarkElf_m000_f has ALL 199
+vertices bound with weight 1.0 to the ROOT bone Bip01 — a DUMMY skin. In
+the L2 client the face is an ATTACHED rigid mesh positioned at the head
+(the vertex weights are meaningless); UModel exported the dummy weights
+as-is. At the bind pose Bip01 ≈ identity → the face sits correctly at its
+body-space head position. During ANY animation Bip01 sways (yaw/pitch) →
+the face swings around the body origin at the ~0.4 m head-height lever —
+forward, then up. Exactly the user's symptom.
+Evidence (the weighted JOINTS_0 histograms): the face = Bip01 50745.0
+(100%); the ah tuft = Bip01_head 9690.0 (100% — correct); the torso =
+spine2/arms/spine (the proper weights). The IBMs and the joint orders are
+identical across the merged files (diff 0.0) — the merge is correct.
+
+**THE FIX:** tools/build_character.py --bind "FDarkElf_m000_f=Bip01_head"
+— re-binds every listed mesh's vertices fully to the given bone (weight
+1.0, the component format preserved). The face then rigidly rides the
+head bone = the client-equivalent attached behavior, natively skinned.
+The unified FDarkElf_base.gltf rebuilt; verified from the file (the face
+binds 100% to Bip01_head) and visually across the frozen run frames
+0/4/8/12 (the face stays on the head).
+
+**The scale:** CHAR_SCALE 1.0 per the user's calibration (the height
+≈ 0.44 m as the mesh is stored).
+
+**Also:** the investigation methods moved to craft-anything (the brief,
+the plan, the hypotheses, the handoff live in analysis/l2-godot.cany).
+The Run keeps the 0.35 head blend; the idles skip the head tracks (see
+DEVLOG-65).
