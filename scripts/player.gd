@@ -150,9 +150,21 @@ const CHAR_HAIR := ["FDarkElf_m000_m00_bh", "FDarkElf_m000_t00_m00_bh_ori"]
 ## 1.78 m, the user: "рост и размеры превышены", 2026-11-15).
 const CHAR_SCALE := 3.6
 const RUN_ANIM := "Run_Hand_FDarkElf"
+## The two standing animations from the client: the calm Wait (barely moves)
+## and the weapon-ready AtkWait (the livelier stance played right after the
+## movement/activity, then it settles into the calm Wait). Both injected
+## without the Bip01_head channels (see DEVLOG-62).
+const IDLE_ANIM := "Wait_Hand_FDarkElf"
+const ATKWAIT_ANIM := "AtkWait_Hand_FDarkElf"
 
 var _anim_players: Array = []
 var _char_skels: Array = []
+var _idle_since_ms := -100000  # far in the past = the calm Wait at spawn
+var _face_mat: ShaderMaterial
+var _face_open: Texture2D
+var _face_closed: Texture2D
+var _blink_t := 2.0
+var _blink_closed := false
 var _pbr_shader: Shader
 
 func _load_character() -> void:
@@ -280,24 +292,27 @@ func _attach_full_hair() -> void:
 				var bi: int = sk.find_bone("Bip01_head")
 				var gp: Vector3 = (sk.global_transform * sk.get_bone_global_pose(bi)).origin
 				var ap: AnimationPlayer = c.find_children("*", "AnimationPlayer", true, false)[0]
-				line += " %s[%.3f %.2f %.2f %.2f] realv=%.2f tgt_t=%.1f" % [c.name.get_slice("_", 3) if c.name.begins_with("FDarkElf_m000_") else str(c.name), ap.current_animation_position, gp.x, gp.y, gp.z, get_real_velocity().length(), _target_time]
+				var nm: String = c.name.get_slice("_", 3) if c.name.begins_with("FDarkElf_m000_") else str(c.name)
+				line += " %s[anim=%s pos=%.3f head=%.2f %.2f %.2f]" % [nm, ap.current_animation, ap.current_animation_position, gp.x, gp.y, gp.z]
 			print(line))
 		add_child(dbg_timer)
 		dbg_timer.start()
 
 func _char_run(active: bool) -> void:
-	for ap in _anim_players:
-		if active:
+	if active:
+		_idle_since_ms = -1  # the idle timer restarts on the next idle frame
+		for ap in _anim_players:
 			if ap.current_animation != RUN_ANIM:
 				ap.play(RUN_ANIM)
-		elif ap.is_playing():
-			ap.stop()
-			
-			# AnimationPlayer.stop() leaves the bone poses at the last frame;
-			# the explicit rest reset returns the character to the bind pose
-			# (until the idle clip is injected)
-			for sk in _char_skels:
-				sk.reset_bone_poses()
+	else:
+		# the two-stage standing (the client behavior): the livelier AtkWait
+		# stance right after the movement, then the calm Wait
+		if _idle_since_ms == -1:
+			_idle_since_ms = Time.get_ticks_msec()
+		var want: String = ATKWAIT_ANIM if Time.get_ticks_msec() - _idle_since_ms < 3000 else IDLE_ANIM
+		for ap in _anim_players:
+			if ap.current_animation != want:
+				ap.play(want)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
@@ -406,6 +421,19 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	# the real L2 run animation (Run_Hand_FDarkElf, rotation-only from the
 	# PSA); the procedural bob/lean is retired — the clip carries the gait
+	# the eye blink: swap the face albedo between the open (t00_f) and the
+	# closed (t00_f1) client frames every few seconds
+	if _face_mat != null:
+		_blink_t -= delta
+		if _blink_t <= 0.0:
+			if _blink_closed:
+				_face_mat.set_shader_parameter("albedo_tex", _face_open)
+				_blink_closed = false
+				_blink_t = randf_range(2.5, 4.5)
+			else:
+				_face_mat.set_shader_parameter("albedo_tex", _face_closed)
+				_blink_closed = true
+				_blink_t = 0.12
 	_char_run(moving)
 	# live game coordinates: window title + on-screen HUD (debug aid)
 	var now := Time.get_ticks_msec()

@@ -49,6 +49,7 @@ Usage:
 """
 import argparse
 import json
+import math
 import os
 import struct
 
@@ -107,7 +108,7 @@ def key_at_root(d, base, idx):
     return pos, quat
 
 
-def inject(gltf_path, seq, bones, keydata, skip=()):
+def inject(gltf_path, seq, bones, keydata, skip=(), blend={}):
     d, base, _ = keydata
     g = json.load(open(gltf_path))
     if "animations" not in g:
@@ -126,6 +127,22 @@ def inject(gltf_path, seq, bones, keydata, skip=()):
     node_by_name = {}
     for i, n in enumerate(g["nodes"]):
         node_by_name[n.get("name", "")] = i
+
+    def slerp(a, b, t):
+        d = sum(x * y for x, y in zip(a, b))
+        if d < 0.0:
+            a = tuple(-x for x in a)
+            d = -d
+        if d > 0.9995:
+            r = tuple(a[i] + (b[i] - a[i]) * t for i in range(4))
+        else:
+            th = math.acos(min(1.0, d))
+            st = math.sin(th)
+            wa = math.sin((1 - t) * th) / st
+            wb = math.sin(t * th) / st
+            r = tuple(a[i] * wa + b[i] * wb for i in range(4))
+        n = math.sqrt(sum(x * x for x in r))
+        return tuple(x / n for x in r)
 
     fps = seq["rate"]
     nframes = seq["num_frames"]
@@ -156,10 +173,15 @@ def inject(gltf_path, seq, bones, keydata, skip=()):
         if ni is None or bname in skip:
             continue
         is_root = bname == bones[0]
+        bind_q = None
+        if bname in blend and 0.0 < blend[bname] < 1.0:
+            bind_q = g["nodes"][ni].get("rotation", [0, 0, 0, 1])
         pos, quat = [], []
         for f in range(nframes):
             p, q = (key_at_root if is_root else key_at)(d, base,
                                                         seq["first_frame"] * len(bones) + f * len(bones) + bi)
+            if bind_q is not None:
+                q = slerp(bind_q, q, blend[bname])
             pos += p
             quat += q
         pacc = add_view(struct.pack("<%df" % len(pos), *pos), nframes, 5126, "VEC3")
@@ -191,6 +213,11 @@ def main():
                     help="comma-separated bone names whose channels are NOT "
                     "emitted (e.g. Bip01_head — the L2 run pitch keeps the "
                     "head at the bind orientation, the face stays visible)")
+    ap.add_argument("--bone-blend", default="",
+                    help="name=factor pairs: the bone's animated rotation is "
+                    "slerped toward its bind by (1-factor); Bip01_head=0.35 "
+                    "gives the run a slight nod instead of the full 46 deg "
+                    "ground-stare while keeping the face visible")
     ap.add_argument("--gltf", nargs="+", default=[])
     args = ap.parse_args()
 
@@ -206,7 +233,12 @@ def main():
     if seq is None:
         raise SystemExit(f"sequence '{args.seq}' not found")
     skip = set(x.strip() for x in args.skip_bones.split(",") if x.strip())
-    inject_args = (seq, psa["bones"], psa["keys"], skip)
+    blend = {}
+    for pair in args.bone_blend.split(","):
+        if "=" in pair:
+            k, v = pair.split("=", 1)
+            blend[k.strip()] = float(v)
+    inject_args = (seq, psa["bones"], psa["keys"], skip, blend)
     for g in args.gltf:
         inject(g, *inject_args)
 

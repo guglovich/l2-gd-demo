@@ -5024,3 +5024,41 @@ height print to the console). The user calibrates against the original
 client and reports the value; the constant then gets fixed. 3.6 (~1.60 m
 from the retail collision_height 37.5) is still reported as huge — the
 interactive tuning replaces the guess-loop.
+
+## DEVLOG-63 (2026-11-15): the idle pair + the blink + the run head blend
+
+**The user's report:** the face flies off the head (their screenshot: the
+face mask floating above the body); add the TWO standing animations (the
+livelier one after the activity and the calm one); the eyes must BLINK in
+both; the size is still wrong (see the note at the end).
+
+**The face "detachment" decoded:** the user's screenshot shows the ATKWAIT
+stance (the crouched combat pose) with the head at the bind orientation —
+in that build ALL clips had the Bip01_head channels excluded, so the
+crouched stance kept the upright head and the face read as "flown off".
+The clip-specific handling: AtkWait/Wait keep their head tracks (the
+stances carry them correctly — verified: the face attached in the idle
+renders), the RUN blends the head at 0.35 (--bone-blend "Bip01_head=0.35"
+in tools/psa_to_gltf.py: the head quat = slerp(bind, anim, 0.35) — the
+slight nod instead of the 46-deg ground-stare, the face stays visible;
+verified in the frozen frame profile).
+
+**The two standing animations (from the client's FDarkElf_anim):**
+- `Wait_Hand_FDarkElf` (16 frames @ 6 fps) — the calm standing;
+- `AtkWait_Hand_FDarkElf` (22 frames @ 12 fps) — the weapon-ready stance.
+The state machine (scripts/player.gd _char_run): running → on stop the
+AtkWait stance plays for 3 s → then the calm Wait loops (the spawn starts
+directly in the calm Wait).
+
+**The blink:** the face albedo swaps between the client's open-eye frame
+(t00_f) and the closed-eye frame (t00_f1) — a random 2.5-4.5 s interval,
+0.12 s closed (scripts/player.gd _physics_process).
+
+**The size:** still open. The retail DE female collision_height = 37.5 dat
+units ≈ 160 cm → the scale 3.6, but the user reports it as still wrong
+("персонаж ниже карты при входе в деревню" — ambiguous: shorter than the
+map expects, or sinking below the map surface at the entrance). The
+interactive calibration is in place: the =/- keys adjust the rig scale by
+5% live and print the multiplier + the resulting height; L2_CHAR_SCALE
+overrides the default for the screenshot runs. THE USER CALIBRATES AND
+REPORTS THE NUMBER; the constant gets fixed then.
