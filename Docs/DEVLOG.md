@@ -4943,3 +4943,37 @@ the bind pose (pelvis frame0 within 5.7° of bind).
 (Walk_Hand), the blink (t00_f1), the hair variant tuning, the exact height
 calibration vs the original client (the 4.0 scale constant), the weapon
 bone attachment (Weapon_R_Bone etc. exist in the skeleton).
+
+## DEVLOG-60 (2026-11-15): THREE CHARACTER BUGS FIXED (the user's report)
+
+1. **"лицо съехало в сторону"** — diagnosed via per-part renders + bone
+   probes: the face mesh is NOT displaced (all six skeletons' Bip01_head
+   global poses are IDENTICAL live and frozen, verified by
+   L2_CHAR_DEBUG=1; the injected animation data is byte-identical across
+   the part files). What read as a "displaced face" = the hair: the small
+   ah tuft (38 verts) rendered as a white wisp while the head showed only
+   the dark backside of the face texture. FIX: the FULL hair
+   FDarkElf_m000_m00_bh (13 hair bones, bind in body space) is attached to
+   the Bip01_head bone via BoneAttachment3D with the correction transform
+   inv(head bind global) — the hair rides every head pose (the client
+   attaches its hair bones to the head too; the bh's own skeleton cannot
+   play the Bip01 run clip). Verified: the hair sits on the head at bind,
+   at the frozen run frames and in the live autorun.
+2. **"дефолт стойка в режиме бега"** — the click-to-move target is dropped
+   when the character is BLOCKED (get_real_velocity() < 0.5 m/s while
+   has_target): no more running-in-place against a house; the pose returns
+   to bind via _char_run(false). Verified at the user's spot (11040,17464):
+   the character runs to the steps, gets blocked, stands idle.
+3. **"рост и размеры превышены"** — CHAR_SCALE 4.0 → 3.6: the retail DE
+   female collision_height = 37.5 dat units ≈ 160 cm; 3.6 × 0.444 m mesh =
+   1.60 m. The constant stays single (scripts/player.gd) for further
+   calibration against the original client.
+
+Diagnostics kept (env-gated): L2_CHAR_DEBUG=1 (per-part bone print),
+L2_CHAR_ONLY=<part> (render one part), L2_DEBUG_CAM=close (head close-up),
+L2_ANIM_FRAME, L2_AUTORUN.
+
+**Pending:** the idle (Wait_Hand) / walk (Walk_Hand) clips, the blink
+(t00_f1), the exact scale confirmation vs the original client, the hair
+physics (the client animates the 13 hair bones — ours is a static bind,
+fine without wind/physics).

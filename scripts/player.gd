@@ -43,6 +43,10 @@ func _ready() -> void:
 			# side view for character-animation diagnostics
 			cam.position = Vector3(-6, 1.0, 0.001)
 			cam.rotation = Vector3(-0.05, -PI / 2, 0)
+		elif OS.get_environment("L2_DEBUG_CAM") == "close":
+			# head/upper-body close-up for character diagnostics
+			cam.position = Vector3(-2.4, 1.5, 0.001)
+			cam.rotation = Vector3(-0.05, -PI / 2, 0)
 		else:
 			cam.position = Vector3(0, 30, 0.001)
 			cam.rotation = Vector3(-1.55, 0, 0)
@@ -115,10 +119,9 @@ func _make_crosshair() -> void:
 
 ## The character = the original L2 Dark Elf female FIGHTER base (2026-11-15):
 ## the m000 body parts (no armor set, no weapon) + the face variant t00 + the
-## hair variant ah, the client-derived PBR sets (texgen.py from the client
-## PNGs), the run animation Run_Hand_FDarkElf injected by tools/psa_to_gltf.py
-## (rotation-only — the L2 MeshAnimation tracks carry no position keys for the
-## real skeleton bones; the bind translations come from the glTF rests).
+## hair, the client-derived PBR sets (texgen.py from the client PNGs), the run
+## animation Run_Hand_FDarkElf injected by tools/psa_to_gltf.py into every
+## part's glTF (rotation+translation channels).
 const CHAR_TEX_ROOT := "res://assets/character/fdarkelf/Texture"
 const CHAR_PARTS := [
 	# [mesh name, texture object, alpha-cutout]
@@ -129,10 +132,17 @@ const CHAR_PARTS := [
 	["FDarkElf_m000_f", "FDarkElf_m000_t00_f", false],
 	["FDarkElf_m000_m00_ah", "FDarkElf_m000_t00_m00_ah_ori", true],
 ]
-## The L2 skeletal meshes are stored ~4x below world scale (the client scales
-## them at render). 4.0 x 0.444 m mesh height = 1.78 m — calibrate against the
-## original client side-by-side if it deviates (single constant).
-const CHAR_SCALE := 4.0
+## The full hair = FDarkElf_m000_m00_bh: its own 13-bone skeleton (Hair01-13,
+## the client's hair physics) whose bind is in body space — it cannot play the
+## Bip01 run clip, so it is attached to the Bip01_head bone via BoneAttachment3D
+## (the client attaches the hair bones to the head too). Without the bh the
+## head shows only the dark backside of the face texture and the small ah tuft
+## reads as a "displaced face" (the user's bug report, 2026-11-15).
+const CHAR_HAIR := ["FDarkElf_m000_m00_bh", "FDarkElf_m000_t00_m00_bh_ori"]
+## The L2 skeletal meshes are stored below world scale; the retail collision
+## height of the DE female = 37.5 dat units ≈ 160 cm → scale 3.6 (was 4.0 =
+## 1.78 m, the user: "рост и размеры превышены", 2026-11-15).
+const CHAR_SCALE := 3.6
 const RUN_ANIM := "Run_Hand_FDarkElf"
 
 var _anim_players: Array = []
@@ -147,6 +157,10 @@ func _load_character() -> void:
 	if _pbr_shader == null:
 		_pbr_shader = load("res://assets/shaders/l2_surface_pbr.gdshader")
 	for part in CHAR_PARTS:
+		# diagnostic: render only one part (L2_CHAR_ONLY=<mesh name>)
+		var only := OS.get_environment("L2_CHAR_ONLY")
+		if only != "" and only != part[0]:
+			continue
 		var path := "res://assets/character/%s.gltf" % part[0]
 		if not ResourceLoader.exists(path):
 			continue
@@ -189,6 +203,48 @@ func _load_character() -> void:
 			for a in lib.get_animation_list():
 				lib.get_animation(a).loop_mode = Animation.LOOP_LINEAR
 			_anim_players.append(ap)
+	_attach_full_hair()
+
+func _attach_full_hair() -> void:
+	# the bh hair rides the Bip01_head bone (BoneAttachment3D): its own bind
+	# is in body space, so the correction = inv(head bind global) * bh bind
+	# (identity — the bh root is the body-space origin)
+	var only := OS.get_environment("L2_CHAR_ONLY")
+	if only != "" and only != CHAR_HAIR[0]:
+		return
+	var hair_scene: PackedScene = load("res://assets/character/%s.gltf" % CHAR_HAIR[0])
+	if hair_scene == null:
+		return
+	# find the upper part's skeleton (any part's skeleton works — all identical)
+	var skel: Skeleton3D = null
+	var head_bind := Transform3D.IDENTITY
+	for c in rig.get_children():
+		var sk: Skeleton3D = c.find_children("*", "Skeleton3D", true, false)[0]
+		skel = sk
+		var bi: int = sk.find_bone("Bip01_head")
+		head_bind = sk.get_bone_global_pose(bi)  # rig-local (skeleton root = rig child)
+		break
+	if skel == null:
+		return
+	var attach := BoneAttachment3D.new()
+	attach.name = "HairAttach"
+	attach.bone_idx = skel.find_bone("Bip01_head")
+	attach.bone_name = "Bip01_head"
+	skel.add_child(attach)
+	var inst: Node = hair_scene.instantiate()
+	# correction: the bh bind (identity in body space) expressed in the head
+	# bone's bind space; Hair01 then rides every head pose
+	attach.add_child(inst)
+	inst.transform = head_bind.affine_inverse() * Transform3D.IDENTITY
+	# the hair material: alpha-blend strands (see the ah material above)
+	var hm := StandardMaterial3D.new()
+	hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, CHAR_HAIR[1]])
+	hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hm.roughness = 0.55
+	hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	for mi in inst.find_children("*", "MeshInstance3D", true, false):
+		for s in mi.mesh.get_surface_count():
+			mi.set_surface_override_material(s, hm)
 	# diagnostic hook: freeze the run clip at one frame (L2_ANIM_FRAME=<0..15>)
 	if OS.get_environment("L2_ANIM_FRAME") != "":
 		var fr := int(OS.get_environment("L2_ANIM_FRAME"))
@@ -196,6 +252,23 @@ func _load_character() -> void:
 			ap.play(RUN_ANIM)
 			ap.seek(fr / 24.0, true)
 			ap.pause()
+	# diagnostic: per-part skeleton/bone state (L2_CHAR_DEBUG=1)
+	if OS.get_environment("L2_CHAR_DEBUG") == "1":
+		var dbg_t := 0.0
+		var dbg_timer := Timer.new()
+		dbg_timer.wait_time = 0.5
+		dbg_timer.timeout.connect(func():
+			dbg_t += 0.5
+			var line := "t=%.2f " % dbg_t
+			for c in rig.get_children():
+				var sk: Skeleton3D = c.find_children("*", "Skeleton3D", true, false)[0]
+				var bi: int = sk.find_bone("Bip01_head")
+				var gp: Vector3 = (sk.global_transform * sk.get_bone_global_pose(bi)).origin
+				var ap: AnimationPlayer = c.find_children("*", "AnimationPlayer", true, false)[0]
+				line += " %s[%.3f %.2f %.2f %.2f]" % [c.name.get_slice("_", 3) if c.name.begins_with("FDarkElf_m000_") else str(c.name), ap.current_animation_position, gp.x, gp.y, gp.z]
+			print(line))
+		add_child(dbg_timer)
+		dbg_timer.start()
 
 func _char_run(active: bool) -> void:
 	for ap in _anim_players:
@@ -279,6 +352,15 @@ func _physics_process(delta: float) -> void:
 		else:
 			has_target = false
 			dest_marker.visible = false
+		# blocked (a wall/house between): the real displacement is ~zero while
+		# the run animation plays — drop the target and stand (the user's
+		# "дефолт стойка в режиме бега" bug, 2026-11-15)
+		if moving and get_real_velocity().length() < 0.5:
+			has_target = false
+			dest_marker.visible = false
+			velocity.x = 0
+			velocity.z = 0
+			moving = false
 	if not moving:
 		velocity.x = move_toward(velocity.x, 0, 20 * delta)
 		velocity.z = move_toward(velocity.z, 0, 20 * delta)

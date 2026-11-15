@@ -1,0 +1,234 @@
+{
+  "asset" : {
+    "generator" : "UE Viewer (umodel) build 1573",
+    "version" : "2.0"
+  },
+  "scene" : 0,
+  "scenes" : [
+    {
+      "nodes" : [ 0 ]
+    }
+  ],
+  "nodes" : [
+    {
+      "name" : "FDarkElf_m000_m00_bh",
+      "mesh" : 0,
+      "skin" : 0,
+      "children" : [ 1 ]
+    },
+    {
+      "name" : "Hair01",
+      "children" : [ 2, 6, 10 ],
+      "translation" : [ 1.44098e-09, 0.40361, 0.00587187 ],
+      "rotation" : [ -0.707107, -0.707107, 1.18323e-08, -1.13051e-06 ]
+    },
+    {
+      "name" : "Hair10",
+      "children" : [ 3 ],
+      "translation" : [ 0.0238891, -0.0174432, 0.0129244 ],
+      "rotation" : [ -5.36869e-07, -0.0825196, -7.75256e-08, -0.996589 ]
+    },
+    {
+      "name" : "Hair11",
+      "children" : [ 4 ],
+      "translation" : [ -0.0315337, -2.29409e-09, 1.10348e-09 ],
+      "rotation" : [ 2.5539e-08, 0.00870872, 5.50427e-09, -0.999962 ]
+    },
+    {
+      "name" : "Hair12",
+      "children" : [ 5 ],
+      "translation" : [ -0.0264883, -1.60198e-10, -5.04902e-09 ],
+      "rotation" : [ 8.2436e-08, -0.0228533, 1.30964e-07, -0.999739 ]
+    },
+    {
+      "name" : "Hair13",
+      "translation" : [ -0.0766802, -4.04737e-08, -0.00501605 ],
+      "rotation" : [ 0.130525, 0.00407538, 0.000536393, -0.991436 ]
+    },
+    {
+      "name" : "Hair06",
+      "children" : [ 7 ],
+      "translation" : [ 0.0233008, -1.61556e-08, 0.0236841 ],
+      "rotation" : [ -6.15829e-07, -0.106169, -1.94974e-08, -0.994348 ]
+    },
+    {
+      "name" : "Hair07",
+      "children" : [ 8 ],
+      "translation" : [ -0.0318475, -1.6572e-09, -8.08477e-09 ],
+      "rotation" : [ 2.2583e-08, 0.0254314, -2.88942e-08, -0.999677 ]
+    },
+    {
+      "name" : "Hair08",
+      "children" : [ 9 ],
+      "translation" : [ -0.0242049, 1.33426e-09, 3.03568e-09 ],
+      "rotation" : [ 5.29662e-07, -0.0112685, 8.88227e-08, -0.999937 ]
+    },
+    {
+      "name" : "Hair09",
+      "translation" : [ -0.0825161, -3.1993e-08, -0.00539786 ],
+      "rotation" : [ 0.130527, -0.000441384, -5.81862e-05, -0.991445 ]
+    },
+    {
+      "name" : "Hair02",
+      "children" : [ 11 ],
+      "translation" : [ 0.0229046, 0.0161949, 0.0132444 ],
+      "rotation" : [ -5.35723e-07, -0.0825196, -2.64688e-08, -0.996589 ]
+    },
+    {
+      "name" : "Hair03",
+      "children" : [ 12 ],
+      "translation" : [ -0.0315338, -2.49743e-09, -6.09353e-09 ],
+      "rotation" : [ 2.33325e-08, 0.00870872, 5.11632e-09, -0.999962 ]
+    },
+    {
+      "name" : "Hair04",
+      "children" : [ 13 ],
+      "translation" : [ -0.0264883, -1.45886e-09, -3.00657e-09 ],
+      "rotation" : [ 8.24455e-08, -0.0228533, 7.95814e-08, -0.999739 ]
+    },
+    {
+      "name" : "Hair05",
+      "translation" : [ -0.0766802, -3.4606e-08, -0.00501604 ],
+      "rotation" : [ 0.130525, 0.00407537, 0.00053648, -0.991436 ]
+    }
+  ],
+  "skins" : [
+    {
+      "inverseBindMatrices" : 0,
+      "skeleton" : 1,
+      "joints" : [
+        1,2,3,4,5,6,7,8,9,10,11,12,13
+      ]
+    }
+  ],
+  "materials" : [
+    {
+      "name" : "FDarkElf_m000_t00_m00_bh",
+      "pbrMetallicRoughness" : {
+        "baseColorFactor" : [ 0.3, 0.3, 0.3, 1.0 ],
+        "metallicFactor" : 0.1,
+        "roughnessFactor" : 0.5
+      }
+    }
+  ],
+  "meshes" : [
+    {
+      "primitives" : [
+        {
+          "attributes" : {
+            "POSITION" : 2,
+            "NORMAL" : 3,
+            "TANGENT" : 4,
+            "JOINTS_0" : 5,
+            "WEIGHTS_0" : 6,
+            "TEXCOORD_0" : 7
+          },
+          "indices" : 1,
+          "material" : 0
+        }
+      ],
+      "name" : "FDarkElf_m000_m00_bh"
+    }
+  ],
+  "buffers" : [
+    {
+      "uri" : "FDarkElf_m000_m00_bh.bin",
+      "byteLength" : 10696
+    }
+  ],
+  "bufferViews" : [
+    {
+      "buffer" : 0,
+      "byteOffset" : 0,
+      "byteLength" : 832
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 832,
+      "byteLength" : 1224
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 2056,
+      "byteLength" : 1728
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 3784,
+      "byteLength" : 1728
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 5512,
+      "byteLength" : 2304
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 7816,
+      "byteLength" : 1152
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 8968,
+      "byteLength" : 576
+    },
+    {
+      "buffer" : 0,
+      "byteOffset" : 9544,
+      "byteLength" : 1152
+    }
+  ],
+  "accessors" : [
+    {
+      "bufferView" : 0,
+      "componentType" : 5126,
+      "count" : 13,
+      "type" : "MAT4"
+    },
+    {
+      "bufferView" : 1,
+      "componentType" : 5123,
+      "count" : 612,
+      "type" : "SCALAR"
+    },
+    {
+      "bufferView" : 2,
+      "min" : [ -0.0298158, 0.292772, -0.0428762 ],
+      "max" : [ 0.0324421, 0.445507, 0.0268131 ],
+      "componentType" : 5126,
+      "count" : 144,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 3,
+      "componentType" : 5126,
+      "count" : 144,
+      "type" : "VEC3"
+    },
+    {
+      "bufferView" : 4,
+      "componentType" : 5126,
+      "count" : 144,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 5,
+      "componentType" : 5123,
+      "count" : 144,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 6,
+      "normalized" : true,
+      "componentType" : 5121,
+      "count" : 144,
+      "type" : "VEC4"
+    },
+    {
+      "bufferView" : 7,
+      "componentType" : 5126,
+      "count" : 144,
+      "type" : "VEC2"
+    }
+  ]
+}
