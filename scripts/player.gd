@@ -23,7 +23,7 @@ func _init() -> void:
 	if OS.get_environment("L2_VIEW_YAW") != "":
 		yaw = float(OS.get_environment("L2_VIEW_YAW"))
 	if OS.get_environment("L2_ZOOM") != "":
-		cam_zoom = clampf(float(OS.get_environment("L2_ZOOM")), 0.35, 2.6)
+		cam_zoom = clampf(float(OS.get_environment("L2_ZOOM")), 0.02, 2.6)
 var pitch := -0.35
 # Mouse-wheel camera zoom (the classic L2 camera distance): 1.0 = default,
 # the wheel scales the whole pivot->camera offset so the pitch angle holds.
@@ -331,10 +331,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_WHEEL_UP:
 		# wheel zoom: up = closer, down = farther (clamped)
-		cam_zoom = clampf(cam_zoom * 0.88, 0.35, 2.6)
+		cam_zoom = clampf(cam_zoom * 0.88, 0.02, 2.6)  # no lower limit: the user zooms in close to the character
 	elif event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		cam_zoom = clampf(cam_zoom * 1.14, 0.35, 2.6)
+		cam_zoom = clampf(cam_zoom * 1.14, 0.02, 2.6)
 	elif event is InputEventMouseButton and event.pressed \
 			and event.button_index == MOUSE_BUTTON_LEFT:
 		# click-to-move: cast through the click position onto the world,
