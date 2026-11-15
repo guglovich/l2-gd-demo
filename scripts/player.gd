@@ -48,6 +48,10 @@ func _ready() -> void:
 			# head/upper-body close-up for character diagnostics
 			cam.position = Vector3(-2.4, 1.5, 0.001)
 			cam.rotation = Vector3(-0.05, -PI / 2, 0)
+		elif OS.get_environment("L2_DEBUG_CAM") == "close2":
+			# the opposite side (character front when facing east)
+			cam.position = Vector3(2.4, 1.5, 0.001)
+			cam.rotation = Vector3(-0.05, PI / 2, 0)
 		else:
 			cam.position = Vector3(0, 30, 0.001)
 			cam.rotation = Vector3(-1.55, 0, 0)
@@ -152,10 +156,13 @@ var _char_skels: Array = []
 var _pbr_shader: Shader
 
 func _load_character() -> void:
+	var char_scale := CHAR_SCALE
+	if OS.get_environment("L2_CHAR_SCALE") != "":
+		char_scale = float(OS.get_environment("L2_CHAR_SCALE"))
 	rig = Node3D.new()
 	rig.name = "Rig"
 	rig.rotation_degrees.y = 180.0
-	rig.scale = Vector3.ONE * CHAR_SCALE
+	rig.scale = Vector3.ONE * char_scale
 	add_child(rig)
 	if _pbr_shader == null:
 		_pbr_shader = load("res://assets/shaders/l2_surface_pbr.gdshader")
@@ -322,6 +329,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			dest_marker.visible = true
 	elif event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	elif event is InputEventKey and event.pressed and not event.echo:
+		# live character-scale calibration: + grows, - shrinks (5% a step);
+		# the current multiplier prints to the console for the DEVLOG
+		if event.keycode == KEY_EQUAL:
+			rig.scale = rig.scale * 1.05
+			print("CHAR_SCALE %.2f (height ~%.2f m)" % [rig.scale.x, 0.444 * rig.scale.x])
+		elif event.keycode == KEY_MINUS:
+			rig.scale = rig.scale * 0.95
+			print("CHAR_SCALE %.2f (height ~%.2f m)" % [rig.scale.x, 0.444 * rig.scale.x])
 
 func _physics_process(delta: float) -> void:
 	if OS.get_environment("L2_DEBUG_CAM") == "":

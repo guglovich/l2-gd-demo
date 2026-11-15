@@ -107,7 +107,7 @@ def key_at_root(d, base, idx):
     return pos, quat
 
 
-def inject(gltf_path, seq, bones, keydata):
+def inject(gltf_path, seq, bones, keydata, skip=()):
     d, base, _ = keydata
     g = json.load(open(gltf_path))
     if "animations" not in g:
@@ -153,7 +153,7 @@ def inject(gltf_path, seq, bones, keydata):
     samplers, channels = [], []
     for bi, bname in enumerate(bones):
         ni = node_by_name.get(bname)
-        if ni is None:
+        if ni is None or bname in skip:
             continue
         is_root = bname == bones[0]
         pos, quat = [], []
@@ -187,6 +187,10 @@ def main():
     ap.add_argument("--psa", required=True)
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--seq", default=None)
+    ap.add_argument("--skip-bones", default="",
+                    help="comma-separated bone names whose channels are NOT "
+                    "emitted (e.g. Bip01_head — the L2 run pitch keeps the "
+                    "head at the bind orientation, the face stays visible)")
     ap.add_argument("--gltf", nargs="+", default=[])
     args = ap.parse_args()
 
@@ -201,7 +205,8 @@ def main():
     seq = next((s for s in psa["seqs"] if s["name"] == args.seq), None)
     if seq is None:
         raise SystemExit(f"sequence '{args.seq}' not found")
-    inject_args = (seq, psa["bones"], psa["keys"])
+    skip = set(x.strip() for x in args.skip_bones.split(",") if x.strip())
+    inject_args = (seq, psa["bones"], psa["keys"], skip)
     for g in args.gltf:
         inject(g, *inject_args)
 

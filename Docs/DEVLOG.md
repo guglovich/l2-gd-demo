@@ -5003,3 +5003,24 @@ Verification renders: the bind from behind (opaque hair), the autorun
 arrival (X 7400 → 8640, standing pose in both shots, 0 script errors),
 the frozen run frame 4 (the clip still plays while moving, the hair rides
 the head).
+
+## DEVLOG-62 (2026-11-15): the run head pitch + the live size calibration
+
+**"лицо теряется при беге"** — numeric bone analysis (the injected head
+rotation vs its bind across the sequences): the RUN clip holds Bip01_head
+at 41-46° from the bind through the whole cycle, WAIT/Stand hold it at
+20-31° — the head is pitched down even where it must look forward. The
+delta-from-bind and the world-space interpretations were tested and
+rejected (170-180° garbage). The pragmatic fix: the Bip01_head channels
+are NOT emitted (tools/psa_to_gltf.py --skip-bones Bip01_head) — the head
+keeps the bind orientation (face forward) while the body leans; the hair
+(BoneAttachment3D on Bip01_head) follows. Verified in the frozen frame 4
+profile: the head up, the stride unchanged.
+
+**"персонаж огромный"** — the size calibration went interactive: the
+L2_CHAR_SCALE env overrides the default (3.6), and the =/- keys adjust the
+rig scale by 5% live in game (the current multiplier and the resulting
+height print to the console). The user calibrates against the original
+client and reports the value; the constant then gets fixed. 3.6 (~1.60 m
+from the retail collision_height 37.5) is still reported as huge — the
+interactive tuning replaces the guess-loop.
