@@ -16,7 +16,6 @@ var _coord_label: Label
 var move_target: Vector3
 var has_target := false
 var rig: Node3D
-var bob_t := 0.0
 var dest_marker: MeshInstance3D
 
 func _init() -> void:
@@ -40,6 +39,10 @@ func _ready() -> void:
 		if OS.get_environment("L2_DEBUG_CAM") == "down":
 			cam.position = Vector3(0, 6, 0.001)
 			cam.rotation = Vector3(-1.55, 0, 0)
+		elif OS.get_environment("L2_DEBUG_CAM") == "side":
+			# side view for character-animation diagnostics
+			cam.position = Vector3(-6, 1.0, 0.001)
+			cam.rotation = Vector3(-0.05, -PI / 2, 0)
 		else:
 			cam.position = Vector3(0, 30, 0.001)
 			cam.rotation = Vector3(-1.55, 0, 0)
@@ -87,6 +90,12 @@ func _ready() -> void:
 	dest_marker.visible = false
 	add_child(dest_marker)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	# diagnostic hook: start running immediately so screenshots capture the
+	# run animation mid-stride (L2_AUTORUN=1)
+	if OS.get_environment("L2_AUTORUN") == "1":
+		has_target = true
+		move_target = position + Vector3(12.0, 0.0, 0.0)
+		dest_marker.visible = true
 
 func _make_crosshair() -> void:
 	# the visible cursor: the L2-style crosshair (the mouse is never
@@ -104,17 +113,97 @@ func _make_crosshair() -> void:
 	var tex := ImageTexture.create_from_image(img)
 	Input.set_custom_mouse_cursor(tex, Input.CURSOR_ARROW, Vector2(16, 16))
 
+## The character = the original L2 Dark Elf female FIGHTER base (2026-11-15):
+## the m000 body parts (no armor set, no weapon) + the face variant t00 + the
+## hair variant ah, the client-derived PBR sets (texgen.py from the client
+## PNGs), the run animation Run_Hand_FDarkElf injected by tools/psa_to_gltf.py
+## (rotation-only — the L2 MeshAnimation tracks carry no position keys for the
+## real skeleton bones; the bind translations come from the glTF rests).
+const CHAR_TEX_ROOT := "res://assets/character/fdarkelf/Texture"
+const CHAR_PARTS := [
+	# [mesh name, texture object, alpha-cutout]
+	["FDarkElf_m000_u", "FDarkElf_m000_t1000_u", false],
+	["FDarkElf_m000_l", "FDarkElf_m000_t1000_l", false],
+	["FDarkElf_m000_b", "FDarkElf_m000_t1000_b", false],
+	["FDarkElf_m000_g", "FDarkElf_m000_t1000_g", false],
+	["FDarkElf_m000_f", "FDarkElf_m000_t00_f", false],
+	["FDarkElf_m000_m00_ah", "FDarkElf_m000_t00_m00_ah_ori", true],
+]
+## The L2 skeletal meshes are stored ~4x below world scale (the client scales
+## them at render). 4.0 x 0.444 m mesh height = 1.78 m — calibrate against the
+## original client side-by-side if it deviates (single constant).
+const CHAR_SCALE := 4.0
+const RUN_ANIM := "Run_Hand_FDarkElf"
+
+var _anim_players: Array = []
+var _pbr_shader: Shader
+
 func _load_character() -> void:
 	rig = Node3D.new()
 	rig.name = "Rig"
 	rig.rotation_degrees.y = 180.0
+	rig.scale = Vector3.ONE * CHAR_SCALE
 	add_child(rig)
-	for part in ["FDarkElf_m013_u", "FDarkElf_m013_l", "FDarkElf_m013_b", "FDarkElf_m013_g"]:
-		var path := "res://assets/character/%s.gltf" % part
-		if ResourceLoader.exists(path):
-			var scene: PackedScene = load(path)
-			var inst := scene.instantiate()
-			rig.add_child(inst)
+	if _pbr_shader == null:
+		_pbr_shader = load("res://assets/shaders/l2_surface_pbr.gdshader")
+	for part in CHAR_PARTS:
+		var path := "res://assets/character/%s.gltf" % part[0]
+		if not ResourceLoader.exists(path):
+			continue
+		var scene: PackedScene = load(path)
+		var inst := scene.instantiate()
+		rig.add_child(inst)
+		# the client-derived PBR material on every surface (the glTF carries
+		# only dummy materials — UModel does not bind L2 character textures)
+		var mat := ShaderMaterial.new()
+		mat.shader = _pbr_shader
+		mat.set_shader_parameter("albedo_tex",
+				load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, part[1]]))
+		mat.set_shader_parameter("normal_tex",
+				load("%s/%s.pbr_normal.png" % [CHAR_TEX_ROOT, part[1]]))
+		mat.set_shader_parameter("uv_is_texels", false)
+		mat.set_shader_parameter("pom_scale", 0.0)
+		mat.set_shader_parameter("use_alpha", part[2])
+		if part[2]:
+			# the hair: alpha-BLEND strands (the client renders the hair
+			# FinalBlend translucent); alpha-scissor discards most of the
+			# thin strands — verified 2026-11-15
+			var hm := StandardMaterial3D.new()
+			hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, part[1]])
+			hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			hm.alpha_scissor_threshold = 0.0
+			hm.roughness = 0.55
+			hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+			hm.cull_mode = BaseMaterial3D.CULL_BACK
+			for mi in inst.find_children("*", "MeshInstance3D", true, false):
+				for s in mi.mesh.get_surface_count():
+					mi.set_surface_override_material(s, hm)
+		else:
+			for mi in inst.find_children("*", "MeshInstance3D", true, false):
+				for s in mi.mesh.get_surface_count():
+					mi.set_surface_override_material(s, mat)
+		# the injected run animation, one AnimationPlayer per part; all parts
+		# share the same skeleton and the same clip so they stay in sync
+		for ap in inst.find_children("*", "AnimationPlayer", true, false):
+			var lib = ap.get_animation_library("")  # untyped: Variant return
+			for a in lib.get_animation_list():
+				lib.get_animation(a).loop_mode = Animation.LOOP_LINEAR
+			_anim_players.append(ap)
+	# diagnostic hook: freeze the run clip at one frame (L2_ANIM_FRAME=<0..15>)
+	if OS.get_environment("L2_ANIM_FRAME") != "":
+		var fr := int(OS.get_environment("L2_ANIM_FRAME"))
+		for ap in _anim_players:
+			ap.play(RUN_ANIM)
+			ap.seek(fr / 24.0, true)
+			ap.pause()
+
+func _char_run(active: bool) -> void:
+	for ap in _anim_players:
+		if active:
+			if ap.current_animation != RUN_ANIM:
+				ap.play(RUN_ANIM)
+		elif ap.is_playing():
+			ap.stop()  # back to the bind pose until the idle clip is injected
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
@@ -198,20 +287,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= GRAVITY * delta
 	move_and_slide()
-	# the placeholder procedural gait: the bob + the lean while moving
-	# (the real skeletal walk/run comes from the L2 .psa conversion)
-	if moving and rig:
-		bob_t += delta * (11.0 if speed >= RUN_SPEED else 7.5)
-		rig.position.y = absf(sin(bob_t)) * 0.09
-		rig.rotation_degrees.x = 6.0
-		rig.rotation_degrees.z = sin(bob_t * 0.5) * 2.5
-	elif rig:
-		rig.position.y = lerpf(rig.position.y, 0.0, minf(10.0 * delta, 1.0))
-		rig.rotation_degrees.x = lerpf(rig.rotation_degrees.x, 0.0,
-				minf(10.0 * delta, 1.0))
-		rig.rotation_degrees.z = lerpf(rig.rotation_degrees.z, 0.0,
-				minf(10.0 * delta, 1.0))
-		bob_t = 0.0
+	# the real L2 run animation (Run_Hand_FDarkElf, rotation-only from the
+	# PSA); the procedural bob/lean is retired — the clip carries the gait
+	_char_run(moving)
 	# live game coordinates: window title + on-screen HUD (debug aid)
 	var now := Time.get_ticks_msec()
 	if now - _last_title_ms > 250:

@@ -1,53 +1,77 @@
-# ActorX PSA animation format (UModel export)
+# ActorX PSA animation format (UModel export) — VERIFIED 2026-11-15
 
-UModel exports L2 `MeshAnimation` (ver 123 licensee 28) to `.psa` with
-`umodel -export` (default ActorX format; `-gltf` refuses animations from CLI).
+The facts below were verified against the actual FDarkElf_anim.psa and the
+UEViewer sources (Exporters/ExportPsk.cpp, Exporters/Psk.h,
+Exporters/ExportGLTF.cpp). The earlier version of this doc had the chunk
+layout and the quaternion order WRONG — that cost a debugging loop.
 
-## Structure (little-endian, all strings NUL-padded 64 bytes unless noted)
+## CRITICAL PITFALL (cost the 2026-11-15 session half a day)
+
+The PSA in `tmp/umodel_export/` (Oct 2025) was exported by an OLD UModel
+build and contains RAW, NON-NORMALIZED "quaternions" (components like
+z=1.0, w=6.47) — that export is UNUSABLE. A fresh UModel export writes
+proper normalized quats + full position tracks. ALWAYS re-export the PSA
+with the current umodel before debugging the format
+(`tmp/umodel_export2/` holds the good one).
+
+## Structure (little-endian)
+
+Chunk header = VChunkHeader: name[20] + TypeFlag u32 (PSA_VERSION =
+20100422 on the first chunk) + DataSize i32 (record size) + DataCount i32
+(record count) = 32 bytes.
 
 ```
-"ANIMHEAD\0\0\0\0"            (16 bytes)
-BONE_NAMES  chunk: "BONENAMES" + count i32 + names[count] (64 bytes each)
-BONE_FLAGS? (not in psa — skip)
-BONE_HIERARCHY: "BONEHIER" + count i32 + i32(parent)[count]
-ANIM_HEAD: "ANIMHEAD"?? — actually named "ANIMHEAD" replaced by:
-  "TOTALFRAMES" + i32 frames_total
-  "FRAMESIZE"   + i32 frame_size?  (some exporters omit)
-"ANIMHEAD" + i32 num_sequences + i32 num_bones + f32 frames_per_sec
-SEQUENCE chunk "SEQHEAD"?? — per sequence record:
-  name[64], group[64], i32 start_frame, i32 num_frames, f32 rate
-  i32 start_bone, i32 num_bones, i32 flags
-RAWKEYS chunk "RAWKEYS" + i32 count + keys[count]:
-  each key: pos f32[3] (x,y,z), quat f32[4] (w,x,y,z) — ActorX order is
-  (x,y,z) pos then (w,x,y,z) quat; quat is Unreal-space (left-handed, Z-up),
-  needs -x/-y swap for Godot (Y-up, -Z forward).
+"ANIMHEAD"        header only, no records
+"BONENAMES"       DataCount = numBones; records = FNamedBoneBinary (120 B):
+                  name[64] + flags u32 + numchildren i32 + parent i32
+                  + VJointPosPsk (quat 4f + pos 3f + length 1f + size 3f)
+                  NOTE: UModel writes parent = -1 for bone 0, 0 for ALL
+                  others — the hierarchy is USELESS here; take it from the
+                  glTF mesh skeleton instead.
+"ANIMINFO"        DataCount = numSequences; records = AnimInfoBinary (168 B):
+                  name[64] + group[64] + TotalBones + RootInclude +
+                  KeyCompressionStyle + KeyQuotum (4 i32) + KeyReduction +
+                  TrackTime + AnimRate (3 f32) + StartBone + FirstRawFrame +
+                  NumRawFrames (3 i32)
+"ANIMKEYS"        DataCount = Σ(NumRawFrames) * numBones; records =
+                  VQuatAnimKey (32 B): pos 3f + quat 4f (X,Y,Z,W — W LAST)
+                  + time 1f
 ```
 
-## Sequences in FDarkElf_anim.psa (Dark Elf female)
+Keys are FRAME-MAJOR over the whole file: key index for (global frame g,
+bone b) = g * numBones + b; a sequence's frames start at
+FirstRawFrame * numBones.
 
-Names look like: `wt` (wait/idle), `wk` (walk), `rn` (run), `atk` variants,
-`hit`, `sit`, etc. Each sequence = continuous frame range in RAWKEYS.
-For movement we need: idle (wt / wt_end), walk (wk / wk_f?), run (rn / rn_f).
+UModel applied MIRROR_MESH to the written keys (ExportPsk.cpp:21):
+`pos.y *= -1; quat.y *= -1; quat.w *= -1`.
 
-## Conversion plan (psa_to_gltf.py)
+## Conversion to glTF (UModel ExportGLTF.cpp conventions)
 
-1. Parse chunks; map bones by name to the glTF skeleton exported by UModel
-   (node names match BONE_NAMES).
-2. For each wanted sequence build a glTF animation:
-   - samplers: rotation (quat xyzw → glTF xyzw) and translation per bone
-     (root bone also carries movement).
-   - L2 FPS from ANIM_HEAD (usually 32? read actual value).
-   - ActorX bones are in **parent-relative** space already (as serialized);
-     glTF needs local-space TRS per node — verify by comparing to pose of
-     the mesh at frame 0; if mismatch, convert world→local.
-3. Embed animations into the character glTF (or a separate .gltf imported
-   alongside; Godot merges by node path).
+The glTF part files (mesh bind pose) use:
+- TransformPosition: swap Y/Z, scale 0.01 (UE cm → glTF m)
+- TransformRotation: swap quat Y/Z, W kept (left- to right-handed)
+- the root bone node (index 0) additionally conjugated
 
-Position conversion L2→Godot: swap Y/Z and invert: glTF pos = (x, z, -y)
-in mesh-local space; quaternions: apply (w, x, z, -y)?? — VERIFY
-empirically on the character (feet must stay on ground plane).
+From a PSA key (x,y,z = pos, X,Y,Z,W = quat):
+```
+pos_gl  = ( x,  z, -y) * 0.01
+quat_gl = ( X,  Z, -Y, -W)             (non-root)
+quat_gl = (-X, -Z,  Y, -W)             (root — conjugated)
+```
+Both translations and rotations are parent-relative, matching the glTF
+node local transforms, so channels target the nodes directly. The L2
+tracks carry FULL position tracks (bind offsets + animation) — verified
+against the glTF rests (UpperArm 2.774 vs 2.77, Calf 11.216 vs 11.22).
 
 ## Status
 
-`tools/psa_to_gltf.py` — NOT WRITTEN YET. PSA file:
-`tmp/umodel_export/DarkElf/MeshAnimation/FDarkElf_anim.psa`.
+`tools/psa_to_gltf.py` — written and verified (2026-11-15): injects a PSA
+sequence as a glTF animation into the character part files.
+`Run_Hand_FDarkElf` (16 frames @ 24 fps) lives in all six
+`assets/character/FDarkElf_m000_*.gltf`. Idle (Wait_Hand) / walk (Walk_Hand)
+are NOT injected yet — pending the user's go.
+
+UModel CLI still refuses glTF animation export ("glTF animation could be
+exported from mesh viewer only"); the `-md5` export works and writes
+per-sequence .md5anim files (useful as a cross-check, not used by the
+pipeline).

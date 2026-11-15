@@ -4883,3 +4883,63 @@ local-only.
 
 **Status:** the task is done. The golden-baseline protocol, AGENTS.md and
 DEVLOG stay the source of truth; the remote is the backup/visibility copy.
+
+## DEVLOG-59 (2026-11-15): THE REAL CHARACTER — the Dark Elf female FIGHTER
+## base + the run animation
+
+**The user's task:** replace the placeholder with the ORIGINAL dark elf
+female fighter skeleton + her textures (no armor set, no weapon), any head
+variant, and make the run animation.
+
+**What the client has (found via `umodel -list`):**
+- `Animations/DarkElf.ukx`: SkeletalMeshes `FDarkElf_m000_{u,l,b,g}` (the
+  BASE body, m000 = no armor), the FACE mesh `FDarkElf_m000_f`, the hair
+  variants `FDarkElf_m000_m00_ah` (Bip01-skeleton, 85 nodes) and
+  `_m00_bh` (OWN Hair01-13 skeleton — physics hair, NOT usable with our
+  animation, skipped), MeshAnimation `FDarkElf_anim` (99 sequences).
+- `SysTextures/fdarkelf.utx`: base body textures `FDarkElf_m000_t1000_{u,l,
+  b,g}`; face variants `FDarkElf_m000_t00/t01/t02_f` (+`_f1` = the blink
+  frame); hair textures `_ah_ori/_ah_u00` (white strands on black, alpha =
+  coverage). We took `t00_f` (eyes open) and `ah_ori`.
+
+**The pipeline (all our tools, the modern-port rule respected — the texgen
+PBR sets are generated FROM the client PNGs, 1:1 identity):**
+- exported the 6 base meshes via umodel glTF → `assets/character/` and the
+  8 client PNGs → `assets/character/fdarkelf/Texture/`, generated the PBR
+  sets with `tools/l2strict/texgen.py`;
+- `tools/psa_to_gltf.py` (NEW): parses the ActorX PSA and injects a chosen
+  sequence as a glTF animation into the part files. `Run_Hand_FDarkElf`
+  (the no-weapon run, 16 frames @ 24 fps) injected into all six parts;
+  Godot plays all six AnimationPlayers in sync (same clip, same frame).
+- `scripts/player.gd`: loads the 6 base parts, assigns the PBR materials
+  (the hair = StandardMaterial3D TRANSPARENCY_ALPHA — the alpha-scissor
+  discard ate the thin strands, verified), plays the run clip while moving,
+  stops to the bind pose when idle; rig scale 4.0 (the L2 skeletal meshes
+  are stored ~4x below world scale; 0.444 m mesh → ~1.78 m).
+
+**THE TRAP THAT COST THE SESSION (documented in Docs/psa-format.md):** the
+old PSA export (tmp/umodel_export, Oct 2025) contains RAW NON-NORMALIZED
+quats (z=1.0, w=6.47) from an old UModel build — the character fell flat /
+crumpled no matter the conversion. A FRESH export (tmp/umodel_export2)
+gives proper normalized quats + full position tracks. The conversion math
+is derived from UEViewer's ExportGLTF.cpp and verified numerically against
+the bind pose (pelvis frame0 within 5.7° of bind).
+
+**Verification (the frozen-frame + autorun renders):**
+- the bind pose at spawn: the base body + face + ear + white hair, standing
+  upright on the ground (zoom 0.45 close-up) — the user should compare
+  against the original client;
+- the run cycle frozen at frames 0/4/8/12 (L2_ANIM_FRAME hook, side cam):
+  a proper stride with the L2 forward lean, the cycle varies per frame;
+- autorun in-game (L2_AUTORUN=1, top-down): the character runs with the
+  animation live, legs cycling toward the destination marker.
+- Gates: A (0 shader errors), B (the character visibly changed at spawn),
+  C (trace: the character is scripts/player.gd, not BSP/statics), D
+  (L2_ANIM_FRAME/L2_AUTORUN hooks prove the animation branch fires), E
+  (no world-space effects added).
+
+**Pending (NOT done, out of the stated scope):** the idle animation
+(Wait_Hand_FDarkElf is in the same PSA, one command away), the walk
+(Walk_Hand), the blink (t00_f1), the hair variant tuning, the exact height
+calibration vs the original client (the 4.0 scale constant), the weapon
+bone attachment (Weapon_R_Bone etc. exist in the skeleton).
