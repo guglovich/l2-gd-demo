@@ -5158,3 +5158,70 @@ binds 100% to Bip01_head) and visually across the frozen run frames
 the plan, the hypotheses, the handoff live in analysis/l2-godot.cany).
 The Run keeps the 0.35 head blend; the idles skip the head tracks (see
 DEVLOG-65).
+
+## DEVLOG-67 (2026-11-15): THE STARTING OUTFIT — chargrp.dat (m001_t02) + the flicker investigation (deferred)
+
+**The gear (the user's report: "у нас просто какой-то купальник").** The
+m000 body parts we rendered are the client's UNDERWEAR (t1000) — the
+visible outfit comes from armor meshes + texture sets on top. The exact
+starter set was recovered from the client data files, not guessed:
+
+- `tools/l2redat.exe` (wine) decrypts the Interlude .dat files (the
+  "Lineage2Ver4138" format) → JSON. Decrypted: `armorgrp.dat` (1195
+  armor items with per-race mesh/texture bindings), `chargrp.dat` (the
+  per-race-gender creation look), `hairgrp.dat` (l2redat's format
+  support is incomplete there — only a/b ints; deferred, not needed).
+- **chargrp.dat entry 3 = the DE female FIGHTER creation look:**
+  chest/legs/feet/gloves = `DarkElf.FDarkElf_m001_{u,l,b,g}` with
+  `FDarkElf.FDarkElf_m001_t02_{u,l,b,g}`; hair `FDarkElf_m000_t00_m00_ah`;
+  face `FDarkElf_m000_t00_f` (we already had both). So the armor MODEL is
+  m001 (the same mesh family as the universal starter t02 — the human
+  fighter MFighter_m001_t02 is chargrp entry 0), NOT another tNN on m000
+  (fdarkelf.utx has no m000 armor sets at all — only t1000 + hair/face
+  variants; the m003..m010 sets belong to armor models m003..m010).
+- The pipeline rerun: the four m001 skeletal meshes exported from
+  DarkElf.ukx (same 85-node skin, joint order asserted identical, 1
+  primitive each, dummy materials); the t02 textures exported 512/256 px
+  with REAL alpha masks on u/g; texgen PBR sets generated; the unified
+  FDarkElf_base rebuilt with build_character.py --skip (NEW: --skip drops
+  listed parts and, when the base donor is skipped, strips its mesh node
+  while still donating the skeleton + animations). The m000 body parts
+  are REPLACED by the armor meshes — the L2 client hides the body part
+  under armor the same way. CHAR_MAT_MAP switched to the m001 entries.
+- Verified: the dark leather bodice with straps + the shoulder plates +
+  the leg harness + heeled boots (the zoom-0.13 renders front/back) and
+  the spawn screenshot; 0 shader errors (Gate A). The long white hair
+  (bh, t00) matches the reference screenshots.
+
+**The white flicker (ears/face, ~30 s period, certain angles, while
+moving) — investigation started, DEFERRED by the user ("долгая итерация,
+собирай сборку").** Findings so far (all numeric):
+
+- NOT specular: the generated roughness is 0.65–0.95 everywhere (face
+  p50 0.82) — no glossy glint source.
+- The bh hair mesh has 4 triangle pairs EXACTLY coplanar (0 µm) with the
+  face mesh at the scalp (centers ~y=0.42) and 873 pairs within 2 mm;
+  those bh texels are FULLY OPAQUE (alpha 255). The UE2 client used a
+  LEQUAL depth test (the later-drawn hair stably wins); Godot's LESS
+  flips the tie — a plausible mechanism, but the temporal probes did NOT
+  confirm it as THE cause:
+- A fixed top-down camera + playing Run series: 2078 pixels flip dark
+  (46,51,61 = face) ↔ bright (159,158,159 = hair) — but a frozen-pose +
+  sub-pixel camera jitter series shows the SAME variance with shadows
+  OFF, with the bh hidden, and with a 0.8 mm vertex-push (grow) applied
+  — i.e. the measured variance was edge aliasing of the probe method,
+  not a confirmed depth fight. The vertex-push experiment (shader
+  `vertex_push` uniform + StandardMaterial3D.grow) was REVERTED as
+  unverified; the diagnostic harness remains: tmp/flicker_probe.gd
+  (isolated scene; L2_PROBE_TOP=1/2, L2_PROBE_SWEEP) and world.gd
+  `_burst_flow` (L2_BURST=<sec> L2_BURST_DIR=<dir> + L2_AUTORUN=1 — a
+  frame burst in the real scene; 450-frame autorun burst showed no
+  whole-frame white flashes at default zoom — the flash is localized on
+  the head, needs the close-zoom burst run).
+- Remaining candidates for the next iteration: the sun shadow boundary
+  sweeping the face/ears while moving (energy 5.0 makes the lit state
+  blinding); the ah tuft vs face; the blink period (2.5–4.5 s, does not
+  match "30 s" — unlikely). The next probe: close-zoom burst (L2_ZOOM
+  0.25 + L2_AUTORUN + L2_BURST 60) + shadows on/off A/B on the head bbox.
+
+**Pending:** hairgrp.dat format (the hair style list) — not needed yet.

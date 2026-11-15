@@ -41,6 +41,8 @@ func _ready() -> void:
 		_trace_box_flow()
 	if OS.get_environment("L2_SCREENSHOT") != "":
 		_screenshot_flow()
+	if OS.get_environment("L2_BURST") != "":
+		_burst_flow()
 
 
 ## Region tracer: L2_TRACE_BOX="x1,y1,x2,y2" casts rays from the camera
@@ -247,6 +249,26 @@ func _floor_grid_flow() -> void:
 				cur_y = y - 0.01
 			var walkable: bool = not is_nan(best_y)
 			print("%.0f %.0f %.3f %.2f %s %s" % [gx, gy, best_y, best_n, best_mesh, "ok" if walkable else "gap"])
+	get_tree().quit()
+
+
+## The temporal-flicker capture (the white-flash diagnostic, 2026-11-15):
+## L2_BURST=<seconds> + L2_BURST_DIR=<abs dir> walks the character
+## (L2_AUTORUN=1) and saves a frame every ~0.1 s for N seconds — the
+## analysis finds the flash frames and the flipped pixels.
+func _burst_flow() -> void:
+	var d := OS.get_environment("L2_BURST_DIR")
+	var secs := float(OS.get_environment("L2_BURST"))
+	for i in 90:
+		await get_tree().physics_frame
+	var t := 0.0
+	while t < secs:
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(
+				d.path_join("burst_%06.1f.png" % t))
+		await get_tree().create_timer(0.1).timeout
+		t += 0.1
+	print("BURST done: ", t, " s")
 	get_tree().quit()
 
 

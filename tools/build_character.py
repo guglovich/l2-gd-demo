@@ -126,6 +126,15 @@ def main():
                     "mesh carries a dummy all-on-root skin (in the client it "
                     "is an attached rigid mesh, not skinned) — it must be "
                     "bound to Bip01_head or it swings with the root")
+    ap.add_argument("--skip", default="",
+                    help="comma-separated part names NOT to merge. If the "
+                    "base donor's own name is listed, its mesh node is "
+                    "stripped too (the skeleton + animations are still "
+                    "donated) — used to REPLACE body parts with armor "
+                    "parts (the chargrp starting outfit m001_t02)")
+    ap.add_argument("--no-base-mesh", action="store_true",
+                    help="strip the base donor's mesh node (keep skeleton "
+                    "+ animations)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
@@ -149,11 +158,22 @@ def main():
         if "=" in pair:
             k, v = pair.split("=", 1)
             bind_map[k.strip()] = v.strip()
+    skip = set(x.strip() for x in args.skip.split(",") if x.strip())
+    if args.no_base_mesh or base["_name"] in skip:
+        # the base donor gives up its mesh (armor replaces the body parts):
+        # drop the mesh + skin references from its nodes
+        out["meshes"] = []
+        for n in out["nodes"]:
+            n.pop("mesh", None)
+            n.pop("skin", None)
     bin_data = bytearray(base["_bin"])
     scene_nodes = list(out["scenes"][0]["nodes"])
     # the merged part meshes ride the base skin (skin 0)
     for ppath in args.parts:
         part = load(ppath)
+        if part["_name"] in skip:
+            print(f"skipped {part['_name']}")
+            continue
         # assert the joint orders match (name-by-node)
         base_names = [base["nodes"][j].get("name") for j in base["skins"][0]["joints"]]
         part_names = [part["nodes"][j].get("name") for j in part["skins"][0]["joints"]]

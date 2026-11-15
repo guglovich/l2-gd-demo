@@ -138,11 +138,16 @@ const CHAR_TEX_ROOT := "res://assets/character/fdarkelf/Texture"
 ## skin, one animation player, the six client meshes as skinned meshes.
 const CHAR_SCENE := "res://assets/character/FDarkElf_base.gltf"
 ## The mesh name -> [texture object, alpha-cutout] for the material pass.
+## The armor = the chargrp.dat starting outfit (2026-11-15): the DE female
+## FIGHTER starts in FDarkElf_m001_{u,l,b,g} with the t02 texture set — the
+## dark leather bodice with straps (the user's original-client screenshots).
+## The m000 body parts are replaced by the armor meshes (build_character
+## --skip); the face + the ah tuft stay m000.
 const CHAR_MAT_MAP := {
-	"FDarkElf_m000_u": ["FDarkElf_m000_t1000_u", false],
-	"FDarkElf_m000_l": ["FDarkElf_m000_t1000_l", false],
-	"FDarkElf_m000_b": ["FDarkElf_m000_t1000_b", false],
-	"FDarkElf_m000_g": ["FDarkElf_m000_t1000_g", false],
+	"FDarkElf_m001_u": ["FDarkElf_m001_t02_u", false],
+	"FDarkElf_m001_l": ["FDarkElf_m001_t02_l", false],
+	"FDarkElf_m001_b": ["FDarkElf_m001_t02_b", false],
+	"FDarkElf_m001_g": ["FDarkElf_m001_t02_g", false],
 	"FDarkElf_m000_f": ["FDarkElf_m000_t00_f", false],
 	"FDarkElf_m000_m00_ah": ["FDarkElf_m000_t00_m00_ah_ori", true],
 }
