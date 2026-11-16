@@ -3,7 +3,13 @@
 The legacy client marks its zones (sound, lighting, ambience) with
 INVISIBLE brush volumes and portal planes inside the map. They never
 render — `tools/l2strict/temple_native.py` excludes them by name
-(ZONE_MARKER_BRUSHES) and by flag (0x40a000 = NoOcclude|Translucent).
+(ZONE_MARKER_BRUSHES) and by the sky-plane origin (|origin.z| > 10000).
+
+IMPORTANT (DEVLOG-72): the 0x40a000 flag is NOT an invisibility flag.
+Polys23/28 carry it but RENDER in the live client (they are the hall walls
+behind the skin windows). The never-rendered set is: the sky-plane copies
+(origin z ≈ +16871: Polys17, the Polys51 ADD twin) and Polys55/67 (the
+non-solid stair-corridor wrappers).
 This log keeps their coordinates for the future lighting/sound stage:
 these volumes define WHERE the client switches zone properties (the
 temple interior ambience vs the outside valley), so they are the natural

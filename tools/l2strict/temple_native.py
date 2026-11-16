@@ -81,15 +81,27 @@ SUBTRACT_CAP_EXCLUDE = {
     # under it (poly 5) render.
     "Polys31": {0, 1, 2, 3},
     "Polys35": {0, 1, 2, 3},
+    # Polys51 = the apse passage to the Shillien statue (a narrow carved
+    # vault X 29144..30464, Y 10616..11032, Z −4262..−3000; the ray probe
+    # hit its west cap at (29144, 11021, −3700) standing between the hall
+    # and the statue). Its west cap is an air-air joint with the hall —
+    # the client shows the statue THROUGH it; the inner walls (001_1) and
+    # the floor stay.
+    "Polys51": {2},
 }
 
-# The INVISIBLE zone-marker brushes (the legacy zone separator family, the
-# full inventory lives in Docs/temple_zones.md): the live client never
-# renders ANY face of them — they are lighting/sound/zone markers, not
-# geometry. Not even their 0x0-flagged faces show (Polys28 poly 3, Polys23
-# poly 1 stood as full-height walls across the hall). Listed by name here;
-# the face-flag filter (ZONE_BOX_FLAGS) alone misses these 0x0 faces.
-ZONE_MARKER_BRUSHES = {"Polys17", "Polys23", "Polys28", "Polys55", "Polys67"}
+# The INVISIBLE zone-marker brushes (the full inventory lives in
+# Docs/temple_zones.md). NOT the whole 0x40a000 family: Polys23/28 (the
+# hall side walls behind the skin windows) carry the same flags but DO
+# render in the live client — the user's screenshots show walls behind
+# those windows, and our exclusion left sky-holes. The real markers are
+# the volumes whose origin sits ~16871 units ABOVE the world (the
+# sky-plane copies: Polys17, the Polys51 ADD twin — they are caught by the
+# SKY_ORIGIN_Z filter below) and Polys55/67 (the wrappers of the two stair
+# corridors — non-solid markers: the corridors are already walled by
+# Polys71/59 themselves and must stay passable).
+ZONE_MARKER_BRUSHES = {"Polys55", "Polys67"}
+SKY_ORIGIN_Z = 10000.0  # the sky-plane copy origin (16871) — never render
 
 
 def main() -> None:
@@ -129,6 +141,11 @@ def main() -> None:
         loc = props.get("Location", (0, 0, 0))
         piv = props.get("PrePivot", (0, 0, 0))
         origin = [loc[k] - piv[k] for k in range(3)]
+        if abs(origin[2]) > SKY_ORIGIN_Z:
+            # the sky-plane copy of a temple volume (origin ~16871): placed
+            # ~126 m above the world — a marker, never rendered
+            stats["skip_sky"] = stats.get("skip_sky", 0) + 1
+            continue
         if not (REGION[0] <= origin[0] <= REGION[1]
                 and REGION[2] <= origin[1] <= REGION[3]):
             continue
@@ -151,9 +168,10 @@ def main() -> None:
             if pr["flags"] & FACE_SKIP_FLAGS:
                 stats["skip_flags"] += 1
                 continue
-            if csg == 1 and (pr["flags"] & ZONE_BOX_FLAGS) == ZONE_BOX_FLAGS:
-                stats["skip_zone"] += 1
-                continue
+            # NOTE: the 0x40a000 flag is NOT a render filter — Polys23/28
+            # (the hall walls behind the skin windows) carry it and render
+            # in the live client. The invisible volumes are caught by name
+            # (ZONE_MARKER_BRUSHES) and by the sky-plane origin above.
             if pr["i"] in caps:
                 stats["skip_caps"] += 1
                 continue
