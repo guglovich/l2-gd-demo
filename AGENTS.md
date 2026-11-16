@@ -235,14 +235,21 @@ Details: `Docs/craft-anything.md`.
 - Terrain UVs use `su = 2 * layer.Scale.x / (128 * 128 * UScale)` and the
   matching V formula; masks use tile UV `0..1`.
 
-## The modern-port rule (the user's directive, 2026-11-12)
+## The modern-port rule (the user's directive, 2026-11-12; extended 2026-11-16)
 
-- **Do NOT recreate the legacy client's outdated logic** — the CSG brush
-  carving, subtractive/additive volume emulation, the 2000s level-design
-  hacks. This covers levels, effects, and everything else.
-- From the old client we take ONLY: the correct meshes, the geodata, and
-  the coordinates. The levels are built with modern and optimized Godot 4
-  means (native nodes, materials, shaders, visibility ranges, LODs).
+- **NEVER port the original's crutches** (the user's rule, restated
+  2026-11-16 after the temple subtract-brush incident): any outdated logic
+  of the legacy client — the CSG brush carving, subtractive/additive volume
+  emulation, invisible zone-separator boxes (the 0x40a000 family), the
+  2000s level-design hacks — is a priority error to reproduce. This covers
+  levels, effects, and everything else.
+- From the old client we take ONLY: **the geodata and the coordinates.**
+  Meshes — if they are clean (bug-free); if building them from scratch is
+  cleaner, we CREATE them instead (the temple interior is the example: the
+  client authors it as subtract volumes, we emit a clean native mesh from
+  the client coordinates — tools/l2strict/temple_native.py).
+- The levels are built with modern and optimized Godot 4 means (native
+  nodes, materials, shaders, visibility ranges, LODs).
 - Textures are NOT ported verbatim as PNG files. They are CREATED with
   modern methods (procedural/3D/volumetric Godot materials, no PNG), using
   the clean-room approach with the condition of a 1:1 visual identity to

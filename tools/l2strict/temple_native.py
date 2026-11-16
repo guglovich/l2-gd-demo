@@ -2,29 +2,46 @@
 """Native Shillien Temple builder (2026-11-16, the user's modern-port rule).
 
 The whole temple interior (floors, walls, the stair ramps) is authored in
-the client as CSG_Subtract brush volumes; the level BSP Model500 contains
-NONE of it (model_full.py: zero surf geometry in the temple region) and no
-static meshes cover it either. Rendering those subtract faces through the
-legacy brush pipeline (the bsp2.py csg=2 switch) was tried and REVERTED:
-that is the legacy-crutch port the modern-port rule forbids (emulating the
-2000s CSG carve result through the brush renderer).
+the client as brush volumes; the level BSP Model500 contains NONE of it
+(model_full.py: zero surf geometry in the temple region) and no static
+meshes cover it either. Rendering the subtract faces through the legacy
+brush pipeline (the bsp2.py csg=2 switch) was tried and REVERTED: that is
+the legacy-crutch port the modern-port rule forbids.
 
 This builder is the approved path: it takes ONLY the client coordinates
-(the subtract volumes' face polygons + their FPoly texture axes) and emits
-a clean native Godot mesh — one primitive per texture, UVs = texels from
-the authored texture axes, the same uv_is_texels convention the level BSP
-uses — no CsgOper semantics, no carving, no brush-pipeline emulation.
+(the temple brush volumes' face polygons + their FPoly texture axes) and
+emits a clean native Godot mesh — one primitive per texture, UVs = texels
+from the authored texture axes, the same uv_is_texels convention the level
+BSP uses — no CsgOper semantics, no carving, no brush-pipeline emulation.
 
-Input : tmp/decrypted/MAPS/20_18.unr + assets/maps/20_18/bsp.json
-        (the brush<->polys pairing with locations, csg opers)
+Sources (all parsed DIRECTLY from the .unr, not from bsp.json — the
+bsp2.json set is missing the temple floor brushes: the ADD volumes that
+overlap subtract volumes are dropped there as legacy "housings"):
+  ADD brushes      — the real temple geometry: the entrance floors
+                     (Polys43/63), the main west passage stairs
+                     (Polys83/79/87, the three ai_004 marches). Faces with
+                     the zone-box flag set 0x40a000 (NoOcclude|Translucent —
+                     the legacy INVISIBLE zone separators Polys17/23/28/55/67)
+                     are NOT rendered, and ZonePortal faces are not either.
+  SUBTRACT brushes — the interior volumes (the stair ramps Polys71/59, the
+                     vestibule Polys39, the gallery slopes Polys31/35...).
+                     Their AIR-AIR end caps are NOT rendered — in the live
+                     client those faces sit between two carved (empty)
+                     regions and never show; rendering them sealed the
+                     temple entrances (the user's report: in the original
+                     everything is open). The excluded caps, verified
+                     against the entrance openings:
+                       Polys71 poly 1,3 and Polys59 poly 1,3 (the corridor
+                       end walls at Y 11784/12824 and 9240/10280)
+                       Polys39 poly 0,2 (the vestibule west/east walls at
+                       X 26328/26501 — the main entrance)
+
+Region filter (X 25400..31500, Y 8800..17200) selects the temple volumes
+only; the road strip (X 6300..17220) is untouched, so the golden baseline
+cannot regress.
+
 Output: assets/maps/20_18/meshes_bsp/TempleNative.gltf/.bin
         assets/maps/20_18/temple_native.json (surfaces[] with tex pairs)
-
-The region filter (X 25500..31500, Y 8800..17200) selects the temple
-subtract volumes only: the two stair ramps (Polys71/59, the 26.1-degree
-marches with the ai_004 step texture), the gallery slopes (Polys31/35/47/51,
-45 degrees, in008/in023) and the temple floors/walls. The road strip (X
-6300..17220) is untouched, so the golden baseline cannot regress.
 """
 import json
 import os
@@ -34,13 +51,27 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from l2_probe import Package  # noqa: E402
+from l2_props import read_object  # noqa: E402
 from levelbsp import resolve_tex  # noqa: E402
-from bsp2 import parse_polys  # noqa: E402
+from bsp2 import parse_polys, model_polys_ref  # noqa: E402
 
 SCALE = 0.01
-# the temple subtract volumes (see the module docstring)
-REGION = (25500, 31500, 8800, 17200)
-FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000  # invisible, fake backdrop, portal
+REGION = (25400, 31500, 8800, 17200)
+FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000   # invisible, fake backdrop, portal
+ZONE_BOX_FLAGS = 0x40A000                  # NoOcclude|Translucent|Modulate:
+                                           # the legacy invisible zone boxes
+# The subtract air-air end caps (the live client never renders them — see
+# the module docstring): {polys name: set of raw poly indices}
+SUBTRACT_CAP_EXCLUDE = {
+    "Polys71": {1, 3},
+    "Polys59": {1, 3},
+    # Polys39 (the main-entrance vestibule) is carved air between two OPEN
+    # regions: its west/east caps sealed the entrance, its top cap rendered
+    # as a phantom floor at Z -3000 (the floor profile 26400,11032), its
+    # bottom cap z-fights the Polys43 entrance slab at -3752. The whole
+    # volume is air in the live client — none of its faces show.
+    "Polys39": {0, 1, 2, 3, 4, 5},
+}
 
 
 def main() -> None:
@@ -48,42 +79,73 @@ def main() -> None:
     out_dir = os.path.join(asset_dir, "meshes_bsp")
     pkg = Package(map_path)
     shaders = json.load(open(os.path.join(asset_dir, "shader_diffuse.json")))
-    bsp = json.load(open(os.path.join(asset_dir, "bsp.json")))
 
-    polys_exports = {}
+    # the ADD brushes already rendered by bsp2 (from bsp.json) — do not
+    # duplicate their faces
+    bsp = json.load(open(os.path.join(asset_dir, "bsp.json")))
+    already = {br["polys"] for br in bsp["brushes"]}
+
+    polys_parse = {}
     for i in range(pkg.export_count):
         if pkg.class_of_export(i) == "Polys":
-            polys_exports[pkg.name(pkg.exports[i][3])] = i
+            e = pkg.exports[i]
+            polys_parse[i] = parse_polys(pkg.data[e[6]:e[6] + e[5]], e[5])
 
-    groups = {}          # tex_key -> [(verts, uvs)]  (texture groups)
-    stats = {"brushes": 0, "faces": 0, "skipped_flags": 0, "skipped_tex": 0}
-    for br in bsp["brushes"]:
-        if br.get("csg") != 2:
+    groups = {}          # tex_key -> [(verts, uvs)]
+    stats = {"add": 0, "sub": 0, "faces": 0, "skip_flags": 0, "skip_tex": 0,
+             "skip_zone": 0, "skip_caps": 0, "skip_dup": 0}
+    for i in range(pkg.export_count):
+        if pkg.class_of_export(i) != "Brush":
             continue
-        loc = br["location"]
-        if not (REGION[0] <= loc[0] <= REGION[1]
-                and REGION[2] <= loc[1] <= REGION[3]):
-            continue
-        pi = polys_exports.get(br["polys"])
-        if pi is None:
-            continue
-        e = pkg.exports[pi]
+        e = pkg.exports[i]
         d = pkg.data[e[6]:e[6] + e[5]]
-        stats["brushes"] += 1
-        for pr in parse_polys(d, e[5]):
+        try:
+            state, props, end = read_object(d, pkg, bool(e[4] & 0x02000000))
+        except Exception:
+            continue
+        bref = props.get("Brush")
+        if not isinstance(bref, int) or bref <= 0:
+            continue
+        csg = props.get("CsgOper", 1)
+        csg = int(csg) if isinstance(csg, int) else 1
+        loc = props.get("Location", (0, 0, 0))
+        piv = props.get("PrePivot", (0, 0, 0))
+        origin = [loc[k] - piv[k] for k in range(3)]
+        if not (REGION[0] <= origin[0] <= REGION[1]
+                and REGION[2] <= origin[1] <= REGION[3]):
+            continue
+        j = model_polys_ref(pkg, bref - 1, loc, piv, polys_parse)
+        if j is None or j not in polys_parse:
+            continue
+        pname = pkg.name(pkg.exports[j][3])
+        if csg == 1:
+            if pname in already:
+                stats["skip_dup"] += 1
+                continue
+            stats["add"] += 1
+        else:
+            stats["sub"] += 1
+        caps = SUBTRACT_CAP_EXCLUDE.get(pname, set()) if csg == 2 else set()
+        for pr in polys_parse[j]:
             if pr["flags"] & FACE_SKIP_FLAGS:
-                stats["skipped_flags"] += 1
+                stats["skip_flags"] += 1
+                continue
+            if csg == 1 and (pr["flags"] & ZONE_BOX_FLAGS) == ZONE_BOX_FLAGS:
+                stats["skip_zone"] += 1
+                continue
+            if pr["i"] in caps:
+                stats["skip_caps"] += 1
                 continue
             tex = resolve_tex(pkg, pr["poly_mat"], shaders)
-            if not tex:
-                stats["skipped_tex"] += 1
+            if not tex or tex[1] in ("AntiPortal", "ZonePortal"):
+                stats["skip_tex"] += 1
                 continue
-            base = [pr["base"][k] + loc[k] for k in range(3)]
+            base = [pr["base"][k] + origin[k] for k in range(3)]
             tu, tv = pr["tu"], pr["tv"]
             verts = []
             uvs = []
             for v in pr["verts"]:
-                w = [v[k] + loc[k] for k in range(3)]
+                w = [v[k] + origin[k] for k in range(3)]
                 verts.append(w)
                 uvs.append((sum((w[k] - base[k]) * tu[k] for k in range(3)),
                             sum((w[k] - base[k]) * tv[k] for k in range(3))))
@@ -166,11 +228,11 @@ def main() -> None:
     json.dump({"schema": 1, "surfaces": surfaces},
               open(os.path.join(asset_dir, "temple_native.json"), "w"),
               indent=1)
-    print(f"temple_native: brushes {stats['brushes']}, faces {stats['faces']} "
-          f"(skipped flags {stats['skipped_flags']}, tex {stats['skipped_tex']}), "
+    print(f"temple_native: ADD {stats['add']}, SUB {stats['sub']} "
+          f"(dup {stats['skip_dup']}), faces {stats['faces']} "
+          f"(zone {stats['skip_zone']}, caps {stats['skip_caps']}, "
+          f"flags {stats['skip_flags']}, tex {stats['skip_tex']}), "
           f"{len(mesh_prims)} surfaces, {len(blob)} bytes")
-    for s in surfaces:
-        print("   surface tex:", s["tex"])
 
 
 if __name__ == "__main__":

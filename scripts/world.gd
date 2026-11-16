@@ -1189,10 +1189,11 @@ func _build_environment() -> void:
 
 
 func _spawn_player() -> void:
-	# Spawn on the road deck over the hole cutout, west entrance.
-	# Surface under (7400, 17650) is the road deck top at z ~= -4404.5 (measured
-	# from glTF triangles in tmp/ent_scan.py); 10+ m clearance overhead.
-	var start := Vector3(7400.0, 17650.0, -4404.5)
+	# TEMPORARY (the user's order, 2026-11-16): the spawn moved to the
+	# Shillien Temple north entrance platform (28087,13107,-3752) to verify
+	# the temple fixes (DEVLOG-69/70). The village spawn (7400,17650,-4404.5)
+	# comes back when the temple stage closes.
+	var start := Vector3(28087.0, 13107.0, -3752.0)
 	var spawn_env := OS.get_environment("L2_SPAWN")
 	if spawn_env != "":
 		var sp := spawn_env.split(",")
@@ -1206,6 +1207,6 @@ func _spawn_player() -> void:
 	player.terrain = self
 	player.position = Vector3(start.x * UNIT_SCALE, floor_y * UNIT_SCALE + 0.9, start.y * UNIT_SCALE)
 	if OS.get_environment("L2_VIEW_YAW") == "":
-		player.yaw = -PI / 2  # face the bridge into the village (east, west entrance)
+		player.yaw = 0.0  # face the temple entrance arch (south) from the north platform
 	add_child(player)
 	print("player spawned at ", player.position, " terrain_height=", floor_y * UNIT_SCALE)
