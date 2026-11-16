@@ -39,6 +39,8 @@ func _ready() -> void:
 		_green_trace_flow()
 	if OS.get_environment("L2_TRACE_BOX") != "":
 		_trace_box_flow()
+	if OS.get_environment("L2_TRACE_RAY") != "":
+		_trace_ray_flow()
 	if OS.get_environment("L2_TRACE_COLOR") != "":
 		_trace_color_flow()
 	if OS.get_environment("L2_SCREENSHOT") != "":
@@ -88,6 +90,46 @@ func _trace_box_flow() -> void:
 					_texture_for_surface(owner_name, surf), hit.get("normal")])
 		print("TRACE_BOX totals:", counts)
 		get_tree().quit()
+
+
+## Single-ray probe: L2_TRACE_RAY="ux1,uy1,z1,ux2,uy2,z2" (game units: UE x,
+## UE y, UE height) casts one ray (up to 8 hits stepping past each) and
+## prints the hits' mesh, face, surface texture, position, normal. Locates
+## any suspect wall (a plug, a stray cap) to the exact face.
+func _trace_ray_flow() -> void:
+	for i in 10:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var p := OS.get_environment("L2_TRACE_RAY").split(",")
+	# Godot axes: X = UE x, Y = UE height (z), Z = UE y (the level BSP
+	# convention — every builder emits [x, z, y] * SCALE)
+	var from := Vector3(float(p[0]) * UNIT_SCALE, float(p[2]) * UNIT_SCALE,
+			float(p[1]) * UNIT_SCALE)
+	var to := Vector3(float(p[3]) * UNIT_SCALE, float(p[5]) * UNIT_SCALE,
+			float(p[4]) * UNIT_SCALE)
+	var space := get_world_3d().direct_space_state
+	var cur := from
+	for n in range(8):
+		var q := PhysicsRayQueryParameters3D.create(cur, to)
+		var hit := space.intersect_ray(q)
+		if hit.is_empty():
+			print("TRACE_RAY %d: NO-HIT (from %v to %v)" % [n, cur, to])
+			break
+		var col = hit.get("collider")
+		var owner_name := "unknown"
+		if col is Node and (col as Node).has_meta("mesh_key"):
+			owner_name = str((col as Node).get_meta("mesh_key"))
+		elif col is Node:
+			owner_name = "<%s>%s" % [(col as Node).get_class(), (col as Node).name]
+		var fid := int(hit.get("face_index", -1))
+		var surf := _surface_for_face(owner_name, fid)
+		var pos: Vector3 = hit.get("position")
+		print("TRACE_RAY %d: %s face=%d surf=%d tex=%s pos=g(%.0f,%.0f,%.0f) n=%v" % [
+			n, owner_name, fid, surf, _texture_for_surface(owner_name, surf),
+			pos.x / UNIT_SCALE, pos.y / UNIT_SCALE, pos.z / UNIT_SCALE,
+			hit.get("normal")])
+		cur = pos + (to - from).normalized() * 0.05
+	get_tree().quit()
 
 
 ## Green-pixel tracer: L2_GREEN_TRACE=1 renders one frame, finds green-dominant

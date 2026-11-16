@@ -71,7 +71,25 @@ SUBTRACT_CAP_EXCLUDE = {
     # bottom cap z-fights the Polys43 entrance slab at -3752. The whole
     # volume is air in the live client — none of its faces show.
     "Polys39": {0, 1, 2, 3, 4, 5},
+    # The gallery slope wedges: ALL four side caps are air-air joints with
+    # the neighbouring carved volumes (Polys39 the vestibule at X 26501,
+    # the outside air at X 29144, the corridors Polys71/59 at Y 11784/10280,
+    # each other at Y 11032). In the live client the galleries connect OPEN
+    # to the vestibule and the corridors — rendering the caps sealed the
+    # main entrance (the ray probe: TempleNative face at (26501, 11017,
+    # −3712), normal −X). Only the walkable slope (poly 4) and the floor
+    # under it (poly 5) render.
+    "Polys31": {0, 1, 2, 3},
+    "Polys35": {0, 1, 2, 3},
 }
+
+# The INVISIBLE zone-marker brushes (the legacy zone separator family, the
+# full inventory lives in Docs/temple_zones.md): the live client never
+# renders ANY face of them — they are lighting/sound/zone markers, not
+# geometry. Not even their 0x0-flagged faces show (Polys28 poly 3, Polys23
+# poly 1 stood as full-height walls across the hall). Listed by name here;
+# the face-flag filter (ZONE_BOX_FLAGS) alone misses these 0x0 faces.
+ZONE_MARKER_BRUSHES = {"Polys17", "Polys23", "Polys28", "Polys55", "Polys67"}
 
 
 def main() -> None:
@@ -121,6 +139,9 @@ def main() -> None:
         if csg == 1:
             if pname in already:
                 stats["skip_dup"] += 1
+                continue
+            if pname in ZONE_MARKER_BRUSHES:
+                stats["skip_zone_brush"] = stats.get("skip_zone_brush", 0) + 1
                 continue
             stats["add"] += 1
         else:
