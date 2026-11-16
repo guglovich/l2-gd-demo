@@ -25,3 +25,6 @@ Docs/**/*.png
 
 # The dev work log stays LOCAL only (the user's order, 2026-11-16)
 Docs/DEVLOG.md
+
+# The _L2_UNREALED reference toolkit (1 GB, the user's local tool — stays out of git)
+tools/_L2_UNREALED/

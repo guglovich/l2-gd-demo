@@ -1,0 +1,59 @@
+{
+ "schema": 1,
+ "surfaces": [
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_001_1"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_ai_004"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_ai_008"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in002"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in008"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in022"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in023"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_in024"
+   ]
+  },
+  {
+   "tex": [
+    "sylen_temple_t",
+    "oren_sylen_t010"
+   ]
+  }
+ ]
+}

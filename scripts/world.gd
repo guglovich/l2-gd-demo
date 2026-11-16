@@ -39,6 +39,8 @@ func _ready() -> void:
 		_green_trace_flow()
 	if OS.get_environment("L2_TRACE_BOX") != "":
 		_trace_box_flow()
+	if OS.get_environment("L2_TRACE_COLOR") != "":
+		_trace_color_flow()
 	if OS.get_environment("L2_SCREENSHOT") != "":
 		_screenshot_flow()
 	if OS.get_environment("L2_BURST") != "":
@@ -72,6 +74,10 @@ func _trace_box_flow() -> void:
 			var owner_name := "unknown"
 			if col is Node and (col as Node).has_meta("mesh_key"):
 				owner_name = str((col as Node).get_meta("mesh_key"))
+			elif col is Node:
+				owner_name = "<%s>%s" % [(col as Node).get_class(), (col as Node).name]
+			elif col != null:
+				owner_name = "<non-node>"
 			var fid := int(hit.get("face_index", -1))
 			var k := owner_name
 			counts[k] = counts.get(k, 0) + 1
@@ -80,8 +86,8 @@ func _trace_box_flow() -> void:
 				print("TRACE_BOX px(%d,%d) %s face=%d surf=%d tex=%s n=%v" % [
 					px, py, owner_name, fid, surf,
 					_texture_for_surface(owner_name, surf), hit.get("normal")])
-	print("TRACE_BOX totals:", counts)
-	get_tree().quit()
+		print("TRACE_BOX totals:", counts)
+		get_tree().quit()
 
 
 ## Green-pixel tracer: L2_GREEN_TRACE=1 renders one frame, finds green-dominant
@@ -128,6 +134,57 @@ func _green_trace_flow() -> void:
 					px, py, owner_name, fid, surf, _texture_for_surface(owner_name, surf),
 					hit.get("position"), hit.get("normal")])
 	print("GREEN_TRACE totals:", counts)
+	get_tree().quit()
+
+
+## Color tracer: L2_TRACE_COLOR="r,g,b,tol" finds pixels near that color and
+## reports what they hit — settles "what surface is this patch" numerically.
+func _trace_color_flow() -> void:
+	for i in 10:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or img == null:
+		print("TRACE_COLOR: no camera/image")
+		get_tree().quit()
+		return
+	var p := OS.get_environment("L2_TRACE_COLOR").split(",")
+	var target := Color(float(p[0]), float(p[1]), float(p[2]))
+	var tol := float(p[3]) if p.size() > 3 else 0.06
+	var w := img.get_width()
+	var h := img.get_height()
+	var space := get_world_3d().direct_space_state
+	var counts := {}
+	for py in range(0, h, 6):
+		for px in range(0, w, 6):
+			var c := img.get_pixel(px, py)
+			if absf(c.r - target.r) > tol or absf(c.g - target.g) > tol \
+					or absf(c.b - target.b) > tol:
+				continue
+			var pos := Vector2(px, py)
+			var from := cam.project_ray_origin(pos)
+			var dir := cam.project_ray_normal(pos)
+			var q := PhysicsRayQueryParameters3D.create(from, from + dir * 500.0)
+			var hit := space.intersect_ray(q)
+			if hit.is_empty():
+				counts["NO-HIT"] = counts.get("NO-HIT", 0) + 1
+				continue
+			var col = hit.get("collider")
+			var owner_name := "unknown"
+			if col is Node and (col as Node).has_meta("mesh_key"):
+				owner_name = str((col as Node).get_meta("mesh_key"))
+			elif col is Node:
+				owner_name = "<%s>" % (col as Node).get_class()
+			var fid := int(hit.get("face_index", -1))
+			var k := owner_name
+			counts[k] = counts.get(k, 0) + 1
+			if counts[k] <= 3:
+				var surf := _surface_for_face(owner_name, fid)
+				print("TRACE_COLOR px(%d,%d) %s face=%d surf=%d tex=%s pos=%v n=%v" % [
+					px, py, owner_name, fid, surf, _texture_for_surface(owner_name, surf),
+					hit.get("position"), hit.get("normal")])
+	print("TRACE_COLOR totals:", counts)
 	get_tree().quit()
 
 
@@ -596,6 +653,12 @@ func _build_bsp() -> void:
 	# temple court, the valley); the streets/buildings live in the Brush
 	# actors — render BOTH sources.
 	_build_bsp_brushes()
+	# The Shillien Temple interior (floors, walls, the stair ramps) is
+	# authored in the client as subtract volumes — the level BSP has none
+	# of it and no static meshes cover it. temple_native.py emits it as a
+	# CLEAN native mesh from the client coordinates (the modern-port rule:
+	# no legacy brush-pipeline emulation). Same uv_is_texels convention.
+	_build_temple_native()
 
 func _build_bsp_brushes() -> void:
 	var brushes: Array = bsp_data.get("brushes", [])
@@ -703,6 +766,56 @@ func _build_bsp_brushes() -> void:
 	print("bsp brushes built ", built, ", skipped ", skipped,
 		", textured surfaces ", textured_surfaces, ", unique materials ", mat_cache.size())
 
+
+
+## The Shillien Temple interior as a NATIVE mesh (temple_native.py): the
+## client authors it as subtract volumes (the stair ramps Polys71/59 with
+## the ai_004 step texture, the gallery slopes, the floors/walls) — the
+## level BSP has none of it and no static meshes cover it. This loads the
+## clean emitted mesh with the same texel-UV BSP materials + trimesh
+## collision. Modern-port rule: coordinates from the client, no legacy
+## brush-pipeline emulation.
+func _build_temple_native() -> void:
+	var tn := _load_json(MAP_DIR + "/temple_native.json")
+	var gp := "%s/meshes_bsp/TempleNative.gltf" % MAP_DIR
+	if tn.is_empty() or not ResourceLoader.exists(gp):
+		print("temple_native: missing (build with tools/l2strict/temple_native.py)")
+		return
+	var scene: PackedScene = load(gp)
+	if scene == null:
+		print("temple_native: load failed")
+		return
+	var root := scene.instantiate()
+	var mesh: Mesh = null
+	for c in root.get_children():
+		if c is MeshInstance3D:
+			mesh = c.mesh
+			break
+	root.free()
+	if mesh == null:
+		return
+	var mat_cache := {}
+	var surfaces: Array = tn.get("surfaces", [])
+	var textured := 0
+	for si in range(mesh.get_surface_count()):
+		if si < surfaces.size() and surfaces[si].get("tex") != null:
+			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
+			textured += 1
+		else:
+			mesh.surface_set_material(si, _bsp_grey())
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	world.add_child(mi)
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	var shape := mesh.create_trimesh_shape()
+	shape.backface_collision = true
+	col.shape = shape
+	body.add_child(col)
+	body.set_meta("mesh_key", "TempleNative")
+	world.add_child(body)
+	print("temple_native: surfaces ", mesh.get_surface_count(),
+		", textured ", textured, ", unique materials ", mat_cache.size())
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:
