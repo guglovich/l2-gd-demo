@@ -22,3 +22,6 @@ __pycache__/
 
 # Screenshots and renders (all stay local, never pushed)
 Docs/**/*.png
+
+# The dev work log stays LOCAL only (the user's order, 2026-11-16)
+Docs/DEVLOG.md
