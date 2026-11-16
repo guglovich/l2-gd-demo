@@ -103,6 +103,13 @@ SUBTRACT_CAP_EXCLUDE = {
 ZONE_MARKER_BRUSHES = {"Polys55", "Polys67"}
 SKY_ORIGIN_Z = 10000.0  # the sky-plane copy origin (16871) — never render
 
+# Polys23/28 render ONLY the inner face that shows through the skin windows
+# (Polys28 poly 3 at Y 11536, Polys23 poly 1 at Y 10528) — and WITHOUT
+# collision (the user's report: the whole-volume render sealed the side
+# passages of the hall; in the live client those passages are open). These
+# faces go to the separate decor mesh (TempleNativeDecor) with no body.
+HALL_BACK_WALL_FACES = {"Polys28": {3}, "Polys23": {1}}
+
 
 def main() -> None:
     map_path, asset_dir = sys.argv[1], sys.argv[2]
@@ -122,6 +129,7 @@ def main() -> None:
             polys_parse[i] = parse_polys(pkg.data[e[6]:e[6] + e[5]], e[5])
 
     groups = {}          # tex_key -> [(verts, uvs)]
+    decor_groups = {}    # the same, but NO collision (the window-back walls)
     stats = {"add": 0, "sub": 0, "faces": 0, "skip_flags": 0, "skip_tex": 0,
              "skip_zone": 0, "skip_caps": 0, "skip_dup": 0}
     for i in range(pkg.export_count):
@@ -164,6 +172,7 @@ def main() -> None:
         else:
             stats["sub"] += 1
         caps = SUBTRACT_CAP_EXCLUDE.get(pname, set()) if csg == 2 else set()
+        decor = HALL_BACK_WALL_FACES.get(pname, set()) if csg == 1 else set()
         for pr in polys_parse[j]:
             if pr["flags"] & FACE_SKIP_FLAGS:
                 stats["skip_flags"] += 1
@@ -174,6 +183,12 @@ def main() -> None:
             # (ZONE_MARKER_BRUSHES) and by the sky-plane origin above.
             if pr["i"] in caps:
                 stats["skip_caps"] += 1
+                continue
+            if decor and pr["i"] not in decor:
+                # Polys23/28: the other faces seal the side passages of the
+                # hall (the user's report) — render nothing but the inner
+                # window-back wall, and render it WITHOUT collision.
+                stats["skip_hall_extra"] = stats.get("skip_hall_extra", 0) + 1
                 continue
             tex = resolve_tex(pkg, pr["poly_mat"], shaders)
             if not tex or tex[1] in ("AntiPortal", "ZonePortal"):
@@ -188,90 +203,110 @@ def main() -> None:
                 verts.append(w)
                 uvs.append((sum((w[k] - base[k]) * tu[k] for k in range(3)),
                             sum((w[k] - base[k]) * tv[k] for k in range(3))))
-            groups.setdefault(tuple(tex), []).append((verts, uvs))
+            key = tuple(tex)
+            if decor:
+                decor_groups.setdefault(key, []).append((verts, uvs))
+            else:
+                groups.setdefault(key, []).append((verts, uvs))
             stats["faces"] += 1
 
-    # build the glTF: one primitive per texture group, Godot axes (x, z, y),
-    # meters — the level BSP convention (uv_is_texels on the shader side)
-    blob = bytearray()
-    buffer_views = []
-    accessors = []
-    materials = []
-    mesh_prims = []
-    surfaces = []
-    for key in sorted(groups.keys()):
-        pos = []
-        uvs = []
-        idx = []
-        vbase = 0
-        for verts, uvs2 in groups[key]:
-            for v in verts:
-                pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
-            for u, w in uvs2:
-                uvs.extend([u, w])
-            n = len(verts)
-            for k in range(1, n - 1):
-                idx.extend([vbase, vbase + k + 1, vbase + k])
-            vbase += n
-        if not idx:
-            continue
-        pb = struct.pack(f"<{len(pos)}f", *pos)
-        buffer_views.append({"buffer": 0, "byteOffset": len(blob),
-                             "byteLength": len(pb)})
-        blob.extend(pb)
-        accessors.append({"bufferView": len(buffer_views) - 1,
-                          "componentType": 5126, "count": len(pos) // 3,
-                          "type": "VEC3",
-                          "min": [min(pos[0::3]), min(pos[1::3]),
-                                  min(pos[2::3])],
-                          "max": [max(pos[0::3]), max(pos[1::3]),
-                                  max(pos[2::3])]})
-        ub = struct.pack(f"<{len(uvs)}f", *uvs)
-        buffer_views.append({"buffer": 0, "byteOffset": len(blob),
-                             "byteLength": len(ub)})
-        blob.extend(ub)
-        accessors.append({"bufferView": len(buffer_views) - 1,
-                          "componentType": 5126, "count": len(uvs) // 2,
-                          "type": "VEC2"})
-        ib = struct.pack(f"<{len(idx)}I", *idx)
-        buffer_views.append({"buffer": 0, "byteOffset": len(blob),
-                             "byteLength": len(ib)})
-        blob.extend(ib)
-        accessors.append({"bufferView": len(buffer_views) - 1,
-                          "componentType": 5125, "count": len(idx),
-                          "type": "SCALAR"})
-        while len(blob) % 4:
-            blob.append(0)
-        si = len(mesh_prims)
-        materials.append({"name": f"m{si}",
-                          "pbrMetallicRoughness":
-                              {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
-                          "doubleSided": True})
-        mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
-                                          "TEXCOORD_0": len(accessors) - 2},
-                           "indices": len(accessors) - 1, "material": si,
-                           "mode": 4})
-        surfaces.append({"tex": list(key)})
+    def build_gltf(groups, mesh_name):
+        blob = bytearray()
+        buffer_views = []
+        accessors = []
+        materials = []
+        mesh_prims = []
+        surfaces = []
+        for key in sorted(groups.keys()):
+            pos = []
+            uvs = []
+            idx = []
+            vbase = 0
+            for verts, uvs2 in groups[key]:
+                for v in verts:
+                    pos.extend([v[0] * SCALE, v[2] * SCALE, v[1] * SCALE])
+                for u, w in uvs2:
+                    uvs.extend([u, w])
+                n = len(verts)
+                for k in range(1, n - 1):
+                    idx.extend([vbase, vbase + k + 1, vbase + k])
+                vbase += n
+            if not idx:
+                continue
+            pb = struct.pack(f"<{len(pos)}f", *pos)
+            buffer_views.append({"buffer": 0, "byteOffset": len(blob),
+                                 "byteLength": len(pb)})
+            blob.extend(pb)
+            accessors.append({"bufferView": len(buffer_views) - 1,
+                              "componentType": 5126, "count": len(pos) // 3,
+                              "type": "VEC3",
+                              "min": [min(pos[0::3]), min(pos[1::3]),
+                                      min(pos[2::3])],
+                              "max": [max(pos[0::3]), max(pos[1::3]),
+                                      max(pos[2::3])]})
+            ub = struct.pack(f"<{len(uvs)}f", *uvs)
+            buffer_views.append({"buffer": 0, "byteOffset": len(blob),
+                                 "byteLength": len(ub)})
+            blob.extend(ub)
+            accessors.append({"bufferView": len(buffer_views) - 1,
+                              "componentType": 5126, "count": len(uvs) // 2,
+                              "type": "VEC2"})
+            ib = struct.pack(f"<{len(idx)}I", *idx)
+            buffer_views.append({"buffer": 0, "byteOffset": len(blob),
+                                 "byteLength": len(ib)})
+            blob.extend(ib)
+            accessors.append({"bufferView": len(buffer_views) - 1,
+                              "componentType": 5125, "count": len(idx),
+                              "type": "SCALAR"})
+            while len(blob) % 4:
+                blob.append(0)
+            si = len(mesh_prims)
+            materials.append({"name": f"m{si}",
+                              "pbrMetallicRoughness":
+                                  {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
+                              "doubleSided": True})
+            mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
+                                              "TEXCOORD_0": len(accessors) - 2},
+                               "indices": len(accessors) - 1, "material": si,
+                               "mode": 4})
+            surfaces.append({"tex": list(key)})
+        gltf = {
+            "asset": {"version": "2.0", "generator": "l2godot temple_native"},
+            "scene": 0, "scenes": [{"nodes": [0]}],
+            "nodes": [{"mesh": 0, "name": mesh_name}],
+            "meshes": [{"name": mesh_name, "primitives": mesh_prims}],
+            "materials": materials,
+            "accessors": accessors, "bufferViews": buffer_views,
+            "buffers": [{"uri": f"{mesh_name}.bin", "byteLength": len(blob)}],
+        }
+        return gltf, blob, surfaces, mesh_prims
 
-    gltf = {
-        "asset": {"version": "2.0", "generator": "l2godot temple_native"},
-        "scene": 0, "scenes": [{"nodes": [0]}],
-        "nodes": [{"mesh": 0, "name": "TempleNative"}],
-        "meshes": [{"name": "TempleNative", "primitives": mesh_prims}],
-        "materials": materials,
-        "accessors": accessors, "bufferViews": buffer_views,
-        "buffers": [{"uri": "TempleNative.bin", "byteLength": len(blob)}],
-    }
+    gltf, blob, surfaces, mesh_prims = build_gltf(groups, "TempleNative")
     json.dump(gltf, open(os.path.join(out_dir, "TempleNative.gltf"), "w"))
     open(os.path.join(out_dir, "TempleNative.bin"), "wb").write(bytes(blob))
     json.dump({"schema": 1, "surfaces": surfaces},
               open(os.path.join(asset_dir, "temple_native.json"), "w"),
               indent=1)
+    n_surfaces = len(mesh_prims)
+    if decor_groups:
+        dg, dblob, dsurfaces, dprims = build_gltf(decor_groups,
+                                                  "TempleNativeDecor")
+        json.dump(dg, open(os.path.join(out_dir,
+                                        "TempleNativeDecor.gltf"), "w"))
+        open(os.path.join(out_dir, "TempleNativeDecor.bin"),
+             "wb").write(bytes(dblob))
+        json.dump({"schema": 1, "surfaces": dsurfaces},
+                  open(os.path.join(asset_dir, "temple_native_decor.json"),
+                       "w"), indent=1)
+    else:
+        dprims = []
     print(f"temple_native: ADD {stats['add']}, SUB {stats['sub']} "
           f"(dup {stats['skip_dup']}), faces {stats['faces']} "
-          f"(zone {stats['skip_zone']}, caps {stats['skip_caps']}, "
-          f"flags {stats['skip_flags']}, tex {stats['skip_tex']}), "
-          f"{len(mesh_prims)} surfaces, {len(blob)} bytes")
+          f"(caps {stats['skip_caps']}, flags {stats['skip_flags']}, "
+          f"tex {stats['skip_tex']}, sky {stats.get('skip_sky', 0)}, "
+          f"hall-extra {stats.get('skip_hall_extra', 0)}), "
+          f"{n_surfaces}+{len(dprims)} surfaces, "
+          f"{len(blob)}+{len(dblob) if decor_groups else 0} bytes")
 
 
 if __name__ == "__main__":

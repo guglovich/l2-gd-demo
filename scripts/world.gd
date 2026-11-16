@@ -858,6 +858,37 @@ func _build_temple_native() -> void:
 	world.add_child(body)
 	print("temple_native: surfaces ", mesh.get_surface_count(),
 		", textured ", textured, ", unique materials ", mat_cache.size())
+	# The window-back walls (Polys28 poly 3, Polys23 poly 1): visual-only —
+	# no collision, the side passages of the hall must stay walkable
+	# (the user's report: the whole-volume collision sealed them).
+	var dgp := "%s/meshes_bsp/TempleNativeDecor.gltf" % MAP_DIR
+	var dtn := _load_json(MAP_DIR + "/temple_native_decor.json")
+	if not dtn.is_empty() and ResourceLoader.exists(dgp):
+		var dscene: PackedScene = load(dgp)
+		if dscene != null:
+			var droot := dscene.instantiate()
+			var dmesh: Mesh = null
+			for c in droot.get_children():
+				if c is MeshInstance3D:
+					dmesh = c.mesh
+					break
+			droot.free()
+			if dmesh != null:
+				var dsurfaces: Array = dtn.get("surfaces", [])
+				var dtextured := 0
+				var dcache := {}
+				for si in range(dmesh.get_surface_count()):
+					if si < dsurfaces.size() and dsurfaces[si].get("tex") != null:
+						dmesh.surface_set_material(si,
+							_bsp_material(dsurfaces[si]["tex"], dcache))
+						dtextured += 1
+					else:
+						dmesh.surface_set_material(si, _bsp_grey())
+				var dmi := MeshInstance3D.new()
+				dmi.mesh = dmesh
+				world.add_child(dmi)
+				print("temple_native_decor: surfaces ",
+					dmesh.get_surface_count(), ", textured ", dtextured)
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:

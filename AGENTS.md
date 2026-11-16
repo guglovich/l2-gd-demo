@@ -256,3 +256,9 @@ Details: `Docs/craft-anything.md`.
   the original client.
 - Verification = the mandatory screenshot comparison against the original
   (Docs/DE_village.png and the user's captures) for every new material.
+- **NEVER break what already works** (the user's rule, 2026-11-17): the
+  village (the road, the tunnel, the spawn flow) was working — any change
+  outside the current task region that touches the working areas is a
+  regression by definition. The golden-road baseline pixel-diff gates this
+  for the road; for everything else, changes must stay inside the task's
+  region (e.g. the temple work may not alter the village).
