@@ -926,6 +926,17 @@ func _build_meshes() -> void:
 		body.scale = inst.scale
 		body.set_meta("mesh_key", key)
 		world.add_child(body)
+	# GATE D (DEVLOG-79): tint side_ent surfaces with distinct colors
+	if OS.get_environment("L2_SIDEENT_DEBUG") != "":
+		var se_mesh: Mesh = _get_mesh("sylen_temple_s:sylentemple_side_ent")
+		if se_mesh != null:
+			var hide := StandardMaterial3D.new()
+			hide.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA
+			hide.albedo_color = Color(1.0, 1.0, 1.0, 0.0)
+			hide.no_shadow_cast = true
+			for dbg_si in [0, 1]:
+				se_mesh.surface_set_material(dbg_si, hide)
+			print("GATE D: side_ent surfaces 0,1 HIDDEN")
 	print("placed ", placed, " static meshes, ", _shape_cache.size(), " collision shapes")
 	if not skipped.is_empty():
 		print("SKIPPED (mesh failed to load): ", skipped)
@@ -1006,10 +1017,12 @@ func _get_mesh(key: String) -> Mesh:
 	_static_grey.cull_mode = StandardMaterial3D.CULL_DISABLED
 	for si in range(mesh.get_surface_count()):
 		if si >= pis.size():
+			print("FALLBACK: ", key, " surf ", si, " (pis exhausted, pis=", pis.size(), ")")
 			mesh.surface_set_material(si, _static_grey)
 			continue
 		var mi := int(pis[si])
 		if mi < 0 or mi >= texs.size():
+			print("FALLBACK: ", key, " surf ", si, " (mi ", mi, " out of ", texs.size(), ")")
 			mesh.surface_set_material(si, _static_grey)
 			continue
 		var t = texs[mi]
