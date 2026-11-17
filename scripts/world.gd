@@ -1065,12 +1065,14 @@ func _get_mesh(key: String) -> Mesh:
 				# the live client shows them from the road (no backface
 				# culling for statics). Without this the bridge "боковины"
 				# (the span side walls inside O_DE_Bridge) are invisible.
-				# DEVLOG-78 rev2: the client CULLS backfaces on statics (UE2
-				# default) — the unconditional two-sided render leaked the portal
-				# frames' BACK faces through the level-BSP walls (the gray
-				# rectangles above the arches, the user's report). Two-sided only
-				# where the authored shader says so / the legacy list.
-				m.cull_mode = StandardMaterial3D.CULL_BACK
+				# DEVLOG-79 rev2: the client renders L2 statics TWO-SIDED —
+				# empirical: the bridge "боковины" (single-plane strips, normals
+				# away from the road) are visible from the road in the live
+				# client, and the temple facade gaps (the doorway spandrels,
+				# DEVLOG-78/79) are filled by the skin's INNER faces only —
+				# with backface culling they turn into sky holes. The
+				# CULL_BACK experiment (rev2) was reverted.
+				m.cull_mode = StandardMaterial3D.CULL_DISABLED
 				# Real values (MECHANICS.md, decompiled/original packages):
 				# Shader flags carried in materials.json.shader — apply TwoSided.
 				# Opacity/OutputBlending are present as object refs/flags but not
