@@ -818,20 +818,26 @@ func _build_bsp_brushes() -> void:
 ## collision. Modern-port rule: coordinates from the client, no legacy
 ## brush-pipeline emulation.
 func _build_temple_native() -> void:
-	# DEVLOG-76 face rule: the temple Brush actors render ONLY their 0x0-flag
-	# faces (the 0x40a000 faces are the zone-boundary markers — in002 gray
-	# squares and alien walls; the ZonePortals are 0x4000109). The air-air
-	# caps are excluded (the open entrances), and the hall wall bands
-	# (Polys23/28 0x0 faces) are cut around the corridor doorways. Static
-	# meshes carry the rest of the interior (deco08, skin, side_stair...).
-	var tn := _load_json(MAP_DIR + "/temple_native.json")
-	var gp := "%s/meshes_bsp/TempleNative.gltf" % MAP_DIR
+	# DEVLOG-77: the temple interior IS the level BSP (336 nodes in the
+	# temple region of Model500 — the old "zero temple BSP geometry" probe
+	# read surf idx[4] = iBrushPoly as a node index and was invalid). The
+	# client renders exactly: the level BSP (stone walls with the carved
+	# panel recesses, floors, ceilings) + the decoration static meshes.
+	# The Brush actors are the CSG sources — their Models are empty and the
+	# runtime renders nothing from them (engine.dll has no runtime CSG).
+	# TempleBsp.gltf = the node-walked temple part of the level BSP
+	# (tools/l2strict/temple_bsp.py). The Brush faces are NOT rendered.
+	if OS.get_environment("L2_NO_TEMPLEBSP") != "":
+		print("temple_bsp: SKIPPED (L2_NO_TEMPLEBSP)")
+		return
+	var tn := _load_json(MAP_DIR + "/temple_bsp.json")
+	var gp := "%s/meshes_bsp/TempleBsp.gltf" % MAP_DIR
 	if tn.is_empty() or not ResourceLoader.exists(gp):
-		print("temple_native: missing (build with tools/l2strict/temple_native.py)")
+		print("temple_bsp: missing (build with tools/l2strict/temple_bsp.py)")
 		return
 	var scene: PackedScene = load(gp)
 	if scene == null:
-		print("temple_native: load failed")
+		print("temple_bsp: load failed")
 		return
 	var root := scene.instantiate()
 	var mesh: Mesh = null
@@ -860,9 +866,9 @@ func _build_temple_native() -> void:
 	shape.backface_collision = true
 	col.shape = shape
 	body.add_child(col)
-	body.set_meta("mesh_key", "TempleNative")
+	body.set_meta("mesh_key", "TempleBsp")
 	world.add_child(body)
-	print("temple_native: surfaces ", mesh.get_surface_count(),
+	print("temple_bsp: surfaces ", mesh.get_surface_count(),
 		", textured ", textured, ", unique materials ", mat_cache.size())
 
 
