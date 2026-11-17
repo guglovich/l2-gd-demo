@@ -46,6 +46,10 @@ DISP_MAX_POINTS = 8000
 SCALE = 0.01
 CELL = 128.0
 
+# The Shillien Temple region (temple_native REGION): every Brush actor whose
+# origin falls inside is a ZONE VOLUME — never rendered (DEVLOG-76).
+TEMPLE_REGION = (25400, 31500, 8800, 17200)
+
 
 def read_compact(d, p):
     """The authentic L2 FCompactIndex decode (Core.dll 0x1015cfb0).
@@ -490,6 +494,22 @@ def main():
         if pname not in polys_objs:
             continue
         origin = [loc[k] - pivot[k] for k in range(3)]
+        # DEVLOG-76: the Shillien Temple Brush actors are ZONE VOLUMES
+        # (sound/light markers — Polys17 the hall box, Polys23/28 the
+        # passage slabs, Polys51 the apse volume, Polys71/59 the stair
+        # corridors, Polys83/79 the march duplicates, Polys91..111 the
+        # apse caps): the level BSP carries zero temple geometry and the
+        # client renders the interior from static meshes ALONE (deco08 =
+        # hall floor+walls, ent_stair/ent_stair02 = the west marches at
+        # the same heights, side_stair = the corridor ramps, deco03 = the
+        # apse floor). Every brush face here is a zone-volume face — the
+        # source of the alien walls, the gray in002 squares and the
+        # duplicate ramps. Modern-port rule: never render zone separators.
+        # The region is the temple_native REGION; the village road brushes
+        # lie outside it (the golden baseline gates this).
+        if (TEMPLE_REGION[0] <= origin[0] <= TEMPLE_REGION[1]
+                and TEMPLE_REGION[2] <= origin[1] <= TEMPLE_REGION[3]):
+            continue
         # CsgOper: 1 = CSG_Add (solid), 2 = CSG_Subtract (the carved AIR —
         # the engine renders the subtraction result, never the brush itself)
         csg = props.get("CsgOper")

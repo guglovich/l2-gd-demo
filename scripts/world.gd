@@ -818,6 +818,12 @@ func _build_bsp_brushes() -> void:
 ## collision. Modern-port rule: coordinates from the client, no legacy
 ## brush-pipeline emulation.
 func _build_temple_native() -> void:
+	# DEVLOG-76 face rule: the temple Brush actors render ONLY their 0x0-flag
+	# faces (the 0x40a000 faces are the zone-boundary markers — in002 gray
+	# squares and alien walls; the ZonePortals are 0x4000109). The air-air
+	# caps are excluded (the open entrances), and the hall wall bands
+	# (Polys23/28 0x0 faces) are cut around the corridor doorways. Static
+	# meshes carry the rest of the interior (deco08, skin, side_stair...).
 	var tn := _load_json(MAP_DIR + "/temple_native.json")
 	var gp := "%s/meshes_bsp/TempleNative.gltf" % MAP_DIR
 	if tn.is_empty() or not ResourceLoader.exists(gp):
@@ -858,37 +864,6 @@ func _build_temple_native() -> void:
 	world.add_child(body)
 	print("temple_native: surfaces ", mesh.get_surface_count(),
 		", textured ", textured, ", unique materials ", mat_cache.size())
-	# The window-back walls (Polys28 poly 3, Polys23 poly 1): visual-only —
-	# no collision, the side passages of the hall must stay walkable
-	# (the user's report: the whole-volume collision sealed them).
-	var dgp := "%s/meshes_bsp/TempleNativeDecor.gltf" % MAP_DIR
-	var dtn := _load_json(MAP_DIR + "/temple_native_decor.json")
-	if not dtn.is_empty() and ResourceLoader.exists(dgp):
-		var dscene: PackedScene = load(dgp)
-		if dscene != null:
-			var droot := dscene.instantiate()
-			var dmesh: Mesh = null
-			for c in droot.get_children():
-				if c is MeshInstance3D:
-					dmesh = c.mesh
-					break
-			droot.free()
-			if dmesh != null:
-				var dsurfaces: Array = dtn.get("surfaces", [])
-				var dtextured := 0
-				var dcache := {}
-				for si in range(dmesh.get_surface_count()):
-					if si < dsurfaces.size() and dsurfaces[si].get("tex") != null:
-						dmesh.surface_set_material(si,
-							_bsp_material(dsurfaces[si]["tex"], dcache))
-						dtextured += 1
-					else:
-						dmesh.surface_set_material(si, _bsp_grey())
-				var dmi := MeshInstance3D.new()
-				dmi.mesh = dmesh
-				world.add_child(dmi)
-				print("temple_native_decor: surfaces ",
-					dmesh.get_surface_count(), ", textured ", dtextured)
 
 
 func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float, z: float) -> Vector3:

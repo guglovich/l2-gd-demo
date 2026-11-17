@@ -57,58 +57,89 @@ from bsp2 import parse_polys, model_polys_ref  # noqa: E402
 
 SCALE = 0.01
 REGION = (25400, 31500, 8800, 17200)
-FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000   # invisible, fake backdrop, portal
-ZONE_BOX_FLAGS = 0x40A000                  # NoOcclude|Translucent|Modulate:
-                                           # the legacy invisible zone boxes
-# The subtract air-air end caps (the live client never renders them — see
-# the module docstring): {polys name: set of raw poly indices}
-SUBTRACT_CAP_EXCLUDE = {
-    "Polys71": {1, 3},
-    "Polys59": {1, 3},
-    # Polys39 (the main-entrance vestibule) is carved air between two OPEN
-    # regions: its west/east caps sealed the entrance, its top cap rendered
-    # as a phantom floor at Z -3000 (the floor profile 26400,11032), its
-    # bottom cap z-fights the Polys43 entrance slab at -3752. The whole
-    # volume is air in the live client — none of its faces show.
-    "Polys39": {0, 1, 2, 3, 4, 5},
-    # The gallery slope wedges: ALL four side caps are air-air joints with
-    # the neighbouring carved volumes (Polys39 the vestibule at X 26501,
-    # the outside air at X 29144, the corridors Polys71/59 at Y 11784/10280,
-    # each other at Y 11032). In the live client the galleries connect OPEN
-    # to the vestibule and the corridors — rendering the caps sealed the
-    # main entrance (the ray probe: TempleNative face at (26501, 11017,
-    # −3712), normal −X). Only the walkable slope (poly 4) and the floor
-    # under it (poly 5) render.
-    "Polys31": {0, 1, 2, 3},
-    "Polys35": {0, 1, 2, 3},
-    # Polys51 = the apse passage to the Shillien statue (a narrow carved
-    # vault X 29144..30464, Y 10616..11032, Z −4262..−3000; the ray probe
-    # hit its west cap at (29144, 11021, −3700) standing between the hall
-    # and the statue). Its west cap is an air-air joint with the hall —
-    # the client shows the statue THROUGH it; the inner walls (001_1) and
-    # the floor stay.
-    "Polys51": {2},
+# DEVLOG-76 face rule (the client's brush rendering, reverse-engineered from
+# the flag split + the user's reports): a Brush poly face renders IFF its
+# flags are 0x0. The 0x40a000 set (NoOcclude|Translucent|Modulate) marks the
+# ZONE-BOUNDARY faces of the volume boxes (Polys17 the hall box — all 6 faces,
+# Polys55/67 the corridor wrappers — all 6, Polys23/28 — 5 of 6 faces: the
+# marker stone in002 everywhere). Rendering them produced the gray in002
+# squares and the alien interior walls. ZonePortal faces (0x4000109) and the
+# invisible/fake-backdrop families are skipped as before.
+FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000 | 0x40A000
+
+# The air-air caps are computed automatically (v6.1): a SUBTRACT face whose
+# plane is the touching plane of two carved volumes (or of a carved volume
+# and an ADD solid) is an interior CSG face — the client's load-time carve
+# removes it. Manual overrides for the faces bordering OUTSIDE air (the
+# world's air is not a box): the vestibule west cap (Polys39 poly 0, the
+# entrance facade) and the corridor outside ends (Polys71/59 poly 3), plus
+# the vestibule bottom (poly 5, the solid-solid z-fight with Polys43).
+MANUAL_CAP_EXCLUDE = {
+    "Polys39": {0, 5},
+    "Polys71": {3},
+    "Polys59": {3},
 }
 
-# The INVISIBLE zone-marker brushes (the full inventory lives in
-# Docs/temple_zones.md). NOT the whole 0x40a000 family: Polys23/28 (the
-# hall side walls behind the skin windows) carry the same flags but DO
-# render in the live client — the user's screenshots show walls behind
-# those windows, and our exclusion left sky-holes. The real markers are
-# the volumes whose origin sits ~16871 units ABOVE the world (the
-# sky-plane copies: Polys17, the Polys51 ADD twin — they are caught by the
-# SKY_ORIGIN_Z filter below) and Polys55/67 (the wrappers of the two stair
-# corridors — non-solid markers: the corridors are already walled by
-# Polys71/59 themselves and must stay passable).
-ZONE_MARKER_BRUSHES = {"Polys55", "Polys67"}
-SKY_ORIGIN_Z = 10000.0  # the sky-plane copy origin (16871) — never render
+# The hall wall bands (Polys23 poly 1 at Y 10528, Polys28 poly 3 at Y 11536 —
+# the only 0x0 faces of those slabs, texture oren_sylen_001_1) span the
+# corridor doorways (x 27880..28280 — the sidedoor01/02 tunnel boxes). The
+# client's doorways are open: the wall quads are split into west strip +
+# east strip + lintel (above z -3411) around each opening.
+DOORWAY = (27880.0, 28280.0, -3411.0)   # x0, x1, lintel bottom z
+WALL_FACES = {"Polys23": 1, "Polys28": 3}
 
-# Polys23/28 render ONLY the inner face that shows through the skin windows
-# (Polys28 poly 3 at Y 11536, Polys23 poly 1 at Y 10528) — and WITHOUT
-# collision (the user's report: the whole-volume render sealed the side
-# passages of the hall; in the live client those passages are open). These
-# faces go to the separate decor mesh (TempleNativeDecor) with no body.
-HALL_BACK_WALL_FACES = {"Polys28": {3}, "Polys23": {1}}
+
+def _emit_face(pr, origin, groups, stats, cut_rects=None):
+    """Emit one poly (optionally split around door cuts) into groups."""
+    tex = pr["_tex"]
+    base = [pr["base"][k] + origin[k] for k in range(3)]
+    tu, tv = pr["tu"], pr["tv"]
+
+    def uv_of(w):
+        return (sum((w[k] - base[k]) * tu[k] for k in range(3)),
+                sum((w[k] - base[k]) * tv[k] for k in range(3)))
+
+    verts = [[v[k] + origin[k] for k in range(3)] for v in pr["verts"]]
+    quads = [(verts, uv_of)]
+    if cut_rects:
+        # plane axes: the face is axis-aligned; find the two varying axes
+        mins = [min(v[k] for v in verts) for k in range(3)]
+        maxs = [max(v[k] for v in verts) for k in range(3)]
+        var = [k for k in range(3) if maxs[k] - mins[k] > 1.0]
+        if len(var) == 2:
+            ax, bx = var          # a = the wide axis (x), b = the other
+            a0, a1 = mins[ax], maxs[ax]
+            b0, b1 = mins[bx], maxs[bx]
+            dx0, dx1, lintel = cut_rects
+            # normal of the original poly (winding reference)
+            A, B, C = verts[0], verts[1], verts[2]
+            n = [(B[1]-A[1])*(C[2]-A[2]) - (B[2]-A[2])*(C[1]-A[1]),
+                 (B[2]-A[2])*(C[0]-A[0]) - (B[0]-A[0])*(C[2]-A[2]),
+                 (B[0]-A[0])*(C[1]-A[1]) - (B[1]-A[1])*(C[0]-A[0])]
+            def quad(r0, r1, s0, s1):
+                corners = []
+                for (a, b) in ((r0, s0), (r1, s0), (r1, s1), (r0, s1)):
+                    w = [0.0, 0.0, 0.0]
+                    w[ax], w[bx] = a, b
+                    for k in range(3):
+                        if k not in var:
+                            w[k] = mins[k]
+                    corners.append(w)
+                n2 = [(corners[1][1]-corners[0][1])*(corners[2][2]-corners[0][2]) - (corners[2][1]-corners[0][1])*(corners[1][2]-corners[0][2]),
+                      (corners[1][2]-corners[0][2])*(corners[2][0]-corners[0][0]) - (corners[2][2]-corners[0][2])*(corners[1][0]-corners[0][0]),
+                      (corners[1][0]-corners[0][0])*(corners[2][1]-corners[0][1]) - (corners[2][0]-corners[0][0])*(corners[1][1]-corners[0][1])]
+                if n[0]*n2[0] + n[1]*n2[1] + n[2]*n2[2] < 0:
+                    corners.reverse()
+                return corners
+            quads = [
+                (quad(a0, dx0, b0, b1), uv_of),
+                (quad(dx1, a1, b0, b1), uv_of),
+                (quad(dx0, dx1, lintel, b1), uv_of),
+            ]
+    for corners, uvf in quads:
+        groups.setdefault(tuple(tex), []).append(
+            (corners, [uvf(w) for w in corners]))
+        stats["faces"] += 1
 
 
 def main() -> None:
@@ -117,11 +148,6 @@ def main() -> None:
     pkg = Package(map_path)
     shaders = json.load(open(os.path.join(asset_dir, "shader_diffuse.json")))
 
-    # the ADD brushes already rendered by bsp2 (from bsp.json) — do not
-    # duplicate their faces
-    bsp = json.load(open(os.path.join(asset_dir, "bsp.json")))
-    already = {br["polys"] for br in bsp["brushes"]}
-
     polys_parse = {}
     for i in range(pkg.export_count):
         if pkg.class_of_export(i) == "Polys":
@@ -129,9 +155,16 @@ def main() -> None:
             polys_parse[i] = parse_polys(pkg.data[e[6]:e[6] + e[5]], e[5])
 
     groups = {}          # tex_key -> [(verts, uvs)]
-    decor_groups = {}    # the same, but NO collision (the window-back walls)
     stats = {"add": 0, "sub": 0, "faces": 0, "skip_flags": 0, "skip_tex": 0,
-             "skip_zone": 0, "skip_caps": 0, "skip_dup": 0}
+             "skip_caps": 0, "cut": 0}
+
+    # --- pass 1: the carved-volume boxes (for the air-air touch test) -----
+    # SUBTRACT brushes carve air; Polys17 (the hall box, all faces 0x40a000)
+    # carves the hall air too; ADD brushes are the solids the voids sit
+    # on/in. A subtract face is an interior CSG face (never rendered) when
+    # its plane is exactly the touching plane with another such box.
+    boxes = []           # (pname, min[3], max[3], csg, poly_index)
+    brush_face_data = []  # (pname, csg, origin, prs, j)
     for i in range(pkg.export_count):
         if pkg.class_of_export(i) != "Brush":
             continue
@@ -149,11 +182,6 @@ def main() -> None:
         loc = props.get("Location", (0, 0, 0))
         piv = props.get("PrePivot", (0, 0, 0))
         origin = [loc[k] - piv[k] for k in range(3)]
-        if abs(origin[2]) > SKY_ORIGIN_Z:
-            # the sky-plane copy of a temple volume (origin ~16871): placed
-            # ~126 m above the world — a marker, never rendered
-            stats["skip_sky"] = stats.get("skip_sky", 0) + 1
-            continue
         if not (REGION[0] <= origin[0] <= REGION[1]
                 and REGION[2] <= origin[1] <= REGION[3]):
             continue
@@ -161,54 +189,77 @@ def main() -> None:
         if j is None or j not in polys_parse:
             continue
         pname = pkg.name(pkg.exports[j][3])
-        if csg == 1:
-            if pname in already:
-                stats["skip_dup"] += 1
+        prs = polys_parse[j]
+        brush_face_data.append((pname, csg, origin, prs))
+        if csg == 2 or pname == "Polys17":
+            mins = [min(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            maxs = [max(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            boxes.append((pname, mins, maxs, csg))
+        elif csg == 1:
+            # ADD solids participate as the solid side of void-on-solid joints
+            mins = [min(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            maxs = [max(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            boxes.append((pname, mins, maxs, 1))
+
+    def touching(my_pname, mins, maxs):
+        """planes {axis: value} where another box touches this one with an
+        overlapping footprint (the shared faces are interior CSG faces)."""
+        planes = {}
+        for pname, bmin, bmax, _csg in boxes:
+            if pname == my_pname:
                 continue
-            if pname in ZONE_MARKER_BRUSHES:
-                stats["skip_zone_brush"] = stats.get("skip_zone_brush", 0) + 1
-                continue
-            stats["add"] += 1
-        else:
-            stats["sub"] += 1
-        caps = SUBTRACT_CAP_EXCLUDE.get(pname, set()) if csg == 2 else set()
-        decor = HALL_BACK_WALL_FACES.get(pname, set()) if csg == 1 else set()
-        for pr in polys_parse[j]:
+            for k in range(3):
+                # this box's min face touched by the other's max face
+                if abs(bmax[k] - mins[k]) < 1.0 and all(
+                        bmin[m] < maxs[m] - 1.0 and bmax[m] > mins[m] + 1.0
+                        for m in range(3) if m != k):
+                    planes.setdefault(k, set()).add(mins[k])
+                if abs(bmin[k] - maxs[k]) < 1.0 and all(
+                        bmin[m] < maxs[m] - 1.0 and bmax[m] > mins[m] + 1.0
+                        for m in range(3) if m != k):
+                    planes.setdefault(k, set()).add(maxs[k])
+        return planes
+
+    # --- pass 2: emit the faces ------------------------------------------
+    for pname, csg, origin, prs in brush_face_data:
+        stats["add" if csg == 1 else "sub"] += 1
+        manual = MANUAL_CAP_EXCLUDE.get(pname, set()) if csg == 2 else set()
+        planes = None
+        if csg == 2:
+            mins = [min(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            maxs = [max(v[k] for pr in prs for v in pr["verts"]) + origin[k]
+                    for k in range(3)]
+            planes = touching(pname, mins, maxs)
+        cut = DOORWAY if (csg == 1 and pname in WALL_FACES) else None
+        for pr in prs:
             if pr["flags"] & FACE_SKIP_FLAGS:
                 stats["skip_flags"] += 1
                 continue
-            # NOTE: the 0x40a000 flag is NOT a render filter — Polys23/28
-            # (the hall walls behind the skin windows) carry it and render
-            # in the live client. The invisible volumes are caught by name
-            # (ZONE_MARKER_BRUSHES) and by the sky-plane origin above.
-            if pr["i"] in caps:
+            if pr["i"] in manual:
                 stats["skip_caps"] += 1
                 continue
-            if decor and pr["i"] not in decor:
-                # Polys23/28: the other faces seal the side passages of the
-                # hall (the user's report) — render nothing but the inner
-                # window-back wall, and render it WITHOUT collision.
-                stats["skip_hall_extra"] = stats.get("skip_hall_extra", 0) + 1
-                continue
+            if planes is not None:
+                # the face's plane: the axis with zero extent
+                lo = [min(v[k] for v in pr["verts"]) + origin[k] for k in range(3)]
+                hi = [max(v[k] for v in pr["verts"]) + origin[k] for k in range(3)]
+                axis = next((k for k in range(3) if hi[k] - lo[k] < 1.0), None)
+                if axis is not None and lo[axis] in planes.get(axis, ()):
+                    stats["skip_caps"] += 1
+                    continue
             tex = resolve_tex(pkg, pr["poly_mat"], shaders)
             if not tex or tex[1] in ("AntiPortal", "ZonePortal"):
                 stats["skip_tex"] += 1
                 continue
-            base = [pr["base"][k] + origin[k] for k in range(3)]
-            tu, tv = pr["tu"], pr["tv"]
-            verts = []
-            uvs = []
-            for v in pr["verts"]:
-                w = [v[k] + origin[k] for k in range(3)]
-                verts.append(w)
-                uvs.append((sum((w[k] - base[k]) * tu[k] for k in range(3)),
-                            sum((w[k] - base[k]) * tv[k] for k in range(3))))
-            key = tuple(tex)
-            if decor:
-                decor_groups.setdefault(key, []).append((verts, uvs))
-            else:
-                groups.setdefault(key, []).append((verts, uvs))
-            stats["faces"] += 1
+            pr["_tex"] = tex
+            rects = DOORWAY if (cut and pr["i"] == WALL_FACES[pname]) else None
+            if rects:
+                stats["cut"] += 1
+            _emit_face(pr, origin, groups, stats, rects)
 
     def build_gltf(groups, mesh_name):
         blob = bytearray()
@@ -287,26 +338,11 @@ def main() -> None:
     json.dump({"schema": 1, "surfaces": surfaces},
               open(os.path.join(asset_dir, "temple_native.json"), "w"),
               indent=1)
-    n_surfaces = len(mesh_prims)
-    if decor_groups:
-        dg, dblob, dsurfaces, dprims = build_gltf(decor_groups,
-                                                  "TempleNativeDecor")
-        json.dump(dg, open(os.path.join(out_dir,
-                                        "TempleNativeDecor.gltf"), "w"))
-        open(os.path.join(out_dir, "TempleNativeDecor.bin"),
-             "wb").write(bytes(dblob))
-        json.dump({"schema": 1, "surfaces": dsurfaces},
-                  open(os.path.join(asset_dir, "temple_native_decor.json"),
-                       "w"), indent=1)
-    else:
-        dprims = []
-    print(f"temple_native: ADD {stats['add']}, SUB {stats['sub']} "
-          f"(dup {stats['skip_dup']}), faces {stats['faces']} "
+    print(f"temple_native v6 (flag rule): ADD {stats['add']}, "
+          f"SUB {stats['sub']}, faces {stats['faces']} "
           f"(caps {stats['skip_caps']}, flags {stats['skip_flags']}, "
-          f"tex {stats['skip_tex']}, sky {stats.get('skip_sky', 0)}, "
-          f"hall-extra {stats.get('skip_hall_extra', 0)}), "
-          f"{n_surfaces}+{len(dprims)} surfaces, "
-          f"{len(blob)}+{len(dblob) if decor_groups else 0} bytes")
+          f"tex {stats['skip_tex']}, door cuts {stats['cut']}), "
+          f"{len(mesh_prims)} surfaces, {len(blob)} bytes")
 
 
 if __name__ == "__main__":
