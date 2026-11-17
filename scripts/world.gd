@@ -889,7 +889,7 @@ func _build_temple_native() -> void:
 		if si < surfaces.size() and surfaces[si].get("tex") != null:
 			# the temple BSP = the client's baked section-stream UVs (final
 			# tile coordinates) + per-section one-sidedness (DEVLOG-82 rev2)
-			var ts: bool = surfaces[si].get("two_sided", true)
+			var ts: bool = surfaces[si].get("two_sided", true) or OS.get_environment("L2_BSP_2SIDED") != ""
 			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache, false, ts))
 			textured += 1
 		else:

@@ -147,12 +147,14 @@ def main() -> None:
             for u, w in uvs2:
                 uvs.extend([u, w])
             n = len(verts3d)
-            # the polygons are oriented to the node plane normal (right-hand
-            # rule = CCW seen from the front). Godot's front face = the
-            # winding it keeps with cull_back — verified by render; flip the
-            # FAN order here once if the convention proves opposite.
+            # The polygons are oriented to the node plane normal (right-hand
+            # rule = CCW seen from the front). EMPIRICAL (DEVLOG-82 rev3):
+            # Godot's cull_back keeps the side OPPOSITE the right-hand
+            # normal — the L2_BSP_2SIDED A/B proved the stairs invisible
+            # with this fan order and back with the reversed one. So the
+            # fan is emitted REVERSED (clockwise from the plane side).
             for k in range(1, n - 1):
-                idx.extend([vbase, vbase + k, vbase + k + 1])
+                idx.extend([vbase, vbase + k + 1, vbase + k])
             vbase += n
         if not idx:
             continue

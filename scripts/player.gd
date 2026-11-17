@@ -24,6 +24,8 @@ func _init() -> void:
 		yaw = float(OS.get_environment("L2_VIEW_YAW"))
 	if OS.get_environment("L2_ZOOM") != "":
 		cam_zoom = clampf(float(OS.get_environment("L2_ZOOM")), 0.02, 2.6)
+	if OS.get_environment("L2_VIEW_PITCH") != "":
+		pitch = float(OS.get_environment("L2_VIEW_PITCH"))
 var pitch := -0.35
 # Mouse-wheel camera zoom (the classic L2 camera distance): 1.0 = default,
 # the wheel scales the whole pivot->camera offset so the pitch angle holds.
