@@ -637,7 +637,7 @@ func _bsp_material(tex: Array, cache: Dictionary) -> Material:
 
 func _bsp_grey() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	m.albedo_color = Color(0.32, 0.31, 0.30)
+	m.albedo_color = Color(1.0, 0.1, 0.9) if OS.get_environment("L2_GREY_DEBUG") != "" else Color(0.32, 0.31, 0.30)
 	m.roughness = 0.95
 	m.cull_mode = StandardMaterial3D.CULL_DISABLED
 	return m
@@ -1001,7 +1001,7 @@ func _get_mesh(key: String) -> Mesh:
 	# baseColorFactor placeholders (red/green) for its materials — leaving
 	# them on unmapped surfaces shows flat pink/green strips.
 	var _static_grey := StandardMaterial3D.new()
-	_static_grey.albedo_color = Color(0.32, 0.31, 0.30)
+	_static_grey.albedo_color = Color(1.0, 0.1, 0.9) if OS.get_environment("L2_GREY_DEBUG") != "" else Color(0.32, 0.31, 0.30)
 	_static_grey.roughness = 0.95
 	_static_grey.cull_mode = StandardMaterial3D.CULL_DISABLED
 	for si in range(mesh.get_surface_count()):
@@ -1052,7 +1052,12 @@ func _get_mesh(key: String) -> Mesh:
 				# the live client shows them from the road (no backface
 				# culling for statics). Without this the bridge "боковины"
 				# (the span side walls inside O_DE_Bridge) are invisible.
-				m.cull_mode = StandardMaterial3D.CULL_DISABLED
+				# DEVLOG-78 rev2: the client CULLS backfaces on statics (UE2
+				# default) — the unconditional two-sided render leaked the portal
+				# frames' BACK faces through the level-BSP walls (the gray
+				# rectangles above the arches, the user's report). Two-sided only
+				# where the authored shader says so / the legacy list.
+				m.cull_mode = StandardMaterial3D.CULL_BACK
 				# Real values (MECHANICS.md, decompiled/original packages):
 				# Shader flags carried in materials.json.shader — apply TwoSided.
 				# Opacity/OutputBlending are present as object refs/flags but not
