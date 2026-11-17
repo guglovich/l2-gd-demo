@@ -166,6 +166,31 @@ def main() -> None:
                            "mode": 4})
         surfaces.append({"tex": list(key)})
 
+    # DEVLOG-81: the CLEAN-ROOM fills — the wall bands the CSG never
+    # produced faces for: the strips between the corridor lintels
+    # (z -3218) and the skin facade bottom (-3145) above the north/south
+    # doorway openings (x 27888..28272), facing the platforms. Without
+    # them the sun pours through the facade holes and lights the in008
+    # gallery bands inside (the "gray rectangles"). Texture = in002, the
+    # same stone the BSP walls use. Facing: +y (north fill) / -y (south).
+    fills = [
+        # (x0, x1, y, z0, z1, normal_y, tex)
+        (27888, 28272, 12824, -3182, -3145, +1, ("sylen_temple_t", "oren_sylen_in002")),
+        (27888, 28272, 9240, -3182, -3145, -1, ("sylen_temple_t", "oren_sylen_in002")),
+        # the doorway soffits (the opening ceilings): z -3218..-3182 facing down
+        (27888, 28272, 12824, -3218, -3182, -1, ("sylen_temple_t", "oren_sylen_in002")),
+        (27888, 28272, 9240, -3218, -3182, -1, ("sylen_temple_t", "oren_sylen_in002")),
+    ]
+    for (x0, x1, y0, z0, z1, ny, ftex) in fills:
+        # the quad in the plane y = y0 (or z = z0 for the soffits: use y-plane too)
+        corners = [(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)]
+        if ny < 0:
+            corners.reverse()
+        uvs = [(0.0, 0.0), (float(x1-x0)/64.0, 0.0),
+               (float(x1-x0)/64.0, float(z1-z0)/64.0), (0.0, float(z1-z0)/64.0)]
+        groups.setdefault(tuple(ftex), []).append((corners, uvs))
+        stats["faces"] += 1
+
     gltf = {
         "asset": {"version": "2.0", "generator": "l2godot temple_bsp"},
         "scene": 0, "scenes": [{"nodes": [0]}],
