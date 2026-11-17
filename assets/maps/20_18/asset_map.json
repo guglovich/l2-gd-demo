@@ -1461,8 +1461,8 @@
    "primitive_material_indices": [
     0,
     1,
-    3,
-    2
+    2,
+    3
    ]
   },
   "sylen_temple_s:sylentemple_ent_stair": {
