@@ -36,7 +36,10 @@ from levelbsp import parse_level_model, find_level_model, resolve_tex  # noqa: E
 
 SCALE = 0.01
 REGION = (25400, 31500, 8800, 17200)
-FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000   # invisible, fake backdrop, portal
+# invisible, fake backdrop, portal + 0x40a000 (Unlit|0x2000|0x8000 — the
+# ZONE-BOUNDARY faces the client never draws; 28 of them carry the marker
+# stone oren_sylen_in002 = the gray rectangles above the arches; DEVLOG-78)
+FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000 | 0x40A000
 
 
 def main() -> None:
