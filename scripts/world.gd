@@ -872,7 +872,8 @@ func _build_temple_native() -> void:
 	body.add_child(col)
 	body.set_meta("mesh_key", "TempleBsp")
 	world.add_child(body)
-	print("temple_bsp: surfaces ", mesh.get_surface_count(),
+	print("temple_bsp: build ", tn.get("build", "?"),
+		", surfaces ", mesh.get_surface_count(),
 		", textured ", textured, ", unique materials ", mat_cache.size())
 
 

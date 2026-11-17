@@ -177,7 +177,9 @@ def main() -> None:
     }
     json.dump(gltf, open(os.path.join(out_dir, "TempleBsp.gltf"), "w"))
     open(os.path.join(out_dir, "TempleBsp.bin"), "wb").write(bytes(blob))
-    json.dump({"schema": 1, "surfaces": surfaces},
+    import time
+    build_id = "temple-bsp " + time.strftime("%Y-%m-%d %H:%M")
+    json.dump({"schema": 1, "build": build_id, "surfaces": surfaces},
               open(os.path.join(asset_dir, "temple_bsp.json"), "w"), indent=1)
     print(f"temple_bsp: nodes in region {stats['nodes']}, faces {stats['faces']} "
           f"(hidden {stats['hidden']}, marker {stats['marker']}, "
