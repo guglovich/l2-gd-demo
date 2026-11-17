@@ -650,6 +650,10 @@ func _build_bsp() -> void:
 	# one surface per material, UVs = texels (scaled per texture size).
 	# Collision = the same mesh trimesh with backface (authentic: the level
 	# BSP IS the engine's collision world).
+	if OS.get_environment("L2_NO_LEVELBSP") != "":
+		print("levelbsp: SKIPPED (L2_NO_LEVELBSP diagnostic)")
+		_build_bsp_brushes()
+		return
 	var lb := _load_json(MAP_DIR + "/levelbsp.json")
 	var gp := "%s/meshes_bsp/LevelBSP.gltf" % MAP_DIR
 	if lb.is_empty() or not ResourceLoader.exists(gp):
