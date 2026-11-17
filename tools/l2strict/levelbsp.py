@@ -158,7 +158,9 @@ def parse_level_model(pkg, midx):
         q += 16 + 16
         nvert = d[q + 2]
         q += 3 + 8 + 12
-        return {"cs": cs, "nvert": nvert, "end": q}
+        # the 5 fixed INTs: iLeaf0, iLeaf1, iSection, iFirstVertex, iLightMap
+        sect = struct.unpack_from("<3i", d, q - 12)
+        return {"cs": cs, "nvert": nvert, "sect": sect, "end": q}
 
     nodes = []
     for _ in range(nn):
@@ -184,7 +186,78 @@ def parse_level_model(pkg, midx):
         iv, p = read_compact(d, p)
         isd, p = read_compact(d, p)
         verts.append((iv, isd))
-    return {"vec": vec, "pts": pts, "nodes": nodes, "surfs": surfs, "verts": verts}
+    sections = parse_sections(d, p, nodes, surfs)
+    return {"vec": vec, "pts": pts, "nodes": nodes, "surfs": surfs,
+            "verts": verts, "sections": sections}
+
+
+def parse_sections(d, p, nodes, surfs):
+    """Walk NumSharedSides..Sections and decode the client's baked section
+    vertex streams (2026-11-18). Each FBspSection = compact NumVertices +
+    [NumVertices x 40 B records: pos12 + uv8 + 8 B mystery + normal12] +
+    INT Revision + compact Material objref + INT NumNodes + DWORD PolyFlags
+    + INT iLightMapTexture. Validation (this model): Revision == NumNodes
+    == the node count of the section, and the section material == the
+    materials of its nodes' surfs — 31/31 sections. The stream UVs are the
+    client's FINAL texture coordinates (tile units, repeat) — the computed
+    dot(v-base,U) texel UVs are wrong by orders of magnitude and produced
+    every flat-gray BSP patch (the 'gray rectangles')."""
+    nsh = struct.unpack_from("<i", d, p)[0]
+    p += 4
+    nz = struct.unpack_from("<i", d, p)[0]
+    p += 4
+    if not (0 <= nz <= 64):
+        raise ValueError(f"bad NumZones {nz}")
+    for _ in range(nz):
+        _, p = read_compact(d, p)
+        p += 20
+    _, p = read_compact(d, p)          # Polys objref
+    nb, p = read_compact(d, p)
+    p += nb * 25
+    nlh, p = read_compact(d, p)
+    p += nlh * 4
+    nl, p = read_compact(d, p)
+    for _ in range(nl):
+        for _ in range(3):
+            _, p = read_compact(d, p)
+        p += 8
+    nli, p = read_compact(d, p)
+    for _ in range(nli):
+        _, p = read_compact(d, p)
+    p += 8                              # RootOutside + Linked
+
+    nsec, p = read_compact(d, p)
+    node_count = {}
+    for nd in nodes:
+        k = nd["sect"][0]
+        node_count[k] = node_count.get(k, 0) + 1
+    sections = []
+    for _ in range(nsec):
+        nv, after = read_compact(d, p)
+        vstart = after
+        p = after + nv * 40
+        rev = struct.unpack_from("<i", d, p)[0]
+        p += 4
+        mat, p = read_compact(d, p)
+        numnodes = struct.unpack_from("<i", d, p)[0]
+        p += 4
+        pflags = struct.unpack_from("<I", d, p)[0]
+        p += 4
+        ilm = struct.unpack_from("<i", d, p)[0]
+        p += 4
+        recs = []
+        for i in range(nv):
+            o = vstart + i * 40
+            pos = struct.unpack_from("<3f", d, o)
+            uv = struct.unpack_from("<2f", d, o + 12)
+            recs.append((pos, uv))
+        if rev != numnodes or numnodes != node_count.get(len(sections), 0):
+            raise ValueError(
+                f"section {len(sections)}: rev {rev} numnodes {numnodes} "
+                f"vs node count {node_count.get(len(sections), 0)}")
+        sections.append({"nvert": nv, "mat": mat, "num_nodes": numnodes,
+                         "poly_flags": pflags, "ilm": ilm, "verts": recs})
+    return sections
 
 
 def main():

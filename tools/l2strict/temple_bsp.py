@@ -1,25 +1,30 @@
 #!/usr/bin/env python3
-"""The Shillien Temple LEVEL BSP extractor (2026-11-17, DEVLOG-77).
+"""The Shillien Temple LEVEL BSP extractor (2026-11-18, DEVLOG-82).
 
-THE ROOT CAUSE of every temple defect (the alien walls, the gray squares,
-the statue voids, the missing floor): the temple interior IS the level BSP.
-model_full.py's temple probe was broken — it used surf idx[4] (iBrushPoly)
-as a NODE index — and reported "zero temple geometry". In truth 336 BSP
-nodes (walls with the carved panel recesses, floors, ceilings, bands) sit
-in the temple region of Model500, and the client renders exactly that:
-the level BSP + the decoration static meshes. The Brush actors are the
-CSG SOURCES (their own Models are empty, the runtime renders nothing
-from them — engine.dll has no runtime CSG at all).
+THE ROOT CAUSE of every temple defect (the gray rectangles above the
+arches, near the decorative windows, around the statue): the client's
+level-BSP texture coordinates are NOT computed from the surf U/V axes —
+they are BAKED into the model's Sections array (FBspSection vertex
+streams: pos12 + uv8 + 8 B mystery + normal12, node slice =
+node.sect = (iSection, iFirstVertex)). The stream UVs are the client's
+FINAL tile coordinates (in002 walls: 128 world units per U tile, 512
+per V tile). The old computed UVs (dot(v - base, U)) were wrong by
+orders of magnitude (+-35000) and every BSP face sampled a random
+texel — the flat-gray patches. The stream positions match the node
+polygons exactly (10380/10380 vertices, 0 mismatches).
 
-levelbsp.py's extractor has the same broken mapping (it iterates SURFS and
-reads idx[4] as a node index — 774 surfs shrink to 17 surfaces), so the
-temple BSP never reached the render. This tool extracts the temple part of
-the level BSP the way the client walks it: NODE → iSurf (cs[1]) → material /
-UV axes / flags; NODE → iVertPool (cs[0]) + NumVertices → the polygon.
+The node walk stays: NODE -> iSurf (cs[1]) for material/flags, NODE ->
+sect slice for positions and UVs. Validation: rev == numnodes == node
+count and section material == node surf materials — 31/31 sections.
+
+The clean-room fills (DEVLOG-81): only the wall strips the CSG never
+produced faces for (z -3182..-3145 above the doorway openings) remain;
+the soffit fills were DUPLICATES of real client faces (z -3218..-3182
+exists in the sections) and are dropped. Fill UVs follow the client's
+own density at the same wall (u = x/128, v = z/512).
 
 Region filter: the temple interior only. The village keeps its approved
-look (bsp2 ADD brushes + the 17 legacy levelbsp surfaces) — the full-BSP
-village swap is a separate task needing the baseline re-approval.
+look (bsp2 ADD brushes + the 17 legacy levelbsp surfaces).
 
 Output: assets/maps/20_18/meshes_bsp/TempleBsp.gltf/.bin
         assets/maps/20_18/temple_bsp.json (surfaces[] with tex pairs)
@@ -36,12 +41,23 @@ from levelbsp import parse_level_model, find_level_model, resolve_tex  # noqa: E
 
 SCALE = 0.01
 REGION = (25400, 31500, 8800, 17200)
-# invisible, fake backdrop, portal. NOTE (DEVLOG-78 rev2): the 0x40a000
-# BSP surfs are the temple WALL MASSES (in002 — ~130 faces: the hall side
-# walls, the apse walls with the doorway jambs carved, the corridor
-# walls); the client renders them — skipping them left the "gray
-# rectangle" holes. Only Invisible/FakeBackdrop/Portal skip.
+# invisible, fake backdrop, portal. The 0x40a000 BSP surfs are the temple
+# WALL MASSES (in002 — the hall side walls, the apse walls with the doorway
+# jambs carved, the corridor walls); the client renders them.
 FACE_SKIP_FLAGS = 0x1 | 0x80 | 0x4000000
+
+# the clean-room fills: the wall strips above the north/south doorway
+# openings (the CSG volumes never produced faces there; the client blocks
+# the sun with its shadow volumes — we block it with the fills).
+# (x0, x1, y, z0, z1, normal_y, tex)
+FILLS = [
+    (27888, 28272, 12824, -3182, -3145, +1, ("sylen_temple_t", "oren_sylen_in002")),
+    (27888, 28272, 9240, -3182, -3145, -1, ("sylen_temple_t", "oren_sylen_in002")),
+]
+# the client's own tile density measured at the same wall: 128 units per
+# U tile, 512 per V tile
+FILL_UTILE = 128.0
+FILL_VTILE = 512.0
 
 
 def main() -> None:
@@ -52,10 +68,10 @@ def main() -> None:
 
     midx = find_level_model(pkg)
     M = parse_level_model(pkg, midx)
-    vec, pts, nodes, surfs, verts = (M["vec"], M["pts"], M["nodes"],
-                                     M["surfs"], M["verts"])
+    pts, nodes, surfs, verts, sections = (M["pts"], M["nodes"], M["surfs"],
+                                          M["verts"], M["sections"])
     print(f"level model: {len(nodes)} nodes, {len(surfs)} surfs, "
-          f"{len(verts)} verts, {len(pts)} points")
+          f"{len(verts)} verts, {len(sections)} sections (streams)")
 
     groups = {}          # tex_key -> [(verts3d, uvs)]
     stats = {"nodes": 0, "hidden": 0, "marker": 0, "nomat": 0,
@@ -63,11 +79,12 @@ def main() -> None:
     for nd in nodes:
         cs = nd["cs"]
         si = cs[1]          # iSurf
-        pool, cnt = cs[0], nd["nvert"]
+        cnt = nd["nvert"]
+        isec, ifv = nd["sect"][0], nd["sect"][1]
         if not (0 <= si < len(surfs)):
             stats["nomat"] += 1
             continue
-        if cnt < 3 or pool + cnt > len(verts):
+        if cnt < 3 or not (0 <= isec < len(sections)):
             stats["nomat"] += 1
             continue
         s = surfs[si]
@@ -78,17 +95,12 @@ def main() -> None:
         if not tex or tex[1] in ("AntiPortal", "ZonePortal"):
             stats["marker"] += 1
             continue
-        poly = []
-        ok = True
-        for k in range(cnt):
-            vi = verts[pool + k][0]
-            if not (0 <= vi < len(pts)):
-                ok = False
-                break
-            poly.append(pts[vi])
-        if not ok:
+        recs = sections[isec]["verts"]
+        if ifv + cnt > len(recs):
             stats["nomat"] += 1
             continue
+        poly = [recs[ifv + k][0] for k in range(cnt)]
+        uvs = [recs[ifv + k][1] for k in range(cnt)]
         xs = [v[0] for v in poly]
         ys = [v[1] for v in poly]
         zs = [v[2] for v in poly]
@@ -97,11 +109,6 @@ def main() -> None:
                 and -6100 <= max(zs) and min(zs) <= -1500):
             stats["outside"] += 1
             continue
-        base = pts[s["idx"][0]]
-        U = vec[s["idx"][2]]
-        V = vec[s["idx"][3]]
-        uvs = [(sum((v[k] - base[k]) * U[k] for k in range(3)),
-                sum((v[k] - base[k]) * V[k] for k in range(3))) for v in poly]
         groups.setdefault(tuple(tex), []).append((poly, uvs))
         stats["faces"] += 1
         stats["nodes"] += 1
@@ -166,28 +173,16 @@ def main() -> None:
                            "mode": 4})
         surfaces.append({"tex": list(key)})
 
-    # DEVLOG-81: the CLEAN-ROOM fills — the wall bands the CSG never
-    # produced faces for: the strips between the corridor lintels
-    # (z -3218) and the skin facade bottom (-3145) above the north/south
-    # doorway openings (x 27888..28272), facing the platforms. Without
-    # them the sun pours through the facade holes and lights the in008
-    # gallery bands inside (the "gray rectangles"). Texture = in002, the
-    # same stone the BSP walls use. Facing: +y (north fill) / -y (south).
-    fills = [
-        # (x0, x1, y, z0, z1, normal_y, tex)
-        (27888, 28272, 12824, -3182, -3145, +1, ("sylen_temple_t", "oren_sylen_in002")),
-        (27888, 28272, 9240, -3182, -3145, -1, ("sylen_temple_t", "oren_sylen_in002")),
-        # the doorway soffits (the opening ceilings): z -3218..-3182 facing down
-        (27888, 28272, 12824, -3218, -3182, -1, ("sylen_temple_t", "oren_sylen_in002")),
-        (27888, 28272, 9240, -3218, -3182, -1, ("sylen_temple_t", "oren_sylen_in002")),
-    ]
-    for (x0, x1, y0, z0, z1, ny, ftex) in fills:
-        # the quad in the plane y = y0 (or z = z0 for the soffits: use y-plane too)
+    # the clean-room wall strips (the CSG's own gaps) with the client's
+    # tile density at the same wall
+    for (x0, x1, y0, z0, z1, ny, ftex) in FILLS:
         corners = [(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)]
         if ny < 0:
             corners.reverse()
-        uvs = [(0.0, 0.0), (float(x1-x0)/64.0, 0.0),
-               (float(x1-x0)/64.0, float(z1-z0)/64.0), (0.0, float(z1-z0)/64.0)]
+        uvs = [(0.0, 0.0),
+               (float(x1 - x0) / FILL_UTILE, 0.0),
+               (float(x1 - x0) / FILL_UTILE, float(z1 - z0) / FILL_VTILE),
+               (0.0, float(z1 - z0) / FILL_VTILE)]
         groups.setdefault(tuple(ftex), []).append((corners, uvs))
         stats["faces"] += 1
 
@@ -204,7 +199,8 @@ def main() -> None:
     open(os.path.join(out_dir, "TempleBsp.bin"), "wb").write(bytes(blob))
     import time
     build_id = "temple-bsp " + time.strftime("%Y-%m-%d %H:%M")
-    json.dump({"schema": 1, "build": build_id, "surfaces": surfaces},
+    json.dump({"schema": 2, "build": build_id, "uv": "section-streams",
+               "surfaces": surfaces},
               open(os.path.join(asset_dir, "temple_bsp.json"), "w"), indent=1)
     print(f"temple_bsp: nodes in region {stats['nodes']}, faces {stats['faces']} "
           f"(hidden {stats['hidden']}, marker {stats['marker']}, "

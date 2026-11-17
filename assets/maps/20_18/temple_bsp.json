@@ -1,6 +1,7 @@
 {
- "schema": 1,
- "build": "temple-bsp 2026-11-17 23:43",
+ "schema": 2,
+ "build": "temple-bsp 2026-11-18 00:23",
+ "uv": "section-streams",
  "surfaces": [
   {
    "tex": [

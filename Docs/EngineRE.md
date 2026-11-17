@@ -137,3 +137,30 @@ floor meshes in the client.
 - `tools/re/engine/umodel.c` — UModel::BuildRenderData / PostLoad / the
   section grouper (from the 2026-11-17 disassembly).
 - `tools/re/engine/brush.c` — ABrush::PostLoad / the brush-render facts.
+
+### Level BSP Sections — the client's baked vertex streams ✔ (2026-11-18,
+### DEVLOG-82; levelbsp.py parse_sections, validated 31/31)
+UModel::Serialize's Sections array (ver≥105) ships the RENDER-READY
+vertices. Each FBspSection = compact NumVertices + [NumVertices × 40 B
+records: **pos12 + uv8 + 8 B mystery + normal12**] + INT Revision +
+compact Material objref + INT NumNodes + DWORD PolyFlags + INT
+iLightMapTexture. Validation on Model500: Revision == NumNodes == the
+node count of the section (31/31), section material == the materials of
+its nodes' surfs (31/31).
+- Node → stream mapping: node.sect = (iSection, iFirstVertex); the
+  node's NumVertices records start at iFirstVertex. Positions match the
+  node polygons EXACTLY (10380/10380 vertices, 0 mismatches).
+- **THE UVs ARE THE CLIENT'S FINAL TEXTURE COORDINATES** (tile units,
+  repeat; in002 walls: 128 world units per U tile, 512 per V tile;
+  ai_008 panels ≈ 1 tile/face; the big village floors span hundreds of
+  tiles). They are NOT texels and NOT derivable from the surf U/V axes:
+  the old dot(v−base, U) computation produced ±35000 garbage and every
+  BSP face sampled a random texel — the root cause of ALL flat-gray
+  patches (above the arches, near the decorative windows, around the
+  statue). BuildRenderData's per-material division (texscale) applies
+  to the RUNTIME grouping, not to these baked streams.
+- Consequence: any level-BSP render must use the section-stream UVs
+  verbatim (temple_bsp.py does since DEVLOG-82). The village levelbsp/
+  bsp2 layers still use the computed texel UVs (approved look — do not
+  touch without the baseline re-approval; they carry the same latent
+  bug).

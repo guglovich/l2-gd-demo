@@ -607,13 +607,16 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 ## (owner Brush, iBrushPoly = raw poly index). bsp2 writes per-face "tex"
 ## and the prim index into bsp.json; faces without a surf keep the neutral
 ## stone placeholder.
-func _bsp_material(tex: Array, cache: Dictionary) -> Material:
-	var key := "%s:%s" % [tex[0], tex[1]]
+func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true) -> Material:
+	var key := "%s:%s|%s" % [tex[0], tex[1], "t" if texel_uvs else "n"]
 	if cache.has(key):
 		return cache[key]
 	# MODERN-PORT RULE: procedural clean-room shader first — no PNG in the
-	# render path for the road materials (BSP UVs are raw texels).
-	var pm := L2ProcTex.material_for(tex[0], tex[1], true)
+	# render path for the road materials. The VILLAGE BSP layers carry raw
+	# texel UVs (uv_is_texels=true); the TEMPLE BSP carries the client's
+	# baked section-stream UVs = final tile coordinates (DEVLOG-82) —
+	# texel_uvs=false, no UV rescaling anywhere.
+	var pm := L2ProcTex.material_for(tex[0], tex[1], texel_uvs)
 	if pm != null:
 		cache[key] = pm
 		return pm
@@ -623,9 +626,11 @@ func _bsp_material(tex: Array, cache: Dictionary) -> Material:
 		var img := Image.new()
 		if img.load(tp) == OK:
 			m.albedo_texture = ImageTexture.create_from_image(img)
-			# The BSP UVs are TEXELS (1 texel per world unit): scale them by
-			# 1/texture size so one tile = the texture's own pixel size.
-			m.uv1_scale = Vector3(1.0 / img.get_width(), 1.0 / img.get_height(), 1.0)
+			if texel_uvs:
+				# Texel UVs (1 texel per world unit): scale by 1/texture size.
+				m.uv1_scale = Vector3(1.0 / img.get_width(), 1.0 / img.get_height(), 1.0)
+			# else: the UVs are already the client's final tile coordinates —
+			# pass through unchanged.
 		else:
 			print("bsp: texture failed to load ", tp)
 	else:
@@ -699,11 +704,10 @@ func _build_bsp() -> void:
 	# temple court, the valley); the streets/buildings live in the Brush
 	# actors — render BOTH sources.
 	_build_bsp_brushes()
-	# The Shillien Temple interior (floors, walls, the stair ramps) is
-	# authored in the client as subtract volumes — the level BSP has none
-	# of it and no static meshes cover it. temple_native.py emits it as a
-	# CLEAN native mesh from the client coordinates (the modern-port rule:
-	# no legacy brush-pipeline emulation). Same uv_is_texels convention.
+	# The Shillien Temple interior comes from the level BSP node walk
+	# (temple_bsp.py) — the client's own stone structure + the decoration
+	# static meshes. Its UVs = the client's baked section-stream tile
+	# coordinates (DEVLOG-82) — texel_uvs=false there.
 	_build_temple_native()
 
 func _build_bsp_brushes() -> void:
@@ -759,7 +763,15 @@ func _build_bsp_brushes() -> void:
 		# hole-shaped shadow map produced full-surface shadow acne (the
 		# "streaks" that broke the location in the reverted attempt)
 		var mats: Array = []
+		var brush_dbg := OS.get_environment("L2_BRUSH_DEBUG") != ""
 		for si in range(mesh.get_surface_count()):
+			if brush_dbg:
+				var bm := StandardMaterial3D.new()
+				var bhue := fmod(float(polys.length() * 131 + si * 37), 360.0)
+				bm.albedo_color = Color.from_hsv(bhue / 360.0, 0.85, 0.95)
+				mats.append(bm)
+				print("BRUSH: ", polys, " surf ", si, " hue=", bhue)
+				continue
 			if prim_tex.has(si):
 				mats.append(_bsp_material(prim_tex[si], mat_cache))
 			else:
@@ -855,7 +867,17 @@ func _build_temple_native() -> void:
 	var mat_cache := {}
 	var surfaces: Array = tn.get("surfaces", [])
 	var textured := 0
+	var dbg_cols := [Color(1.0, 0.1, 0.9), Color(0.1, 1.0, 0.2), Color(0.2, 0.4, 1.0),
+		Color(1.0, 0.9, 0.1), Color(1.0, 0.4, 0.1), Color(0.1, 1.0, 0.9),
+		Color(0.6, 0.1, 1.0), Color(0.9, 0.5, 0.1), Color(0.1, 0.6, 0.1),
+		Color(0.9, 0.1, 0.4)]
 	for si in range(mesh.get_surface_count()):
+		if OS.get_environment("L2_BSP_DEBUG") != "":
+			var dbg := StandardMaterial3D.new()
+			dbg.albedo_color = dbg_cols[si % dbg_cols.size()]
+			mesh.surface_set_material(si, dbg)
+			textured += 1
+			continue
 		if si < surfaces.size() and surfaces[si].get("tex") != null:
 			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
 			textured += 1
@@ -1020,7 +1042,18 @@ func _get_mesh(key: String) -> Mesh:
 	_static_grey.albedo_color = Color(1.0, 0.1, 0.9) if OS.get_environment("L2_GREY_DEBUG") != "" else Color(0.32, 0.31, 0.30)
 	_static_grey.roughness = 0.95
 	_static_grey.cull_mode = StandardMaterial3D.CULL_DISABLED
+	# L2_FLAT_DEBUG: flat per-surface colors — identify visible geometry by
+	# pixel color (decode: hue = (len(pkg)*131 + len(obj)*31 + si*37) % 360).
+	var flat_dbg := OS.get_environment("L2_FLAT_DEBUG") != ""
 	for si in range(mesh.get_surface_count()):
+		if flat_dbg:
+			var fm := StandardMaterial3D.new()
+			var hue := fmod(float(parts[0].length() * 131 + parts[1].length() * 31 + si * 37), 360.0)
+			fm.albedo_color = Color.from_hsv(hue / 360.0, 0.85, 0.95)
+			fm.cull_mode = StandardMaterial3D.CULL_DISABLED
+			mesh.surface_set_material(si, fm)
+			print("FLAT: ", key, " surf ", si, " hue=", hue)
+			continue
 		if si >= pis.size():
 			print("FALLBACK: ", key, " surf ", si, " (pis exhausted, pis=", pis.size(), ")")
 			mesh.surface_set_material(si, _static_grey)
