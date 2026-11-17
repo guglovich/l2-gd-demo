@@ -18,6 +18,9 @@ render_mode world_vertex_coords, cull_disabled, diffuse_burley, specular_schlick
 
 uniform int mode = 0;
 uniform bool uv_is_texels = true;
+// The client renders BSP faces one-sided (UE2 culls backfaces unless the
+// section is TwoSided); statics render both sides. Gated per material.
+uniform bool cull_back = false;
 uniform vec2 tile_px = vec2(256.0, 256.0);
 uniform float relief = 1.0;      // normal bump strength
 uniform float detail = 1.0;      // world-space grain amount
@@ -306,6 +309,9 @@ vec3 surface_p(int m, vec2 px, vec3 wp, out float h) {
 }
 
 void fragment() {
+	if (cull_back && !FRONT_FACING) {
+		discard;
+	}
 	vec2 px = uv_is_texels ? UV : UV * tile_px;
 	float h0, hu, hv, hx, hy, hz;
 	vec3 alb = surface_p(mode, px, VERTEX, h0);

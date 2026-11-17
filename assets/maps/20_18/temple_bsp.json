@@ -1,67 +1,77 @@
 {
  "schema": 2,
- "build": "temple-bsp 2026-11-18 00:23",
+ "build": "temple-bsp 2026-11-18 00:52",
  "uv": "section-streams",
  "surfaces": [
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_001_1"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_ai_004"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_ai_008"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in002"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in008"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in016"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in022"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in023"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_in024"
-   ]
+   ],
+   "two_sided": false
   },
   {
    "tex": [
     "sylen_temple_t",
     "oren_sylen_t010"
-   ]
+   ],
+   "two_sided": false
   }
  ]
 }

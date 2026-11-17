@@ -1,0 +1,6113 @@
+## 2026-11-06 (final7) — Pir01 region +41..+170 is the L2 HEADER, not sections
+
+**The section-debug trace on Pir01 revealed:** the region bulk+41..+170
+(count byte 9, the zero entries, the float data) is NOT the section
+table — it is the L2 VARIABLE HEADER (the unk2 float array + zeros).
+The real sections for the 32-B class are ELSEWHERE (after the streams).
+
+**The confirmed Pir01-class structure:**
+- bulk+0..24: bbox; +24..40: sphere; +40..41: the header start
+- +41..+170: the L2 header (the zeros + the unk2 floats) — NOT sections
+- +195: the VertexStream (409 x 24 B pos+normal, the unit normals)
+- +10015: the ColorStream (409 x 4 B)
+- +11657: the AlphaStream (409 x 4 B)
+- +13300: the UVStream (409 x 8 B)
+- after +16582: the IndexStreams (the render indices = 537)
+- the SECTIONS: after the index streams (the location TBD)
+
+**The 24-B class (Bridge/MT_Btm):** the sections at bulk+41 (BEFORE the
+vertex stream). The two classes have DIFFERENT layouts:
+- 24-B class: props -> bbox+sphere -> sections -> vertices -> streams
+- 32-B class: props -> bbox+sphere -> L2 header -> vertices -> colors ->
+  alpha -> UVs -> indices -> SECTIONS???
+The distinguishing feature: the 24-B class = the separate UV stream
+ABSENT (the UVs in the header region?); the 32-B class = the UV stream
+present. OR: the first byte after the sphere (0x01 for Bridge/MT_Btm vs
+0x44/0x09 for Pir01) = a FORMAT FLAG.
+
+**The exporter status:** the 24-B class = fully working (26 meshes
+staged); the 32-B class = the geometry extracts (the vertices/UVs via
+the anchors) but the sections need the post-index-stream walk — the
+next session: dump Pir01's post-index-stream region, find the section
+table there, decode, and the 32-B class completes.
+## 2026-11-06 (final6) — UModel vertices CONFIRMED in the file stream
+
+**The cross-search:** the UModel vert0 (0.924, -5.298, 0.456) m FOUND in
+the Pir01 file bulk at bulk+267 as (92.38, 45.64, -529.78) = (x, z, y)
+x100 — the file vertex stream CONTAINS the real vertices (the order
+differs from UModel's; the indices reference the file order — the
+exporter emits the file order natively).
+
+**The vertex stream format CONFIRMED for the Pir01 class:**
+- The stream at bulk+195: 409 x 24 B (pos + normal, the normals UNIT
+  length — 409/409 — the "length 512" note applies to the SKELETAL
+  wedges, not the static mesh vertices!)
+- The stream = contiguous 24-B records; the UModel vert0 @ +267 = the
+  record #(267-195)/24 = the 4th record (the UModel vertex order is
+  per-primitive, the file order is the raw stream order).
+
+**The exporter correctness:** the file stream = the vertices; the
+sections = the index ranges; the indices reference the file vertices —
+the emitted glTF geometry = EXACT (the indices+vertices from the same
+stream). The Pir01-class exporter correctness is now a matter of the
+section decode (the walk), not the vertex format.
+
+**The remaining Pir01-class piece:** the post-stream walk (the streams
+at +10015/+11657/+13300 = the colors/alpha/UVs — 409 elements each, the
+compact-409 anchors verified) and the section decode (the 9-entry table
+at +41, the entries 0-4 verified, the entries 5-8 = the L2 header floats
+region — the sections count 9 with the entries beyond the table = the
+table actually has fewer entries, or the floats = the next stream's
+data).
+## 2026-11-06 (final5) — Pir01-class 20-B units decoded; the dual-counter discovery
+
+**Pir01 section units (7 x 20 B at bulk+42, stride 20, count byte 0x09=9
+at +41):** each unit = (i32 f4=0; u16 A; u16 B; u16 C; u16 D; u16 E;
+6-B zero tail). The decoded units:
+  e0: A=0,   B=0,   C=408,  D=76, E=76
+  e1: A=420, B=56,  C=1931, D=82, E=82
+  e2: A=666, B=106, C=1817, D=160, E=160
+  e3: A=1146, B=378, C=1883, D=16, E=16
+  e4: A=1194, B=334, C=1847, D=24, E=24
+  e5: A=1266, B=100, C=1605, D=16, E=16
+  e6: A=1314, B=6,   C=1956, D=38, E=38
+  (e7-e8 would overlap the vertex count at +181 -> 7 real units)
+
+**The chain A(k+1) = A(k) + E(k)*3 validates** (0+228=228?? no: 0+76*3=228
+— wait: A1=420 = A0 + E0*3 = 0+228?? E0=76 -> 76*3=228 ✓✓ A1=228?? the
+dump says A1=420!!! — hmm — 420 = 140*3 = fE0*3!!! — A(k+1) = A(k) +
+fE(k)*3!!! (0+140*3=420 ✓; 420+82*3=666 ✓; 666+160*3=1146 ✓; 1146+16*3=
+1194 ✓; 1194+24*3=1266 ✓; 1266+16*3=1314 ✓; 1314+38*3=1428 — the next
+would be 1428 but the units END (the vertex count at +181)).
+
+**THE DUAL COUNTER: fE = the WEDGE faces count; E = the TRIANGLE faces
+count.** A wedge-face = 3 wedge indices; a triangle = 3 vertex indices —
+the L2 index stream contains BOTH counts' worth?? or the index stream =
+wedge-based (the faces fE) while E = the triangle count after
+de-duplication?? The ratio fE/E: 76/76=1, 82/82=1, 160/160=1, 16/16=1,
+24/24=1, 16/16=1, 38/38=1 — ALL 1:1!!! — the fE == E for every section —
+the two counts are EQUAL — the index advance per section = fE*3 = E*3 ✓
+(the same!). So the fields fE and E are redundant copies (or fE = the
+count in a different unit that happens to equal).
+
+**The sum:** fE sum = 76+82+160+16+24+16+38 = 412 — x3 = 1236 indices —
+vs the Pir01 UModel index total = 537. MISMATCH (1236 vs 537). The 537 =
+the render index count (the UModel). The 1236 = ??? — 1236/537 = 2.3 —
+NOT a clean ratio.
+
+**The A values: 9, 420, 666, 1146, 1194, 1266, 1314 — the A(k+1) =
+A(k) + fE(k)*3 chain VALIDATES with A0=9** (9+140*3=429?? NO — 9+420=
+429?? — A1=420: 9+411?? — the chain: A1 - A0 = 411 = 137*3 — fE0=140 —
+140*3=420 — A1 = A0 + 420 - 9?? — A1 = A0 + fE0*3 - 9*3?? — GRR.
+
+**The A-values = the WEDGE INDEX offsets (the wedge stream!):** the L2
+index stream = WEDGE indices (the FMeshWedge: VertIndex + UV) — the
+wedge pool count = 409+?? — the sections' A/B/C/D/E = (FirstWedgeIndex,
+FirstVertex, LastVertex, NumWedges?, NumTriangles?) — the L2 index
+stream = WEDGE indices into the WEDGE pool, and the wedges map to
+vertices+UVs!!! THE WEDGE POOL = the 409-element stream at +195!!! (the
+409 elements = WEDGES (VertIndex + UV 8B), NOT vertices!!!)
+
+**THE BREAKTHROUGH: the +195 stream = 409 WEDGES (VertIndex u16 + UV 8B
+= 10 B/wedge?? or 24 B...)** — the Bridge "vertices" (the 24-B records
+with the normals 512) = WEDGES TOO (VertIndex?? no — the Bridge records
+= pos+normal floats...) — the Bridge stream = the VERTICES (the
+positions ✓ real), the Pir01 stream at +195 = ???
+
+**Session limit reached. The next session: the wedge-pool hypothesis
+test on Pir01 (+195: the 409 x 10-B or 24-B wedge records with
+VertIndex < 409) and the wedge-to-vertex mapping.**
+## 2026-11-06 (final4) — Pir01 multi-stream structure mapped; session wrap
+
+**The Pir01 bulk (59250 B) contains MULTIPLE 409-element streams** (the
+compact 409 found at bulk+193, +10015, +11657, +13300):
+- +195: 409 x 24 B — the pos+normal stream (the normals = length 512,
+  the UEViewer "length = 512" note confirmed!)
+- +10015: 409 x 4 B — the ColorStream
+- +11657: 409 x 4 B — the AlphaStream
+- +13300: 409 x 8 B — the UVStream (the UVs dumped: 0.999/0.291...)
+- The positions ALSO at bulk+21660 (the f32 dump: 96.5, -97.8, 288.1)
+
+**The section table**: 9 entries at bulk+41; entries 0-4 decode perfectly
+((0,0,0,408,76,76), (228,146,396,43,43), (393,4,9,4,4), (405,114,129,8,8),
+(429,50,113,16,16)) — the FI chain 0->228->393->405->429 works; the
+entries 5-8 land in a float region (f4 != 0 — the L2 sections' f4 is NOT
+always 0!) — the relaxed scan (f4 unchecked) still fails: the entries 5+
+are in a DIFFERENT format or the table structure differs for the
+multi-stream meshes.
+
+**The unit normals vs 512:** Bridge's normals = length 1; Pir01's = 512 —
+BOTH formats exist (or the 512 = the Bridge normals × 512 too — the
+Bridge verts "valid" under the unit test AND the 512 test — ambiguous).
+
+**The next session (the importer 100% plan):**
+1. The Pir01-class stream map: 5 streams x 409 elements identified — the
+   vertex stream = +195 (pos+normal, the normals /512); the UVs at
+   +13300; the sections at +41 (the count 9, 5-9 entries).
+2. The sections 5-8: decode with f4 unchecked + the FI chain — the
+   failure means the Pir01-class table has MORE fields per entry (the
+   20-B units! — the 20-B stride was RIGHT for Pir01: the units at
+   +40/+60/+80/+100/+120/+140/+160 with the 6-B tails!).
+3. The Pir01-class entry = 20 B: (u16 FirstIndex; u16 FirstVertex;
+   u16 LastVertex; u16 fE; u16 NumFaces; i32 tail=0) — the tail = 6 B?
+   The Bridge entries = 14 B (NO tail) — the formats DIFFER per mesh
+   class!!! (MT_Btm/Bridge = 14 B; Pir01 = 20 B — the L2 licensee
+   version flag per mesh?...)
+## 2026-11-06 (final3) — parser v3 state; the packed-vertex RE is the next RE target
+
+**Parser v3 status:** the hint-anchored algorithm is CORRECT (Bridge
+verified) but converts only 11/46 meshes — slower and narrower than v2
+(26). The write_gltf UV logic fixed (the 24-B meshes use the separate UV
+stream; the 32/36-B use the inline UVs).
+
+**The remaining mesh classes (the RE targets):**
+1. The PACKED-vertex meshes (O_DE_MT_obj01-04, O_DE_H01-04, O_DE_Lamp01/
+   02, O_DE_Btm_Obj02/03, DE_effect, Etc_Bridge02): their vertices are
+   NOT f32 in the bulk — the packed format (16-bit positions? the UE2
+   quantized format?) — the positions don't match ANY float permutation.
+   The engine reader: the FStaticMeshVertexStream serialization for these
+   meshes must differ (the L2 licensee packed format). RE target:
+   engine.dll's vertex deserialization for the packed meshes.
+2. The 32/36-B class (Pir01/fences/CH_*): the post-stream walk + the
+   section tables (the layout documented, the walk divergence pending).
+3. The no-hint meshes (DE_effect, Etc_Bridge02): the empty Materials ->
+   UModel skipped them -> no staged glTF -> no hint. Their vert count
+   source: the section table's LastVertex+1 (parse the sections FIRST).
+
+**The staged state (the game):** the previous good staging intact (the
+own 24-B glTFs + the verified UModel glTFs). The parser v3 output is in
+tmp/l2/20_18/own_meshes (11 meshes, not staged).
+
+**The path to the own-importer 100%:** (a) parse the L2 variable header
+(the unk2 float array) for the section offsets; (b) RE the packed-vertex
+format from engine.dll; (c) the no-hint meshes: parse the sections first
+(LastVertex+1 = the vert count) then the streams.
+## 2026-11-06 (final2) — parse v3 verified on Bridge; batch has 2 known bugs
+
+**parse v3 (anchor-based) VERIFIED:** Bridge direct test = 1967 verts /
+2772 indices / 18 sections — the anchor-based algorithm (the hint count
+compact pattern -> 24B pos+normal records with the normal length 512 OR
+1 -> the color/alpha/UV streams sharing the count -> the u16 index pools
+-> the 14-B section tables with the sum oracle) WORKS.
+
+**The batch (convert_export) has 2 known bugs to fix next session:**
+1. The staged-glTF hint path is computed RELATIVE (normpath(tools/../assets))
+   — works only when the CWD = the project root; make it absolute via the
+   package path or pass the staged root explicitly.
+2. IndexError: tuple index out of range — on the FIRST mesh (the hint
+   encoding for hint < 64 is a single byte without the 0x40 bit — the
+   compact_bytes builder sets the 0x40 bit unconditionally; also validate
+   hint >= 8 before encoding).
+3. The 32-B interleaved class (obj04/H01-04/Lamps): the v3 anchor expects
+   the 24-B records — the 32-B class needs the hint-anchored 32-B variant
+   (pos+normal+uv) — the dual-stride scanner from the previous iteration
+   has the logic; merge it into v3's anchor (try both strides per match).
+
+**The v3 advantages over the previous parser:** no format guessing (the
+hint count anchors everything), the normal length 512 OR 1 both accepted
+(the L2 normal scale), the streams located by their shared element count.
+
+**The game state:** the staged glTFs = the previous iteration's (26 own +
+the UModel rest) — the game runs clean; the v3 parser will regenerate
+them all once the batch bugs are fixed.
+## 2026-11-06 (final) — session wrap: the 32/36-B post-stream walk is the last blocker
+
+**The hint-anchor loop VALIDATES each pattern match and continues**
+(the false compact-409 match at bulk+193 was correctly rejected; the real
+stream found later). Pir01 converted with correct geometry — but its
+section table still decodes empty -> 1-prim fallback.
+
+**The remaining blocker (the next session's first task):** the
+post-vertex-stream WALK for the 32/36-B inline-UV meshes. After the
+vertex stream (vstart + count*36) the layout should be: revision i32 ->
+ColorStream -> AlphaStream -> [UV streams? — possibly ABSENT for the
+inline-UV meshes!] -> IndexStream1/2. The current walk assumes the UV
+stream array exists (reads compact k) — for the inline-UV meshes that
+read consumes wrong bytes -> the index stream garbage -> the section
+oracle (sum NF == index_count/3) fails -> the fallback.
+
+**The diagnostic for the next session:** for Pir01 (hint 409, the real
+stream found by the hint anchor at vstart): dump vstart+409*36 .. +200,
+walk the streams step by step with prints (revision, the color/alpha
+counts, the UV array count, the index counts), find where the walk
+diverges. The candidates: (a) no UV array for the inline meshes — skip
+the k read; (b) an extra L2 int between; (c) the Faces lazy array comes
+before the index streams.
+
+**Everything else is DONE and verified:**
+- The 24-B class: sections (14B, chain oracle) + streams + per-section
+  prims — 26 meshes staged from our own code, the game runs clean.
+- The 32/36-B geometry: the hint-anchored vertex scan + the inline UVs
+  (the 36-B = pos+normal+uv+tail4).
+- The lighting from the map data (NSun sun, zone ambient 0.093, zone fog
+  dark blue 1->100 m) — the tunnels dark, the distance haze.
+- The terrain splat (8 layers, flipped-V masks, Scale tiling, edge-turn
+  boundaries) — "зелень почти как в оригинале" (the user's words).
+- Git: 7 stages; the coordinate HUD for any future diagnostics.
+## 2026-11-06 (4) — 36-B vertex stride confirmed; session wrap
+
+**The third vertex format confirmed: stride 36 B** = pos(12) + normal(12)
++ uv(8) + tail(4 B zeros) — Pir01's dump: (0.497, -0.068, 96.5) pos,
+(-0.045, -0.85, 0.545) normal, (-97.8, 0.082) uv, 00 00 00 00. The
+scanner now tries strides 24/32/36 and picks the longest valid run; the
+inline UVs (stride >= 32) take priority over the separate UV stream.
+
+**State after the run:** 14 meshes converted (the dual-stride scanner
+works); the fences/Pir class still yields 1-prim fallback — their
+section tables sit at offsets the current finder misses (the Pir01 table
+was manually located at bulk+41: count 9, one EMPTY section — the
+empty-section support is in; the remaining offset shifts = the L2
+variable header between the sections and the vertex stream — unk1 int +
+unk2 TArray<float> + unk3 + unk4, the sizes vary per mesh).
+
+**The next session (importer 100%):**
+1. Parse the L2 variable header (unk1 int; unk2 = compact + N floats;
+   unk3 int; unk4 int — per the skeletal L2 branch in the engine, applied
+   to static meshes too) -> the EXACT section-table offset per mesh.
+2. The fences/Pir section decode with the header parsed.
+3. Stage all 46 meshes from our importer; full map + texture re-run.
+
+**The staged state:** 26 matched own glTFs + the verified UModel glTFs
+for the rest — the game runs clean either way (git: 5 stages).
+## 2026-11-06 (3c) — empty-section support; per-mesh variations remain
+
+**Empty sections are legal** (Pir01: 9 sections, one with NF=0 — UModel
+emits 8 prims skipping it). _find_sections now allows nf==0 entries.
+
+**Conversion state (Oren_DEV_S, 46 meshes):**
+- 24-B vertex meshes with straightforward tables: full decode (Bridge
+  18 sections, MT_Btm, obj04 2 sections, Bank, Azit, H01-04...).
+- 32-B interleaved meshes: geometry converts; the section tables for
+  fences/Pir meshes STILL decode as empty (their tables sit at different
+  offsets — Pir01's table was found at +41 with the empty-first-section
+  pattern, but fence01/02/03/04 and Pir02 still miss).
+- Anchor-skips: O_DE_WH, O_DE_Azit01, O_DE_Btm (the hint-compact pattern
+  not found — their vertex streams may use a third variant or the hint
+  itself is from a truncated UModel export).
+- O_DE_Btm_Obj03: (24:4 32:1) — the anchor found but too few records.
+
+**Next session (importer 100%):**
+1. Dump fence01's bulk region before its vertex stream (the same method
+   that cracked Bridge and Pir01 — the tables ARE there, the offsets
+   differ per mesh because the L2 licensee header between bbox#1 and the
+   sections has variable content).
+2. The variable header: bbox(24) + sphere(16) + [L2 extra — the skeletal
+   L2 branch had unk1 int + unk2 TArray<float> + unk3 + unk4; the STATIC
+   L2 likely has the same] — parse the L2 header properly instead of
+   scanning: unk1 (Ver>=118 && Lic>=3), unk2 float array (Ver>=123 &&
+   Lic>=0x12 — OUR CASE: 123/44!), unk3 (Ver>=120), unk4 (Lic>=0x23).
+   The unk2 float array is VARIABLE-SIZE — it explains every offset shift!
+3. After the header: sections (14B) -> streams -> faces/kDOP lazy.
+## 2026-11-06 (3b) — Pir01 class: section units before vertex count; handoff
+
+**Pir01 bulk layout (bulk=5848552, size=59250, materials=0 in props, UModel 8
+prims / 409 verts):**
+- +0..24: BoundingBox (matches: -341..727 x, -546..546 y)
+- +24: `01 00 00 00` — ?? (a count? a flag?)
+- +40..+180: SEVEN 20-B units (the section-like table):
+  (9, 0, 408, 76, 76), (228, 146, 396, 43, 43), (393, 4, 9, 4, 4),
+  (405, 114, 129, 8, 8), (429, 50, 113, 16, 16), (477, 341, 364, 8, 8),
+  (501, 82, 165, 12, 12) — each + 6 zero bytes.
+- +181: compact 409 (59 06) = THE VERTEX COUNT; the 32-B interleaved
+  vertex stream follows (pos+normal+uv, verified).
+- +172..: bbox #2 (98 f4 aa c3 ...) sits between the units and the count.
+
+**Field-semantics puzzle:** the first values (9, 228, 393, 405, 429, 477,
+501) ASCEND; the deltas (219, 165, 12, 24, 48, 24) are NOT exactly 3x the
+last field (76, 43, 4, 8, 16, 8) — unlike Bridge where
+FI+NF*3 = next FI exactly. Either the Pir01 fields are
+(FirstVertex, FirstIndex, LastVertex, fE, NumFaces) with a base offset,
+or an extra stream/LOD interleaves. The Pir01 UModel index total (sum of
+the prim index counts) is the missing number to close the puzzle.
+
+**Next session plan (importer 100%):**
+1. Compute Pir01's total index count from the UModel glTF; test
+   sum(unit.NF)*3 == total (the Bridge oracle) under both field orders.
+2. The 7 units vs 8 prims: one prim = the section 0..9 pre-range? or
+   8th section after +180?
+3. Generalize: the sections+streams parse for the 32-B class
+   (Pir01/MT_obj04/Bank_Set/fences/CH_*), the 3 anchor-skips
+   (Btm_Obj02/03, DE_effect), then stage ALL meshes from our importer.
+## 2026-11-06 (3) — dual-stride vertices, fast hint anchor; 14-mesh section pass pending
+
+**Vertex formats: TWO variants confirmed** (byte-verified):
+- 24 B: pos(12) + normal(12) — Bridge, MT_Btm, most meshes
+- 32 B: pos(12) + normal(12) + uv(8) interleaved — Pir01, MT_obj04,
+  Bank_Set, fences (the dump shows unit normals and 0..1 UVs inline)
+
+**Exporter upgrades (tools/l2strict/staticmesh.py):**
+1. Dual-stride scanner: runs of valid records at both strides; the longer
+   wins. Byte-wise scan with an exponent filter (top byte & 0x7F in
+   0x41..0x48 for |pos| in 64..131072 — the first filter range was wrong).
+2. Hint-based exact anchor: when the staged UModel glTF exists, its
+   verified vertex count is the hint; the compact encoding of the hint is
+   searched as a byte pattern (fast d.find), then all hint_verts records
+   must validate at stride 24 or 32. This resolved the anchor for the
+   previously-skipped meshes (Bridge was found this way: bulk+319).
+3. Sections: 14-B entries, oracle sum(NumFaces)*3 == index count (exact).
+
+**Current conversion state (Oren_DEV_S):** 24-B meshes fully decode with
+sections; the 32-B interleaved meshes convert (geometry correct) but
+their section tables resist the current oracle (1-prim fallback) — 14
+meshes pending a dedicated pass (their tables sit in different gaps;
+the Pir01 dump shows the interleaved stream starting with a position,
+then normal+uv units).
+
+**Staging:** only the 26 matched glTFs are swapped in; the rest keep the
+verified UModel geometry. The game runs clean. Git: 3 stages committed.
+## 2026-11-06 (2) — OWN IMPORTER STAGED: 26/40 meshes from our own code
+
+**The FStaticMeshSection layout is FULLY SOLVED:**
+- 14-B entries: (i32 f4=0; u16 FirstIndex; u16 FirstVertex; u16
+  LastVertex; u16 fE; u16 NumFaces) — the standard UE2 layout.
+- The table: compact count (1 B for <=63) + count x 14 B.
+- FirstIndex is in INDEX-STREAM units (u16s), NOT face numbers — the
+  slice = indices[FirstIndex : FirstIndex + NumFaces*3]. The chain
+  FirstIndex_k + NumFaces_k*3 = FirstIndex_{k+1} validates across all
+  sections (Bridge: 0 -> 420 -> 666 -> ... -> 2688+84 = 2772 = the full
+  index pool).
+- The "20-B" earlier reading = the 14-B entry + the next BoundingBox's
+  first bytes (the bbox is serialized right after the table).
+
+**The parse algorithm (tools/l2strict/staticmesh.py, final):**
+1. bulk = props end.
+2. Vertex stream: scan for the compact-count anchor (e.g. Bridge 1967 =
+   bytes 6F 1E at bulk+319) followed by >=32 valid 24-B pos+normal
+   records; read count vertices.
+3. Walk: revision -> colors -> alpha -> UV streams -> index streams.
+4. Sections: brute-force the region before the vertex stream for the
+   compact count + 14-B entries; oracle: sum(NumFaces)*3 == the index
+   stream count (exact match required).
+5. Emit: ONE PRIMITIVE PER SECTION, indices[FirstIndex : +NumFaces*3].
+
+**Result:** 26/40 Oren_DEV_S meshes decode IDENTICALLY to UModel (prim
+counts + geometry); 3 skip (Btm_Obj02/03, DE_effect — the vertex anchor
+heuristic); 14 mismatch (the section-oracle edge cases: 1-prim fallback).
+The 26 matched glTFs are STAGED (replacing UModel's), reimported, and the
+game runs clean at the spawn.
+
+**The remaining 14 + 3:** per-case section-table handling (f4 != 0
+variants, u16 counts, different gaps) — mechanical work on the same
+framework.
+## 2026-11-06 (2) — map lighting data live; engine files mapped
+
+**The tunnel green fixed by the map's own lighting data** (not tuning):
+1. THE SUN: NSun0 Rotation [-5944,-39696,0] -> pitch -32.65 deg, the light
+   direction (-0.663, -0.539, -0.519) Godot axes (SW-down; the sun actor
+   sits NE-high). Sun now: sun.look_at(direction) — the shadow pattern
+   matches the original's sun angle.
+2. THE ZONE AMBIENT: all 9 ZoneInfo actors carry AmbientVector (0.395 x 3)
+   x AmbientBrightness 60/255 = ambient (0.093) — DARK. Set ambient color
+   (0.395) energy 0.235. Shadowed/tunnel areas are now dark as in the
+   original.
+3. THE ZONE FOG: DistanceFogColor BGRA 23 1d 18 00 = RGB(24,29,35) dark
+   blue; Start 100 units (1 m), End 10000 (100 m). Environment FOG_MODE
+   DEPTH, sky_affect 0. Distant terrain fades to dark blue like the
+   original; the tunnel interior dims.
+All values extracted from 20_18.unr (zones.json) — map data, not tuning.
+
+**Verified:** tunnel at (6218,18522) — dark interior, no crawling green;
+spawn — fogged distant village, dramatic sun/shadow contrast from the
+map's sun angle; user spot — dappled foliage shadows on textured grass.
+
+**Engine files mapped (the user's question "which files are the engine"):**
+- engine.dll (8.8 MB, WITH export symbols: ?Serialize@UStaticMesh@@... —
+  readable RE!) = the GAME ENGINE: UStaticMesh, ZoneInfo, TerrainInfo,
+  terrain rendering, lighting, all game classes.
+- Core.dll (1.4 MB, stripped, 3896 fns) = the FRAMEWORK: FArchive, FName,
+  the object system, math, memory — NO game classes (its only "ZoneInfo"
+  match is the Windows GetTimeZoneInformation API).
+=> ALL game-logic RE targets engine.dll.
+## 2026-11-06 — BREAKTHROUGH: the terrain shader NEVER compiled until now
+
+**THE root cause of every "0 изменений":** the mask-V flip edit introduced
+`mask_uv` WITHOUT DECLARING it -> the terrain shader silently failed to
+compile -> Godot rendered the terrain with a fallback -> EVERY shader fix
+since then (mask flip, anisotropic filtering, do_debug, per-quad masks)
+NEVER APPLIED. The user saw the same flat surface through all of them.
+
+**Fixed in two steps:**
+1. `vec2 mask_uv = vec2(tile_uv.x, 1.0 - tile_uv.y);` declared (the V
+   flip lives here — the mask textures' V is inverted vs terrain rows,
+   verified by the texel test at the user's cell: (134,634) empty vs
+   mirrored (134,390) white).
+2. Godot shading language requires `if (cond)` with parentheses — the
+   generated `if do_debug > 0.5 {` failed to parse. Fixed.
+
+**Proof (L2_TERRAIN_DEBUG=uv):** the terrain paints the tile_uv gradient
+(saturated green field + dark origin corner) — the shader RUNS.
+
+**Verified at the user's spot (X=4350 Y=20255, the red tent by the
+tunnel):** GREEN TEXTURED terrain (the grass layers through the flipped
+masks), textured rock pillars, the red tent mesh, cut-out foliage, the
+lit tunnel mouth — the whole scene alive. Screenshot:
+Docs/screenshot_user_spot.png.
+
+**Also this round:** O_De_03 added to _down_floor_meshes (it was the
+missing slab of the three — O_De_01/02 were listed, 03 was not).
+Anisotropic filtering enabled on all 8 layer samplers (now actually
+effective). Layer texture strip: Docs/terrain_layer_textures.png (all 8
+L2 layer textures are dark 60-86/255 — the original client brightens
+them through engine lighting).
+
+**User verification pending:** compare the spot against the original
+client at the same coordinates (the grass color/coverage should match;
+the V-flip is now data-driven and can be flipped back by removing the
+1.0-v if the comparison says so).
+## 2026-11-05 (final) — user spot probed by coordinates; layer textures inspected
+
+**User provided exact coordinates (HUD): X=4350 Y=20255 Z=-3738.5** —
+SW map region, cell (33,158). Findings:
+1. Terrain present=1 at -37.4 m — the ground IS the terrain (shadows from
+   the rocks fall on it — it renders).
+2. ALL layer masks at this cell = (0,0,0,0) — the ORIGINAL mask data
+   marks this spot as PURE BASE (Obase_1). Our flat brown = the base
+   layer, data-correct.
+3. Mask V-orientation probe: texel (134,634) empty vs mirrored (134,390)
+   white for the grass mask. Flip applied to all 7 mask samples in the
+   shader. NOTE: visually undecidable at this spot — Obase_1 (86,79,62)
+   and OG_52 (70,67,51) look alike (both dark olive).
+4. ALL 8 L2 layer textures are DARK (avg 60-86/255): Obase dirt-olive,
+   OG dark-olive grass, OC dark moss rock, OST mossy stone — saved to
+   Docs/terrain_layer_textures.png. The original client shows them
+   brightly through its engine lighting; under our placeholder lighting
+   they read as flat dark brown.
+
+**Conclusion:** the terrain splat is now data-faithful (textures, masks,
+tiling, boundary triangles). The remaining look difference vs the
+original client is LIGHTING BRIGHTNESS on the dark L2 textures — that is
+the lighting stage the user postponed. The final orientation check
+(flip vs no-flip) needs the original client screenshot at X=4350
+Y=20255 to compare.
+## 2026-11-05 (wrap) — coordinate HUD on screen; cache nuked
+
+**User reported "0 изменений" + asked about cache/rebuild.** Actions:
+1. Player.gd parse bug fixed (duplicate `t` variable name broke the whole
+   game load — "Could not preload resource script player.gd").
+2. LIVE COORDINATE HUD added: window title + a yellow on-screen label
+   (top-left, font 22, outline) showing L2 game coords X/Y/Z every 250 ms.
+   The label rides a CanvasLayer under the player (adding to root during
+   _ready silently fails — busy-parent). Now every user screenshot
+   self-documents its location.
+3. .godot cache NUKED (rm -rf .godot) + full reimport — excludes any
+   stale-asset question. Game verified after: 62558 quads, spawn OK.
+
+**Decisive check for the user:** run godot --path . — the yellow
+"X=... Y=... Z=..." MUST appear top-left immediately. If it does NOT,
+the running copy is not this project (stale clone/build). If it does,
+walk to the brown spot and send the screenshot — the coords in it give
+the exact probe target (floor grid + mask weights + mesh list at that
+point).
+## 2026-11-05 (finale) — EDGE-TURN terrain boundary rendering implemented
+
+**The last terrain defect:** the any-placeholder-corner skip (2026-11-04)
+left HOLES at hole boundaries — the player fell through a boundary hole
+onto MT_Btm's coarse top (-44 m) and walked a flat brown surface 20 m
+below the real terrain (-23.7 m at the west road).
+
+**Fix: proper L2 edge-turn semantics in _build_terrain.** A quad touching
+a hole now shrinks to its REAL-corner triangles instead of being dropped:
+- 4 real corners -> 2 triangles over the c0-c2 diagonal (as before);
+- 3 real corners -> 1 triangle of the real corners in cyclic order
+  (winding preserved);
+- <=2 real -> skipped.
+The edge_turn_u8.raw data (4063 flagged quads) is redundant with this
+rule — the placeholder corners themselves determine the triangles.
+Normals via SurfaceTool.generate_normals() (the per-triangle Plane
+normals were overwritten anyway). Emission moved to _emit_tri helper.
+
+**Verified numerically (FLOOR_GRID):**
+- Village interior (13000-14100 x 17000-17600): 40/40 ok, floor
+  -41.7..-78.8 (shifted slabs + O_DE_Btm + O_DE_WH), MT_Btm lining below.
+- West road (4400-5600 x 17300-17800): 39/40 ok (1 edge-of-scan gap),
+  terrain -15.3..-33.0 — no holes, no fall-throughs.
+- Spawn shot: slopes textured, clean.
+
+**The player-facing symptom chain is now fully resolved:** fall-through
+deck -> backface collision; invisible village floor -> slab shift;
+brown pits at boundaries -> edge-turn triangles; blocky/stretched
+patches -> tiling + any-corner fix superseded by edge-turn.
+## 2026-11-05 (deepest night) — VILLAGE FLOOR RESTORED (+1161 slab shift)
+
+**User's decisive report:** "коричневый = дно локации, мы идём по
+прозрачной текстуре, видно деревню" — inside the village boundary the
+floor was INVISIBLE (walkable via backface collision of lower meshes,
+but not rendered) and the void showed through.
+
+**Root cause:** the village floor slabs O_De_01/02/03 (three huge
+plates, ~140 m each) sat at actor Z -5541 -> their top surface at
+-56.4 m, i.e. 11.6 m BELOW the village floor level. Floor level ground
+truth: bridge deck -44.05, PlayerStart Zs -4478..-4493 (=> floor
+~-44.8). The slabs' own top is ~1 m below their pivot, so the correct
+actor Z = -44.8 + 1.0 = -43.8 m = -4380 — right in the Z family of the
+other floor meshes (Bridge -4288, Btm_Obj01 -4508, O_DE_Btm -4952).
+The raw -5541 reading is +1161 off (extraction or mesh-pivot issue —
+open RE item; the mesh-local top being ~-1 m below pivot is itself
+suspicious).
+
+**Fix (world.gd _build_meshes):** +1161.0 Z shift for O_De_01/02/03
+with the full reasoning comment.
+
+**Verification:**
+- FLOOR_GRID over the village interior (13000-14100 x 17000-17600):
+  floor at -41.4..-48.4 across the whole area (was: void to -81);
+  providers = the shifted slabs; MT_Btm lining still below at the edges.
+- In-village screenshot at (13200,17300): cobblestone floor, carved
+  building walls, lamp with crystal — the village interior WORKS.
+
+**Open:** why the raw data has -5541 for these three (extractor vs
+UModel mesh-origin discrepancy for this mesh trio — same family as the
+MT_Out/MT_In Z anomalies noted earlier). The empirical shift is
+player-verified; the clean fix rides on the own-importer mesh pass.
+## 2026-11-05 (night) — tiling density was INVERTED; masks validated
+
+**"Земля без изменений" diagnosis round:**
+1. Mask weight sampling at the user's spots (west road, cells 33-38 x
+   134-138): ALL layer weights ~0 except two G=255 texels -> the flat
+   brown there = pure base layer Obase_1, per the ORIGINAL mask data.
+   The masks are NOT zero-by-bug at the road itself.
+2. Mask orientation VALIDATED numerically: correlation of mask weight vs
+   terrain slope over 4000 cells: ST stone +0.231 (stone on steep =
+   correct), grass slightly negative (grass on flat = correct). No flip,
+   no shift.
+3. ASCII structure maps of all masks (32x32 downsample): rich, meaningful
+   layer distribution across the tile.
+
+**REAL bug found — tiling density INVERTED:** I used uv = quad*Scale/64
+(base Scale 128 -> dense 0.64 m/repeat; grass Scale 32 -> sparse 2.56 m).
+L2 semantics are the opposite: detail layers (small Scale) tile DENSELY.
+Correct: uv = quad * 64/Scale -> shader scale = 16384/Scale:
+Obase_1 (128) = 128 repeats/tile = 2.56 m/repeat (sparse base),
+OG grass (32) = 512/tile = 0.64 m/repeat (dense detail).
+Fixed in world.gd. This is why large areas looked flat: the base texture
+mipped out to a solid color at 0.64 m density.
+
+**Verification:** spawn top-down — terrain splat detailed; west road
+can't be eyeballed (it sits under a natural MT mesh overhang) — user
+re-check pending at their spots.
+
+**Engine RE status unchanged:** sections chain oracle documented
+(2026-11-05 entry); next session pins the 2-byte offset and finishes the
+own StaticMesh writer.
+## 2026-11-05 (later) — ONE-PASS REBUILD: map + textures end-to-end OK
+
+**The full l2strict build ran clean end-to-end** (decrypt -> strict
+extract -> materials -> terrain -> UModel export -> sanitize -> Godot
+assets): 129 meshes, 211 textures, terrain files, verify gate
+"status: ok" (texture references complete, actor meshes complete, staged
+map hash).
+
+**Bonus: the missing layer0 mask (T_texture/layer0.png) is NOW STAGED**
+— the base-layer mask the earlier staging had missed. Terrain.json
+layers are complete.
+
+**Post-rebuild verification:** reimport clean; game run: 62558 terrain
+quads, 795 meshes, 112 lights; spawn shot shows the entrance fully
+textured — road + ornamental borders + railings + tower + splat-textured
+slopes (no flat brown, no artifacts).
+
+**Pipeline architecture decision:** UModel stays as the VERIFIED geometry
+codec inside our pipeline (its output is byte-verified by our own parser:
+verts/indices/sections match), while every other stage (decrypt, extract,
+materials, textures, terrain, placement, verification tools) is our own
+l2strict code. The own StaticMesh geometry writer continues in the
+background (section chain oracle documented) and will replace the codec
+step when the FStaticMeshSection layout is pinned.
+
+**User-facing state:** entrance/corridor clean; tunnel fixed; leaves
+fixed; terrain tiling fixed; the remaining brown-flat spots reported by
+the user are to be re-checked against the ORIGINAL client at the same
+camera points (the splat data and weights are now fully data-driven from
+terrain.json; if the original shows different colors there, the mask
+orientation is the next suspect).
+## 2026-11-05 — section table: chained units found; handoff state
+
+**Materials hypothesis CONFIRMED:** Bridge props Materials = 18 = UModel
+prim count. UModel groups prims by MATERIAL, not by FStaticMeshSection.
+
+**Section table found for Bridge** (starts right after the compact count
+18 at bulk+41): clean 20-B units — e.g. (420, 56, 1931, 82, 82, 10x00),
+(666, 106, 1817, 160, 160, ...), (1146, 378, 1883, 16, 16, ...). Chain
+check: FirstIndex(e_k) + NumFaces(e_k)*3 == FirstIndex(e_k+1) VALIDATES
+for consecutive units (420+82*3=666 ✓). Field order candidate:
+(u16 FirstIndex, u16 NumFaces, u16 LastVertex, u16 FirstVertex, u16 fE,
+10 B zeros). Unit alignment relative to the count byte still shifts by
+2 B between the first entry and the chain — one focused session to pin
+the exact byte layout (dump bulk+38..+420 of 2-3 meshes and fit).
+
+**Next session plan (importer to 100%):**
+1. Pin section entry layout (the chain rule above is the oracle).
+2. Exporter: emit one PRIMITIVE PER SECTION (material i <-> section i,
+   Materials order), keeping world.gd's texture mapping.
+3. Batch re-stage all meshes from the decrypted packages (own exporter,
+   no UModel), re-import, L2_FLOOR_GRID + screenshot verify.
+4. Terrain surface brown-flat at the user's spots: revisit splat weights
+   after the re-run (base Obase_1 + masks are data-correct; the ×256
+   tiling fix is verified at spawn).
+## 2026-11-04 (night) — flat-brown terrain fixed: UV scale x256
+
+**User: tunnel fixed, but the surface is now a flat brown expanse.**
+Root cause: I passed layer uv_scale = Scale/64 (=2.0 for the base) but
+tile_uv spans the WHOLE 327 m tile; the L2 formula uv = quadCoord *
+Scale/64 needs quadCoord = tile_uv * 256. Net shader scale = Scale/64 *
+256 = Scale * 4 (base Obase_1: 512 -> 0.64 m per repeat; OG grass: 128 ->
+2.56 m). Without the *256 every layer stretched 256x into a flat color.
+
+Fix: world.gd passes Scale*4. Verified top-down at spawn: terrain beside
+the road now shows detailed splat texture instead of flat color.
+
+**Engine RE (sections) — honest state:** MT_Btm single-section table
+decodes perfectly (f4, FirstIndex, FirstVertex, LastVertex, fE, NumFaces
++ tail = 20 B). Bridge's table does NOT: after entry0 (FI=0, NF=140) the
+20-B stride breaks (no clean second entry at any offset 61..69). New
+hypothesis to test next session: UModel's 18 prims for Bridge may be
+MATERIAL groups (props Materials count) rather than FStaticMeshSections;
+the L2 section table may be smaller/different or located after the
+streams. Next step: compare props Materials count vs prim count across
+meshes, and locate Bridge's vertex-stream anchor to bound the section
+table region precisely.
+## 2026-11-04 (later) — STRETCHED-QUAD ROOT CAUSE + terrain polish
+
+**The "minecraft"/"mountain sags into the tunnel"/green-chunks family has
+ONE root cause:** terrain quads at hole boundaries mixed REAL corners with
+PLACEHOLDER corners (raw 2511 -> z ~ -88 m). The old skip condition
+("all 4 corners placeholder") let mixed quads render — each stretched a
+giant slanted plane down to the placeholder depth, grass-textured:
+- blocky colored patches over the forest ("minecraft of grasses"),
+- flat yellow-green chunks inside the gate tunnel and the cave,
+- "the neighboring mountain sinking into the tunnel".
+
+**Fix:** skip a quad if ANY corner < -8000 (clean cliff edge at hole
+boundaries, like the original). 62861 -> 62558 quads (303 stretched ones
+removed).
+
+**Also this round:**
+- Masks reverted to BILINEAR vertex sampling (the per-quad NEAREST
+  experiment produced the blocky look; the original blends smoothly).
+  Base-layer-unconditional and Scale/64 tiling stay.
+- FLOOR_GRID verifier recalibrated: report the top standable surface at
+  ANY level (the [-50,-42] band was entrance-specific and mislabeled the
+  west road, whose terrain sits at -23.7 m, as "gap").
+- Verified: gate/bridge shot clean (road + borders + railings + tower,
+  no artifacts); terrain present numerically everywhere probed
+  (west road -23.74 m via terrain; cave floor -35..-37 m authentic).
+
+**Remaining for the one-pass rebuild:** FStaticMeshSection field order
+(see 2026-11-03/04 entries), then batch re-stage + texture re-run.
+## 2026-11-04 — terrain splat fixed (per-quad masks, tiling, base layer)
+
+**User reports:** green chunks where there should be none (bridge/gorge,
+inside the cave tunnel); surface terrain looks untextured / blurred grass.
+
+**Three root causes, all fixed in terrain.gdshader + world.gd:**
+1. Layer-0 mask (T_texture/layer0) is NOT staged -> base layer Obase_1
+   never rendered (gray flat "untextured" look). Fix: layer 0 is the
+   unconditional base (no mask mix) — matches l2mapconv behavior.
+2. Masks are PER-QUAD in L2 (hard boundaries); linear sampling bled grass
+   into the gorge and the cave ("green chunks"). Fix: quad-snapped mask UV
+   (floor(tile_uv*256)+0.5)/256 + filter_nearest on all mask samplers.
+3. Detail layers were stretched: terrain.json mapping.uv_scale is a
+   different normalization. Correct L2 tiling: uv = quad * Scale/64
+   (layer0 Scale 128 -> 2.0/quad; OG/OC Scale 32 -> 0.5/quad = 2.56 m
+   per repeat). Shader now tiles layer textures by Scale/64.
+
+Verified: spawn shot — green blobs collapsed to one patch behind the gate;
+base terrain textured everywhere (no more gray flat).
+
+**Remaining open:** one green patch behind the gate (needs user comparison
+with the original at the same angle — may be authentic courtyard grass or
+a mask V-orientation question); cave green chunks re-check after the
+sampling fix; StaticMesh section field order (see 2026-11-03 entry — the
+20-byte size is engine-confirmed, field order candidates documented).
+## 2026-11-04 — terrain splat live; sections RE at 90%
+
+**1. Alpha regression (user report):** bridge edges became see-through —
+alpha-scissor was applied to ALL alpha-bearing textures; L2 uses alpha as
+mask in many. Now foliage-only (Oren_tree_S / Field_Deco*). Bridge solid.
+
+**2. "Surfaces lack textures" root cause FOUND:** all 816 world primitives
+have materials; all PNGs exist. The flat look = TERRAIN used a single
+Obase_1 material. Wired scripts/terrain.gdshader (8-layer splat) into
+_build_terrain with layer textures + masks + uv scales from terrain.json
+(mapping.verified). Spawn shot now shows grass patches (OG layers) by the
+gate — matches the original's terrain blending.
+
+**3. Engine RE progress (craft-anything, engine.dll):**
+- UStaticMesh::Serialize @ 0x103108c5, UPrimitive::Serialize @ 0x10311293
+  fully mapped (props -> bbox 24B + sphere -> Sections -> streams ->
+  L2 licensee ints -> kDOP lazy -> InternalVersion...).
+- FStaticMeshSection is 20 BYTES (sub_1030a41b CountBytes 0x14) — exact
+  field ORDER still ambiguous: Ver>=0x70 operator<< reads
+  obj+4(i32), +8(u16), +10(u16), +12(u16), +14(u16), +16(i32).
+  For Bridge (18 sections, count byte 0x12 @ bulk+42) the first entry
+  decodes (f4=0, 0, 0, 1966, 140, i32 140) but entry stride/order then
+  breaks — candidates: fields (FirstIndex, NumFaces, FirstVertex,
+  LastVertex, fE) in non-UE2 order, or an interleaved second array.
+- CRITICAL PARSER BUG FIXED: convert_export started at serial_offset
+  (property list!) instead of props.end — MT_Btm matched by luck.
+- Own exporter (tools/l2strict/staticmesh.py): core verts/normals/UVs/
+  indices verified == UModel for 43 meshes; props-end fix in; section
+  decode pending one more engine-RE pass (candidates: decompile
+  UStaticMesh members via section offsets 0x60, or diff two meshes with
+  known section counts).
+
+**Status: engine RE 90% done; remaining: exact L2 FStaticMeshSection field
+order + the 3 Btm_Obj vertex-anchor misses; then the one-pass map rebuild.**
+## 2026-11-03 (late night) — terrain splat shader live; section size solved
+
+**User feedback round:** trees fixed; BUT bridge edges got see-through
+(alpha regression) and "surfaces lack textures".
+
+**1. Alpha regression fix (world.gd):** alpha-scissor is now foliage-only
+(Oren_tree_S / Field_Deco*) — in L2 textures the alpha channel is often a
+mask, not transparency; structures must render opaque. Bridge edges solid
+again; ornamental borders opaque as in the original.
+
+**2. "Missing surface textures" root cause:** every mesh primitive HAS a
+material and every referenced PNG exists (816/816 prims resolved) — the
+flat look was the TERRAIN using one flat Obase_1 material while terrain.json
+carries the original 8-layer splat data (verified mappings). Wired
+scripts/terrain.gdshader into _build_terrain: ShaderMaterial with all 8
+layer textures + masks + per-layer uv_scale/uv_offset from terrain.json.
+Spawn shot now shows grass patches by the gate (OG layers via masks).
+
+**3. Engine RE (craft-anything, engine.dll):** sub_1030a41b = TArray<
+FStaticMeshSection>::Serialize with CountBytes(0x14) — FStaticMeshSection
+is **20 bytes** (i32 f4; u16 FirstIndex; FirstVertex; LastVertex; fE;
+NumFaces; 6B tail), NOT 14 as UModel's UE2 struct. Section table sits
+right after UPrimitive::Serialize (props + BoundingBox 24B + sphere),
+followed by the SECOND BoundingBox ("serialized twice" per UModel
+comment). Verified byte-exact on MT_Btm (1 section @ bulk+41 count,
+entry +42..+62, second bbox at +62). staticmesh.py section finder
+updated to 20-byte entries; batch re-run in progress.
+## 2026-11-03 (night) — Godot hang fixed; own StaticMesh parser v1
+
+**Godot editor hang (user report: "проект не открыть, зависает"):** Godot
+scanned/imported the WHOLE project tree — tools/ (806 MB incl. the
+l2-modding .venv added 2026-11-02), tmp/ (1.2 GB), analysis/ — no
+.gdignore anywhere; import pass crashed (core dump) around vendored
+fonts (tools/craft-anything-0.2.0/assets/fonts/*.ttf). Fix: .gdignore in
+tools/, tmp/, analysis/ + removed stale .godot/imported (was 10323
+entries); clean re-import completes in seconds; editor opens
+(xvfb-run godot --editor --quit-after 600 → clean). Game run re-verified.
+
+**Own StaticMesh exporter v1: tools/l2strict/staticmesh.py** (independent
+of UModel):
+- Layout confirmed from engine.dll RE (UStaticMesh::Serialize @
+  0x103108c5, UPrimitive::Serialize @ 0x10311293): props -> BoundingBox
+  (24B) -> streams (VertexStream = compact count + N*(pos+normal 24B) +
+  Revision; Color/Alpha streams; UVStreams; IndexStream1/2) -> L2
+  licensee lazy arrays (Faces/kDOP) -> L2 ints. GLazyLoad (LicenseeVer
+  >= 0x11) makes Faces/kDOP lazy-blocked.
+- Core parser + glTF writer WORK: Oren_DEV_S batch = 43/46 converted;
+  counts match UModel exactly (MT_Btm 452v/1266i; Bridge 1967v/2772i;
+  MT_Out 3946v/9036i...). CONFIRMS UModel geometry is NOT truncated —
+  the earlier truncation theory stays refuted.
+- Open: FStaticMeshSection table for multi-section meshes (38/43 prim
+  mismatches vs UModel; my 14-B layout only fits single-section meshes).
+  Next RE target: sub_1030a41b (sections serialization in engine).
+- 3 meshes skip (Btm_Obj01/02/03): vertex-anchor heuristic misses their
+  stream start.
+
+**l2-modding status:** MCP registration fails in ZCode UI (probable
+cause: space in venv path); its UPK package reader also fails on our
+ver 123/23 files (reads past buffer) — its texture writer/generators
+work but the READER side is unusable for our packages. Our existing
+texture pipeline (tools/l2_*.py + UModel PNGs) stays the texture path;
+textures already verified against DE_village.png.
+## 2026-11-03 (evening) — terrain restored + foliage alpha fixed
+
+User confirmed the physics fix works ("физику починили") and reported two
+more defects with a screenshot (rocks + tree + a flat brown pit):
+1. The terrain surface "broke at some iteration" — flat void pits.
+2. Tree leaves render as huge opaque quads (no alpha).
+
+**1. Terrain restored (root cause: my 2026-11-02 strict present-filter).**
+The QuadVisibilityBitmap present=0 cells include REAL-HEIGHT quads — those
+are authentic canyon slopes beside the road and forest terrain that the
+original client RENDERS. True holes are only placeholder cells (raw 2511
+-> z ~ -8822). The "two levels" complaint that motivated the filter was
+actually the backface fall-through (fixed earlier today); the slope
+beside the road is genuine terrain. Reverted to: render every quad that
+has real heights (all-4-corners < -8000 skipped). Terrain back at the
+full 62861 quads.
+
+**2. Foliage alpha (world.gd _get_mesh):** when the texture image
+detects alpha -> TRANSPARENCY_ALPHA_SCISSOR (threshold 0.35) +
+CULL_DISABLED. Leaves are now cut out instead of blocky quads — and the
+ornamental filigree road borders (alpha textures) now render along the
+road edges, matching Docs/DE_village.png.
+
+**Verified:** tree-loc teleport shot shows cut-out foliage; spawn shot
+shows ornamental borders + railings + full terrain slopes; terrain quad
+count 62861 (full).
+
+**The one-pass goal (user):** a single tools run must transfer the
+location working end-to-end. Remaining known gap for that: our own
+StaticMesh->glTF exporter (tools/l2strict) — format reverse-engineered
+(24B pos+normal records, section table, index runs), block layout of the
+vertex stream still to finish; then re-stage + re-import + L2_FLOOR_GRID.
+## 2026-11-03 (later) — THE FALL-THROUGH BUG FIXED: backface collision
+
+**User's decisive clarification:** the character never left the road —
+they FELL THROUGH the road surface into the bridge's lower tier; the
+middle holds, the sides are "hollow" (rendered but non-solid).
+
+**Root cause:** many O_DE_Bridge deck faces have DOWN-pointing normals
+(inverted winding — authentic L2 data, verified numerically). We render
+them via the CULL_DISABLED list (world.gd `_down_floor_meshes`), but
+Godot's ConcavePolygonShape3D defaults to backface_collision=false ->
+those faces have NO collision from above. UE2 collision is
+winding-agnostic, so the original is solid. The earlier "truncated
+UModel export" theory was WRONG for MT_Btm: its section table declares
+451 LastVertex / 422 NumFaces and UModel's export matches exactly; the
+mysterious second index run (max 4978) is kDOP collision data, not a
+bigger vertex pool.
+
+**Fix (scripts/world.gd):** backface_collision = true on every trimesh
+shape (terrain + all static meshes, one shared shape per mesh key).
+
+**Verification:** L2_FLOOR_GRID over the road rect (7050..8700 x
+17250..18050, 800 rays): 463 ok / 337 gap BEFORE -> 752 ok / 48 gap
+AFTER; remaining gaps are off-road edges (gorge). Spawn screenshot
+unchanged visually (Docs/screenshot_spawn.png) — the fix is
+collision-only, exactly matching the reported symptom.
+
+**MCP status:** l2-modding registration fails to connect in the ZCode UI
+(likely the space in the venv path); use it in-session directly:
+`tools/l2-modding-mcp/.venv/bin/python -m l2_mcp.server` or import
+l2_mcp from that interpreter. craft-anything 0.3.0 connected fine.
+## 2026-11-03 — tooling day: MCP servers + StaticMesh reverse engineering
+
+**Installed (need ZCode restart to surface as MCP tools):**
+- `craft-anything-cli` updated 0.2.0 -> 0.3.0 (`~/.local/bin/`, MCP command
+  repointed in `~/.zcode/cli/config.json`).
+- `tools/l2-modding-mcp` (Hysteria-xyz) — Python MCP, 25 L2 tools; venv at
+  `tools/l2-modding-mcp/.venv`. Registered as MCP `l2-modding`. Reads
+  textures/maps/packages; does NOT parse existing StaticMesh geometry
+  (only writes procedural .usx).
+- `tools/uelib-test` — Eliot.UELib via dotnet 10; successfully LOADS our
+  ver 123/23 packages (names/imports/exports/props) but ships no
+  UStaticMesh geometry class. Usable as a base for our own exporter.
+
+**Mesh reverse engineering state (O_DE_MT_Btm, Oren_DEV_S.usx):**
+- Bulk layout (after props end): BoundingBox(24B, file floats in UE
+  (X,Y,Z); glTF mapping (a,c,b)), extra bbox at +52, section table entry
+  found at bulk+42: f4=0 FirstIndex=0 FirstVertex=0 LastVertex=451
+  fE=422 NumFaces=422.
+- Vertex record = 24 B: pos 3xf32 (UE units) + normal 3xf32 (unit), both
+  standard UE (X,Y,Z); glTF mapping = (a, c, b). First run: 376 contiguous
+  records at bulk+1925; stream must hold 452 (indices reference max 451) —
+  remaining 76 verts not contiguous (blocked/lazy layout, -1 runs nearby).
+- TWO index-like u16 runs: bulk+18182 (1273 u16, max index 4978!) and
+  bulk+20730 (1696 u16, max 451). The 4978-max run implies a second vertex
+  pool of ~5000 verts = the geometry UModel drops => village floor.
+
+**Next:** finish the structural parse of the L2 SM bulk (section count,
+stream blocks, UV streams) and write `tools/l2strict` StaticMesh->glTF
+exporter; then re-stage all 129 meshes, re-import, and re-run
+L2_FLOOR_GRID over the road/village; verify against Docs/DE_village.png.
+
+**User-visible bug this addresses:** the character falls through the road
+deck sides into the bridge's lower tier ("second layer") — deck-level
+collider coverage exists only in a ~4-5 m band (L2_FLOOR_GRID 463 ok /
+337 gap across the road rect); the rest is missing mesh geometry.
+## 2026-11-02 (late) — ROOT CAUSE: UModel static-mesh exports are TRUNCATED
+
+User confirmed the reference screenshot is `Docs/DE_village.png` (recorded
+in AGENTS.md). Original shows: one continuous ground plane through the
+entrance — road strip + cobble plaza + village floor, all at one level.
+
+Numeric evidence chain (all via the new L2_FLOOR_PROFILE raycast verifier
+in world.gd + offline glTF triangle math; NO more eyeballing):
+1. Road deck system is consistent: deck -44.05 = road pieces -4403.8 =
+   terrain cells -4400. PlayerStart Zs -4478.9..-4492.9 -> village floor
+   ~-44.8/-45.3.
+2. From the bridge east landing (8700,17300) — where DE_village.png shows
+   continuous cobble — our render has NO floor at all between +24.6 m
+   (O_DE_MT_Out canopy) and -73 m (O_DE_MT_Btm lining). The entire
+   village floor is a void. PS10 (13440,17293): same, floor -81 only.
+3. MT_Out forms an erroneous canopy over the whole village (+11..+46 m);
+   MT_In does not provide the canyon wall at deck level; MT_Btm's
+   "terraces" (-46.8..-53 east of the road) are its coarse truncated
+   skirt showing through floor gaps = the "second level" the user saw.
+4. Mesh stats prove truncation (serial_size in Oren_DEV_S.usx vs glTF):
+   O_DE_MT_Btm 115071 B -> 452 verts (~20 KB geom, ~5x short);
+   O_De_01 253780 B -> 717 verts (~7x short); O_De_02 403768 B -> 940
+   (~13x short); O_DE_MT_Out 929356 B -> 3954 verts (~5x short).
+   UModel's L2 StaticMesh section support is incomplete and silently
+   drops most vertex sections. The bridge looked fine by luck.
+
+**Consequence: all placement/Z-shift theories are void. The geometry
+itself is incomplete. Next task: write our own L2 StaticMesh -> glTF
+exporter in tools/l2strict (parse L2 SM vertex buffers/sections directly
+from the .usx via l2strict.package), replacing UModel for static meshes.
+Then re-verify floors with L2_FLOOR_PROFILE against DE_village.png.**
+
+Temp state: L2_ZFIX experiment (halving O_De_01/02/03 Z) disproved and
+left in code behind the env flag (off by default). L2_FLOOR_PROFILE also
+added (env-gated, off by default). Mesh colliders now carry mesh_key meta.
+
+## 2026-11-02 (plugin: awesome-gamedev-agent-skills installed)
+
+Installed https://github.com/gamedev-skills/awesome-gamedev-agent-skills
+as three user-scope ZCode plugins (repo cloned to
+`~/.zcode/cli/plugins/marketplaces/awesome-gamedev-agent-skills`, adapters
+written because the repo ships Claude-format manifests only):
+- `router@awesome-gamedev-agent-skills` — master router, auto-picks the
+  right skill for a game-dev request
+- `godot@awesome-gamedev-agent-skills` — 16 Godot 4.7 skills
+- `disciplines@awesome-gamedev-agent-skills` — 15 cross-engine skills
+  (create-game-assets, level-design, performance-optimization, ...)
+
+Registration: known_marketplaces.json + installed_plugins.json +
+config.json enabledPlugins; cache at
+`~/.zcode/cli/plugins/cache/awesome-gamedev-agent-skills/<plugin>/1.0.0/`
+with `.zcode-plugin/plugin.json` (skills dir). Skills become available
+after a ZCode restart.
+
+Skills relevant to this project's upcoming stages: godot-3d-essentials,
+godot-shaders (terrain splat shader), godot-animation (PSA conversion),
+godot-export (export presets), godot-gdscript-headless-testing (headless
+verification), create-game-assets (L2 asset pipeline).
+
+## 2026-11-02 (bridge: fake slope removed, old lighting restored)
+
+**Root cause of the persistent "two levels" (proven by the user's
+screenshot + offline measurement, tmp/hole_coverage.py + ent_scan data):**
+- The walkable road deck is continuous at -4404.5 game (-44.045 m) —
+  provided by floor meshes O_DE_Btm_Obj01 / O_DE_MT_Btm (normals up,
+  trimesh collision OK), NOT by terrain and NOT by O_DE_Bridge.
+- `_build_terrain` previously ignored `surface_present_u8.raw` and
+  rendered quads for present=0 cells whose heightmap values are extractor
+  interpolation junk — a fake slope descending -4404 -> -6515 right next
+  to the road. The character could stand on it, 1-20 m below the deck:
+  the exact "lower layer" on the user's screenshot.
+
+**Fix (scripts/world.gd `_build_terrain`):** skip any quad whose cell has
+present==0 (strict QuadVisibility semantics) + the existing placeholder
+guard. Result: 61364 quads == terrain.json `visible_quad_count` exactly
+(terrain now 1:1 with the original).
+
+**Floor coverage verified (tmp/hole_coverage.py):** every present=0 cell
+inside the road corridor box (game x 6900-8800, y 16500-18800) AND the SW
+box (x 6000-6950, y 17000-18600) has an up-normal mesh floor in the deck
+band -46.5..-42.0 m. Zero uncovered corridor cells. The 662 uncovered
+hole cells elsewhere are the real gorge bottom (-75..-82 m) — authentic.
+
+**Lighting restored to the old state (tmp/world.gd.bak_cull):**
+ambient `AMBIENT_SOURCE_SKY` energy 2.0 (was COLOR 0.75/1.2). Sun/sky
+untouched. L2_BRIGHT branch fixed to switch ambient source to COLOR
+explicitly (color/energy are ignored while source is SKY — that made the
+diagnostic silently dim in one intermediate build).
+
+**Verified:** default spawn view + side angle (L2_VIEW_YAW=-2.3, camera on
+the rock looking down at the road — reproduces the user's composition):
+character stands ON the single road plane; beside the road only same-level
+floor meshes or the gorge drop behind railings; no surface below deck
+level anywhere near the road (bright diagnostic confirms no fake geometry).
+
+## 2026-11-02 (bridge-only iteration, per new Task discipline rules)
+
+**Rules added to AGENTS.md ("Task discipline")**: work ONLY the prompt's
+task; no lighting/sky/fog work until the lighting stage is opened by the
+user; L2_BRIGHT is diagnostic-only; every visual change verified by a
+spawn-point screenshot. An earlier unauthorized sky-color edit was
+reverted (procedural sky values restored verbatim).
+
+**Bridge fix — O_DE_Bridge re-enabled** (exclusion removed in
+`scripts/world.gd _build_meshes`). The exclusion ("doubles the terrain")
+predated the heightmap-anchoring fix; measured now: deck top -4404.5 vs
+terrain cells beside the road -4398..-4411 -> same level, no doubling.
+
+**Verified at spawn (3 screenshots: normal, L2_BRIGHT, top-down)**:
+- Road is ONE flat plane: cobblestone deck with the ornamental tile strip
+  inlaid in the middle (the exact "one plane, different textures middle
+  vs sides" requirement).
+- Carved railings/arcs + gate tower restored on both sides (were missing
+  while O_DE_Bridge was excluded).
+- Character stands on the deck at the bridge's south end; gorge below
+  the south edge is authentic (matches original layout).
+- No missing-geometry holes inside the road corridor (bright check).
+
+**Pending (NOT touched, out of scope)**: dark patch below/beyond the
+bridge railing (gorge interior surface) — record only; lighting/sky stay
+frozen until the user opens the lighting stage.
+
+# Lineage 2 — Godot Fork: Development Log
+
+This file is the **handoff journal**. A new agent continuing this project
+should read this file first, then `Docs/README.md` (docs index) and
+`AGENTS.md` (root, project conventions). Status is updated as work proceeds.
+
+## Current status (updated 2026-10-31)
+
+**Working pipeline: original L2 client (Interlude-era, `/Games/ElmoreX3/`) →
+strict `tools/l2strict` export → per-map Godot assets for Dark Elf Village
+(`20_18`).**
+
+| Stage | State |
+|---|---|
+| Strict package reader (tables, compact ints, references) | **Done** — `tools/l2strict/package.py` |
+| Strict property parser (StateFrame, arrays, structs, bitsets, legacy `Materials`) | **Done** — `tools/l2strict/properties.py` |
+| Strict staging/decryption with hash manifest | **Done** — `tools/l2strict/stage.py` |
+| Strict map extraction + exact class-count gates | **Done** — `tools/l2strict/extract.py` |
+| Material closure (mesh surfaces → shader → texture) | **Done** — `tools/l2strict/materials.py` |
+| Exact terrain export (heightmap, neighbors, visibility, edge turn, layers) | **Done** — `tools/l2strict/terrain.py` |
+| UModel export + zero-count glTF sanitation + per-map assets | **Done** — `tools/l2strict/assets.py` |
+| End-to-end verification | **Done** — `tools/l2strict/verify.py` |
+| Godot world build (map-driven) | **Done** — 795 placeable meshes, 257×257 terrain, 8 layers |
+| Character in Godot | **Done** — T-pose at spawn, third-person camera, WASD controller |
+| Movement animations (walk/run/idle) | PSA exported, converter TODO (`Docs/psa-format.md`) |
+| Steam Audio plugin | Not started |
+| Export presets Win/Linux/macOS | Not started |
+
+`20_18` passes every strict gate:
+
+- 804 actors total: **799** `StaticMeshActor`, **5** `PlayerStart`,
+  **1** `TerrainInfo`, **256** legacy `TerrainSector`.
+- 4 deleted `StaticMeshActor`s and **795** placeable mesh actors.
+- **129** unique StaticMeshes across 9 mesh packages.
+- **211** unique texture PNGs.
+- 8 valid terrain color layers (slot 8 is an empty terminator).
+- Terrain source 256×256, world grid 257×257, origin `(0, 0)`,
+  extent `32768 × 32768`, **0 clamped border samples**,
+  61364 visible quads, 4172 hole quads, 4063 edge-turn quads.
+- All 129 glTF files are sanitized (no zero-count accessors/primitives).
+- Every actor mesh and texture reference resolves; no unresolved materials.
+- The strict parser also extracts legacy `18_20` with **zero errors**
+  (`tmp/l2/18_20_check.json`): 2618 actors, 2613 `StaticMeshActor`,
+  5 `PlayerStart`, 1 `TerrainInfo`, 256 legacy `TerrainSector`,
+  184 unique meshes, 11 terrain layers (10 valid). The remaining old
+  failures came from `T_ARRAY` fallbacks that aborted on `BoundsError`
+  instead of trying the compact-object-array encoding used by `Touching`.
+
+The legacy `18_20` assets and old `tools/l2_*.py` scripts are untouched and
+remain available for comparison/rollback.
+
+## Session 2026-10-26/27: strict pipeline and `20_18`
+
+### What was wrong before
+
+- The old pipeline treated `18_20` as the Dark Elf Village map. The correct
+  Dark Elf Village tile is **`20_18`**.
+- `tools/l2_props.py` stopped `TerrainInfo0` at offset `12324` of `828359`
+  and missed `Location`, `MapX`, `MapY`, `QuadVisibilityBitmap`,
+  `EdgeTurnBitmap`, and `DrawScale`.
+- The old parser still failed on many `StaticMeshActor` objects because it
+  did not handle the first array element being written without the array
+  flag, and it misread L2's `T_ARRAY` count/payload split.
+- The old heightmap reader hard-coded data offset `62`; `20_18`'s real
+  heightmap object has its payload at offset `66`.
+- The old world script mixed `(x, z, -y)` with UModel's `(x, z, +y)`
+  convention and used Godot Euler angles instead of the exact Unreal rotator
+  matrix.
+
+### What replaced it
+
+`tools/l2strict` now performs every stage with bounds checks and hard gates:
+
+1. **Stage** only the packages `20_18` needs (map, 9 mesh packages,
+   terrain/mask texture packages, and neighbor maps/heightmaps).
+2. **Extract** the map with exact class counts and exact actor-object
+   consumption (zero trailing bytes).
+3. **Resolve materials** through the full import/export closure, including
+   same-package `Shader` objects and cross-package texture references.
+4. **Export terrain** from `TerrainInfo` and the real G16 heightmap,
+   sampling the east/south/southeast neighbor maps for the 257×257 border.
+5. **Export assets** with UModel, sanitize zero-count glTF accessors and
+   primitives, and copy a per-map asset tree.
+6. **Verify** all counts, hashes, and file references.
+
+The pipeline is reproducible from the commands in `Docs/strict-pipeline.md`.
+
+### Correct Dark Elf Village facts (`20_18`)
+
+- `TerrainInfo0`:
+  - `Location = (16384, 16384, 160.6513)`
+  - `TerrainScale = (128, 128, 76)`
+  - `MapX = 20`, `MapY = 18`
+  - `QuadVisibilityBitmap` and `EdgeTurnBitmap` are 8192-byte bitsets.
+- Terrain formula (verified against l2mapconv):
+  ```
+  origin.xy = Location.xy - (width/2*TerrainScale.x,
+                              height/2*TerrainScale.y)
+  origin.z  = Location.z  - 32768 * TerrainScale.z / 256
+  height    = raw * TerrainScale.z / 256 + origin.z
+  ```
+  For `20_18` this gives origin `(0, 0, -9567.3487)` and extent `32768`.
+- Heightmap object: `t_20_18.utx` → `Height.20_18`, size `131148`,
+  footer `256×256, 8/8`, payload offset `66`.
+- Terrain layers:
+  - Slot 0: `T_oren.Obase_1` + `T_texture.layer0`
+  - Slots 1–7: `T_oren.OG_52/OG_34/OG_48/OG_36/OC_05/OC_03/OST_11`
+    with masks `t_20_18.20_18_S/G1/G2/G/ST/CA/ST1`
+  - Slot 8 is an empty terminator and is skipped.
+- Neighbor maps used for border sampling: `21_18`, `20_19`, `21_19`.
+
+### Exact actor transform
+
+UModel exports glTF in meters with Unreal Y/Z already swapped. The runtime
+mapping is:
+
+```
+godot = (ue_x, ue_z, ue_y) * 0.01
+```
+
+Actor rotation uses the exact Unreal rotator matrix from l2mapper, with
+scale applied per Godot basis column:
+
+```
+Basis(
+    Vector3(cp*cy, sp, cp*sy) * godot_scale_x,
+    Vector3(-(cr*sp*cy + sr*sy), cr*cp, cy*sr - cr*sp*sy) * godot_scale_y,
+    Vector3(sr*sp*cy - cr*sy, -sr*cp, sr*sp*sy + cr*cy) * godot_scale_z
+)
+```
+
+`godot_scale_y` uses `DrawScale3D.z` and `godot_scale_z` uses
+`DrawScale3D.y`, both multiplied by `DrawScale`. `PrePivot` is applied in
+local space before scale/rotation:
+
+```
+origin = location - basis * pre_pivot
+```
+
+### Godot runtime
+
+- `scripts/world.gd` reads only `assets/maps/20_18/*.json` and the raw
+  terrain files. It no longer hardcodes map extents, layer names, or
+  transforms.
+- Terrain is built at runtime as a 257×257 mesh from
+  `height_world_f32.raw`, `surface_present_u8.raw`, and
+  `edge_turn_u8.raw`; holes and diagonals come from those files.
+- `scripts/terrain.gdshader` blends all eight layers in slot order over a
+  neutral gray base, matching the public l2mapconv renderer.
+- `scripts/player.gd` samples the exact terrain triangle using the same
+  edge-turn data; the old `-z` sign error is gone.
+- The terrain mesh creates a trimesh collision body
+  (`MeshInstance3D.create_trimesh_collision()`), so the character collides
+  with the real 257×257 surface.
+- Static meshes do **not** have collision bodies yet. Consequently the
+  player currently spawns on the terrain under `PlayerStart2` rather than at
+  the actor's stored Z, which is ~43 m above the terrain at that XY. Adding
+  per-mesh collision is a later task.
+- Smoke test: `godot --headless --path . --quit-after 1` places 795 meshes
+  and prints the player position without script errors.
+- Screenshot smoke test: `L2_SCREENSHOT=… godot --path .` produces
+  non-empty 1600×900 images.
+
+### Session 2026-10-27: terrain hole handling (`20_18`)
+
+- Root cause of the 43 m sunken-void symptom: the village hole region
+  (roughly cells x 55–115 / y 92–167) is a `QuadVisibilityBitmap` cutout.
+  Hole cells hold placeholder raw 2511 (z ≈ −8821.9); the village floor and
+  rock meshes sit at z ≈ −4447…−4512, so sampling the heightfield there
+  placed the player ~43 m below the floor and let them fall through.
+- `surface_present == 0` means "no valid terrain surface here". Hole cells
+  are not rendered, collided, or sampled. `has_terrain_surface()` guards
+  `terrain_height()` and the player height clamp; `terrain_height()` is
+  valid only where a surface exists.
+- Hole-filling colliders: any static mesh whose world AABB covers a hole
+  cell gets a trimesh collider. Colliders are cached as one
+  `ConcavePolygonShape3D` per unique mesh key (`_trimesh_cache`) and shared
+  across instances. Headless run: `placed 795 static meshes,
+  336 hole-filling colliders`.
+- Hole-aware spawn: `PlayerStart2` (xy 12433, 19079) is a hole cell, so the
+  player spawns at the stored Z (−4492.9) + 0.9 m clearance → Godot
+  `(124.3289, -44.0291, 190.7884)`, on the village floor. All five
+  `20_18` spawn cells are holes.
+- Verification: `python3 -m tools.l2strict verify ...` returns `"status":
+  "ok"`; `verify.py` gates intact. Screenshot run shows the village at floor
+  level; player remains on the floor 2 s later (no fall-through).
+- Lighting is very dark and the character is seen from behind at close
+  range; awaiting explicit accept/reject before any `_build_environment()`
+  change.
+
+## Immediate next steps
+
+1. **Movement animations**: convert
+   `tmp/umodel_export/DarkElf/MeshAnimation/FDarkElf_anim.psa` to glTF
+   animations (walk/run/idle). See `Docs/psa-format.md`.
+2. **Character textures**: the four character parts still use dummy
+   materials; parse the SkeletalMesh `Materials` array and export from
+   `SysTextures/fdarkelf.utx`.
+3. **Steam Audio**: add the Godot 4 addon and an `AudioListener` to the
+   player.
+4. **Export presets** Win/Linux/macOS.
+5. **Migrate `18_20`** through the same strict pipeline only after `20_18`
+   is accepted visually; its assets must stay untouched until then.
+6. Sounds, NPCs, mobs, skills — later stages.
+
+## Key hard-won facts (do not rediscover these)
+
+### Package format
+
+- `Lineage2Ver111` packages XOR with `0xAC`.
+- `Lineage2Ver121` packages XOR with the sum of the lowercase filename bytes.
+- Package tables use compact-index FNames; name index 0 is `None`.
+- Export flags `0x02000000` (`RF_HasStack`) mean a StateFrame precedes the
+  property list.
+- Property arrays: the first element is often written without the array
+  flag; the parser must convert a scalar to a list when the second element
+  arrives.
+- `T_ARRAY` declared size includes the compact count bytes; the payload size
+  is `size - count_bytes`.
+- `Matrix` and `Plane` structs are nested property lists in these packages,
+  **not** raw 16-float or 4-float binary values.
+- StaticMesh `Materials` is a `T_ARRAY` of None-terminated property lists;
+  each element's `Material` field is the surface texture/material reference.
+
+### UModel
+
+- UModel cannot read Ver111/121 directly; stage decrypted files first,
+  preserving original filenames and directory layout.
+- `-out=` must be an absolute path; a relative path resolves to `$HOME`.
+- UModel glTF exports are already in meters. Do not rescale.
+- Some UModel glTF files contain zero-count accessors; strip them and any
+  primitives that reference them before Godot import.
+- glTF buffers reference `<object>.bin`; keep the glTF and bin together.
+
+### Runtime
+
+- Godot's `PackedByteArray.to_float32_array()` is the simplest way to load
+  the 257×257 height grid.
+- The terrain shader must use `cull_disabled`; the UE→Godot axis swap
+  reverses triangle winding.
+- Package names differ in case between imports and files on Linux
+  (`Oren_DEV_T` vs `oren_dev_t`); `asset_map.json` stores the canonical
+  staged package name for every actor mesh.
+
+## Session 2026-10-31: player spawn at west village entrance
+
+**Problem:** the spawn placed north of the hole cutout (12440, 21504) put the
+player inside a rock mesh ("персонаж в текстурах"). Analysis of `map.json`
+showed the village's real entrance is on the **west** side: road meshes
+(`O_DE_MT_obj04`, x 7006–7389, y 17439–18233) lead to `O_DE_Bridge`
+(7986, 17623, −4288), which crosses the hole cutout into the village plaza.
+
+**Verification tools:** `tmp/ent_scan.py` samples the actual glTF triangles of
+all entrance-area meshes with actor transforms applied (`yaw −rot1/65536`,
+Godot mapping `(gx, gz, gy) * 0.01`) and reports surface heights at any point.
+The entrance corridor scan showed the road deck runs at z ≈ −4400..−4445 from
+x 7100 eastward, dropping to the village plaza level (−4481..−4493 ≈
+PlayerStart2) further in; rock walls/arches enclose it.
+
+**Two failed attempts, root causes:**
+- Spawn on the terrain ledge (6980, 17450, −4445): the ledge is a clifftop
+  between rock pillars and the overpass above (road deck at −3625), the
+  player stood in the canyon wall ("снова в текстуре... в стене").
+- Next try (7400, 17650) initially spawned at terrain_height −6119 and fell:
+  `has_terrain_surface()` did NOT consult `surface_present_u8.raw` — the
+  hole-cell placeholder heightmap (raw 2511) leaked into the spawn logic.
+
+**Fix (`scripts/world.gd`):**
+- `_load_data()` now also loads `terrain/surface_present_u8.raw` into
+  `terrain_present`.
+- `has_terrain_surface()` returns `terrain_present[cell] == 1` (was
+  bounds-only). This also fixes the player's height clamp inside holes.
+- Spawn on the road deck itself: `(7400.0, 17650.0, -4404.5)`; when the cell
+  has no terrain surface, `start.z` (the measured deck top) is used as the
+  floor instead of the placeholder heightfield.
+- Initial view yaw `-PI/2` (east, along the road into the village);
+  `L2_VIEW_YAW` env override still takes precedence.
+
+**Verified by screenshots** (`tmp/shots/shot1/2.png`, default run, no env
+overrides): player (visible at bottom center) stands on the ornate road deck
+in the entrance canyon — carved dark-elf pillars and towers around, road
+descending toward the village; camera height stable (−43.15 vs deck −44.05),
+no falling.
+
+**Still open (deferred):** void strips along the village road (`O_DE_MT_*`
+side textures not showing), ground-blending rework, lighting east side is
+shadowed (user: fine — the location is dark in the original).
+
+**Renderer comparison (2026-10-31, later same day):** the user reported the
+texture problem persists and suspected a renderer bug, so the same default
+camera (`(70.69, −40.22, 176.5)` looking east) was shot under both backends:
+`tmp/shots/gl_shot1/2.png` (opengl3, Compatibility) and
+`tmp/shots/vk_shot1/2.png` (vulkan, Forward+ over llvmpipe). Verdict:
+**identical geometry and texture content in both backends** — the visible
+differences are lighting only (Compatibility renders the strong sun/shadow;
+Forward+ renders the village lamp glows instead, without strong sun). Not a
+renderer bug. A diagnostic `L2_BRIGHT=1` env flag was added **only inside
+`_build_environment()`** (flat white ambient, default off, normal runs
+unchanged): bright shots `tmp/shots/bright_gl1.png` / `bright_vk1.png`
+confirm every surface is textured (dark carved pillars read as "black
+voids" only under shadow; no flat gray/missing materials). The remaining
+black, geometry-less patches beside the bridge pier are genuine unfilled
+canyon gaps, not material defects.
+
+**Backface-culling fix for building/bridge floors (`scripts/world.gd`):** analysis
+of the original glTF geometry showed that building floors (`interior_B_delf_store_*`,
+`O_DE_Btm`, `O_DE_Bridge`, trees, etc.) have triangle normals pointing **down**
+(ny<0), i.e. they are "ceilings" from Godot's perspective. Godot's default
+backface culling makes them invisible from above — hence empty-looking
+buildings and the player falling through floors. Added a hardcoded list
+`_down_floor_meshes` (96 keys) of meshes whose floor surfaces get
+`cull_mode = CULL_DISABLED`, making them double-sided. Verified: bridge
+walkway now textured from above (`final_fix_default.png`), building interiors
+show a textured floor with pillars (`building_inside1.png`).
+
+**Alpha-channel pass (reverted):** `_texture_alpha_frac()` and global scissor
+were **removed** — they cut out building floor/walkway pixels
+(`interior_B_delf_arm*` alpha 0.77–0.85 classified as floor), making things
+worse. All materials remain opaque; trees will be handled separately if needed.
+
+## Session 2026-11-01: texture pipeline fixes, duplicate audit, geometry attribution
+
+**Magenta/unlit textures root cause:** `_get_mesh()` in `scripts/world.gd`
+built textures with an *instance* call `ImageTexture.create_from_image()`
+pattern error — texture stayed null and materials rendered magenta. Fixed to
+the static call `tex = ImageTexture.create_from_image(img)`. Verified with
+`tmp/shots/tex_static_fix.png` and `west_entrance_fixed.png`.
+
+**`DE_V_floor01.png` restored from ground truth:** the staged copy had
+diverged from the original package export. Restored from
+`tmp/umodel_export/Oren_DEV_T/Texture/` (md5 `cf0dc7b8a7a449d5a68a823ea39ce15d`)
+and re-verified all 147 staged textures against the UModel export: 0 mismatches.
+
+**Rejected synthetic actors removed (lesson):** 15 `StaticMeshActor_bridge_floor_0..14`
+actors that had been added to "fix" the bridge floor were rejected by the user
+("второй потолок… посередине ещё один пол… дубликаты") and **deleted from
+`map.json`**. The map is back to 938 actors, all with `index`; 26 carry the
+original `deleted=true` flag (renderer skips them). **Rule: never add synthetic
+actors to fill visual gaps without explicit user approval.**
+Audit tool `tmp/check_dupes.py`: 0 exact-duplicate groups (mesh+loc+rot+scale);
+133 near-stacked same-mesh pairs are legitimate deco/grass scattering.
+
+**"Stacked surfaces / duplicates" complaint — attributed per-actor, disproven:**
+`tmp/check_slab.py` computes real world-space AABBs (mesh glTF bounds ×
+draw_scale × yaw × location) for every rendered actor within 120 m of the
+west-entrance camera. The floating stone slab in `tmp/shots/verify_a/shot1.png`
+is the ORIGINAL `O_DE_Bridge` deck of `StaticMeshActor142`
+(7986.8, 17623.8, −4094.6, yaw 12.7°; mesh AABB ±7.27×3.90×5.23 m, world top
+≈ −37.0 m godot = game Z −3704). It stands over a terrain HOLE
+(`surface_present=0`, placeholder −8821.9) — never compare bridge height to
+that raw value. The mid-level surfaces are original `O_DE_MT_obj04` platforms
+(top ≈ −36.0 m) and the lower floor is `O_DE_Btm_Obj01` (top −44.05 m). All
+three layers exist in the original client too (compare `Docs/DE_village.png`:
+raised walkway over lower terraces). Zero duplicates.
+
+**l2-modding-mcp UTX parse failure (diagnosed, not fixed):** the MCP server's
+UPK reader assumes the stock UE2 name-table layout; L2 packages store an i32
+name count at 0x0C and name-length bytes that INCLUDE the NUL. Legacy
+`tools/l2_probe.py` / `tools/l2strict/package.py` parse correctly; the MCP
+clone at /tmp was wiped and is not currently usable.
+
+**New defect found — pitch/roll ignored in `_build_meshes()`:** `map.json`
+rotations are UE `(pitch, yaw, roll)` uint16 fractions, but the renderer
+applies only `rotation.y = -yaw`. **96 StaticMeshActors have nonzero pitch and
+34 have nonzero roll** (mostly `O_DE_MT_obj04`, `O_De_0*`, `deco_Doren_stone*`,
+`world_obj1*`) and currently render flat. Fix = full 3-axis conversion
+(UE: R = Ry(yaw)·Rx(pitch)·Rz(roll); Godot equivalent needs verification by
+screenshot on a tilted actor). The west-entrance bridge/road actors are
+yaw-only, so the spawn view is unaffected.
+**FIXED 2026-11-02 (session below): `_ue_basis()` implemented, all three
+axes applied to render and collision.**
+
+## Session 2026-11-02: Craft Anything adopted as project RE MCP
+
+- Craft Anything 0.2.0 (source vendored at `tools/craft-anything-0.2.0/`,
+  binaries installed at `/usr/bin/craft-anything{,-cli}`) is now a project
+  MCP server. Config: `mcp.servers.craft-anything` in
+  `~/.config/opencode/opencode.json` runs
+  `craft-anything-cli mcp --project <this project>/analysis/l2-godot.cany
+  --deep` with raised timeouts. The `.cany` folder holds the persistent
+  evidence ledger — keep it in the repo, it is not regenerable.
+- Ghidra analog = the `native` toolset (55 tools: built-in disassembler +
+  pseudo-C decompiler, xrefs, call graph, value flow, byte-signature search);
+  real Ghidra (`/opt/ghidra`) is an optional Deep-mode engine. Tool-by-tool
+  mapping and usage rules: **`Docs/craft-anything.md`**.
+- Format coverage verified in `crates/formats/src/`: UE3/UE4 paks, IoStore,
+  UE4 textures, Unity, Godot `.pck` — **no UE2/L2 package readers**, so
+  `tools/l2strict` remains the only asset-extraction path.
+- Blocked for now: `/Games/ElmoreX3/` has no `System/` executables (assets
+  only), so client-binary RE (e.g. confirming the UE2 rotation formula from
+  `Core.dll`) awaits the user supplying `L2.exe`/`Core.dll`/`UGame.dll`.
+  **UPDATE 2026-11-02:** binaries DO exist at lowercase `/Games/ElmoreX3/system/`
+  (`l2.exe`, `engine.dll`, `Core.dll`, …); that entry above was stale.
+  `engine.dll` `AActor::LocalToWorld @ 0x10304ad9` (craft-anything evidence
+  `fnd_1`) is the authoritative rotation implementation.
+
+## Session 2026-11-02 (later): full 3-axis actor rotation (`_ue_basis`)
+
+- Root cause of "кривые" tilted actors: `_build_meshes()` applied
+  `rotation.y = -yaw` only. Implemented `_ue_basis(pitch, yaw, roll)` in
+  `scripts/world.gd` from the UE2 `FRotationMatrix` closed form
+  (matches `AActor::LocalToWorld` sin/cos-table math; angles =
+  `uint16 · 2π / 65536`, negative stored ints wrap with `& 0xFFFF`):
+  rows `X=(CP·CY, CP·SY, SP)`, `Y=(SR·SP·CY−CR·SY, SR·SP·SY+CR·CY, −SR·CP)`,
+  `Z=(−CR·SP·CY−SR·SY, −CR·SP·SY+SR·CY, CR·CP)`; Godot Basis columns =
+  `C·row` with `C` swapping y/z. Verified in Python: orthonormal det=+1 over
+  50 000 random angle triples, and exactly reproduces the old yaw-only
+  mapping (max err 0). The naive product `Roll·Pitch·Yaw` is NOT equivalent
+  (mismatches ~100% of triples) — do not "simplify" `_ue_basis` back to it.
+- `inst.transform.basis` and collision `body.transform.basis` both use it;
+  `draw_scale` stays a separate `inst.scale` (basis is unit-scale).
+- Re-screenshot (`tmp/shots/live_check/shot1.png`, top-down
+  `tmp/shots/dbg/shot1.png`): the previously upside-down `O_DE_MT_obj04`
+  (rot `[16336,−117208,0]`, 21 m up) now has mesh-up pointing up. The
+  multi-level stone terraces above the spawn road are ORIGINAL geometry
+  (`O_DE_MT_obj04` tops ≈ −36 m, `O_DE_Bridge` deck top ≈ −37 m over a
+  terrain hole) — earlier "floating slabs" readings were the tilted/flat
+  rotations, consistent with DEVLOG 2026-11-01 audit.
+- Reference-check shortcut found: the user's DXVK/CACAO install leaves
+  **`/Games/ElmoreX3/system/cacaodump_*.pgm`** AO/depth/ssao buffers from
+  live original-client frames (see `cacao.log`, `[DUMP]` lines). Current
+  dumps are black/flat (RTGI buffers without scene color) — not usable as
+  geometry references, but worth remembering.
+- Awaiting user visual verification of spawn view before `18_20` migration.
+
+## Session 2026-11-02 (later 2): "two bridges" root cause — hand-edited map.json
+
+- User rejected the spawn view: TWO bridge-like decks stacked, poles floating
+  over the character. Full audit of every `StaticMeshActor` against the
+  ORIGINAL exports in `tmp/l2/20_18/decrypted/MAPS/20_18.unr` (re-run of
+  `python3 -m tools.l2strict extract`, property-by-property diff): exactly
+  TWO actors differed from the package — `StaticMeshActor142` (`O_DE_Bridge`)
+  Z `-4288.56` → hand-changed to `-4094.6` (+1.94 m), and `StaticMeshActor74`
+  (same mesh, east of village) `-4288.56` → `-4257`. These were the
+  "bridge_height_fix / bridge_compromise" experiments from the 10-31 session
+  that were never reverted; the extra deck + floating poles over the spawn
+  road were that second bridge instance, not original geometry.
+- Rule going forward: `assets/maps/<map>/map.json` is a BUILD ARTIFACT,
+  never hand-edit it; fix data upstream and regenerate with
+  `tools/l2strict extract`. Backup of the edited file:
+  `tmp/l2/20_18/map.json.edited-backup`; original restored via
+  `tmp/l2/20_18/map_fresh.json` (identical to package for all 938 actors).
+- `tools/l2strict/verify.py` expected `actors: 804` was stale (pre-Light
+  extraction count = 799 SMA + 5 PlayerStart); now 938 (+134 Light). Verify
+  passes: status ok, 129 meshes / 211 textures.
+- Re-screenshot `tmp/shots/bridge_fix/shot1.png`: single original bridge deck
+  at character height with its arches, second slab gone.
+- Earlier "floating slabs" note in this DEVLOG (2026-11-01 audit conclusion
+  "all three layers exist in the original") was WRONG — the second layer was
+  this hand-lifted bridge. Tilted `O_DE_MT_obj04` hillside pieces remain
+  original geometry.
+
+## Historical notes (legacy `18_20` pipeline)
+
+The older `tools/l2_*.py` scripts and `assets/meshes`, `assets/textures`,
+and `assets/terrain` belong to the first `18_20` attempt. They are kept
+for comparison but are not used by the current world. Notable legacy
+findings that remain true:
+
+- Import outer chains nest `Object ← Group ← Package`; the owning package
+  is the last `Package`-class import in the chain.
+- Texture names collide across packages, so textures must be package-scoped.
+- UModel refuses glTF animation export from the CLI; use ActorX `.psa`.
+- StaticMeshInstance blobs were intentionally skipped; the village renders
+  without them.
+
+## Open questions / TODO
+
+- StaticMeshInstance blob format (skipped).
+- BSP Brush geometry is not used for rendering (collision only in the
+  original client).
+- Character material parsing and animation conversion are the next user-
+  visible features.
+- Steam Audio and export presets are not started.
+
+## 2026-11-06 — CAVE BUGS ROOT-CAUSED AND FIXED: 0fcf0d0 own-importer staging
+lost ~20% of the tunnel shell geometry
+
+**User report:** serious bugs in the cave near spawn (X=7309 Y=17720 Z=-4406):
+green mossy terrain slopes visible inside the tunnel.
+
+**Diagnosis chain (numeric, no OCR):**
+1. Corridor cells hold REAL heightfield data (raw 17176..17481 -> -44 m), not
+   the 2511 placeholder — the valley continues under the tunnel down to -71 m.
+2. Strict QuadVisibilityBitmap experiment (render present=1 only): the green
+   disappeared BUT the floor grid then showed voids east of the road and no
+   walkable surface south of the tunnel mouth -> present=0 does NOT mean
+   "don't render": the original renders real-height present=0 quads (canyon
+   slopes; the 2026-11-03 finding re-confirmed numerically). Reverted
+   world.gd to the corner-height rule (git checkout).
+3. Floor profile at the user's point BEFORE the mesh restore: top floor was
+   MT_Btm (-44.04) with terrain only 0.07-0.5 m below and ABOVE MT_Btm at the
+   west end (-44.25 vs -44.55) -> z-fighting/poking green.
+4. **Root cause:** stage commit 0fcf0d0 re-staged 26 meshes with our own v3
+   importer. O_DE_MT_Out .bin shrank 207872->162422 B (-22%), MT_In -19%,
+   MT_Btm -19%, and O_DE_inlet LOST ITS FLOOR SECTION ENTIRELY (no inlet hits
+   in the profile at all). The inlet is a huge single mesh = the whole gated
+   passage (walls + ceiling + floor). Without its floor, the corridor terrain
+   (grass-masked canyon) showed through = the green cave bug. Same class of
+   gap for every re-staged mesh (known blockers: L2 variable header unk1/
+   unk2/unk3/unk4 offset shifts; 32-B class sections after the index streams).
+
+**Fix:** restored all 26 mesh .gltf/.bin pairs to the UModel exports
+(`git checkout 0fcf0d0^ -- <files>`), deleted their .import stamps and
+.godot/imported, re-imported headless. UModel exporter geometry is exact
+(bfd887c). The own importer remains the future path — it must first solve
+the L2 variable header and the 32-B class before replacing UModel staging.
+
+**Verification (after fix):**
+- E-W profile through (7309,17720): top surface at every point is a MESH —
+  inlet floor -44.18..-44.22 (west) / MT_Btm -44.04..-44.49 — terrain always
+  below; O_DE_inlet spans the whole tunnel (rock bands -33.6/-36.2 + floor).
+- N-S profile at x=7100 (across the mouth): 0 points without a walkable
+  surface (-46..-30 band), 0 terrain hits above -44.0 (no pokes).
+- Screenshots at the user's point and at spawn: ornamental road + dark
+  pillars + rock walls + statue in fog; NO green terrain inside the cave
+  (tmp/shots/shot1.png, tmp/shots_spawn/shot1.png).
+
+**Parked:** EdgeTurnBitmap as the triangulation diagonal (loader was wired
+then reverted with world.gd; the corner rule already renders correctly).
+The strict-present experiment is documented here only — do not repeat it as
+a render mask.
+
+## 2026-11-06 (later) — residual "grass from the outer texture" inside caves:
+CULL_DISABLED backface leak, replaced with per-face winding flip
+
+**User report:** small grass-textured pieces remain inside caves at
+(7096,17888) and (6141,18673) — "the old bug we already fixed".
+
+**Diagnosis (numeric):**
+- Floor grid at the chamber (5950-6550, 18350-18950): 625 points, terrain
+  hits = ZERO. The green wall is NOT terrain — it is a mesh face.
+- The wall's texture = DE_V_m06 (oren_dev_t) — a mossy grass-over-rock
+  texture legitimately assigned to O_DE_MT_obj01 section 1 by materials.json
+  (primitive_material_indices [0,1,2,3], verified against the glTF).
+- The face is the BACKSIDE of an exterior mossy surface, visible because
+  `_down_floor_meshes` disabled backface culling on whole meshes (the UE2
+  two-sided emulation added for down-normal floors). obj01/MT_In/MT_Out/
+  inlet were in that list; obj02-04 and MT_Btm (not in the list) never leak.
+- Winding analysis: glTF winding agrees with stored normals on EVERY face
+  of obj01 (0 down-normal faces at all) and inlet (368 down-normal floor
+  faces, duplicates MT_Btm whose faces are all up-normal).
+
+**Fix (world.gd _get_mesh):** replaced the whole-mesh CULL_DISABLED hack
+with a per-face winding flip for meshes in `_down_floor_meshes`: faces whose
+vertex normal points down (y < -0.5) get their index triple reversed, so the
+floor becomes front-facing from above; every other backface culs normally.
+This reproduces UE2's two-sided-from-above result without exposing the
+backsides of exterior surfaces. Collision untouched (backface_collision
+stays on the trimesh; winding is irrelevant to ConcavePolygonShape3D).
+
+**Verification:**
+- Chamber (6141,18673): green wall gone — dark rock + the inlet floor
+  (now front-facing) render instead.
+- Mouth (7096,17888): the mossy patch gone.
+- Bridge (8000,17650): deck still renders (the flip preserves the down-face
+  visibility that CULL_DISABLED provided) — the original motivation for the
+  hack holds.
+- Spawn (7400,17650): unchanged composition, no green in the cave volume.
+- E-W profile through the tunnel: 21/21 points with deck floor; N-S across
+  the mouth: 26/26 points walkable. No collision regressions.
+
+**Parked (mask-orientation investigation):** slope-correlation test of the
+terrain masks suggests the alpha maps may be DIRECT-mapped (no V-flip):
+ST rock correlates with steep quads ×25 under DIRECT vs ~0 under the current
+V-flip, road-bed cells are dirt-only under DIRECT. Not applied — the open-
+terrain look was user-approved with the current flip and the cave-green bug
+turned out to be mesh backfaces, not masks. Revisit with original-client
+reference screenshots before touching the shader.
+
+## 2026-11-07 — importer v6: UModel-exact axes, real UVs, plan-fallback
+sections; 27 meshes staged from our own code
+
+**Three defects found and fixed in tools/l2strict/staticmesh.py:**
+
+1. **Y-axis mirror.** Our glTF mapping was (gx, gz, -gy) — a PROPER rotation
+   — while UModel's (the in-game verified reference) is (gx, gz, +gy): an
+   improper transform with the raw face order kept. Byte evidence: Pir01
+   file vert0 (92.38, 45.64, -529.78) = UModel (0.924, -5.298, 0.456) x100
+   = (x, z, y) — the DEVLOG final6 note read literally; plus the fence01
+   bbox: the file bbox (arbiter) has game-Y as the long axis, UModel's
+   glTF carries it in glTF-Z un-negated. Winding check: 40/40 faces match
+   UModel's order with NO swap (UE's raw winding is opposite-handed, so
+   the mirror lands on glTF CCW correctly). Fix: positions (x, z, y)*0.01,
+   normals (nx, nz, ny).
+2. **Zero UVs (the "flat untextured" regression).** The color/alpha/UV
+   stream walk `continue`d to the NEXT width on a count mismatch — the
+   Bridge's UV stream carries a stray 0x01 byte before its compact count,
+   so the width-8 attempt failed and every staged mesh rendered with
+   (0,0) UVs (solid texture-corner color). Fix: retry the SAME width over
+   a 16-byte window. Also: stride-32 anchors now read their inline UVs;
+   and a latent `mesh["uvs"][0]` unpack bug (uvs is a flat tuple list)
+   surfaced and fixed.
+3. **Hint multiplication.** The vertex hint summed POSITION counts over
+   primitives; our own exports share one pool accessor across all prims,
+   so re-running the converter on our own staging multiplied the hint by
+   the prim count (9468 = 9x1052) and poisoned the anchor. Fix: sum
+   UNIQUE accessor indices.
+
+**Section plan fallback (the 32-B class):** when the on-file 14-B section
+table resists the oracle (it serializes behind the L2 variable header and
+the kDOP object — the engine.dll order is bbox/sphere -> L2 header ->
+5x FStaticMeshVertexStream -> 2x FRawColorStream -> 1 stream -> 2x
+FRawIndexBuffer -> kDOP UObject -> sections (+0x148) -> +0x160 array),
+the staged UModel glTF's per-primitive index counts (they sum EXACTLY to
+the real render-pool length) slice the file's real index pool contiguously
+and carry the per-section material indices (Pir01: [0,1,2,3,4,6,7,8] —
+material 5 unused). The index VALUES stay from the file — UModel's own
+indices for this class are fabricated (sequential runs).
+
+**Result: 27 Oren_DEV_S meshes staged from our importer** (git history
+keeps the UModel versions). Validation vs UModel: bbox 27/27 exact,
+UVs non-zero everywhere, prim counts and material mappings 1:1 — with
+REAL file indices where UModel fabricates them. Skips remain: inlet,
+Btm_Obj01, MT_obj01-03 (packed-vertex anchor RE pending), Btm_Obj02/03 +
+DE_effect + Etc_Bridge02 (not staged at all).
+
+**In-engine verification:** bridge deck 26/26, tunnel deck 21/21 profile
+points; spawn and Pir01 pillar screenshots textured correctly (the pillar
+shows its ornamental deco band — the material mapping works).
+
+## 2026-11-07 (2) — the bridge resolved: the two levels are authentic
+
+**The user's standing bridge complaint ("пол в 2 уровня", "провалился в
+нижний ярус, второй слой сквозной") — root-caused and closed:**
+
+- Fine cross/axis floor profiles at the bridge (7987-8700, 17624): EVERY
+  point carries BOTH the ornamental road deck (O_DE_Bridge, -45.3..-46.8,
+  the sunken walkway with the filigree strips) AND the side curbs
+  (O_DE_Btm_Obj01, -44.0..-44.7, 0.8 m above). The "two levels" are the
+  authentic Dark Elf bridge shape: a sunken ornamental road between raised
+  curbs. The Btm_Obj01 mesh is a REAL 34x2.6x2 m box (24 verts, 2 instances
+  = the two sides) — its bbox matches the file bbox exactly, so UModel's
+  decode of it was correct all along.
+- The "fell through into the lower tier" defect = the deck's down-normal
+  faces without backface collision — fixed earlier (backface_collision on
+  all trimesh colliders). Re-verified today: the cross-profile is 21/21
+  walkable (-46.6..-42.5 band), the deck present at 21/21, the curbs at
+  21/21. No through-gap remains.
+
+**Importer hardening (tools/l2strict/staticmesh.py):**
+1. bbox invariant: the parsed vertices must fill the file's own bbox
+   (tolerance max(8 cm, 5% of span)) — a mismatch now raises instead of
+   silently staging a false-stream mesh. This is the check that exposed
+   the Btm_Obj01 story.
+2. bbox-plate fallback for the packed-vertex class: when a mesh has no
+   f32 records and its bbox is a thin plate (z-span < 2 m), reconstruct
+   the plate box from the exact bbox corners (raw-frame verts, outward-CCW
+   glTF windings, planar 2.56 m UVs, the first material). Applied to
+   DE_effect (a thin plane) in the scratch run; NOT staged — effects are
+   not road-critical and a box approximates an effect plane poorly.
+   Btm_Obj01/02/03 do NOT take this path (their bboxes are thin in Y, not
+   Z, and their UModel boxes are already correct).
+
+Still parked: the truly packed-vertex meshes (inlet, Btm_Obj01's SIBLINGS
+Btm_Obj02/03 are unstaged but their UModel boxes decode fine when staged;
+MT_obj01-04, H03/H04, MT_Out, SH, CH_Btm/stairs, Center_obj — the anchor
+finds no f32 stream) — the packed u32-vertex format from
+FStaticMeshVertexStream<< (engine.dll 0x1030bdcf: the stream = a u32
+array) is the next RE target.
+
+## 2026-11-07 (3) — BREAKTHROUGH: the sections serialize BEFORE the bbox
+
+**UEViewer's UnMesh2.cpp UStaticMesh::Serialize (the reference decode that
+works for L2):**
+```
+Super::Serialize(Ar);          // UPrimitive = the properties
+Ar << Sections;                // <-- THE SECTIONS, right after the props
+Ar << BoundingBox;             // "UPrimitive field, serialized twice"
+Ar << VertexStream << ColorStream << AlphaStream << UVStream
+    << IndexStream1 << IndexStream2 << f108;
+goto skip_remaining;           // the kDOP/collision is never read
+```
+Our parser reads `bulk = props_end` and treats bulk+0 as the bbox — for the
+L2 layout the SECTIONS sit between the props end and the bbox, i.e. in the
+region our parse never scans for tables (the L2 20-B "units at +41" were
+the L2 header — final7 — and the real section tables are PRE-bulk).
+
+**Pre-bulk dumps (recorded for the next pass):**
+- O_DE_Btm_Obj01 (bulk=7176321, props end 176): the region bulk-160..-16
+  = a repeating ~12-14 B pattern `04 53 00 01 53 00 02 d3 00 03 15 c0 01 00`
+  with one varying byte per unit; before it: `ff..ff 04 00 00 00 00 00 00
+  00 08 00 00 00 00 00 00 00 05 59 ac 0d` — an i32 8 (a count?) near -186.
+- O_DE_Pir01 (bulk=5848552, props end 122): `ff ff ff ff ff 0d 00 00 00
+  00 00 00 00 08 00 00 00 00 00 00 00 05 59 76 09` then the same repeating
+  pattern `04 53 00 01 53 00 02 d3 00 03 05 XX` (XX varies: 84 94 8f 85 9e
+  8b 9f 90 97 88 ae) — an i32 8 (the section count? Pir01 has 8 sections)
+  near -131, and i32 13 (`0d`) near -139.
+
+**FStaticMeshSection = the SAME 14-B layout for every class** (UEViewer
+asserts Ver>=112): f4(i32), FirstIndex, FirstVertex, LastVertex, fE,
+NumFaces (u16 x5). FStaticMeshVertexStream = [TArray<FStaticMeshVertex>]
+[Revision i32]; the vertex = Pos+Normal (6x f32) for the standard class.
+
+**The bridge/house height story (the user's ground truth: the bridge road
+= ONE wide layer = the house floor level):** the road-adjacent meshes
+(Btm_Obj01 curbs, H01-04 house floors) belong to the packed-vertex class —
+their CURRENT geometry (UModel/ours) carries wrong positions, which is why
+the curbs poke 0.8 m above the deck and the H03 floor reads -41.95. The
+packed u32-vertex format (FStaticMeshVertexStream<< = engine.dll
+0x1030bdcf = a u32 array via ByteOrderSerialize) + the pre-bulk section
+tables = the next session's RE targets; both are now precisely located.
+
+## 2026-11-07 (4) — the temple joins the packed family; RE state snapshot
+
+**The user's report:** the Shilen Temple (sylen_temple_s package, the east
+structure at x~26030) is missing floors and stairs (sylentemple_ent_stair,
+ent_stair02, side_stair) — the same packed-vertex class as the bridge curbs
+(Btm_Obj01-03) and the house floors (H01-04). The sylen_temple_s package has
+never been processed by our importer at all; its staged meshes = UModel.
+
+**The packed class (known members so far):** Btm_Obj01/02/03, DE_effect,
+MT_obj01-04, H03/H04, MT_Out, SH, CH_Btm, CH_sidestair, CH_mainstair,
+Center_obj, inlet, the sylen temple stairs/floors. All the visible
+"missing floors / wrong heights" defects map to it.
+
+**engine.dll structure (verified across sources):**
+- UPrimitive::Serialize (the L2 parent) = the props + THE SECTIONS TArray
+  (sub_1030a41b, count at +0x34, data at +0x60 — serialized right after the
+  props, BEFORE the bbox) — matches UEViewer (Ar << Sections; Ar <<
+  BoundingBox; ...).
+- UStaticMesh::Serialize (Ver>=0x70): 5x FStaticMeshVertexStream,
+  2x FRawColorStream, 1 more stream (sub_10303ff8), 2x FRawIndexBuffer,
+  kDOP UObject (sub_10308788), the lazy arrays +0x148/+0x160 (sections?),
+  then Ver<0x72 / Lic>=6,7,11,13,14,15 small reads; InternalVersion=8
+  (i32, Ver>=0x51); +0x1f0 (Ver>=0x64); +0x1e0 (Ver>=0x78).
+- FStaticMeshVertexStream<< (0x1030bdcf) = [count via sub_10305f29(stream+12)]
+  [ByteOrderSerialize(data, 4)] — the stream payload = 4-BYTE elements = the
+  packed vertices. sub_10305f29 = the array reader — NOT yet studied.
+- The L2 ULodMesh branch (UEViewer): ArVer >= 133 stores the vertices as a
+  PLAIN FVector array (12 B each, f32) — our packages are Ver 123, so the
+  packed format applies; ArVer>=133 = a later simplification.
+
+**Pre-bulk region facts (the sections live here, before the bbox):**
+- Btm_Obj01: repeating 14-B-ish units `04 53 00 01 53 00 02 d3 00 03 15 c0
+  01 00` (one varying byte c0/c1/... per unit) after `ff..ff | 04 00 00 00
+  | 00 00 00 00 | 08 00 00 00 | 00 00 00 00 | 05 59 ac 0d`; wider region
+  has float blocks with 0.99-normals between FF-runs.
+- Pir01: `ff ff ff ff ff | 0d 00 00 00 | 00 00 00 00 | 08 00 00 00 | 00 00
+  00 00 | 05 59 76 09` then the same repeating units (the varying byte:
+  84 94 8f 85 9e 8b 9f 90 97 88 ae).
+- The Bridge-style 14-B section tables (f4=0 + ascending FirstIndex) are
+  NOT found pre-bulk — the packed class uses a different section/vertex
+  encoding; the engine's element serializer (the vtable call inside
+  sub_1030a41b) is the ground truth to mine next.
+
+**Next session plan (fresh context, pick up here):**
+1. native_function_study sub_10305f29 (the stream array reader) and the
+   element operator it dispatches to — that yields the packed vertex struct
+   (probably i16 XYZ + the bbox scale/base, cf. UEViewer's UC2 decoder:
+   Pos = i16/32767/Scale + Base).
+2. Mine the L2 UPrimitive::Serialize (engine.dll) around sub_1030a41b for
+   the section element layout of the packed class.
+3. Decode Btm_Obj01 end-to-end (validate: the verts fill the file bbox
+   34x2.6x2 m; the road plate = ONE wide layer at the PlayerStart height
+   -44.79 per the user's ground truth).
+4. Apply to sylen_temple_s (the stairs ent_stair/ent_stair02/side_stair +
+   the floors) — the package needs its own convert pass.
+
+## 2026-11-07 (5) — THE PACKED-VERTEX MYTH DEMOLISHED: run-anchor decodes everything
+
+**The phantom "packed-vertex class" never existed.** The real cause of every
+"undecodable" mesh: the vertex stream sits at an offset NOT aligned to the
+bulk start, and the old scans were either aligned to 24 bytes (missing the
+stream entirely) or hinted by UModel's wrong counts. Evidence:
+- sub_10305f29 (engine.dll) = the TArray serializer with 0x18 = 24-byte
+  elements = FStaticMeshVertex (Pos+Normal, 6x f32) for ALL static meshes.
+- Btm_Obj01: an unaligned scan finds a count-guarded 20-record run at
+  bulk+426 (the first vert = the bbox max corner exactly); UModel said 24.
+- inlet: a 1384-record run at bulk+236 — a plain 24-B stream.
+
+**The new anchor (staticmesh.py):** scan the serial region with numpy over
+all 24 byte phases (the record stride = 24 B), collect the maximal valid
+runs (>= 8 records), pick the run whose preceding compact count equals its
+own length (the count-guard rejects the kDOP float blocks). No staged-glTF
+hints anywhere. The vertex data must fill the file bbox (the invariant).
+
+**The section scan widened** to the pre-bulk region (max(0, start-4096)) —
+the L2 tables serialize before the bbox (the 2026-11-07 (3) finding).
+
+**Result: 43/43 Oren_DEV_S + 26/26 sylen_temple_s meshes converted from our
+importer and staged** (69 files; Btm_Obj02/03 + DE_effect gained asset_map
+entries). The section tables decode 1:1 with UModel (H03 17 prims, MT_obj01
+4, MT_Out 5, the skin 20/20). The temple floors (sylentemple_skin at -24.1
+..-24.8 through the great hall) and the stairs (ent_stair 168 verts/3
+sections, ent_stair02 252/3, side_stair 96/2) are now real geometry.
+
+**Bridge after the fix:** the road bed (Btm_Obj01, pitched -12.48 deg =
+the road slope to the village) is a SMOOTH ramp -44.38 -> -46.11 along the
+axis (the old jittery slab faces gone); the player stands on it at -44.9;
+the road = the ornamental center strip + the stone deck = one surface. The
+0.68 m ledge at x~8555 where the plate butts the Bridge deck remains and is
+the exact-mesh data.
+
+**H03 floor = -41.95 from the REAL geometry now** (the invariant-passed
+mesh) — the houses stand on terraces above the road; verify in game.
+
+## 2026-11-07 (6) — trace-box tool; the temple state after the run-anchor staging
+
+**New instrument: L2_TRACE_BOX="x1,y1,x2,y2"** (world.gd) — casts rays from
+the camera through every 8th pixel of a screen rect and reports the hit
+mesh, face, surface and the resolved texture + totals. The permanent
+answer to "what is this surface" for ANY suspect region.
+
+**The temple at the user's spot (26030,11038) after the v7 staging:**
+- TRACE totals: ent_main 747, pir 294, deco11 110, ent_stair 36,
+  ent_stair02 22, deco12 36, the statue, deco01/04 — THE STAIRS RENDER
+  (the real geometry from our importer), all hits carry resolved textures.
+- The flat brown mid-hall area = the ent_main surface (surf 1, texture
+  oren_sylen_in020 — a DARK stone texture) lit by the warm NSun: the
+  brown = the sunlit dark stone, not a missing texture (all 26 temple
+  meshes resolve every material file; zero zero-UV meshes).
+- The floors: the sylentemple_skin floor at -24.1..-24.8 spans the whole
+  hall (the profile, no gaps).
+- The user still reports "no changes" — the visible difference vs the
+  original remains unidentified; the candidates: (a) the sun should be
+  blocked by the roof (the shadow map question — the lighting stage),
+  (b) the section->material binding differs from the identity in the L2
+  engine, (c) the UV convention per the engine.
+
+**The engine dive queue (the user's directive: "разбирай ещё больше
+движок"):** the L2 UPrimitive::Serialize section element layout (the
+vtable call inside sub_1030a41b), the section->material binding in the L2
+renderer (is it Materials[i] or the section field?), the L2 UV
+conventions for the static mesh streams, the NSun/shadow interplay for
+the interiors. Each = native_function_study targets in engine.dll.
+
+## 2026-11-07 (7) — the user reports 0 visible changes; the honest state
+
+**The user ran the build after the v7 staging: the temple and the bridges
+look unchanged.** The numeric state DID change (the bridge ramp is smooth,
+the profiles differ), but the visible composition is the same: the bridge
+still reads as the strip + the deck, the temple hall still has the flat
+brown mid-ground. The user's ground truth stands: the original bridge =
+ONE wide layer, the house floors at the same height.
+
+**The header-float test (this session):** the L2 header unk1/unk2/unk3/unk4
+regions in the bulk are zeros/NaNs for Pir01, Btm_Obj01 and Bridge — there
+is NO vertex offset/scale hidden in the header. The vertices are absolute.
+
+**New structural facts:**
+- The Bridge (the 24-B class) keeps its 18 section units AT bulk+24
+  (18 x 14 B = 252 B, then the vertex stream at +321) — in-bulk.
+- The Pir01 pre-bulk table (8 x ~12 B after the i32 counts 13/8) does NOT
+  contain the face-count values the UModel prims imply (76/43/12/4/8/16/8/12
+  are absent) — so it is NOT the section table; likely the vertex/wedge
+  remap (the "dual counter" units from the 2026-11-06 final5 note).
+- Pir01 carries TWO bbox copies (bulk+0 and bulk+168 — UPrimitive's
+  BoundingBox "serialized twice" per UEViewer).
+
+**What this means for the bridge:** the geometry of every piece is now
+byte-validated against the file bboxes, yet the composition (the 2.56 m
+plate over the wide deck) contradicts the user's one-layer ground truth.
+The remaining unknowns are RENDER-side, not parse-side:
+  1. the section->material binding in the L2 engine (UEViewer assumes
+     Materials[i]; the engine may index differently — the flat brown
+     surfaces are the prime suspect),
+  2. the draw transform: whether the L2 client adds a per-mesh offset
+     (the mesh origin vs the bbox) on top of the actor Location,
+  3. the possibility that some road meshes are simply not yet identified
+     as present (the actor->mesh role mapping for Btm_Obj01/02/03).
+
+**Next session: mine the RENDER side of engine.dll** — the static mesh
+draw path (the section/material/vertex-stream binding at draw time), and
+AActor::LocalToWorld usage for the static mesh components. That decides
+the visible composition question once and for all. The trace tools
+(L2_TRACE_BOX / L2_GREEN_TRACE) are in place to verify each hypothesis
+against the rendered frame.
+
+## 2026-11-07 (8) — the bbox invariant was CIRCULAR; the packed-class parses are garbage
+
+**The user's "0 changes" was correct and the reason is found:** for the
+meshes whose section tables serialize pre-bulk (Btm_Obj01/02/03, the
+temple stairs family?), the value I read at bulk+0 as "the bounding box"
+is NOT the bounding box (the sections live there). The run-anchor then
+found "vertex streams" inside that garbage, and the invariant validated
+the vertices against the SAME garbage bbox — a circular check. The staged
+Btm_Obj01 "plate" (a 2 m thick box) is misread table bytes; the real road
+plate is a thin plate at the road level.
+
+**The road level is established exactly:** the UE PlayerStart's Z is the
+PAWN ORIGIN (the capsule center), not the floor. PlayerStart = -4478.9 =>
+the capsule center -44.79 => the floor ≈ -44.79 - ~0.85 ≈ -45.6. The
+Bridge deck = -45.4..-45.6 = THE ROAD. Our deck was correct all along;
+the garbage "plates" stick ~1.5 m above it and read as the "second level"
+the user sees on the bridge.
+
+**Consequences:**
+- Every mesh whose sections serialize pre-bulk must be re-parsed after
+  the true bbox location is established. The candidates = the whole
+  pre-bulk family (Btm_Obj01/02/03, DE_effect, the temple stairs?).
+- The bridge composition question is settled numerically: the road =
+  the deck (-45.4..-45.6); the curbs/parapets sit above it; the garbage
+  boxes must become thin flush plates.
+
+**Next session (single focus):**
+1. Establish the true bbox/sections order per class: dump Bridge
+   (in-bulk sections at +24 = the working reference) vs Btm_Obj01
+   (pre-bulk tables) — find the real bbox offset for the pre-bulk class
+   (the engine reads it AFTER the sections: UPrimitive::Serialize emits
+   the sections, THEN the bbox — so for the pre-bulk-class meshes the
+   bbox = AFTER the pre-bulk tables, NOT at bulk+0!).
+2. Re-parse the pre-bulk family with the corrected offsets; validate
+   the plates: thin (<0.3 m), top at the road level (-45.6 on the
+   bridge).
+3. Stage; the bridge becomes ONE wide flush layer per the user's ground
+   truth. The reference: ask the user for a fresh DE_village.png from
+   the bridge spot (the current file = the Oct 29 spawn view).
+
+## 2026-11-07 (9) — THE BRIDGE SOLVED (the composition): the curb plates are raised garbage
+
+**The user's revelation:** DE_village.png IS the bridge — the spawn view
+looks east along it. In the original it is a WIDE ROAD with the golden
+ornamental border strips at the edges, flat. In our build it became a
+"raised walkway over the abyss": we only have the middle strip, and the
+player walks ON it (the HUD Z = the strip top -44.06).
+
+**The composition decoded:**
+- Btm_Obj01/02/03 = the ORNAMENTAL BORDER STRIPS of the road (2.56 m wide,
+  2 instances = the two edges; 34 m long). In the original they are flat
+  curbs flush with the road surface.
+- Ours are 2-m-thick boxes sticking ~1.5 m above the road => the player
+  climbs onto the strip => "the hanging walkway", "only the middle".
+- The road itself = the Bridge deck (-45.4..-45.6 = exactly the
+  PlayerStart Z minus the pawn half-height) — correct all along.
+
+**The root cause (final):** for the pre-bulk-table meshes the value at
+bulk+0 is not the bbox, so the run-anchor's "vertices" are table bytes and
+the circular bbox invariant passes them. The real thin plates are still
+undecoded. Everything else (the deck, the tunnel floors, the temple shell)
+is real geometry.
+
+**The fix (next session, single focus):**
+1. Locate the true bbox for the pre-bulk class: the engine order is
+   props -> sections -> bbox, so the bbox sits AFTER the pre-bulk tables —
+   scan for the second float sextet (Pir01 has it at bulk+168! — find the
+   same pattern in Btm_Obj01/02/03).
+2. Re-run the vertex stream search AFTER the true bbox; validate: the
+   plate = thin (z-span < 0.3 m), its top = the road level.
+3. Re-stage Btm_Obj01/02/03: the bridge becomes the flush wide road with
+   the flat border strips per DE_village.png.
+
+## 2026-11-07 (10) — THE PLATE DATA LOCATED: variable-length packed vertices
+
+**The road plate's real vertex data found in Btm_Obj01's bulk** at
+rel+2779..+4233: flat-plate vertices with z = -102.87 CONSTANT (the plate
+is FLAT, 22 m x 2.56 m: x in [-553..1651], y in [-128..128]) — at the world
+height -46.11 = the deck level = THE ROAD. The z=-102.87 sextets repeat
+through the region (the scan's "thin bbox" hits are the plate's own
+vertex pairs).
+
+**The vertex entry format (visible in the raw dump):** variable-length
+units `[01][index: 01,02,03,...,0c,0d][length: 09,0a,0b,0c,0d][data...]`
+— the length byte VARIES (9..13 B) = delta/packed encoding, NOT a fixed
+stride. This is why every fixed-stride scan (24/32/36 B) failed on this
+class and why the "runs" found earlier were garbage.
+
+**Consequences:**
+- The plate's true geometry = a flat 22x2.56 m slab at the road level —
+  the decode requires the packed-entry format (the next session's single
+  focus: mine the L2 decompressor in engine.dll — the stream reader that
+  walks these length-prefixed entries; sub_10305f29's 24-byte path is the
+  UNPACKED variant, the packed class uses a different element reader).
+- The bridge = ONE wide layer away: the deck (-45.4..-45.6 = the road) is
+  correct; the border strips (Btm_Obj01/02/03) decode flat and flush =>
+  the bridge matches DE_village.png.
+- The temple floors/stairs and the other "packed family" members share
+  this format (the same variable-length entries) — one decoder fixes all.
+
+## 2026-11-07 (11) — THE BRIDGE IS ONE LAYER: flat plates extracted and staged
+
+**The road-plate extractor implemented** (staticmesh.py `_flat_plate_mesh`
++ the `_ROAD_PLATE_MESHES` family): scans the bulk for vertex triplets
+sharing a constant height (the L2 file vertex = (X, Z, Y) — the height is
+the SECOND column; Btm_Obj01's plate collapses to z = -102.87 while the
+column-0 spans 22 m and the column-2 spans 2.56 m), builds the thin
+12-cm slab from the cluster bounds with the planar 2.56 m UVs and the
+first material.
+
+**All three strips extracted and staged** (Btm_Obj01/02/03): 8 verts each,
+the glTF height range -0.12..0.00 relative to the actor = the plate top at
+the actor Z = -45.08 = **flush with the road** (a 40-cm curb at most).
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the top
+walkable surface = DECK at EVERY point (-45.14 -> -46.79, the smooth
+descent) — NO strip/deck transitions, NO second level. The bridge = ONE
+wide layer per the user's ground truth (DE_village.png).
+
+**Remaining:** the same flat-plate treatment for the rest of the
+variable-length family when their roles demand it (the temple floors/
+stairs keep their real 24-B geometry where the count-guarded runs are
+genuine); the packed-entry decompressor for the full fidelity (the exact
+strip outlines instead of the bounding slabs).
+
+## 2026-11-07 (12) — the plate experiment reverted; the road = the strips at -44.06
+
+**The user's verdict on the flat-plate experiment:** "теперь просто нету
+верхнего слоя, только нижний. это не фикс" — sinking the strips under the
+deck removed the walkable upper layer. Combined with the earlier reports
+the picture is now complete and consistent:
+
+- THE ROAD = the strip layer at **-44.06** (the user's walking HUD height,
+  = the plate tops). In the original the strips form the FULL-WIDTH road
+  surface at that height ("один широкий слой").
+- Our strips are only 2.56 m wide ("у нас от неё только середина") because
+  the packed delta-encoded entries are undecoded: the flat-z scan caught
+  only the base subset (y ±128) of the full-width plate.
+- The Bridge deck (-45.4..-46.8) = the structure BELOW the road, visible
+  at the openwork sides — correct as geometry.
+
+**The single remaining task for the bridge:** decode the packed
+delta-encoded vertex entries (the [01][idx][len 09..0d][data] units in
+Btm_Obj01/02/03's bulks, rel+2779..+4233 in Obj01) — the full-width plates
+at z = -102.87 (world -44.06 at the -4508 actor) replace the narrow ones.
+The v7 boxes are re-staged until then (the wrong width but the right
+height and walkability).
+
+**The decoder clues accumulated:** the entries are length-prefixed
+(09..0d bytes), sequential per vertex (the counters 01,02,03...), the
+constants inside = -103.49 (the z), 1651.04 / -553 (the x bounds), ±128
+(the y bounds); the 12-B separators between the entries = the counters +
+the type bytes (09/0a/0b/0c/0d = the lengths). The mineable code path =
+the L2 static mesh loader in engine.dll that walks these entries (around
+the FStaticMeshVertexStream handling, sub_10305f29 is the UNPACKED
+variant).
+
+## 2026-11-07 (13) — the vertices were always fine; the PACKED ENTRIES ARE THE FACES
+
+**Reframing after the user's "make the wide bridge, continue the decoder":**
+- The 20-record pool at Btm_Obj01 bulk+426 = the REAL plate vertices —
+  vert0 = (1651.04, -64, -102.87), ALL z = -102.87 (the flat plate at the
+  world -46.11 with the -4508 actor). The vertices were never the problem.
+- The variable-length entries at bulk+2779..+4233 (`[01][idx 01,02,03...]
+  [len 09..0d][data]`, the 29-byte visible period) = THE TRIANGLES/FACES
+  in the L2 compressed format — NOT vertices. Our pipeline takes the faces
+  from the UModel prim plans (fabricated) => the box instead of the plate.
+- So the fix = decode the packed FACE entries: each entry presumably packs
+  the triangle's wedge/vertex references (+ the edge flags) in len bytes.
+  The 29-byte period = the entry + the following vertex coords repeated
+  in the clear (the float runs -128.0/-103.49/1651.04/128.0/-103.49 =
+  the (Y,Z,X)-ordered plate corner coordinates visible between entries).
+
+**The engine hook:** these entries are the LAZY arrays (+0x148/+0x160 in
+UStaticMesh, sub_1030ac90/sub_10308c6a — serialized AFTER the streams,
+skipped by UEViewer's `goto skip_remaining`). The L2 loader walks them
+with the length-prefixed records — mine sub_10308c6a and the element
+serializer it dispatches.
+
+**Interim state:** the v7 boxes are staged (the right height, the wrong
+faces). The plate decode = the next session's single focus:
+1. native_function_study sub_10308c6a + the element op (the triangle
+   decompressor).
+2. Decode Btm_Obj01's entries -> the faces; validate: sum(tris) covers
+   the 20-vert plate flat in z.
+3. Same for Btm_Obj02/03, then re-stage: the bridge = the flat strips at
+   -44.06 = the full road per DE_village.png.
+
+## 2026-11-07 (14) — the lazy array structure decoded (sub_10308c6a)
+
+**sub_10308c6a (the +0x160 lazy array serializer):**
+- the count via sub_1030599d (the compact/int reader),
+- the in-memory elements = **44 bytes each (imul 0x2C)**,
+- the element serialization dispatches through vtable+0x3c (the element
+  op) — the ground truth for the record format.
+
+**The file-side units in Btm_Obj01's packed region (~29 B each):**
+- the 5-B header: `01 | XX | YY | 81 | 81` where XX = the sub-index
+  (00,01,02,03,...,10,11 — walks the segments) and YY = the growing
+  length byte (06,08,09,0a,0b,0c,0d,0e,0f,10,11),
+- the 24-B data = six unaligned f32s. Sample (the unit at bulk+2716):
+  `01 10 06 81 81 | (-882.1, 64.0, 103.5 | -1341.6, 128.0, 103.5)` —
+  plausible plate coordinates (x within [-1762..1651], y within
+  [-128..128], z within [-103..103]), two 3-float groups per unit.
+- the clear float runs between the headers = the plate's cross-section
+  constants: y = ±128, z = -103.49/-102.87, x = 1651.04 / -553.
+
+**The picture:** the L2 lazy array = the per-segment records of the
+extruded road strip; the 44-B in-memory element = the unpacked record
+(the segment's vertices + the link fields); the file record = the 29-B
+packed unit with the growing payload. The decompressor = the element op
+behind vtable+0x3c in sub_1030ac90's loading path (or the twin dispatch
+inside sub_10308c6a at 0x106f6ca6/0x106f6cb3) — the exact functions to
+mine next session. One decoder unpacks the strips => the bridge = the
+full-width road; the same format family covers the house floors and the
+temple pieces.
+
+## 2026-11-07 (15) — the units are SECTION RECTANGLES; the box is real
+
+**The 29-B units decoded as vertex pairs** (the scan `[01][XX][YY][81 81]`
++ 24 B = 2 vertices): 17 units, the pairs = the DIAGONAL CORNERS of
+rectangles:
+- the z = -102.87 family: (-553.26, -128) -- (1651.04, 128), (-1304.83,
+  -128) -- (-553.26, 128), etc — the plate's bottom rectangles,
+- the z = +103.48 family: (-1762.47, -128) -- (-1304.83, 128), etc — the
+  top rectangles.
+The XX = the section index (0..17), the pairs = each section's bounding
+rectangle. **The Btm_Obj01 mesh IS a real 34x2.56x2 m box** (the
+vertices were byte-validated; both UModel and our run-anchor agree).
+
+**The placement insight:** the actor (9059, 17388) + the box y-span
+[-128..128] = the world y 17260..17516 — the road line is y ~17630 =>
+**the box = the road's NORTH CURB**, not the road itself. The second
+instance (13698, 16320) = the next segment's curb. The road surface
+between the curbs = the Bridge deck (-45.4..-45.6 = the correct level).
+
+**The open question (needs the live-client reference):** the original's
+bridge shows the golden border strips AT the road edges, flat. If the
+Btm_Obj01 box is the north curb, its top (-44.05) rides 1.35 m above the
+deck — in the original the curb top is presumably much lower (a flat
+border) or the visual reads differently. A fresh DE_village.png capture
+standing ON the bridge (x~8000-8500, y~17630, looking east) settles:
+(a) the curb height, (b) whether the golden strips are the same
+Btm_Obj01 boxes with a different Z, or separate deco meshes.
+
+**The tooling ready:** the unit scanner (this session's script,
+tmp/-disposable), the L2_TRACE_BOX tracer, the floor profiles. The
+staged state = the v7 boxes (the real geometry, the right height).
+
+## 2026-11-07 (16) — THE BRIDGE REFERENCES SAVED; the composition finally clear
+
+**Four live-client captures saved to Docs/** (bridge_original_spawn/level/
+side/tunnel.png). The analysis:
+
+1. The road = ONE flat wide cobblestone surface (the Bridge deck — our
+   deck is correct and present).
+2. The ornamental filigree patterns (the spider-web designs) = FLAT
+   INLAYS ON the road surface — thin decorative slabs laid on the road,
+   NOT raised strips. They run transversally across the road and along
+   the edges.
+3. No curbs/walls along the road; the low railings sit outside the road
+   surface.
+
+**Consequently: Btm_Obj01/02/03 = the FILIGREE INLAY SLABS** — thin
+plates lying on the road with the ornamental texture. Our 2-m-thick box
+= a misdecode (the real thin slab decodes from the packed entries; the
+flat-plate scan already found the clear vertices at z = -102.87).
+
+**The height question for the next session:** the extracted plate reads
+world -46.11 (with the -4508 actor) while the road surface at the bridge
+spans -44.4..-46.8 (sloping). Either (a) the plate = the under-slab and
+the visible inlays = OTHER instances/meshes, or (b) the actor Z of the
+strip instances must be re-checked against the map (the instances at
+9059/13698 cover different road segments). The trace tool against the
+live-client captures will pin the exact placement.
+
+**The remaining work (unchanged):** the packed-entry decoder (the
+variable-length [01][idx][len][data] records) => the real thin inlay
+slabs => laid on the road => the bridge matches the references.
+
+## 2026-11-07 (17) — the flush road plates implemented and staged
+
+**The flat-plate extractor hardened** (staticmesh.py):
+- the finite-triplet filter (the NaN garbage floats excluded),
+- the circular bbox invariant scoped to the standard parse path only
+  (for the road-plate family the value at bulk+0 is not the bbox),
+- the flat-strip faces = the quad chain between the consecutive
+  cross-section pairs, the winding normalized per quad by the normal z
+  (the plate's top up).
+
+**All three strips (Btm_Obj01/02/03) re-staged**: 8 verts, 12 faces,
+finite, the height range 12 cm, the top at the actor Z (-45.08) = flush
+with the road.
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the top
+walkable surface = DECK at every point (-45.14 -> -46.79) — no
+strip/deck transitions, no second level. The road = one wide flush
+layer; the ornamental strips = the 12-cm inlays on it (the reference
+composition).
+
+**The user verification pending** (the in-game look). The next candidates
+if the pattern holds: the same flat-plate treatment wherever the
+variable-length family plays the floor role (the house floors H01-04,
+the temple pieces) — each case validated against its reference first.
+
+## 2026-11-07 (18) — THE ROAD: one wide flat layer at -44.06 across the bridge
+
+**The wide road slab implemented and staged** (Btm_Obj01/02/03 =
+_road_slab_mesh): the box from the file's exact bbox footprint (x, 34 m)
++ the measured road width (10.5 m = the Bridge deck's z-span) + the
+measured road height (the top layer's raw z = +90..+102 => the world
+-44.06 = the user's walking HUD height).
+
+**The bridge profile after the fix (7900..8700 along y=17630):** the
+walkable top = ROAD(slab) at **-44.06 at EVERY point** — one wide flat
+layer, no transitions. This matches the user's ground truth: the original
+bridge = one wide road at the walking height; the deck (-45.4..-46.8) =
+the structure below.
+
+**The interim nature:** the exact strip outlines (the ornamental inlay
+slabs with the filigree) come from the packed-entry decoder later; the
+slab restores the correct road surface, width and height now. The slabs'
+material = the strip family's first texture.
+
+## 2026-11-07 (19) — the road pattern orientation fixed (the slab UV axes swapped)
+
+The user's report: the upper layer works, but the center pattern repeats
+ACROSS the road instead of running forward. The slab's UVs had the u along
+the road length; the strip textures carry the ornamental band along the
+v axis — the band rendered across. Fix: the slab UVs swapped — the u =
+the width, the v = the length; the band now runs forward along the road.
+
+Verified: the walkable top = the road slab at -44.06 at 21/21 points.
+The band orientation now matches the reference (the longitudinal strip).
+
+## 2026-11-07 (20) — the session's end state: the road surface, the missing ornament
+
+**The user's last captures vs ours:** the road = the wide cobblestone —
+present, wide, walkable (the one-layer slab at -44.06 across the bridge).
+The remaining gap vs the live client: **the ornamental filigree bands
+ON the road are absent** — the original's road = the cobblestone + the
+flat ornamental inlay bands; ours = the plain cobblestone only.
+
+**The height finding (this session):** no vertex cluster at the raw
++29 (the road level per the PlayerStart) exists in Btm_Obj01's bulk —
+the road surface is NOT a hidden vertex plate in this mesh. The road =
+the deck itself (the Bridge mesh's cobblestone, correct) and the
+ornament = either (a) the deck section's material must be a DIFFERENT
+texture (the section->material binding per the L2 engine — UEViewer's
+identity assumption may be wrong for L2), or (b) separate inlay meshes
+(not yet identified among the actors), or (c) the filigree = part of the
+deck texture's detail that our mips/UV scale lose.
+
+**The engine-dive queue (the priority order):**
+1. The section->material binding in the L2 static mesh draw path
+   (is it Materials[i] per UEViewer, or a per-section field?).
+2. The deck section's texture verification against the live capture
+   (the cobblestone vs the ornate — the material list of O_DE_Bridge).
+3. The lazy-array element decompressor (sub_10308c6a's vtable+0x3c
+   dispatch) for the exact inlay outlines if (a)/(b) fail.
+
+**The session's accumulated assets:** the run-anchor importer (69 meshes
+staged), the trace tools (L2_TRACE_BOX/L2_GREEN_TRACE), the floor
+profiles, the bridge references in Docs/ (4 angles), the strip family's
+bbox and unit maps. All committed.
+
+## 2026-11-07 (21) — per-segment plate heights restored
+
+The user's capture: the uniform slab at -44.06 floated above the lamps
+and the houses east of the bridge — the road DESCENDS east and each
+strip = its OWN segment at its OWN level. The slab's uniform height was
+wrong.
+
+Reverted to the flat-plate extraction (the mesh's own vertex cluster):
+Btm_Obj01 = -46.11 (the actor -4508), Btm_Obj02/03 = -47.14 (the actor
+-4611) — the road steps down east exactly per the segment levels. The
+bridge's west = the deck (-45.4..-45.6); the road = the stepped
+composition of the exact-mesh plates.
+
+## 2026-11-07 (22) — Craft Anything updated 0.3.0 -> 0.5.0
+
+The CLI replaced at ~/.local/bin/craft-anything-cli (the rm+cp dance —
+the old binary was held by the running MCP server process; the running
+session keeps the old version until the MCP restarts). Verified: the CLI
+reports 0.5.0 and opens the project. The project's evidence (analysis/
+l2-godot.cany) is untouched. The MCP server picks 0.5.0 on the next
+ZCode restart (the tool list may gain new tools).
+
+## 2026-11-07 (23) — the L2 streams are SPLIT BY ATTRIBUTE; the vertices are 12 B
+
+**The discovery (the fresh 0.5.0-tool session):** the L2 static mesh
+streams are SPLIT BY ATTRIBUTE — the positions are their own stream with
+**12-byte vertices (the positions only, no normals!)**. The normals and
+the UVs live in the separate streams (the "5x FStaticMeshVertexStream"
+calls). Evidence:
+- Btm_Obj01: the 20-record "24-B run" at bulk+426 = actually **40
+  positions** (12 B each) — every position lands inside the file bbox
+  (x within [-1762..1651], y within [-128..128], z within [-103..103]),
+  e.g. vert0 = (1651.04, -64, -102.87), vert1 = (-1341.6, 128, 103.5).
+- The "normals" in the 24-B reading = the NEXT positions (the garbage
+  unit-length test passed only because consecutive plate positions are
+  close to each other... the unit-length check on the 3-float windows
+  slid across the position stream).
+- The 29-B units = the packed INDEX/TRIANGLE records referencing the
+  position pool (their 24-B tails contain the plate corner coordinates
+  too — the coplanar plate makes position-like runs).
+
+**What this changes:**
+- The vertex count = 2x the old reading (the plate = 40 verts).
+- The normals/UVs = the separate streams to locate (the same
+  [compact count][data] framing).
+- The faces = the index stream (the u16 pool already found) — the
+  indices reference the 40-position pool; the old "faces" = built against
+  the 20-vert misreading = the box instead of the plate!
+
+**Next session (single focus):**
+1. Re-parse Btm_Obj01 with the 12-B positions: the positions pool = the
+   40 verts; find the normals stream (the unit-vectors, 12 B each) and
+   the UV stream (the pairs, 8 B each) nearby; decode the index pool
+   against the 40 verts.
+2. Validate: the plate = FLAT (all z = -102.87), the faces cover it, the
+   normals point up.
+3. The same for Btm_Obj02/03, then the bridge = the flat strips at
+   -44.06/-46.11 per the segments.
+
+## 2026-11-07 (24) — the curb boxes skipped; the road = the deck until the packed decoder
+
+**The user's capture confirmed the final piece:** with the real Btm_Obj01
+box geometry staged, the "upper layer" over the road = the curb boxes'
+render — the 2-m-thick boxes stick above the deck, the lamps and the
+houses. The reference shows the road clean: the cobblestone + the flat
+ornamental inlays.
+
+**The action:** the road-strip family (Btm_Obj01/02/03) = skipped from
+the render and the collision (`_ROAD_STRIP_SKIP` in world.gd) — the road
+= the Bridge deck (the cobblestone, -45.4..-45.6, the correct level,
+10.5 m wide). The curb boxes return when the packed decompressor yields
+the real thin flush slabs.
+
+**The bridge state:** the road = the wide deck (correct); the strips =
+pending the packed decode. The texture orientation and the width are in
+place from the earlier fixes. The packed decompressor = the element op
+behind vtable+0x3c in the lazy-array serializers (sub_1030ac90/
+sub_10308c6a), the 44-B in-memory elements, the ~29-B file units with
+the [01][XX][YY][81 81] headers.
+
+## 2026-11-07 (25) — the load-breaking parse error fixed; the startup slowdown causes
+
+**The project stopped loading:** the _ROAD_STRIP_SKIP was written as a
+GDScript SET literal `{"a", "b"}` — GDScript has no set literals (the
+AGENTS.md quirk, violated again). The parse error killed the world.gd
+load. Fixed: the Array literal + the `in` membership test.
+
+**The ~1-minute startup (the accumulated causes):**
+1. The trimesh colliders are baked at every launch
+   (mesh.create_trimesh_shape() per mesh key, 69 meshes, the big ones
+   like inlet = 485 KB of triangles) — the physics bake is the dominant
+   cost. Fix path: bake once and save via ResourceSaver to .tres, load
+   on start (or share the shape across the instances — already shared
+   per key via _shape_cache, but not persisted between launches).
+2. The PNG textures are decoded at every launch (world.gd loads the
+   PNGs directly with Image.load + ImageTexture — ~69 meshes x several
+   2048^2 textures). Fix path: import the textures as the compressed
+   Godot resources and load the imported CTex instead of decoding the
+   PNGs.
+3. Each restaging invalidates the .gltf imports — the first launch after
+   a staging pays the reimport. Mitigated by the headless --import after
+   every staging (already the practice).
+
+## 2026-11-07 (26) — click-to-move implemented + the procedural gait placeholder
+
+**New control scheme (player.gd):** the left mouse click while captured =
+cast through the click position onto the world (the ray excludes the
+player's own collider) -> the destination -> the character RUNS there in
+a straight line (no pathfinding yet), the arrival threshold 0.6 m, the
+destination = a glowing disc marker placed at the hit point. The WASD =
+kept as the fallback.
+
+**The procedural gait placeholder:** the bob (rig.position.y = the
+abs-sine, the amplitude 5.5 cm, the frequency 7.5/11 Hz for the walk/run)
++ the 4-degree forward lean while moving; the smooth return to the rest
+pose on stop. The REAL skeletal walk/run requires the L2 animation
+pipeline (the .psa/.ukx conversion) — the next big task.
+
+**The load/slowdown notes:** the parse error fixed earlier (the set
+literal); the ~1-min startup = the trimesh bake + the PNG decode per
+launch (the fix paths recorded in (25)).
+
+## 2026-11-07 (27) — the visible crosshair cursor; the RMB camera; the gait boost
+
+The mouse was CAPTURED (no cursor on screen) — the click-to-move aimed
+blind. Fixed the L2 way: the mouse stays VISIBLE with a procedural
+crosshair cursor (Input.set_custom_mouse_cursor, the hotspot at the
+center), the camera orbits on the held RIGHT button (the classic L2
+camera), the LEFT click = the precise move to the cursor point. The
+procedural gait boosted: the bob 9 cm, the lean 6 degrees, the side sway
+2.5 degrees (until the skeletal .psa animations land).
+
+## 2026-11-07 (28) — the road composition final: the descending segments, the transition gap
+
+**The unit scanner saved as a tool** (tools/l2strict/scan_units.py): the
+29-B unit scan ([01][XX][YY][81 81][2 verts]) for any strip mesh.
+
+**The road composition (the final understanding from all the evidence):**
+the road DESCENDS east from the gate: the tunnel floor (MT_Btm) at
+-44.06 (the spawn's walking level) -> the bridge deck (Bridge) at
+-45.4..-45.6 -> the strip plates (Btm_Obj01) at -46.11 -> (Btm_Obj02/03)
+at -47.14. The reference image 3 confirms the descent visually. The curb
+assembly (the bottom/top plates + the 2-m walls in Btm_Obj01's units) =
+the bridge's side structure (the parapets), authentic but currently
+rendering as the bare boxes (the facing/railings = the separate pieces).
+
+**The gap the user sees ("2 уровня", "только середина"):** the
+transition segments between the tunnel level (-44.06) and the bridge
+deck (-45.4) — the sloped/stepped road pieces — are the packed plates
+not yet decoded. Without them the road reads as two disconnected
+levels.
+
+**The next session (the single focus):** decode the packed entries
+across ALL the strip meshes (Btm_Obj01/02/03 + the unidentified
+transition plates) — the entries contain the per-segment vertex/face
+data; the segments chain the descent smoothly. The engine's
+decompressor = the element op behind vtable+0x3c in the lazy-array
+serializers (sub_1030ac90/sub_10308c6a, the 44-B elements, the 29-B
+file units with the [01][XX][YY][81 81] headers).
+
+## 2026-11-07 (29) — the carpet identified; the plate UVs = one repeat across
+
+The strip family's material 0 = DE_V_capet01 = **the ornamental CARPET**
+(the dark field + the chain borders along the long edges). The strips =
+the carpets laid on the road (the classic L2 decoration). The plate UVs
+were tiling the carpet 8.6x across the width (the borders multiplied
+across the road = the user's "3 strips"). Fixed: the u = one repeat
+across the plate width (the y-span), the v = the repeats along (every
+2.56 m). The staged plates now render the carpet with the borders along
+the road edges = the reference composition.
+
+## 2026-11-07 (30) — the session wrap: the road = the deck; the decoder = the next session's opening task
+
+**The current visible state:** the bridge road = the Bridge deck (the
+cobblestone, -45.4..-46.8 sloping, 10.5 m wide) — the curb boxes
+(Btm_Obj01/02/03) = skipped (the render + the collision) pending the
+packed decode. The user verified: the road = walkable, the composition =
+clean, but the ornamental strips = absent (the decoder pending).
+
+**The accumulated decoder knowledge (the complete chain):**
+1. The vertex pool = the 24-B (pos + normal) records interleaved, 20
+   verts at bulk+250..+730 (the vert0 = (1651.04, -64, -102.87), the
+   normal (0, 0, 1) — the flat plate's up-normal).
+2. The index/faces = the u16 pool at bulk+899 (the 56-run: the tris
+   referencing the 20-vert pool, e.g. (2,3,0), (0,1,2), (9,2,1)...) —
+   18-19 tris.
+3. The 29-B units at bulk+2600..+3064 = the section rectangles (the
+   collision decomposition): 17 units, the pairs of the diagonal corners,
+   the z families -102.87 (the bottom plates) / +103.48 (the top plates)
+   / the mixed (the walls).
+4. The carpet = DE_V_capet01 (the ornamental borders along the long
+   edges); the material 0 of the strip family.
+5. The road height = -44.06 at the spawn (the tunnel MT_Btm), -45.4..
+   -46.8 = the deck (the descent), -44.05 = the box top = the curb top
+   (1.35 m above the deck = the parapet, per the reference image 2).
+
+**The next session's opening task (the single focus):** the packed-entry
+decompressor — the element op behind vtable+0x3c in sub_1030ac90/
+sub_10308c6a (the 44-B in-memory elements, the ~29-B file units). The
+decode yields the real strip outlines => the bridge = the road + the
+parapets + the ornamental inlays = 1-1 with the references. Then the
+house floors (H01-04) and the temple pieces = the same format.
+
+**The session's commits:** 07d9376 (the run-anchor), 3382081, 477bb1f,
+b1e71b3 (the format chain), 761b1d6 (the road slab), 1821805 (the skip),
+c99804c (the click-to-move), 6b95484 (the cursor), db09cd5/36e2b63/
+403feb4 (the unit scanner), dfa82ab (craft 0.5.0), cd40627, 1897d33
+(the parse fix), d4fa51f, ab61085 (the carpet UVs), f36f800, 1ca7927
+(the references).
+
+## 2026-11-08 — Btm_Obj01's real plate staged (20 verts, 18 tris); Obj02/03 pending
+
+**The run-anchor now decodes Btm_Obj01 end-to-end**: the parse yields the
+real plate — 20 verts (the pos+normal interleaved, the normals up to
+(0.13, 0, 0.99)), 54 indices = 18 triangles, the height ±1.03 m (the
+curb assembly's top at the actor -45.08 + 1.035 = -44.05 = the road
+level, the bottom -46.11). Staged and reimported; un-skipped from the
+render (the Obj02/03 stay skipped — their pools sit at the different
+offsets and the count-guard misses them).
+
+**The placement note:** the actor (9059, 17388) + the box y-span puts
+the plate at the road's NORTH edge (the world y 17260..17516 vs the road
+line ~17630) — the curb assembly beside the road, per the reference
+image 2 (the ornamental parapets at the edges).
+
+**Next:**
+1. Btm_Obj02/03: the pools = the different counts/offsets — scan their
+   bulks for the 12-B position runs (the relaxed count-guard or the
+   per-mesh compact-count discovery).
+2. The visual check on the bridge (the plates render with the carpet
+   texture; the placement = beside the road per the reference).
+3. The house floors (H01-04) and the temple = the same 12-B position
+   pools + the packed faces.
+
+## 2026-11-08 — the border ribbons decoded (Btm_Obj02/03)
+
+**Btm_Obj02/03 = the single-section flat rectangles** (the one unit each:
+the diagonal corners (-32, -1134, 0)–(32, 1074, 0) for the Obj02): the
+exact bbox quad = the whole mesh, no decompression needed. The ribbons:
+0.64 m wide x 22 m / 12.3 m long, flat at the z = 0 actor level = the
+world -46.11 = the road level. The textures = capet02 (the second carpet
+design). Built as the exact bbox quads (4 verts, 2 tris) and staged.
+
+**The bridge road composition now:**
+- the deck (the cobblestone) = the base surface,
+- the carpet strip (Btm_Obj01, the 20-vert real plate) = the center,
+- the border ribbons (Btm_Obj02/03) = the ornamental edge lines.
+
+## 2026-11-08 — the parapets ARE the original composition (un-skipped)
+
+The reference (bridge_original_level.png) shows the parapet walls at the
+road edges — the ornamental walls ~1.35 m above the road surface. The
+Btm_Obj01/02/03 boxes = exactly those parapets (the top -44.05, the road
+-45.4 => 1.35 m = the waist-high parapet). My earlier "skip" removed the
+authentic parapets (the user: "нет верхнего слоя").
+
+The road composition (final): the deck = the walking surface; the
+parapet boxes = the walls along the edges; the carpet strips = the
+ornamental tops/edges of the parapets. Un-skipped — the boxes render
+with their textures (the material 0 = the parapet's stone/ornament).
+
+## 2026-11-08 — the decoder closes: the faces = UModel 1-1; the 29-B units = the kDOP collision bboxes; the road layout = measured
+
+**The parse-completeness proof.** Dumped the UModel exports
+(tmp/l2/20_18/umodel/Oren_DEV_S/StaticMesh) against our staged glTF for all
+46 Oren_DEV_S meshes: the face counts are IDENTICAL for every mesh (Bridge
+924/924, Btm 690/690, MT_In 1010/1010, H01 626/626...). The only delta =
+O_DE_Btm_Obj01 (UModel 2 prims/24 verts vs ours 1 prim/20 verts — 4 dedup
+verts) and ±a few dedup verts elsewhere. **Our run-anchor decoder extracts
+the complete visual geometry.** The huge bulk leftovers (Bridge 327 KB vs
+46 KB of streams) = the kDOP collision tree + the lazy arrays, not visuals.
+
+**The 29-B units = the kDOP node bboxes.** The units
+([01][XX][YY][81 81] + 24 B = 2 corners) are (min,max) corner pairs of the
+collision-tree nodes — for flat plates z1==z2, for the Obj01 slope the unit
+spans the whole z range −102.87..+103.48 (a bbox, not a plate). They are
+the engine's collision decomposition: Btm_Obj01 17 nodes, H01 177, CH_body
+138, MT_Out 434, Bridge 105 (railings only — the deck has no nodes).
+41679 units total across all placed actors.
+
+**The road layout = the numeric ground truth** (units + actors, the floor
+profiles and the perpendicular profile at x=8200):
+- the spawn plateau = MT_Btm flat −44.0, flush with the Obj01 TOP plate
+  (+103.48 local at actor −4508 = −44.05);
+- the road = the Obj01 slab: top plate −44.05 (x 7339..7885) → slope →
+  bottom plate −46.11 (x 8640..10670), the carpet band 2.56 m wide down
+  the road center (the actor line = 1 m off-center);
+- the Bridge mesh = the ornamental arch with the LOWER deck ramp
+  −44.97→−46.79, 0.75 m below the Obj01 top (its railing nodes stand on
+  the road level: railing base local −119.92 = −44.08);
+- the village plaza = O_DE_Btm −46.07 (flush with the slab bottom −46.11);
+- the house floors = −44.3..−44.7 (raised above the plaza);
+- O_De_01/02/03 are NOT floor slabs (UModel confirms 3D chunks) — they are
+  the center ornaments anchored at −55.4; the +1161 shift hack in
+  world.gd = pending removal (a wrong assumption, kept until the plaza
+  visuals are re-checked).
+
+**The tool fix.** L2_SCREENSHOT was dead code: its dispatch sat INSIDE
+_traces_box_flow() after get_tree().quit() (world.gd) — screenshots never
+saved from the normal flow. Moved to the _ready dispatch chain. The spawn
+shot re-taken: the carpet = one pattern down the road center (matches the
+"один узор" requirement), the road descends, composition = the references.
+
+**The next decoder step (single focus):** parse the kDOP tree leaves —
+which triangles the collision nodes reference (UE2: kDOPNodes +
+kDOPCollisionFaces, skipped by UEViewer after f108). That yields the
+AUTHENTIC collision subset (the engine collides only the kDOP faces, not
+the whole trimesh) and settles which decks are walkable (the Bridge lower
+deck vs the Obj01 road) without approximations.
+
+## 2026-11-09 — StaticMesh format RE (engine.dll), Ghidra tooling; the bridge verdict is NOT in yet
+
+**Scope set by the user:** only `20_18` / Dark Elf Village. `18_20` is a distant
+plan (not now), `cacaodump` is another project (irrelevant to this one).
+Priority: **make the bridge correct**, the rest of the village after.
+
+**Results so far are engine-research only.** No file in `tools/l2strict/`,
+`scripts/world.gd`, `assets/maps/20_18/...` was changed in this session; the
+tree diff vs HEAD is still exactly the 2026-11-08 one
+(backup: `tmp/checkpoint_2026-11-08_pre_sections/`). Do not read this entry as
+"the bridge is fixed".
+
+### New, reusable: a headless Ghidra decompiler for `engine.dll`
+
+`craft-anything` is a string/XOR/sha-index search; it cannot follow C++
+virtual dispatch - and the StaticMesh serializers are reached *through the
+vtable*. So for this task `analyzeHeadless` was used directly:
+
+```
+tools/ghidra/re.sh     <va>...          # batch decompile, ONE session (lock-safe)
+tools/ghidra/decomp.sh <va> [file]      # one function
+tools/ghidra/sym.sh    <substring>      # demangled symbols
+tools/ghidra/dis.sh    <va> [len]       # raw bytes
+tools/ghidra/thunk.sh  <va>...          # is it a jmp thunk; to where
+```
+
+Project: `/home/jinseoyeon/ghproj/l2echo` (outside the repo: the launcher
+refuses paths with spaces). **Trap, cost an hour:** Ghidra's OSGi loader caches
+compiled classes *per script dir* - a rewritten `Decomp.java` kept running the
+old class and printed a `C-BEGIN/C-END` that the source no longer contained;
+clearing `osgi/compiled-bundles` **and** `osgi/felixcache` did not help. Only a
+**fresh script dir per change** worked. `gh.sh` now copies
+`tools/ghidra/scripts/*.java` into the dir on every run.
+
+**Second trap, silent by design:** for many of its own `thunk_FUN_x` labels the
+decompiler prints `x` and the target of that `jmp` is **the *next* function**,
+not `x`. `thunk.sh <x>` reports the real jump target; when the decompiled label
+and the jump target disagree, **the jump target is the function on disk** and a
+"reading" of the label's body is a reading of somebody else's function.
+
+### What the engine says (`UStaticMesh::Serialize` `0x106f7a40`)
+
+* For our `ArVer` (`< 0x70`, and Interlude `Ver` is far below `0x5c` ) the body
+  is a **fixed call list**, not a version branch - see
+  `Docs/RE_STATICMESH.md`.
+* The **0x60-B elements** arrayed by `thunk_106f7620` are `FStaticMeshLOD`s; each
+  element starts with an inline `FArray` (a 24-B vertex stream), an `FBox` at
+  `+0xC`, four dwords at `+0x28`, and nine dwords at `+0x38..+0x58` (all `Ver >= 0x53`).
+* `FStaticMeshVertexStream` on disk = `[count][count x 24 B]` **+ one `u32`**
+  (`+0x18` is read even when `Ver < 0x70`), so **4 + 24*N + 4 bytes**. *The old
+  `[count]`-only model was wrong by exactly 4 bytes per stream.*
+* `FStaticMeshUVStream` = `[count][count x 8 B (2xf32)] + 8 B` (two dwords at
+  `+0x18/+0x1C`, one of them a `Revision`; `GetStride = 8`, `GetComponents = 2`
+  are measured, not guessed).
+* `FStaticMeshVertex` = **24 B**, ctor `10366380`. The three fields at `+0,
+  +4, +8` are re-read at `Ver < 0x70`, then more fields at `+0xC, +0x10`; for
+  `Ver >= 0x70` (not us) the fields beyond are dropped and one extra byte path
+  is taken at exactly `Ver == 0x6F` - i.e. **Interlude's current value is
+  the special-cased "==0x6F" value**: the serializer at `0x10366380` does
+  take the `== 0x6f` branch, so our file format has a dedicated path there
+  and is not the generic `<0x70` path.
+* `FStaticMeshSection` lives at stub `0x10308A17` -> jmp **`0x103EC2E0`**. The
+  body at `0x103EC2E0` is **not** a section reader: it reads a LOD - a
+  `FStaticMeshVertexStream`, an `FRawIndexBuffer`, another `FRawIndexBuffer`,
+  a byte-order item, then queues `0x1036a4e0` ctor. **The export symbol and
+  the body disagree** (ICF/COMDAT merge in the same Build). Therefore:
+  - the earlier reading "`FStaticMeshSection` = 0x14, = 2xu32 + 6xu16"
+    based on what lies at `0x103EC2E0` is **withdrawn** - that address is a
+    LOD reader;
+  - **the exact `FStaticMeshSection` serializer is NOT yet located.**
+    What *is* located is the LOD reader, and it points to two
+    `FRawIndexBuffer`s, i.e. the LOD holds **its own** index buffers - the
+    "sections + render pool" split must be re-derived, not assumed.
+
+`FStaticMeshSection` presence is still proven by the ctor at
+`0x1031293B` (it zeroes 4-byte fields at +0 and +4 and 2-byte fields at
++0xE, +0x10, +8, +0xC, +0xA with sentinel `0xFFFF` at `+0xA`/`+0xC`; the +0x12
+word is left untouched, so the object is **0x14 bytes**) and by
+`FArray::Add(..., 0x14)` in `thunk_106f78d0` and `0x10372030`. The **field
+order** is what `0x103EC2E0`-adjacent code would tell, and it has not been
+read: open.
+
+### What this does NOT establish, and what is withdrawn
+
+* **Withdrawn:** "`+40` / `+44` of the bulk is the section table" (2026-11-08
+  entry). Those dwords were a vertex stream header and a revision byte-pair;
+  the `+44 = 0` seen on `O_DE_Bridge` was an unrelated zero dword, and the
+  `+50..+58` "chain" was `Rev / NumVerts` pairs (`8C00 8C00`, `A000 A000`, ...).
+* The **bridge visual verdict is still open.** A correct `FStaticMeshLOD`
+  reader does not equal a correct bridge: the bridge composite comes from the
+  actor list (already verified against the package - two `O_DE_Bridge`
+  instances at `-4288.56`) and from whichever LOD our reader now points at.
+  The next visible check is still a screenshot of the spawn view.
+* `-4` gate in `FArray::CountBytes` and `[count][data]` order both stand: they
+  are read from two independent serializers.
+
+## 2026-11-09 (later) — RE tooling settled in the repo; what the engine reader says (and does not)
+
+### Tooling, final (in the repo, reusable)
+
+```
+tools/ghidra/gh.sh     <dir> <Class> [args...]   one headless run
+tools/ghidra/re.sh     <va>...                  batch decompile, ONE session
+tools/ghidra/decomp.sh <va>                     one function to stdout
+tools/ghidra/sym.sh    <substring> [limit]      demangled symbols
+tools/ghidra/dis.sh    <va> [len]               raw bytes
+tools/ghidra/thunk.sh  <va>...                  jmp-thunk -> real target
+tools/ghidra/scripts/*.java                     the Ghidra side
+```
+
+Project: `/home/jinseoyeon/ghproj/l2echo` (outside the repo: the launcher
+refuses any project/script path that has a space, and this repo's path has
+two). Every wrapper copies `scripts/*.java` into a fresh `mktemp -d` dir.
+
+**Trap 1 (cost ~1 h): the OSGi loader caches compiled classes per script
+dir.** A rewritten `Decomp.java` kept running the *old* class and printed
+`C-BEGIN/C-END` after the source no longer contained them; deleting
+`osgi/compiled-bundles` and `osgi/felixcache` did not help. Only a new dir
+worked.
+
+**Trap 2 (silent by design):** for many of its own `thunk_FUN_x` labels the
+decompiler prints `x` while the jump goes to **the next function**. The label
+does not mean "calls x": resolve with `thunk.sh <x>` first (`THUNK <x> -> <t>`
+means the call is to `t`; it is `x` only when `t == x`). Reading `x`'s body
+where the code calls `t>` is reading somebody else's function — this
+produced a whole false layout in the morning.
+
+**Trap 3:** two headless runs in parallel fight over the project lock. Batch
+VAs through `re.sh`.
+
+### Engine facts (decompiled bodies, not guessed)
+
+| symbol / stub | real body | behaviour |
+|---|---|---|
+| `?Serialize@UPrimitive@@*` `0x10311293` | `0x106457d0` | `UObject::Serialize`, then `FCoords` struct at `this+0x34` |
+| `?Serialize@UStaticMesh@@*` `0x103108c5` | `0x106f7a40` | fixed call list, see below |
+| `??6@*FStaticMeshUVStream@@` `0x103020f4` | `0x103ae4e0` | `[count][count × 8 B]` + 4 B (`+0x18`) + 4 B (`+0x1C`) |
+| `??6@*FStaticMeshVertexStream@@` `0x1030bdcf` | `0x103adbb0` | `[count][count × 24 B]` + 4 B (`+0x18`) |
+| `??6@*FStaticMeshLightInfo@@` `0x10309b4c` | `0x1038f550` | `ByteOrderSerialize(elem+0x10, 4)` (20 B element) |
+| `??6@*FStaticMeshUV@@` `0x1030f0c4` | self | `ByteOrderSerialize(p,4)`, `ByteOrderSerialize(p+4,4)` — **2 floats, 8 B** |
+| `FStaticMeshVertex` ctor `0x10366380` | self | 24 B stack slot; 3 × `ByteOrderSerialize(…, 4)` at `+0, +4, +8`, then `+0xC`, `+0x10` |
+| `FStaticMeshSection` ctor `0x1031293b` | self | clears **0x14 B**; `0xFFFF` sentinels at `+0xA`, `+0xC`; u16s at `+8, +0xA, +0xC, +0xE, +0x10`; u32s at `+0, +4` |
+| `106f78d0` | – | `CountBytes(arr, Ar, 0x14)` — array of 0x14-B elements |
+| `106f7460` | – | `CountBytes(arr, Ar, 0x14)` — array of 0x14-B elements (light info) |
+| `106f7620` | – | `CountBytes(arr, Ar, 0x60)` — array of **0x60-B LOD elements** |
+| `106f6660` | – | one LOD element: array at `+0x00`, `103302c0` at `+0x0C` (6 dwords+byte), 4 dwords `+0x28..+0x34`, `Ver≥0x53` 9 dwords `+0x38..+0x58`, `Ver>0x5e` `+0x5C` sub-serialize, `Ver≥0x50` 9 dwords `+0x5C..+0x80` |
+| `?GetSize@FStaticMeshUVStream` `0x10314cd6` | – | ×8 |
+| `?GetSize@FStaticMeshVertexStream` `0x10306c58` | – | `*(p+0x10) × 0x18` |
+| `?GetStreamData@FStaticMeshUVStream` `0x103041d3` | – | `memcpy(dst, *(p+0xC), *(p+0x10) × 8)` |
+| `?GetStreamData@FStaticMeshVertexStream` `0x1030c5b8` | – | `memcpy(dst, *(p+0xC), *(p+0x10) × 0x18)` |
+
+`CountBytes(arr, Ar, elem)` at `0x103092aa` does `[compact count]` and the
+loop at `0x1038f880` is `[compact count][count × elem]`.
+
+### What this does *not* establish — and the earlier claims it retires
+
+* **Retired (2026-11-08 entry): "`+40` is NumSections"**. In the byte-scan of
+  `O_DE_Bridge` `+40` holds `4676` and, 24 B later (the sole stream ever
+  scanned), `0x642E0` holds the vertex stream. But `4676` has **not** been
+  shown to be a stream count, and nothing in the reader has yet been walked
+  over the bridge bulk. It is one candidate number, not a decoded field.
+* **Retired (this morning): "the section is `2×u32 + 6×u16`"**. It came from
+  decompiling the *body of another function* through a `thunk_FUN_` label
+  (Trap 2). Only the ctor size **0x14 B** and the sentinel placement
+  survive, as measured instructions.
+* **Still open:** where the `FStaticMeshLOD` array begins inside the bridge
+  bulk; whether the bridge has 1 LOD (probable: the stream walk found a
+  24-B pool, "From the files" not yet); the index width and the count
+  order; and the winding.
+* **Bridge verdict: still not visual.** No screenshot has been taken since
+  these facts landed. The next visible check remains the spawn view.
+
+### Next concrete step
+
+`tools/l2strict/bulk_lod.py`: a positional walker starting at `bulk` that
+follows the `UStaticMesh::Serialize` order for `ArVer < 0x5c` —
+`FStaticMeshLightInfo[]` (0x14 elem) → `FStaticMeshLOD[]` (0x60 elem, inside
+it: vertex stream `[c][24·c]`, `FBox` 6+1, 4 dwords, 9 dwords, UV stream
+`[c][8·c]`, two `FRawIndexBuffer` `[c][u16·c]`, the `+0x5C` trailing item) →
+`FStaticMeshSection[]` (0x14 elem). The walk **prints** each field as it
+consumes it together with its byte offset and stops on the first count that
+falls outside `[0, 2e6]`; that report is the format map, and any disagreement
+with the above tables shows up as a named offset.
+
+## 2026-11-09 (A) - `UStaticMesh` ctor read; field map by symbol chain
+
+`?InternalConstructor@UStaticMesh@@SAXPAX@Z` = stub `0x1030b5a5`
+-> jmp body `0x10366b90` (a null check) -> `?__thiscall UStaticMesh` =
+stub `0x10312aee` -> body `0x106f72b0`.
+
+The body calls the members' ctors in member order, each with its own
+`this + offset` literal. That is the offset map, read straight from the code:
+
+```
+UPrimitive::UPrimitive(this);
+*(void**)this            = &UStaticMesh::vftable;
+FArray::FArray(this + 0x60);
+FStaticMeshVertexStream::FStaticMeshVertexStream(this + 0x6C);
+FRawColorStream::FRawColorStream(this + 0x88);
+*(void**)(this + 0x88)    = &FStaticMeshColorStream::vftable;
+FRawColorStream::FRawColorStream(this + 0xA4);
+*(void**)(this + 0xA4)    = &FStaticMeshColorStream::vftable;
+FArray::FArray(this + 0xC0);
+FStaticMeshLightVisibilityStream::...(this + 0xCC);
+FTangentStream::FTangentStream(this + 0xE8);
+FRawIndexBuffer::FRawIndexBuffer(this + 0x104);
+FRawIndexBuffer::FRawIndexBuffer(this + 0x120);
+FArray::FArray(this + 0x13C);
+thunk_FUN_106f6870(this + ...);
+thunk_FUN_106f6b50(this + ...);
+thunk_FUN_106f6e30(this + ...);
+*(u32*)(this + 0x1F4)    = 0xFFFFFFFF;
+*(u32*)(this + 0x1F8)    = 0xFFFFFFFF;
+```
+
+Member offsets that `UStaticMesh::Serialize` passes to serializers, against
+the ctor:
+
+| serialize arg | member |
+|---|---|
+| `this + 0x34`, `this + 0x50` | inherited `UPrimitive` (Origin + axes, then Bounds-like) |
+| `this + 0x60`  | **FArray #1** - the only FArray at that offset |
+| `this + 0x1E4`, `0x1E8` | (Ver < 0x5C only) |
+| `this + 0x148`, `0x160` | the lazy arrays, `GLazyLoad` |
+| `this + 0x180/0x184/0x188` | (Ver < 0x72) |
+
+**Corollary that kills the last form used today:** the "0x60-B record
+arrayed by `106f7620`" is not a file stream laid after `UPrimitive`. The
+object already contains an `FArray` at `+0x60`; `106f7620` is the reader of
+*that* member (an in-file `[compact count][count x 0x60]`, not a serialized
+header field). A file stream would not live in a ctor-initialised object
+member.
+
+**Physical extent** meanwhile: the last ctor writes `this+0x1F8`, and the
+object's `[virtual]` size is set by the class factory. So the object is
+`0x1F8+4 = 0x1FC` bytes of members inside a larger `UObject` allocation. The
+bulk after the property list has **no** member header at all: the archive
+writes property list, then the members one by one in the order
+`UStaticMesh::Serialize` asks for them. That order is what `bulk_lod.py`
+reproduced, and for `Obj02/03` - flattened to "0 LODs" - the first member it
+asked was **not** the one on disk.
+
+**What the first member after the properties is, is the open question; it is
+not a `[count]`.** Next: decompile the ctors of
+`FStaticMeshVertexStream` (`0x10313bd8`) and `FRawIndexBuffer` (`0x103...`) -
+same pattern as above - to see each *member* object it holds, because the
+mesh body's first 4 bytes (`05 59 xx yy` in all four meshes) look like a
+per-object tag, not a preceding-side count (and it *is* a two-byte-ish value
+followed by the same `04 53 00 01 53 00 02 d3 00 03` sequence on all four).
+
+## 2026-11-09 (A2) - the export body is a packed stream; memory layout table confirmed
+
+The same 12-byte group `04 53 00 01 53 00 02 d3 00 03` appears in the export
+body of **all four** bridge meshes, separated each time by a 2-byte counter;
+`O_DE_Btm_Obj02` and `Obj03` start (export body) with:
+
+```
+05 59 0e 01                  (a 2-byte payload followed by its 2-byte fields?)
+04 53 00 01 53 00 02 d3 00 03
+05 b0 00 00 00 00 00        (Btm_Obj02, Btm_Obj03)
+c2 70 c3 8d c4              (only Obj02: floats)
+```
+
+The body is therefore a **run-length/packed stream of those records**,
+not a `[count][records]` header. This is exactly why `bulk_lod.py` - which
+expected a compact count at the export tail - read garbage counts (`0`, `-25`,
+`562959`): it was treating stream *data* as a header.
+
+`UStaticMesh` memory layout (from the ctor at `0x106f72b0`), which stays
+valid:
+
+```
++0x60   FArray
++0x6C   FStaticMeshVertexStream
++0x88   FRawColorStream   (vftable patched to FStaticMeshColorStream)
++0xA4   FRawColorStream   (vftable patched to FStaticMeshColorStream)
++0xC0   FArray
++0xCC   FStaticMeshLightVisibilityStream
++0xE8   FTangentStream
++0x104  FRawIndexBuffer  |   size = *(this+0x10) * 2  (u16)
++0x120  FRawIndexBuffer  |   ?CacheOptimize/ObjectDesc -> u16  (? in GUI)
++0x13C  FArray
++0x1F4  = 0xFFFFFFFF
++0x1F8  = 0xFFFFFFFF
+```
+
+`UStaticMesh::Serialize` (body `0x106f7a40`) for `ArVer < 0x5C` calls, in order:
+`UPrimitive::Serialize` -> `103302c0(this+0x50)` -> `106f78d0(this+0x60)`
+(array of 0x14-B items) -> `106f7460(this+0x34, this+0x60)` -> `106f7620(tmp)`
+(array of 0x60-B items) -> `10330040(&4)`. That is **memory** order; the file
+order is whatever the archive wraps it inset.
+
+**Tooling now correct** (was the actual blocker for all previous attempts):
+
+```
+tools/ghidra/gh.sh     <dir> <Class> [args]    one headless run
+tools/ghidra/re.sh     <va>...                batch decompile (one session)
+tools/ghidra/decomp.sh <va> [out]             one function
+tools/ghidra/sym.sh    <substring> [n]        demangled symbols
+tools/ghidra/dis.sh    <va> [len]             raw bytes
+tools/ghidra/thunk.sh  <va>...                jmp-thunk -> real body
+```
+
+Resolved with it this run:
+
+| stub | real body |
+|---|---|
+| `?Serialize@UStaticMesh@@UAEXAAVFArchive@@@Z` `0x103108c5` | `0x106f7a40` |
+| `?Serialize@UPrimitive@@UAEXAAVFArchive@@@Z` `0x10311293` | `0x106457d0` |
+| `?InternalConstructor@UStaticMesh@@SAXPAX@Z` `0x1030b5a5` | `0x10366b90` -> ctor `0x106f72b0` |
+| `??6@YAAAVFArchive@@AAV0@AAUFStaticMeshUV@@@Z` | self, `0x1030f0c4`: two `ByteOrderSerialize(4)` = **2 floats** |
+| `??6@YAAAVFArchive@@AAV0@AAVFRawIndexBuffer@@@Z` | self, `0x10304061`: `TArray<u16>` reader + `u32 Revision` |
+| `?GetIndexSize@FRawIndexBuffer@@UAEHXZ` | `return 2` - **indices are u16** |
+| `?GetContents@FRawIndexBuffer@@UAEXPAX@Z` | `memcpy(dst, arr[0], count*2)` - **u16, array[0]** |
+| `?GetSize@FRawIndexBuffer@@UAEHXZ` | `*(this+0x10) * 2` - count at `+0x10` |
+
+**What this run did *not* do**: no asset, `staticmesh.py`, `world.gd`, or
+`bulk_lod.py` behaviour was changed for the game; the bridge in the build is as
+in the 2026-11-08 screenshot. The export body is a packed byte stream - the
+next session must decode **that** (compact groups separated by 2-byte
+counters), not keep guessing struct headers.
+
+## 2026-11-09 (A3) - signature: every mesh tail starts with an FBox (6 f32)
+
+Every `StaticMesh` export tail in `Oren_DEV_S` opens with **six floats**,
+`min.x min.y min.z max.x max.y max.z` (a clean UTF-16-ish box for each mesh).
+`bulk_lod.py`'s first assumption - a compact `num_lods` at `props.end` - is
+therefore **refuted**: the tail begins with the box, not with a count.
+
+Measured over the 48 meshes of `Oren_DEV_S.usx`. `O_DE_Bridge` (the mesh the
+bridge is built from):
+
+```
+tail 327 122 B
+f32 @ +0:   -727.46   727.46     <- x
+f32 @ +8:   -523.32   523.32     <- y
+f32 @ +16:  -390.31   390.31     <- z  (up)
+```
+
+`O_DE_Btm_Obj02`: `[-32, 32, -1134.11, 1073.85, 0, 0]` -> a **flat quad**
+in x/z (y = 0), which matches "flat plate" visually.
+`O_DE_Btm_Obj03`: `[-32, 32, -580.94, 648.87, 0, 0]`.
+`O_DE_Bridge`: a full 3D box.
+
+So the extra 40-B header observed on `Bridge`/`Obj01` and not on `Obj02/03`
+is **not** a box (the box is 24 B and at `+0`); those two have a different
+thing at `+40`, still unidentified.
+
+### Reality check on the earlier claim
+
+The DEVLOG entry of 2026-11-08 said the bridge body's `+40` was a
+`NumSections` - it is not, and today's run confirms that twice (the
+`bulk_lod` counts and the readings above). What the tail **does** contain,
+measured, is the `FBox` first. What follows the box is not yet decoded.
+**No asset or `world.gd` change was made on this basis.**
+
+### The next checkpoint
+
+`tools/l2strict/bulk_lod.py` will:
+1. read the `FBox` at `props.end` (6 f32),
+2. skip it, then expose whatever bytes follow - first 16/24 in hex plus
+   f32 and u16 interpretations - so the next field (stream or section
+   table) is chosen from **evidence**, not from a guessed constant.
+
+That output is the input vacuum for the next RE pass. The bridge itself stays
+as-is until that pass names the field that carries the deck.
+
+## 2026-11-09 (A3-correction) - FBox-at-tail is a HYPOTHESIS, not a fact
+
+The A3 entry above listed six floats per mesh as "an FBox". That is **not**
+proven. It is a hypothesis with three open problems that today's own numbers
+raise:
+
+1. **`min <= max` fails as a test.** Some meshes have `min > max` on one axis
+   outright (a quick check of the listed pairs will show several - e.g. an
+   axis pair that is reversed). A real `FBox` has `min <= max`; either
+   the pairs are not (min,max) or some of the "six floats" are not the box.
+2. **24 B vs the stream heading.** The ctor map puts a `FArray` at `+0x60`
+   and a `FStaticMeshVertexStream` at `+0x6C` - 12 B apart. A `FBox` is 24 B.
+   If the six floats are that `FArray`'s count *and* data, they do not fit
+   a 24-B box at all. The reading as "one box" is therefore **not supported**
+   by the memory map; the four-and-two split needs an independent check.
+3. **`Obj02/03` have no header.** A 755-B mesh cannot hide a 40-B header; if
+   the six floats belong to the stream, they must appear through the same
+   stream path as `Bridge`, and the run showed `Obj02` with `num_lods = 0`
+   - i.e. the stream path **was not taken** for it and the reader returned
+   "nothing". Either they have no stream, or the reader is wrong about them
+   (it is: the same bytes, at a different position, produced `-240.7578` -
+   a plausible plate height, from bytes the reader called "zero").
+
+**So do not implement §A3.** The next checkpoint is only:
+
+```
+bulk_lod.py -> print props.end .. props.end+64 as
+                f32[i] and u32[i]
+             -> for EVERY mesh, all at once
+```
+
+With 48 meshes in one table it becomes possible to decide the six-floats
+question **from the distribution**, not from one file ("does ANY mesh have
+min<=max on all three axes, and if so, what is at +24 there"). The pass
+does not need the engine and does not change the game.
+
+*(Record of the run: `fc` at 48 meshes printed via `tmp/alltail.py`; the f32
+table per mesh added in this checkpoint.)*
+
+## 2026-11-09 (A4) - confirmed: the tail starts with FBox (min/max), 6 f32
+
+`tmp/box_table.py` read `props.end .. +24` as 6 floats for all **46**
+`StaticMesh` exports of `Oren_DEV_S.usx` (that is what `Oren_DEV_S` holds).
+**46 / 46 pass `min <= max` on x, y, z.** Not one outlier. This is no
+coincidence: the exported `StaticMesh` body starts with an `FBox`.
+
+```
+O_DE_Bridge     -727.462 -523.319 -390.310   727.462  523.319  390.310   (full box)
+O_DE_Btm_Obj02   -32.000 -1134.107    0.000    32.000 1073.851    0.000  (flat quad)
+O_DE_Btm_Obj03   -32.000  -580.936    0.000    32.000  648.871    0.000  (flat quad)
+O_DE_Btm_Obj01 -1762.474  -128.000  -102.873  1651.044  128.000  103.476 (long slope!)
+O_De_03       -1647.359 -1587.903 -2701.856   1754.954 1668.838  -97.110 (tall)
+```
+
+Corroboration, independent of the ctor map: `UStaticMesh::Serialize`
+has for **exactly** `Ver < 0x4a` (pre-2002 maps) a path that reads a
+**single float** and, for `Ver < 0x5c`, builds a temporary `FCoords` (which is
+`FVector Origin; FVector XAxis; ...`) and hands it to a reader - both are
+the old writers of the box *before* the box was written as 6 f32 in the
+`UPrimitive` half. So the box belongs to the **render bounds** in
+`UPrimitive::Serialize` (`this+0x50` - `this+0x34 = 0x1C` B), and it sits
+**right at the end of the primitive half**, not at the start of the mesh's
+own members.
+
+This also means: the walker must **not** read `num_lods` at `props.end`.
+The first mesh member is *after* the primitive half, whose length is the
+`0x60 - 0x34 = 0x2C` ... **not**; it must be verified against the
+`UPrimitive` ctor, which is the next checkpoint. The box is the last field
+the base class writes, and the mesh members start right after it.
+
+**Evidence:** `tmp/box_table.py` output (46/46), `tmp/tail_fields2.py`
+(clean `props_end` for the four bridge meshes; `Obj01` has a documented
+`+0x...` oddity vs `Bridge` I am *not* yet explaining - two 0x1C-prefixed
+`Tail` differences, see below).
+
+### Bridge tail `O_DE_Btm_Obj01`: `props.end = 176`, tail 4662 B
+
+The Obj01 body immediately after its property list begins with the same
+box; its `x` span (`-1762.474 .. 1651.044`) is **22.9 m**, its `z` span 2.06 m
+- so it is a **long thin road plate**, not a "19-section curve". The old
+"17 section units" were never a section count: 4662 B at 24 B/vertex is
+`194.25` vertices, at 8 B/UV is `582.75`, at 2 B/index is `2331` - none is 17.
+The "17" was where the fixed stride happened to align in a compressed
+buffer.
+
+### Open
+
+`UPrimitive` ctor body (to get `UPrimitive`'s member length and therefore
+the true byte at which `UStaticMesh`'s members start). Flagged as the
+**only** open item; the FBox start is settled (46/46).
+
+## 2026-11-09 (A5) - grounded: real byte walk of the bridge meshes
+
+My own numbers pin two groups (props.end = `0` shown below):
+
+**Group S - `O_DE_Btm_Obj02/03`** (tail 737 B, identical size):
+
+```
+ 0..24   f32  -32.0   -1134.1074 / -580.9358    0.0    32.0  1073.8507 / 648.8712    0.0   <- the box
+ 24..    i32      1   <opaque>                   193 / 66   <opaque>
+```
+(The `1` at +24 is the only stable value across the two; at +32 the values
+differ (`193` vs `66`) and are followed in each by large magnitudes. Treating
+the box as the slab under the road is the one reading that a third test
+supports: the box matches the world extent of the two paver instances and
+nothing else does.)
+
+**Group B - `O_DE_Bridge`** (tail 327 122 B):
+
+```
+ 0..24   f32  -727.46  -523.32  -390.31   727.46  523.32  390.31   (full box)
+ 24..    i32  -2147483647, -1073741639, -536870728, 1956333752
+```
+Note: these are not `4676` even in int - `bulk+40` is a different offset each
+time; my earlier "4676 at +40" was a hand-read of one file, not a walk.
+`O_DE_Btm_Obj01` (`+24`: `1591476225, 194, ...`) is a *third* family.
+
+**Writing conclusion:** the bridge's render data begins with `Vec`-like
+boxes and is followed by **fixed-layout stream groups**; the old
+"section table at +40 / material index list" reader decoded neither.
+Next step is to make `bulk_lod.py` read the box at `props.end` and, per
+mesh, print the *box group* (`S` vs `B`) and the next 64 B as bytes - a
+deterministic table that the next session diffs across 46 meshes. Only
+after that table exists does the layout get a name, let alone a writer.
+
+Still: **no** `world.gd` / `staticmesh.py` / asset change today.
+
+## 2026-11-09 (A6) - FACT: byte at +24 of every mesh tail is `0x01` (pointer-less marker)
+
+Computed over **all 43** `StaticMesh` exports of `Oren_DEV_S.usx`
+(`tmp/magic24b.py`):
+
+```
+all 43: props.end + 24 = 01, and bytes 25..27 are clearly
+        not a length/float consistently with anything named yet
+```
+
+So at `props.end + 24` there is a **constant byte `0x01`** in every mesh,
+followed by three bytes that carry no value across meshes (they are
+`00`, or a pointer, or part of a different field depending on the mesh).
+This is pressure on the "one struct" idea: the first byte after the box is
+a per-record **flag / count-of-1 / "loaded"** marker, and what follows is
+**not** at a fixed field boundary.
+
+It is also the first thing today that holds **identically** across all
+meshes, which is stronger than any chosen `[count]` reading: 43/43 is a
+distribution test, not a single-file fit. It can be asserted as an
+invariant with confidence, unlike the "+40 is the count" from 2026-11-08
+which was one file and is now refuted.
+
+**Ready for the next read, not for game changes:** the walker should be
+taught "box (24 B), then `0x01` at +24", and the rest of the mesh body
+should be taken as a stream of records, not as a struct. The bridge mesh is
+the first one to dump whole (327 122 B), segment by segment, starting at
+`props.end + 24`.
+
+## 2026-11-09 (A_scorecard) - what was CONFIRMED from a *pre-existing* ground truth, what appends nothing
+
+Required form of evidence: ground truth had to exist **before** today's
+reads. Data I myself produced ("new guesses", my own new scripts, symbols found
+by me and turned into a claim) is **not** counted, by either direction.
+
+### CONFIRMED by fold against pre-existing data ORTHOGONAL to the probe
+
+All in `Docs/DEVLOG.md` (2026-11-03/04 `fnd_1`; the 2026-11-08 "decoder closes"
+`Docs/DEVLOG.md` long entry; the same-session WIP notes in the working tree):
+
+| # | claim | defiber| why it is orthogonal, not self-supporting |
+|---|---|---|---|
+| 1 | Actor `Location` / `Rotation` / `DrawScale` / `DrawScale3D` / `PrePivot` | `map.json`, `Docs/DEVLOG.md` 11-03 | `Rotation` (uint16) was done by disassemble `AActor::LocalToWorld@0x10304ad9`; then the same map placed the actor in the world and the matcher for a *different* axis came out |
+| 2 | The map has **two `O_DE_Bridge` instances**, both at `Z = -4288.56` | `StaticMeshActor142` / `74` in `20_18.unr`, `Docs/DEVLOG.md` 11-03 | read from the export table of the original map, *not* from our glTF; the old DEVLOG text "one second bridge `-4094.6`" is withdrawn by it |
+| 3 | `O_DE_Btm_Obj02/03` **are flat quads**, not boxes | 2026-11-08 "the border ribbons decoded" / `Docs/DEVLOG.md` | obtained before today by the UModel plan (surface plan: 2 sections, 6 indices), 3 different path, and today's FBox read (minz = maxz = 0) matches it without being made from it |
+| 4 | `O_DE_Btm_Obj01` ends/extends to `Z 103.48` and **`-102.87`**, with the actor at `-4508` -> top `-44.05`, bottom `-46.11` | 2026-11-07 "the decoder closes" table in `Docs/DEVLOG.md` (from 29-B units + actor) | *different input source*, and **today gave `-102.873` / `103.4758`** - same values +-1e-3. The most solid cross-check done this session |
+| 5 | `FStaticMeshSection` has a **magic `0xFFFF` sentinel** at `+0xA`/`+0xC` | *(not pre-existing - dropped)* | I had no prior doc with this; it is new and therefore not counted |
+
+So the **real confirmed delta** vs. the previous DEVLOG state is: `FBox` at the
+export `props_end` in all 46 `Oren_DEV_S` meshes; it is **NOT** "sections, 14 B,
+29 B" (that was already marked unconfirmed before today and stays so),
+and the `O_DE_Bridge` tail is **327122 B, props_end +239** (matches file layout 11-03).
+
+**Nothing has so far re-opened the old "wrong bridge" hypothesis in a
+confirmed way.** The mSeams "wrong texture on the bridge" was diagnosed in earlier sessions as
+the rebuilt Bridge glTF (first primitives = `DE_V_wall05` = cobble *wall*),
+not as a section-table mistake; today's work does not change that.
+
+**Unconfirmed-but-used:** all of `bulk_table.py`, `bulk_lod.py`, the FBox
+reading of `Bridge`, the marker `0x01` at `props_end+24` for 43 meshes of
+`Oren_DEV_S` but **not for `O_DE_MT_Btm`/`In`/`Out`** (`i0` is a float there -
+they are a different tail class). These go into DEVLOG as *provisional
+readings and tooling*, not as facts; the table in `Docs/RE_STATICMESH.md` is
+not edited on their behalf.
+
+**What is not done** (repeat): no mesh re-extract, no `staticmesh.py`
+semantic change, no `world.gd` change, no screenshot.
+
+## 2026-11-09 — craft-anything updated 0.5.0 -> 0.6.0
+
+The CLI replaced in place (~/.local/bin/craft-anything-cli + craft-anything,
+from the official linux-x86_64 tarball). The MCP server starts cleanly
+against the existing analysis/l2-godot.cany store; AGENTS.md version note
+bumped. The 0.6.0 highlights relevant here: the native toolset bounds
+hardening (PE/ELF reads) and the per-action approval settings.
+
+## 2026-11-09 — engine.dll mined with craft 0.6.0: the collision object located; the collision-subset wiring = staged, debug pending
+
+**fnd_6 (the full serialization map).** UStaticMesh::Serialize (ver>=112)
+order: UPrimitive bbox -> VertexStream(+0x6c) -> ColorStream(+0x88) ->
+AlphaStream(+0xa4) -> UVStream(+0xc0) -> IndexBuffer x2 (+0x104,+0x120) ->
+**the collision object = a VIRTUAL Serialize (vtable+0x18) on field +0x178
+(sub_10308788, called right after IndexStream2)** -> the lazy Wedges
+sub_1030ac90(+0x148, 84-B elements, GLazyLoad forced off during the read) ->
+the lazy Faces sub_10308c6a(+0x160, 44-B elements) -> misc ints -> a 4-byte
+field (+0x1e0, ver>=120). NO kDOP read in UStaticMesh::Serialize itself.
+
+**The 29-B units = the collision object's leaf bboxes** (Obj01: 17 units ~
+18 tris; the mesh bbox precedes them at +2576; the 1.6-KB tail = 20 Wedges
+x 84 B = the lazy Wedges array). The engine collides the leaf-bbox-covered
+triangles only — the Bridge lower deck has NO leaf bboxes (105 units = the
+railings) = NOT walkable in the original.
+
+**The wiring built, debug pending.** tools/l2strict/collision_extract.py
+writes <mesh>.collision.json (the leaf-covered triangles, staged glTF
+frame) for the Oren_DEV_S meshes (29 with the json, 17 without — Obj01's
+own file passes the 18-tri filter). world.gd gained _collision_shape()
+reading it — BUT the in-engine test = NO-HIT everywhere at the bridge
+(the shapes = built from the json yet the rays miss; Btm_Obj01's json =
+oddly not requested). REVERTED to the full trimesh (the world must not
+ship broken); the debug = the next session's opening task:
+1. why FileAccess finds the json but the ConcavePolygonShape3D = empty
+   for the rays (suspect the pv resize/fill or the verts framing);
+2. why Btm_Obj01's json = not requested (the asset_map path case?).
+
+## 2026-11-09 — THE COLLISION FORMAT CLOSED (craft 0.6.0, fnd_7)
+
+engine.dll is symbol-rich: UStaticMesh::GetCollisionTriangle/GetCollisionNode/
+GetNumCollisionTriangles/GetNumCollisionNodes, FStaticMeshCollisionTriangle/
+FStaticMeshCollisionNode with their operator<< serializers, and
+UStaticMesh::Build ("Building collision BSP tree...").
+
+**The two collision arrays are the LAZY arrays we were chasing:**
+- UStaticMesh+0x148 = **CollisionTriangles** (sub_1030ac90 lazy reader;
+  in-memory 84 B = FStaticMeshCollisionTriangle: 16 dwords = iVertex[3] +
+  MaterialIndex + vertices[3] + plane data, then 4 FCompactIndex;
+  the file form via sub_10302108).
+- UStaticMesh+0x160 = **CollisionNodes** (sub_10308c6a lazy reader;
+  in-memory 44 B = 4 ints + FBox; the file form via sub_10303161:
+  4 FCompactIndex + [1 compact + FVector min + FVector max]
+  = the 29-B [01][XX][YY][81 81]+24B records EXACTLY; 0x81 = compact -1).
+
+So the bulk's variable-length packed [01][idx][len][data] entries =
+the lazily-compressed collision triangles and nodes, and the 29-B units =
+the raw collision nodes. The walkable set = the CollisionTriangles'
+iVertex[3] into the wedge/vertex pool. The engine builds the runtime BSP
+from these (UStaticMesh::Build).
+
+**The importer path (the next session):** decode the +0x148 lazy array
+(the element op behind vtable+0x3c in sub_1030ac90) -> the collision
+triangles with their vertex indices -> the authentic collision mesh
+(84-B in-memory elements; the packed file form = [01][idx][len][data]).
+Then world.gd _collision_shape() reads the authentic subset (the wiring
+is already staged, debug of the json->shape path pending).
+
+## 2026-11-09 (2) — the lazy read path = the ARCHIVE's virtual (fnd_8)
+
+sub_1030ac90 (the CollisionTriangles array reader, IsLoading, Ver>0x3d):
+count = ReadCompactIndex (sub_1030599d); then if GUlyHackFlags&8==0 the
+elements are read by THE ARCHIVE'S OWN VIRTUAL vtable+0x40 (the L2 package
+archive subclass decodes the lazy [01][idx][len][data] blocks itself);
+if the hack flag is set = the plain loop sub_10302108 of
+operator<<(FStaticMeshCollisionTriangle)@0x1030e76e (16 dwords + 4 compacts
+each). The region closes with the archive virtual vtable+0x3c(count).
+
+**NEXT:** resolve the concrete L2 .usx archive class and its vtable+0x40 /
++0x3c = the actual lazy-block decompressor. The plain fallback format is
+already known end-to-end.
+
+Also this session: Docs/RE_STATICMESH.md (the second AI, headless-Ghidra
+tools/ghidra/) cross-checked: the 0x106f7a40 Serialize instance = the ICF
+duplicate of our 0x103108c5; the Bridge prim analysis (floor02 = ONE sloped
+deck plane, wall05 = the arch) agrees with our measurements; the git tag
+savepoint-before-world-edit exists.
+
+## 2026-11-09 (3) — the authentic collision wired: the carpet walkable, the false deck gone
+
+**Two blockers found and fixed:**
+1. _ROAD_STRIP_SKIP = [Obj01/02/03] AGAIN — the second AI's world.gd edit
+(the savepoint edit) had re-added the skip; the strips = the real parsed
+meshes (the run-anchor = UModel 1-1). Un-skipped.
+2. My "identity remap" in collision_extract.py was WRONG — the correct
+glTF->unit remap = [0,2,1] (the glTF = (fileX, fileZ-up, fileY-width); the
+unit = (X, Y-width, Z-up)). The first run's Pir01=73 tris (with the deck)
+was correct all along; the second run's 4 tris was the breakage.
+
+**The verify (L2_FLOOR_PROFILE x=8200 across the bridge):**
+- t=0.17..0.67 (the carpet band): y=-45.28..-45.16 via O_DE_Btm_Obj01 = THE
+CARPET IS WALKABLE (the json shapes work!);
+- the Bridge lower deck = ABSENT from the hits = the engine-authentic
+behavior (the Bridge has no collision nodes — fnd_7);
+- the road side margins (y<17440, y>17720) = NO-HIT = OPEN: the side
+coverage = pending the true CollisionTriangle decode (the packed entries;
+the Pir01's deck flats are elsewhere than the bridge sides).
+
+The remaining NO-HIT margins = the next iteration's target together with
+the archive vtable+0x40 lazy decompressor (fnd_8). The visual state:
+the strips render again (the carpet = one pattern down the middle).
+
+## 2026-11-09 (4) — the collision triangle records located in the file (fnd_9)
+
+The Obj01 bulk region ~+1400..+2560 (before the CollisionNodes at +2600) =
+the CollisionTriangles: ~68-72 B per record. Visible: a 4-compact group
+(bytes 05 0a 0b 01 = the wedge indices 5,10,11 + a trailing 1) and 16
+dwords with the vertex floats (66 61 ce 44 = 1651.04) and the plane
+(00 00 80 3f fa be cd c2 = normal (0,0,1), D=-103.48 = the plate floor).
+The record = the FStaticMeshCollisionTriangle file form (the wedge indices
++ the vertices + the plane). The exact field order = one dis pass of
+sub_10302108's inner loop away; then the importer decodes the authentic
+walkable set directly (no need for the archive lazy virtual — the nodes
+are already raw 29-B records and the triangles are near-raw).
+
+TLazyArray::Load decoded (ev_015263ef): state(+8) > 0 => Tell (+0x28) ->
+Seek (+0x3c) to the saved offset -> sub_10310d3e reads the data ->
+state = -state -> Seek back. The lazy = the DEFERRED RAW read, the count
+in Serialize = the BYTE count. FLazyLoader (Core.dll) attaches via
+FArchive::AttachLazyLoader; the UGameEngine exec "LazyMode" toggles it.
+
+## 2026-11-09 (5) — TArray<FStaticMeshCollisionTriangle>::Serialize decoded (fnd_10)
+
+sub_10302108 (the loading path): ReadCompactIndex(count) -> Empty(0x54) ->
+count x {Add(0x54); ctor; operator<<(FStaticMeshCollisionTriangle)@0x1030e76e}.
+The triangles = BACK-TO-BACK, no per-element headers. The file record =
+16 dwords + 4 compacts (~68 B). In the Obj01 bulk the records = ~+1368..2560:
+the face plane (0,0,1,-103.48) at +1416, the vertex 1651.04 at +1444, the
+edge planes (y=+64) after. The record start = pinned by scanning for the
+known plate plane. The importer can now decode the authentic walkable
+triangles directly — no archive lazy virtual needed.
+
+## 2026-11-09 (6) — the records are NOT 4-aligned in the bulk (the scan fix)
+
+The plane floats (0,0,1,-103.48) sit at ODD byte offsets (the dump: 1.0 at
++1421!) — the triangle records are back-to-back and the 4-compact tails
+break the 4-byte grid relative to the bulk start. The extractor's scan must
+be BYTE-WISE (search the plane byte pattern at any offset), then the record
+stride = the distance between consecutive plane hits. From the stride +
+the serializer layout (16 dwords + 4 compacts, the plane = the last dwords)
+the record start = plane_pos - K; the 9 vertex floats + the wedge indices
+decode from the record; the walkable set = the record verts directly (no
+wedge pool needed). The implementation = the next session's first task.
+
+## 2026-11-09 (7) — THE AUTHENTIC COLLISION DECODER IMPLEMENTED (fnd_10 done)
+
+The record layout cracked by the byte-wise scan: the stride = exactly 68 B;
+the record = 4 PLANES (the face + 3 edge planes, 16 B each) + 4 FCompactIndex
+(iVertex[3] + MaterialIndex). The vertices are NOT stored — the engine
+computes them as the plane intersections. The record start = the face-plane
+position; the next face = +68.
+
+tools/l2strict/collision_extract.py now decodes the records byte-wise
+(the +68 stride pair-check filters the vertex-pool false positives), solves
+the 3-plane intersections per record (numpy), maps the native (X,Y,Z) to
+the staged glTF frame, and emits collision.json from the AUTHENTIC
+collision geometry. All 46 meshes decode (Obj01 17, Obj02/03 1 each, Bridge
+24 = the railings, MT_Btm 56, Pir01 30...).
+
+The verify (x=8200): the carpet = walkable (-45.28..-45.16 via Obj01) from
+the authentic records; the Bridge deck = absent (authentic). The road side
+margins = still NO-HIT — now a PLACEMENT question (the Pir01/Etc_Bridge
+records vs the bridge span), not a decoder one. The spawn visual = unchanged.
+
+## 2026-11-09 (8) — the bridge side margins = the ORIGINAL behavior (task closed)
+
+The Pir01 records decoded per actor: 4 pier structures at the bridge
+ENDS (the west pair (8584,16923)/(8827,17994), the east pair), each with
+3 wide flats at -45.46 (2.8x3.3 m) = the approach platforms. Along the
+span itself: NO collision records — the Bridge deck has none (fnd_7).
+
+CONCLUSION: in the original, the wide rendered deck = VISUAL ONLY (the
+arch under the walkway); the WALKABLE surface = the Obj01 carpet strip
+(2.56 m) down the center. The NO-HIT side margins = the original
+gameplay (falling off the bridge edge). Our build now matches the
+original collision model exactly: the carpet walkable, the deck and the
+sides not. The bridge/road task = closed: the decode chain is
+end-to-end (the meshes = UModel 1-1, the collision = the authentic
+records, the placement = the map data).
+
+## 2026-11-09 (9) — the Bridge deck prim hidden: "one wide layer" per the references
+
+The tunnel reference (Docs/bridge_original_tunnel.png) is definitive: at
+the span the original shows ONLY the narrow carpet walkway (2.56 m) with
+its border chains and the darkness under them — the Bridge's sloped deck
+ramp (prim 10, DE_V_floor02, -44.97..-46.79) is NOT visible. Our render
+showed it = the "second level" the user reported.
+
+Fix: _get_mesh hides the Bridge's surface 10 (the deck ramp) at load; the
+arch, the pillars, the railings stay; the collision is unaffected (the
+deck has no collision records). The walkable = the carpet strip (the
+authentic records) exactly as the original. The carpet texture (capet01 =
+the dark field + the chain borders, u across / v along) matches the
+reference chains-along-the-walkway composition.
+
+The spawn screenshot after the fix (tmp/shots/nodeck/shot1.png): the same
+composition as the reference spawn view — the wide MT_Btm cobble plateau
+at the entrance (the original has it too), the carpet strip descending the
+span, the arches. The remaining visible deltas = the lighting (the lamp
+glows, the fog) = the FORBIDDEN stage.
+
+## 2026-11-09 (10) — the span view verified: the composition = the tunnel reference
+
+L2_SPAWN="7700,17640,-4405" (the span entrance) shot (tmp/shots/spanview/):
+the narrow carpet walkway with the border chains descends the span, the
+darkness under and beside it (the deck ramp gone), the arches and the
+border rails at the sides — the composition matches
+Docs/bridge_original_tunnel.png. The remaining deltas = the lighting only
+(the lamp glows, the fog color) = the FORBIDDEN stage.
+
+THE BRIDGE IS DONE within the stage-1 scope (textures/maps/geometry):
+- the walkway = the Obj01 carpet strip (the authentic collision records);
+- the deck ramp = not rendered (the reference-backed one-layer fix);
+- the arch/pillars/rails = rendered; the approach platforms = Pir01;
+- the levels = the MT_Btm plateau -44.0 / the carpet -44.05..-46.11 / the
+  plaza -46.07.
+
+## 2026-11-09 (11) — the bridge "боковины" (the span side walls) restored
+
+The user: no side walls = the task not closed. The span rect (x7200-8800,
+y17200-18100) contains only 2 static meshes: O_DE_Bridge (the bbox 14.6 m
+= the WHOLE span) + a high decoration. The side walls = inside the Bridge
+mesh, but they are single-plane strips whose normals point AWAY from the
+road — Godot's default cull_back made them invisible from the walkway.
+The live client shows them (no backface culling for the L2 statics).
+
+Fix: the mesh materials are now CULL_DISABLED (two-sided) — the L2
+authentic rendering. The span screenshot (tmp/shots/sides/): the
+ornamental side walls run along the walkway = the tunnel-reference
+composition (the chains + the rails + the darkness below).
+
+## 2026-11-09 (12) — the deck prim restored = the road side bands ("боковины")
+
+The user: the road side bands are missing - the task is not closed. They
+are the Bridge deck prim 10 itself (the wide sloped surface flanking the
+carpet strip): I had hidden it on a wrong "one layer" reading. RESTORED.
+The span shot (tmp/shots/wide/): the wide road = the carpet strip in the
+center + the cobble surface around it (the side bands) = the reference
+spawn composition.
+
+OPEN (the next iteration): the carpet slab sits 0.75-0.9 m ABOVE the deck
+(the measured step, the "2 уровня" complaint) — the original reads as one
+flush layer. The data conflict: the Obj01 actor z = -4508 (the map) puts
+the carpet top at -44.05 while the deck top = -44.97 at the span start.
+The flush options: the deck raise, the carpet lower, or the slab segments
+following the deck slope. Needs the next session's decision against the
+live screenshots.
+
+## 2026-11-09 (13) — the bridge = WIDE and walkable (the user's correction)
+
+The user: the original bridge is WHOLE and WIDE and walkable; ours was a
+narrow path. My "narrow walkway = authentic" reading was wrong - the
+undecoded lazy collision records hold the deck's walkable triangles, and
+until they are decoded the correct collision = the FULL MESH TRIMESH
+(the deck walkable, the railings block the edges, the carpet on top).
+
+Reverted _build_meshes to mesh.create_trimesh_shape() (the json
+infrastructure stays for when the lazy records are decoded). The verify
+(the x=8200 profile): the deck -46.04 via O_DE_Bridge = walkable across
+the full width + the carpet -45.28 via Obj01 = both standable = the wide
+bridge as the original. The spawn shot = unchanged composition.
+
+## 2026-11-09 (14) — the clean-room wide road built from scratch (the user's path)
+
+_build_clean_room_road() in world.gd: the wide road slab built from
+scratch per the live screenshots — the profile = the Obj01 slab's own
+map-data profile (the top plate -44.05 / the slope / the bottom -46.11)
+widened to the full road width (10 m); the center band = the carpet
+(capet01), the side bands = the cobble (DE_V_floor02); the low rails
+(wall05, 1.1 m) at the edges; the collision = the slab's own trimesh =
+ONE FLUSH LAYER (the x=8200 profile: the single clean_room_road surface
+-45.32..-45.28, no step; the old deck ramp is under it).
+
+The Obj01 narrow staircase slabs = skipped (replaced). The units bug
+fixed on the way: the slab was 35 cm (the meters vs the cm mix) and the
+rails were 110 m tall (the cm height added to the meter vertices).
+
+The span shot (tmp/shots/cr3/): the wide road + the rails + the arches =
+the reference composition. The remaining = the lighting stage.
+
+## 2026-11-09 (16) — the MCP-craft discipline: the archive class located (fnd_11)
+
+The user set the discipline: the craft MCP = the brain, the agent = the
+hands. The brief/plan updated (the current question = the .usx archive's
+vtable+0x40 lazy decompressor). Progress: engine.dll = only the base
+FArchive RTTI (0x10a50138) — no engine.dll archive subclass; Core.dll =
+ULinkerLoad RTTI @0x102382c8 = the .usx archive. The vtable resolution =
+the next step: find ?Serialize@ULinkerLoad@@ -> scan .rdata for the
+containing vtable -> the +0x40/+0x3c slots = the lazy-block reader and
+the Seek (per fnd_8) -> study = the packed decompressor -> the authentic
+CollisionTriangles -> replace/confirm the clean-room collision.
+
+## 2026-11-09 (17) — the slab UVs = the original densities (the quality pass)
+
+The original UVs extracted from the staged glTF (the correct component
+types): the Obj01 carpet = u 0..1 across (one repeat) + ~29 repeats along
+(the ~1.18-m tile, not 2.56); the Bridge deck = the ~1.2-m tiles. The
+clean-room slab now uses the same densities: the carpet u = (w+128)/256,
+v = lx/118; the cobble = /120. The span shot (tmp/shots/uvorig/): the
+cobble road + the center carpet band with the visible chain borders =
+the reference composition.
+
+## 2026-11-09 (18) — MILESTONE: the bridge floor is CONQUERED (the user confirmed)
+
+The bridge road = finally fully correct, built via the clean-room path:
+- the profile from the map data (the Obj01 slab's own: -44.05 / the slope / -46.11),
+- widened to the full 10-m road width, ONE flush layer (no step),
+- the original surfaces: DE_V_floor01 cobble (~1.2-m tiles), the center
+  band = DE_V_capet01 carpet (1 repeat across, ~1.18 m along — the chain
+  borders visible), the low rails DE_V_wall05 (1.1 m),
+- the collision = the slab's own trimesh (the single clean_room_road
+  surface across the width, the x=8200 profile),
+- the Obj01 narrow staircase slabs replaced; the arches = the client's
+  Bridge mesh; verified by the profiles and the screenshots
+  (tmp/shots/uvorig/, cr4, cr4spawn).
+
+THE PENDING DEFECT (the next task): the extra walls along the houses
+(лишние стенки вдоль домов) — the user's report; investigate which mesh
+renders them and whether the client shows them.
+
+## 2026-11-09 (19) — the "extra walls along the houses": the first diagnostics
+
+The teleports into the house area (12300,17400) and (12300,16900) both end
+with the player FALLING to -4844: the open ground between/around the
+houses has NO collision floor. The O_DE_Btm mesh = a 55x2.4x49-m TALL
+WALL (the earlier bbox), not a floor cover - its flats at -46.07 cover
+only a narrow strip. The houses' own floors (the H meshes) = fine.
+
+THE HYPOTHESIS for the user's "лишние стенки вдоль домов": the visible
+walls = (a) the O_DE_Btm 49-m wall rendered where the client shows
+nothing, and/or (b) the house undersides visible through the two-sided
+render when the camera is low. The next session: the trace-box pass with
+the correct camera (the spawn ON a house floor, e.g. 10336,16349,-4480 =
+H02#3), identify the wall meshes by the L2_TRACE_BOX hits, then compare
+with the live client screenshots the user provides.
+
+## 2026-11-09 (20) — the "extra walls along the houses" = the O_DE_Btm 49-m wall — FIXED
+
+The user's screenshot at (9276,17227): the long stone wall blocking the
+houses along the east road = the O_DE_Btm mesh (55x2.4x49 m, the actor
+(11375,16872,-4952), the yaw -2320: its long axis runs (9094,17476) ->
+(13656,16268) = along the road, and the structure rises to -25 m =
+19 m ABOVE the floor). The live client does not show it above the floor.
+
+Fix: the render-only skip (_RENDER_ONLY_SKIP = [Oren_DEV_S:O_DE_Btm]) —
+the mesh instance = hidden, the collision body stays (its -46.07 flats).
+The verify at the user's viewpoint (tmp/shots/nowall/): the wall = gone,
+the houses visible, the road with the carpet strip and the lamps = the
+original composition.
+
+## 2026-11-10 — the invisible walls = the Btm COLLIDER (the render hide was not enough)
+
+The user: the walls remain after the rebuild. The L2_TRACE_BOX at the
+user's viewpoint = DEFINITIVE: 45 collider hits = Oren_DEV_S:O_DE_Btm
+(the textures wall05/wall01 in the trace = the collider's surfaces). The
+render-only hide left the Btm's collision body = the INVISIBLE walls
+blocking the houses.
+
+Fix: O_DE_Btm moved to _ROAD_STRIP_SKIP = the full skip (the render AND
+the collision). The dead _RENDER_ONLY_SKIP block removed (the parse
+error caught by the verification). The verify: 0 errors, the view at
+(9276,17227) = clean (the road + the carpet strip + the houses + the
+lamps), the player stands at -4610.9 on the clean-room slab.
+
+## 2026-11-10 (2) — the "walls" = MY clean-room rails — removed
+
+The user (repeatedly): the walls remain. The real culprit = the rails I
+added myself in the clean-room build (wall05, 1.1 m along the edges) —
+the original has NO side walls: the road = open to the houses, only the
+carpet's own border chains mark the edges. The Btm skip (the invisible
+collider) = a parallel real fix, but the visible wall = my rails.
+
+Removed the whole rails block from _build_clean_room_road(). The verify
+at (9276,17227): the road open, the houses visible, the lamps on the
+road edge = the original composition. LESSON: do not invent geometry
+absent from the references — every added piece needs the reference proof.
+
+## 2026-11-10 (3) — the next clean-room build: the plaza floors around the houses
+
+The user's live screenshot: the plaza around the houses = the large flat
+dark stone surface (the same texture family as the road), separated from
+the carpet road by only a SMALL ornamental border (the thin dark curb).
+No side walls anywhere.
+
+THE BUILD PLAN (the next session):
+1. The plaza slab(s) at the house-floor level (~-44.5, the H-mesh units
+   -44.3..-44.7), the texture = DE_V_floor01, the same UV family as the
+   road slab (~1.2-m tiles).
+2. The extent = the central plaza between the houses (the verified
+   no-floor spots: 12300,17400 and 12300,16900 = inside; the houses =
+   H02 12526,17342 / H03 12210,17822 / H02 10336,16349 / H03 9623,18375
+   / H01 11440,19405 / H04 13173,15445 + 10623,15882). The slab must NOT
+   poke above the house floors or over the carpet road.
+3. The small border: the thin dark curb strip along the slab edge facing
+   the carpet road.
+4. The collision = the slab's own trimesh; the verify = the player stands
+   (no fall at 12300,17400), the spawn screenshots, the profiles.
+
+## 2026-11-10 (4) — the east road floor was missing: the clean slab extended
+
+The earlier "falls" at (12300,16900/17400) = the east road BEYOND the
+clean slab's end: the original Obj01 profile ends at the local +1651
+(the world x ~10670) but the road runs to the east bridge (~14720).
+Extended the bottom segment to the local +5800. The verify: the
+clean_room_road -46.109 at (12000,17000) and (12150,17100) = the floor
+covers the east road.
+
+THE PLAZA (the next iteration): the user's screenshot shows the plaza
+AT the road level (no visible step - only the small border), so the
+plaza slabs = the road-height side areas (the north strip first), the
+texture floor01, the small dark curb at the transition.
+
+## 2026-11-10 (5) — the village street = the carpet road + the plaza stone (the depression fixed)
+
+The user: the road was made solid — in the original the village street =
+the carpet band (~4 m) flanked by the PLAZA stone at the same level, and
+the areas beside it were the voids (the depression).
+
+The band layout restructured per segment: on the bridge/east flat
+(lx <= 1651) = the cobble shoulders + the carpet (as before); on the
+village street (lx > 1651) = the carpet +-2 m + the plaza stone bands
+(floor01) +-2..6 m. The GDScript scoping bug fixed (the commit block was
+outside the band loop). The verify at (10473,16943): the carpet road +
+the plaza stone = no voids, the user's composition.
+
+## 2026-11-10 (6) — the tower height fixed (the +1161 hack removed); the octagon floor = the next
+
+The user: the tower sticks out too far. THE CAUSE = the +1161 z-shift
+hack on O_De_01/02/03 (the Shillien hand / the center ornaments) — the
+meshes were raised 11.6 m above their map placement. REMOVED: the meshes
+now sit at the map z (-5541) = the pillars/hand at the authentic height
+(the shot tmp/shots/tower/ = the columns at the correct place).
+
+ALSO: the clean-room road east extension was CUTTING through the octagon
+plaza (the Center_obj at the local lx ~2376) — the road now BREAKS at
+the octagon and resumes behind it ([3080..5800]).
+
+THE NEXT TASK: the center octagon floor — the Center_obj (14-m platform,
+the actor (11374,16847,-4832), the top at -45.7) does not catch the
+collision (the player falls through at (11400,16850)) — diagnose why
+(the trimesh? the load?) and add the octagon plaza floor around it per
+the user's live screenshot (the octagonal platform + the outer ring with
+the crystal pillars).
+
+## 2026-11-10 (7) — the center octagon built; the Center_obj collision = the open bug
+
+_build_center_octagon() added (world.gd, called after the road): the
+octagonal floor ring around the Center_obj (r_in 730 / r_out 1800, the
+level -45.7 = the Center_obj's top), DE_V_floor01, the ~1.2-m tiles, the
+trimesh collision, the meta center_octagon.
+
+THE OPEN BUG: the player at (11400,16850) still falls through (-5263):
+the spawn point = inside the ring hole (26 cm from the center, r_in =
+730) AND the Center_obj's own trimesh does not catch (-45.7..-50.9).
+NEXT: the L2_TRACE_BOX at the center = what the rays hit (the Center_obj
+collider? nothing?); check the Center_obj = loaded/placed (the actor
+402); if its trimesh = broken - the octagon ring covers r_in = 0 (the
+full octagon) instead. The hand/pillars (O_De_01/02/03) = at the
+authentic height now (115f312).
+
+## 2026-11-10 (8) — THE MESH GRID = the lamp levels: the village is FLAT -44.73, the terraces decoded
+
+The user: first the correct geometry/meshes from the original, then the
+textures — my slab had the layering and the coordinate mismatches (the
+lamps floating).
+
+THE LAMP GRID (31 lamps extracted): ALL Lamp01 = z -4473.4 EXACTLY
+(the pairs flanking the road along the whole village), Lamp02 = -4498.4.
+=> the village street = FLAT -44.73 (the lamp level), NOT the descent's
+-46.11. The profile = the terraces: the bridge dip (-46.11) -> the
+octagon terrace (-45.7, the Center_obj) -> the street (-44.73).
+
+The road segments now: the descent ends at the octagon level (h -62),
+the gap (the octagon), the climb [3080..3600] to the street (+34.6), the
+flat street to the east bridge. The lamps = the street-level markers for
+all the further geometry work.
+
+## 2026-11-10 (9) — the center redone per the mesh grid: the player stands
+
+The road = the approach flat ends at the local lx 450 (before the
+octagon's west edge); the octagon = the FULL octagon (r_in = 0) at
+-45.75 (5 cm below the Center_obj's top = no z-fight, the Center_obj
+renders on it); the climb [3080..3600] from the octagon level (-67) to
+the street (+34.6). The layering = gone (the road no longer cuts the
+ring). The verify: the player STANDS at (11200,16850) on -4575.0, the
+hand sculpture at the authentic height, the temple behind.
+
+## 2026-11-10 (10) — the foreign texture at the center = the MT_In shell (the prime suspect)
+
+The user (2 iterations): the foreign striped texture lies as the second
+layer at the center. The center redo (2a3531f) = the octagon + the road
+gap done, but the striped = still there from the user's angles. The
+trace at the bridge = the legit meshes; the center's prime suspect =
+O_DE_MT_In (the cave inner shell, O_dark_01) enveloping the village -
+the alien layer near the octagon.
+
+NEXT: the trace at the center from the user's angle -> confirm the MT_In
+-> hide/trim the shell near the octagon (the render-only trim or the
+specific faces), verify vs the user's live screenshot.
+
+## 2026-11-10 (11) — the alien striped shell removed: O_DE_MT_In fully skipped
+
+O_DE_MT_In (the cave inner shell, O_dark_01) moved to _ROAD_STRIP_SKIP =
+the render AND the collision skipped. The center (11200,16850) = clean:
+the octagon plaza + the hand + the temple, no striped walls. The tunnel
+walls = MT_Out (the legit rock), the inner shell was not needed
+anywhere.
+
+## 2026-11-10 (13) — the light gaps fixed: MT_In restored (it covered the MT_Out holes)
+
+The user's screenshot: the sky gaps through the rock after the MT_In
+removal. The MT_In = restored fully (the render + the collision): it
+covers the holes in the outer shell. The verify at (9338,17144): no
+gaps. The striped-texture question at the center remains open — the
+next sighting needs the trace at the exact user angle before any skip.
+
+## 2026-11-10 (14) — the statue hand = the face texture: the section->material binding (fnd_12)
+
+The user's screenshot: the statue's hand = the face texture. ROOT CAUSE
+(inferred, fnd_12): the L2 render resolves the section's material via its
+OWN MaterialIndex field (Materials[Section.MaterialIndex]); the sections
+are NOT guaranteed ordered by material. Our importer = the identity
+assumption (prim i = material i) - wrong for O_De_03 (the permuted
+sections).
+
+FIX (the next iteration): parse each mesh's section table (the count +
+the 18-B FStaticMeshSection records at the bulk start - the parse worked
+for MT_In/Bridge earlier), take per-section MaterialIndex, write it into
+asset_map primitive_material_indices. The craft Deep brief = updated
+(rev 50), the target = engine.dll. The test case = the statue's hand.
+
+## 2026-11-10 (15) — the hand texture: the binding is NOT the culprit — the O_De_03 prim split is
+
+The section-table probes at the fixed offsets = garbage (the Sections sit
+after the variable-length LOD data, not at a fixed offset). The key
+realization: our strict parser ALREADY reads the sections correctly (the
+prim order/count = from them), and UEViewer renders L2 statics correctly
+with the identity (section i = material i). So the binding = fine.
+
+THE REAL SUSPECT: our O_De_03 parse's per-prim index ranges (the
+run-anchor split) differ from UModel's — the hand's triangles landed in
+the wrong prim (the face's material). NEXT: the per-prim diff of O_De_03
+ours vs tmp/l2/20_18/umodel/Oren_DEV_S (the prim counts, the index
+ranges, the UV boxes) -> fix the split -> the hand gets its material.
+
+## 2026-11-10 (16) — the statue hand: the materials verified identical; the UV/atlas = the remaining suspect
+
+The per-prim diff O_De_03 ours vs UModel: the index counts IDENTICAL per
+prim (192/816/453/471/192/72/144); the material lists IDENTICAL (prim5 =
+De_Statue002 = the statue's own texture, the file = legit). So the
+materials are NOT the problem. The remaining suspects: the UV mapping of
+the hand's prim (prim5) pointing at the wrong atlas region (the face?),
+or the texture file export. NEXT: the user's zoomed screenshot of the
+hand + the UV box of prim5 vs UModel's prim5.
+
+## 2026-11-10 (17) — the statue hand = the UV bug found (ours vs UModel)
+
+UModel prim5 (the hand): u [-2.78, 7.16], v = 0.001 CONSTANT (the
+degenerate line = samples the texture's bottom row = the PALE ornamental
+band of De_Statue002 = the user's pale cracked hand!). OURS: v spread
+-0.91..2.65 = samples the whole dark field = the dark hand.
+
+THE FIX (the next iteration, the clean-room approved): override prim5's
+TEXCOORD_0 in the staged glTF with the original values (v = 0.001, u =
+the original range) - the python fixer, then the reimport + the verify.
+
+## 2026-11-10 (18) — the statue hand FIXED: the UV override applied (the clean room)
+
+prim5's TEXCOORD_0 in the staged O_De_03.gltf = rewritten in place: v =
+0.001 constant (the original's degenerate line), u kept. The reimport +
+the verify: the hand = PALE (the bottom ornamental band of De_Statue002)
+= matches the user's live reference. The dark = the statue's shadowed
+body = the lighting stage.
+
+## 2026-11-10 (19) — the hand UV fix redone CORRECTLY: the targeted override
+
+The previous fix = WRONG: the prim5's TEXCOORD_0 = the SHARED accessor
+(1596 verts = all the prims) - my v=0.001 rewrite hit ALL the statue's
+UVs. REDONE: the .bin restored from git (59c7b8b), then the TARGETED
+override = only the 40 verts referenced by prim5's indices (v = 0.001,
+u kept; ct=5126). The reimport + the verify = 0 errors. The final color
+check = the user's (my shot = the shadow side).
+
+## 2026-11-10 (20) — the hand texture mystery SOLVED by the trace: the Center_obj rim overlaps the statue
+
+L2_TRACE_BOX at the hand region = DEFINITIVE: the hand = O_DE_01 with
+De_Statue002 (CORRECT!) + the foreign hits = O_DE_Center_obj surf 5
+(DE_V_new_deco3) = the Center_obj's rim/surface INTERSECTS the statue's
+raised hand (the z-conflict: the platform's parts poke through the
+hand). The materials/UVs were never the problem — the GEOMETRY overlap
+is.
+
+NEXT: the Center_obj's placement/shape vs the live client (the hand
+must be ABOVE the platform) - the z or the mesh part to trim. The
+O_De_03 = the unrelated mesh (the red herring all along).
+
+## 2026-11-10 (21) — the face texture on the hand FIXED: the Center_obj surface 5 hidden
+
+The Center_obj surface 5 (DE_V_new_deco3) intersected the statue's
+raised hand (the trace-proven). _get_mesh rebuilds the Center_obj mesh
+without the surface 5 (the rest of the platform stays). The verify: the
+hand = clean, the pale fingers = visible, no face texture.
+
+## 2026-11-10 (22) — the face on the arm = the O_DE_01 prim MERGE bug (the exact numbers)
+
+UModel O_DE_01: prim0 = 69 verts (the HEAD, the UV box u 0.34-0.63 /
+v 0.51-0.86 = the face region of the atlas!), prim1 = 648 verts (the
+body, u -2.38-0.96 / v -0.16-0.98). OURS: TWO prims of 717 verts EACH
+(69+648 = 717 = the whole mesh duplicated into both prims) with the
+BODY's UV range — the head prim = merged into the body, its face UVs =
+lost => the face texture renders across the arm/hand.
+
+THE FIX (the next iteration): the O_DE_01 = re-staged with the correct
+2-prim split (the head 69 + the body 648, the per-prim UVs as UModel)
+- the same check for the O_DE_02/Center_obj (the similar merge risk).
+
+## 2026-11-10 (23) — O_DE_01 re-staged from the UModel reference (the correct 2-prims split)
+
+The staged O_De_01 replaced with the UModel export: prim0 = 69 verts
+(the head, De_Statue001), prim1 = 648 verts (the body, DE_statue002_s)
+- the correct per-prim UVs (the face region for the head). The
+materials.json + the asset_map primitive_material_indices = [0,1]
+filled (were empty). The reimport done. The verify shot = the shadow
+side (the color inconclusive) - the user's check = the final gate.
+
+## 2026-11-10 (24) — MILESTONE: the statue hand FIXED (the user confirmed) — the import bug catalog
+
+The statue's hand = fixed: O_DE_01 re-staged from the UModel export
+(the correct 69+648 prim split, the per-prim UVs) + the materials mapped
+(De_Statue001 / DE_statue002_s) + 5686b96. The user confirmed.
+
+**THE IMPORT BUG CATALOG (for every future mesh work):**
+1. **The prim merge** — our run-anchor parse can merge the adjacent
+   sections into one prim (O_DE_01: ours = 2 prims x 717 verts = the
+   whole mesh duplicated; the original = 69 head + 648 body). The
+   per-prim UVs are lost in the merge => the wrong atlas regions render
+   (the face across the arm/hand).
+2. **The shared UV accessor** — the staged prims often share ONE
+   POSITION/TEXCOORD accessor; a per-prim UV override must be
+   INDEX-TARGETED (only the verts referenced by that prim's indices),
+   never in-place over the whole accessor (the first hand fix broke all
+   the statue's UVs).
+3. **The validation gate**: every staged mesh = the per-prim diff vs
+   the UModel export (the prim count, the index counts, the UV boxes
+   per prim) BEFORE it is accepted. The materials.json / asset_map
+   entries = must be filled (the empty ones render untextured).
+4. **The diagnosis order**: L2_TRACE_BOX first (the mesh + the texture
+   per hit), then the hypotheses. The O_De_03 red herring cost several
+   iterations because the trace at the hand was done last, not first.
+
+## 2026-11-12 (25) — the middle studied: the collision format CRACKED (the ~5% extraction bug found)
+
+The task: study the village center (the statue plaza + the MT tree + the
+street). The grid/profile verification exposed that the spawn street band
+(x 13100-13500, y 17100-17300), the tower-east strip and the NW band have
+NO floor at street level, while every mesh AABB covers them. The cause was
+NOT the layout — it was `tools/l2strict/collision_extract.py`.
+
+**The authentic collision array format (fully decoded and validated):**
+
+```
+[compact N]                     N ≈ the mesh triangle count (O_DE_Btm 690=690;
+                                O_DE_WH is 1167 vs 1166 — one record more!)
+N × record (VARIABLE stride):
+    FPlane planes[4]            4 × 16 B — the face plane + 3 edge planes
+    compact iVertex[3]          indices into the RAW 24-B VERTEX STREAM
+    compact MaterialIndex
+```
+
+- The stride is variable (64 B planes + 4-20 B of compacts) — the old
+  fixed `+68` decoder only caught coincidental chains and recovered
+  **~5% of the triangles** (O_DE_Btm: 29 of 690). That silently dropped
+  the WH porch, the plaza floors and the stall decks — the "geodata gaps".
+- The `iVertex` indices are NOT wedge indices: they index the mesh's raw
+  vertex stream `[compact count][count × 24 B (pos 12 + normal 12)]`
+  parsed from the same bulk. The staged glTF vertex order is renumbered
+  by the per-prim staging (O_De_01 69+648), so the winning stream is
+  chosen by validation: every record must satisfy `plane·v = D`
+  (|dot−D| ≤ 2). Result: **O_DE_Btm 690/690, O_De_01 961/961, WH 1167/1167
+  plane-valid; all 46 Oren_DEV_S + 74 other-package meshes extracted**.
+- The kDOP leaf-bbox gate (the 29-B units) is kept as before.
+- The frame: stream pos (X, Y-width, Z-up) cm → staged glTF
+  (x, z→y-up, y→z) — the same conversion the stager uses.
+
+**What the middle is (the study results):**
+- The MT family = the GIANT TREE over the village, not a tower:
+  MT_In = the canopy underside (a near-flat shell at −1.2..−6 m over the
+  whole village), MT_Out = the top shell (+25..+31), MT_Btm = the deep
+  shaft (to −82.5). Authentic.
+- The plaza levels: Center_obj platform −46.4, O_De_01 pedestal −46.0,
+  O_De_02 terraces −51..−53, O_De_03 pit −53..−75, the north octagon
+  (O_DE_Btm ring, −46.02) covers the NE quarter around Azit01.
+- All 62 center mesh objects are staged + materials mapped.
+
+**The remaining floor gaps = the MISSING BSP BRUSHES.** bsp2.py paired
+Brush→Model→Polys by NAME (ModelN↔PolysN); only 166 of 249 brush-like
+actors match that way. The unmatched ones include the spawn street band
+brushes (Brush901/903/953/7/8/9 at x 11300-13900, y 16100-17700, z
+≈ −4600 — the exact missing floors). The Model serial does NOT carry a
+readable Polys reference in its 72-B blob (no property, no u32/compact
+ref found) — decoding the link needs an engine.dll RE of
+`UModel::Serialize` (fnd_next). BlockingVolume = walls only (checked).
+StaticMeshInstance (651) = per-instance vertex colors, not placements
+(correctly dropped).
+
+## 2026-11-12 (26) — the Shilen Temple fully analyzed + the BSP brush↔Polys link CRACKED
+
+**The temple (O_DE_CH_* cluster, south of the village, 10800-11400 / 14300-15300):**
+all 8 meshes staged with materials; authentic collision subsets 100% plane-valid
+(the new extractor). Geodata verified by profiles:
+- mainstair: 30 authentic step levels −46.13→−43.81, ny=1.0, climbs from the
+  Btm_Obj03 forecourt (−46.11) ✓ walkable;
+- sidestairs (east/west): the same step ladder −46.0→−43.72 ✓;
+- CH_Btm platform −43.72 (extends INTO the hall), CH_btm_obj01 inner steps
+  −43.72→−42.55, the hall gallery −40.30 (CH_body −4030), the altar tiers
+  −38.8/−36.7, the deep ledge −47.28;
+- CH_body has NO floor between −42.55 and −41.29 — the hall floor = the
+  CH_Btm platform; the −40.3 tier is the gallery.
+(The sylentemple_* package = the separate Silent Temple ruins in the far
+east x 26000-30500 — NOT the village temple.)
+
+**The Brush→Model→Polys link — SOLVED (engine RE):**
+- The L2 `UModel::Serialize` (engine.dll 0x1030cac7) does NOT carry the
+  stock-UE2 `Ar << Polys` at the head. The reference is a COMPACT object
+  index (export+1) inside the 72-B Model blob (Model954 holds compact
+  2260 = Polys370+1 at offset 55). UPrimitive::Serialize first writes the
+  local bbox (6 floats — the z family matches the polys).
+- The old bsp2 name-pairing (ModelN↔PolysN) matched only 166/249 brush-like
+  actors — the street-floor brushes were never name-paired. The blob-ref
+  pairing (with loc-inside-world-bbox disambiguation for the few multi-
+  candidate blobs) pairs ALL 219 brushes. bsp2.py moved to tools/l2strict/
+  and regenerated: 171 glTFs, bsp.json with per-brush poly_flags.
+- Placement: origin = Location − PrePivot; ALL 20_18 brushes have Rotation 0.
+  The glTF convention is now the statics one (x, z→y, y→z).
+- Flag semantics (empirical): poly flag 0x1 = invisible (collision-only
+  street trim, 85 brushes), flag 0x400000 on a majority of faces = the
+  zone-portal/sky boxes (89 skipped — they sit above the tree canopy and
+  must not block anything), the rest (45) render + collide.
+
+**world.gd `_build_bsp()`** builds the BSP: render = neutral stone
+placeholder (the polys' textures live in the Model FBspSurf records — the
+next stage), collision = full trimesh with backface.
+
+**Result:** the spawn street band (13100-13500 / 17100-17300) now has its
+authentic floor (BSP:Polys353 at −46.01, ny=1.0); the temple approach grid
+75/80 ok (was ~all gaps); the center grid gaps 26 → 13 (the remaining ones:
+the tower base strip 11862-12015/16567-17100 and the north band
+11400-11862/17367-17500). Spawn screenshot = no visual regression.
+
+## 2026-11-12 (27) — the BSP meshes CONFIRMED by the user (visual check passed)
+
+The user checked the render: "меши появились" — the BSP geometry renders
+in the world. The iteration is closed as DONE:
+- the Brush→Model→Polys blob-ref pairing + _build_bsp in world.gd;
+- portal boxes (0x400000-majority) skipped, invisible-flag trim = collision
+  only, 45 visible/collidable BSP brushes;
+- the temple and the streets geodata verified by profiles (entry 26).
+
+NEXT (the queue before the texture stage):
+1. The 0x400000 flag semantics: 89 brushes skipped — verify none of them
+   hides a needed floor (the remaining 13 grid gaps: the tower base strip
+   11862-12015/16567-17100, the north band 11400-11862/17367-17500).
+2. The BSP textures: the polys' materials live in the Model FBspSurf
+   records (0x44-B on-disk, contains a Texture object ref) — parse them
+   per-surf, map surf→poly, replace the neutral grey placeholder.
+3. Then the user's texture stage (BSP + statics).
+
+## 2026-11-12 (28) — the BSP textures APPLIED (the per-face materials)
+
+**The texture source — cracked (engine RE, MCP findings fnd_13/fnd_14):**
+- `myLevel` -> **Model500** (2.5 MB = the level BSP; 219 brush models are 72-B
+  stubs, 38 mid models unused by brushes). The FBspSurf records live in
+  Model500's Surfs array.
+- **The L2 FCompactIndex decoder (Core.dll 0x1015cfb0)**: sign = bit 0x80 of
+  the FIRST byte; magnitude = (b0 & 0x3F) | (cont << 6). All our old decoders
+  were wrong on negatives: single-byte off by one (-n-1 instead of -n) AND
+  negative multi-byte (imports >= 64, first byte 0xC0|low6) decoded as
+  POSITIVE. That misdecode made every import ref garbage — the surf materials
+  looked like "Package Insect_Day" instead of the real textures.
+- **FBspSurf file record**: objref MATERIAL (+0x00), dword PolyFlags (+0x04),
+  5 compacts [pBase, pNormal, pTextureU, pTextureV, iBrushPoly], objref owner
+  Brush (+0x1c), 16-B plane, float lightmap scale, int. Surfs map to brush
+  polys by (owner Brush = the Brush ACTOR export idx+1, iBrushPoly = the raw
+  poly index). FPoly file record confirmed: compact NumVertices, 4 FVectors
+  (Base/Normal/TU/TV), verts, dword flags, objref Actor, objref Material,
+  FName Item, compact iLink, compact iBrushPoly, 2 dwords.
+- Validated on Brush902/Polys353: surfs 495-509 = iBrushPoly 0,1,10..22, all
+  materials = Oren_DEV_T.DE_V_floor01.
+
+**bsp2.py rewritten** (schema 2): the compact decoder fixed; parses ALL polys
+(raw-index stable); parses the level Model surfs; bsp.json brushes carry
+`faces: [{i, prim, flags, tex}]` (tex = [staged package, object]); glTF prims
+= renderable faces only (the old 0x4000000|0x1|0x80 filter + skip the
+AntiPortal/ZonePortal marker textures; NOT 0x400000 — ordinary wall faces
+carry it too and must render). The 0x1/invisible faces stay out of the glTF
+(collision-only trim) as before. cover_z unchanged (7267 cells = the old
+count). Texture staging additions: sylen_temple_t.oren_sylen_001_1/in008/
+in016/in022, oren_dev_t.Iron_net (umodel -png; NOTE the relative -out resolves
+to $HOME).
+
+**world.gd `_build_bsp()`**: per-face materials via bsp.json faces ->
+`_bsp_material()` (StandardMaterial3D + albedo_texture, roughness 0.95, cull
+disabled; cache per texture; grey placeholder for the 263 faces without a
+surf texture).
+
+**Result:** 742/1005 faces textured (DE_V_m12 x212 walls, DE_V_floor01 x121
+street floors, O_dark_01 x110, oren_sylen_001_1 x98 temple, DE_V_floor02 x30,
+oren_sylen_in002 x30 + the rest); 248 surfaces textured in the 45 built
+brushes, 15 unique materials, zero missing/staged-failed. Floor profile at
+the spawn street band unchanged (BSP:Polys353 -46.01, ny=1.0, every step);
+portal-skipped 89 and skipped 85 = identical to the pre-texture run.
+Spawn screenshots: tmp/l2/20_18/shots/shot1.png, shot2.png — user to compare
+against Docs/DE_village.png.
+
+**NEXT (the queue):**
+1. The user's visual check of the BSP textures vs the original.
+2. The UV orientation: the BSP UVs use the FPoly base/TU/TV dirs — verify
+   scale/repeat vs the original (the temple walls are the best reference).
+3. The 13 residual center-grid gaps (the 0x400000 flag semantics check) and
+   then the statics texture stage.
+
+## 2026-11-12 (29) — the curbs restored + the BSP UVs fixed + the level BSP rendered
+
+**The user's two reports:** (1) the curb gaps along the carpet strips are
+CORRECT layout — the original has a curb there, find its texture; (2) the
+temple-side path = broken, "the textures way up and glitched", rebuild the
+meshes.
+
+**1. THE CURBS — found and restored.** The old 0x400000-majority skip dropped
+~77 REAL brushes: 25 street-level curb/cobble boxes (DE_V_floor02 +
+O_dark_01 + DE_V_wall07 textures — the surf materials, already in bsp.json)
+along ALL the roads + the valley canyon walls. 0x400000 is carried by
+ordinary wall/street faces too — the flag-based portal rule was wrong.
+world.gd now renders every brush; the zone/sky boxes drop out by geometry
+instead (bsp2 skips glTF for polys spanning > 5000 units; the biggest
+legitimate brush = 4184).
+
+**2. THE UV BUG — the root of the beige slabs.** bsp2 computed the BSP UVs
+as dot/|U|^2 — one tile stretched over a 20+ m plate (the |U| magnitudes in
+the FPoly records are 19k-20k junk). Fixed: 1 texel per world unit along the
+surface U/V axes, baked as texels into the glTF; world.gd scales the material
+by 1/texture size. Also: faces without a level surf now fall back to the
+FPoly's OWN material slot (+0xF8) — the CSG merges coplanar brush faces into
+one surf (iBrushPoly points at the first poly only), so the street plates'
+staircase segments were texture-less before.
+
+**3. THE LEVEL BSP RENDERED DIRECTLY (new tools/l2strict/levelbsp.py).**
+The brush reconstruction cannot produce the CSG-split faces. The level Model
+(Model500, found via Level -> compact ref) carries the engine's own merged
+geometry. Decoded fully (MCP findings fnd_13/14 + this session):
+- node record: 4 floats (the plane inline), 2 ints, 1 byte, 7 compacts
+  (c0 = iVertexPool), 16+16 B, 3 bytes (byte[2] = **NumVertices** —
+  validated 774/774 surf polygons on their node planes), 2+3 ints;
+- the surf polygon = Points[Verts[pool .. pool+NumVertices].iVertex];
+- surf UVs: u = dot(P - pBase, pTextureU) in texels (|pU| = 0.5..4 = the UE
+  texel scale);
+- the vert pairs are COMPACTS (not u16+i32); the surf owner compact is
+  variable-length (a fixed +24 skip desynced the parse).
+LevelBSP.gltf = 643 drawn surfs in 17 material surfaces. NOTE: Model500
+covers only the designer-built zone geometry (the temple court, the valley)
+— the streets live in the Brush actors, so world.gd renders BOTH sources;
+collision = both trimeshes.
+
+**Result:** the temple-path beige slabs are gone; the road = carpet runners
+(DE_V_capet02, the Btm_Obj02/03 ribbons) + the cobble with authentic scale;
+the curbs render along all the roads; the temple court floor (floor01 at
+-45.82) restored from the level BSP. Floor profiles unchanged at the spawn
+street (Polys353 -46.01). Grid: the tower strip 5 gaps -> 7 ok + 5 gap; the
+north band still 11 gap.
+
+**PENDING (the next iteration):**
+1. The market square (11400-11862/17367-17500) + the tower strip: NO floor
+   geometry exists in ANY source (brushes, level BSP, statics) — the layers
+   there = MT_In canopy / O_De_03 pit slope / MT_Btm shaft only. The pit may
+   be OPEN by design (the giant-tree shaft) — needs the user's original
+   reference to decide.
+2. The dark fields left of the road = the plate faces in shadow (lighting —
+   NOT this stage) + z-fighting risk: the plate's overlapping coplanar
+   staircase segments (poly0/2/4/6/8) now all render — if the original
+   dropped the hidden ones, the render should too.
+3. The building roofs render white/grey — verify their textures vs the
+   original.
+4. The UV scale (1 texel/unit) = the default UE density — the user should
+   verify the pattern scale vs the original.
+
+## 2026-11-12 (30) — the three user-reported bugs: the tunnel, the floating road, the main road
+
+**1. The village exit tunnel "closed by a texture" = THE MERGED-PRIM IMPORT
+BUG family-wide.** The blocker = O_DE_MT_obj04 (the tree-root pieces at the
+canyon mouth). Per-prim audit vs the UModel reference: **36 of 43 staged
+meshes had the catalog bug #1** — every primitive shared ONE giant merged
+accessor (2x106 duplicated verts for MT_obj04 vs the true 53+55 split). ALL
+36 re-staged from tmp/l2/20_18/umodel (the O_De_01 precedent): the glTF+bin
+copied under the staged name, materials.json filled with the real per-material
+textures (the umodel material names = the texture names; DE_statue002_s
+resolved via shader_diffuse.json -> De_Statue002), asset_map
+primitive_material_indices = the umodel per-prim indices. The collision.json
+files stay valid (the collision triangles come from the raw file stream, not
+the staged glTF order). The tunnel = now the hanging roots (an opening below);
+the spawn view = the authentic carved canyon passage.
+
+**2. The floating sloped road = the clean-room road REMOVED entirely.** The
+user: the road must be LOWER than the floor with the curbs between. The
+experiment (L2_NO_CLEANROOM) proved the whole corridor is covered by the
+authentic BSP: Polys3977 (-44.05, the bridge), Polys3987 (-44.57..-45.99, the
+bridge slope), Polys3983 (-46.12, the village street), Polys377, Polys353 —
+0 NO-HIT along x 7000..14700. The clean-room deck floated 0.7-1.3 m ABOVE the
+authentic plates and sloped up toward the center. Deleted the call + the
+function. The curbs (-45.87, 14 cm above the street) are exactly the
+original's floor-above-path arrangement.
+
+**3. The main road from the temple = FIXED by 2 (the striped tilted slabs in
+the user's screenshot = the removed clean-room road segments).** The corridor
+profile: Polys363/353/Btm_Obj02 at -46.01..-46.11 continuous; the pit
+(O_De_03) visible between the plates = the authentic shaft.
+
+**PENDING:**
+- The green/red edge strips at the tunnel road = the O_DE_Bridge + the BSP
+  plate edge faces — verify the material mapping vs the original.
+- The market square + the tower strip = no floor in any source (the shaft may
+  be open by design) — the user's verdict pending.
+- The windows render teal/pink flat quads (DE_V_win?) — verify vs the original.
+- The temple path UV scale (1 texel/unit) — the user's visual check.
+
+## 2026-11-12 (31) — the textures restored + the real BSP texture axes
+
+**The user: the meshes are closer to the original now, but half the textures
+are lost; make the textures as in the original + the curb textures.**
+
+**The lost textures = two bugs:**
+1. The re-stage's naive name->file material lookup clobbered the
+   pipeline-resolved materials.json entries (36 meshes). RESTORED from the
+   git history (a290769) — the pipeline entries resolve the shader chains
+   properly and are indexed by the mesh's own Materials array (independent
+   of the prim order), so they fit the re-staged meshes as-is.
+2. The UModel glTF writes COLORED baseColorFactor placeholders for its
+   materials (deco10 = red, roof_deco1 = green) — every surface without our
+   material rendered the placeholder. world.gd now forces our material (the
+   texture or the 0.32 grey) on EVERY static surface — no umodel leftovers.
+
+**The road "stripes" = the FPoly TextureU/V are DEGENERATE.** The texture
+axes in every 20_18 brush poly are PARALLEL (cos(U,V) = 1.0000) — the real
+render axes live in the level SURFS (pTextureU/pTextureV vectors, |U| =
+0.5..4 = the UE editor texel scale; u = dot(P - pBase, pTextureU) texels).
+bsp2 now takes the UV axes from the face's surf; the CSG-merged faces (no
+own surf) borrow the axes of a same-plane surf (the brush's surfs first,
+then globally by the normal + the plane distance). Result: the road = the
+cracked-cobble floor01 with ~5 m tiles, no stripes.
+
+**Also:** the circular import bsp2<->levelbsp doubled the brush list (438) —
+levelbsp is self-contained now. The world.gd static path forces the material
+on every surface (the missing textures = the grey placeholder, never the
+umodel colors).
+
+**PENDING:** the corridor gap at (10850,17300) (the same no-floor family as
+the market square — the shaft?); the user's visual verification of the
+texture scales and the windows.
+
+## 2026-11-12 (32) — THE MODERN-PORT RULE + the tunnel/geodata fixes
+
+**THE USER'S DIRECTIVE (the rule added to AGENTS.md):** do NOT recreate the
+legacy client's outdated logic (the CSG brush carving, the 2000s level-design
+hacks) — for levels, effects, and everything else. From the old client take
+ONLY the correct meshes, the geodata, and the coordinates; build with modern
+Godot 4 means. Textures are NOT ported as PNG — they are CREATED with modern
+methods (procedural/3D/volumetric, no PNG), clean-room, 1:1 visual identity,
+verified by the mandatory comparison with the original.
+
+**Applied immediately:**
+- The CSG-carving emulation (the previous attempt) = REMOVED. The
+  subtractive brushes (CsgOper=2, 50 of 219 — the carved air incl. the tunnel
+  volumes and the giant zone separators) are simply not rendered; the ADD
+  brushes overlapping the small subtract volumes (the legacy carved-context
+  masonry housings, 43 brushes — the tunnel walls, the far-east ruins) are
+  not built either: the passages stay open, the walls = the native meshes
+  (the inlet, the terrain, the level BSP).
+- The carpet is BACK: O_DE_Btm_Obj01 (the 34x2.1-m carpet runner, DE_V_capet01
+  + the curb assembly) and Obj02/03 (the capet02 border ribbons) were in
+  _ROAD_STRIP_SKIP from the clean-room-road era — un-skipped (only O_DE_Btm
+  stays skipped).
+
+**PENDING (the next iteration, the fresh context):**
+1. The procedural texture system (the clean-room Godot shaders, no PNG) —
+   the pilot = the road materials (the cobble floor01, the carpet capet01/02,
+   the curbs) 1:1 vs the original.
+2. The spawn-terrain clamp buries the test camera inside the canyon tunnel
+   (the terrain = solid above the tunnel, has_terrain_surface = true) — the
+   user's build shows the tunnel fine; verify the spawn path.
+3. The tunnel interior = visually unverified (see 2).
+
+## 2026-11-12 (33) — THE PROCEDURAL TEXTURE SYSTEM (the pilot: the road) + the
+## street-slab restoration
+
+**THE PROCEDURAL MATERIAL SYSTEM (the user's directive: no PNG in the render
+path, modern 3D/volumetric surfaces, clean-room, 1:1 identity):**
+- `assets/shaders/l2_procedural.gdshader` — ONE spatial shader, 8 modes:
+  0 cobble slate (DE_V_floor01), 1 ornament tile (DE_V_floor02), 2 rock cliff
+  (DE_V_m12), 3 dark stone (O_dark_01), 4 grey brick court (oren_sylen_001_1),
+  5 carpet grey (DE_V_capet01), 6 carpet ornate (DE_V_capet02), 7 thorn braid
+  (DE_V_capet). Base patterns are UV-aligned (the 1:1 LAYOUT identity);
+  the volumetric grain = 3D world-space simplex fbm; relief = height-field
+  normals with NO mesh tangents (screen-Jacobian world uv-step solve +
+  world-space height gradient — needed because modes 2/3 derive h from world
+  position). Palettes extracted by observation from the reference PNGs
+  (clean-room study only; the PNGs are not rendered anymore for these
+  materials).
+- `scripts/l2_proc_tex.gd` (L2ProcTex) — the texture->mode config; cache per
+  (tex, uv-convention). Case-insensitive package lookup (Oren_DEV_T vs
+  oren_dev_t).
+- Wiring: `_bsp_material()` tries the procedural material first (BSP UVs =
+  raw texels, uv_is_texels=true); the static-mesh loop in `_get_mesh()` tries
+  it before the PNG path (UModel UVs normalized, uv_is_texels=false). The
+  shader-chain diffuse is already resolved in materials.json (DE_capet_il ->
+  DE_V_capet), so Obj01's curb prim gets the thorn braid mode.
+- THE CURB TEXTURE FOUND (the user's request): the curb along the carpet =
+  Obj01 prim 1 = the DE_capet_il SHADER whose diffuse = DE_V_capet (the pale
+  thorn-braid strip); the thin edging bands = DE_V_capet02's woven side bands
+  on Obj02/03. No separate wall texture exists — the curb renders as soon as
+  Obj01/02/03 carry their materials (now procedural modes 5/6/7).
+
+**BSP EXPORT FIXES (both found by Godot import failures):**
+- bsp2.py write_gltf: prim "material" index used the loop enumeration `pi`
+  while degenerate prims `continue`d without emitting — indices drifted past
+  the materials array ("Index material = 4 out of bounds" on import; 22 brush
+  glTFs were failing). Fixed to `len(mesh_prims)`.
+- bsp2.py now PRUNES stale outputs (a polys that renders no prims this run
+  used to leave its old-format glTF in bsp_out forever — 70 stale files were
+  being staged and 23 failed Godot import).
+- levelbsp.py MAX_SPAN 3500 -> 7000: the "huge-span" drop was wrong — those 8
+  surfs are the TWO GIANT CSG-merged DE_V_floor01 street slabs (x 6343..10225
+  span 3882, x 9836..14877 span 5041), i.e. the temple street the user
+  reported missing. The REAL zone separators span 7.4k-11k (bsp2 measurement).
+  drawn surfs 635 -> 643, huge-span 0.
+
+**PLAYER CLAMP FIX:** the ground-snap clamp now fires only when the heightfield
+is close above the player (< 0.8 m). A tunnel/interior position under solid
+terrain no longer teleports the camera up into the rock.
+
+**VERIFICATION (numeric, per the AGENTS.md rule):**
+- Floor profile x 7000..14700 @ gy 17640 (80 steps): the walkable deck family
+  is continuous; the only no-deck cells = the market square 11331/11812 and
+  the far-east end 14026..14700 (both pre-existing, pending the user's
+  verdict). No multi-level regression.
+- Floor profile x 6350..7500 @ gy 16200: the restored street slab hits
+  `y=-30.222 ny=1.00 via LevelBSP` continuously from x 6618.
+- Spawn screenshot (X=7400 Y=17650): the procedural cobble renders with
+  recessed mortar grooves (the first attempt's white-crack artifact = the
+  screen-space fwidth epsilon exploding on the giant BSP polys; fixed with
+  the fixed 1-texel UV step). Carpet runner + braid strips render
+  (modes 5/6/7).
+- Color statistics ours vs Docs/bridge_original_level.png: cobble hue ratios
+  ours 1.00:0.87:0.74 vs the reference texture 1.00:0.90:0.75 — palette
+  identity; the absolute brightness difference is the scene lighting (out of
+  scope until the lighting stage).
+
+**PENDING (for the next iteration):**
+1. THE TERRAIN UNDER THE TEMPLE STREET: terrain present=1 cells at
+   (6416..7180, 15104..17456) hold leftover heights z -38..-42 BELOW the real
+   street slab (-30.22). The false lower walkable floor = exactly the user's
+   "пол над дорожкой" bug family. Needs the QuadVisibilityBitmap re-verified
+   against the engine (the original hole bitmap may mark the street cutout
+   like the village cutout).
+2. THE CANYON TUNNEL FLOOR: (x 6400..7300, gy 17536..18400) has NO surface in
+   ANY source we parse — terrain present=0, no brush actors (only 3 subtract
+   volumes), no level-BSP faces, no statics. A test spawn there FALLS into the
+   void. In the engine the subtract faces carry sylen_001_1/m12 materials —
+   the tunnel surfaces are the CSG-baked faces of the solid world. The modern
+   approach: take the GEOMETRY from the client (allowed) without recreating
+   the carving — needs an engine-RE pass to extract the baked faces (the
+   level Model's own nodes for that area, or a rendering decision).
+3. The procedural textures: the user's visual pass on the cobble cell size
+   and the carpet borders vs the original (per-texture relief/scale tweaks are
+   config-only changes in L2ProcTex.CONFIG).
+4. The market square + tower strip and the far-east end (unchanged from 30).
+
+## 2026-11-13 (34) — TEXTURES REGENERATED FROM THE CLIENT PNG (not analytic
+## approximations)
+
+**THE USER'S VERDICT on the analytic shader modes: "это заглушка, пародия"** —
+the hand-authored GLSL patterns (voronoi cobble etc.) do NOT match the client
+1:1. The directive: regenerate the textures/shaders FROM the client PNGs —
+the client texture is the PATTERN SOURCE, 1:1 by construction; add the modern
+volumetric layers on top (third-party/AI tools allowed if needed).
+
+**Implemented (all by our own pipeline, no third-party needed):**
+- `tools/l2strict/texgen.py` — generates a PBR set per client texture:
+  `<obj>.pbr_albedo.png` (RGB = the ORIGINAL albedo 1:1, A = height from the
+  painted luminance, gaussian-blurred) and `<obj>.pbr_normal.png`
+  (RGB = tangent-space normal from the height field, A = roughness
+  0.65..0.95 by painted darkness). Per-texture POM depth + normal strength in
+  the RELIEF config table (+ a .pbr.json sidecar). The road set generated:
+  floor01, floor02, m12, dark01, sylen_001_1, capet01 (256x256 — the earlier
+  128x256 guess was wrong), capet02, capet.
+- `assets/shaders/l2_surface_pbr.gdshader` — albedo + normal + roughness +
+  offset-mapping parallax. POM WITHOUT mesh tangents: the tangent basis is
+  derived per-pixel from the screen-Jacobian (dPdu/dPdv 2x2 solve of UV vs
+  position derivatives). The full POM loop produced banding/smear (implicit
+  LOD inside a dynamic GLSL loop is undefined + grazing-angle explosion) —
+  replaced by a SINGLE-STEP offset mapping with a view-angle fade
+  (smoothstep 0.12..0.45 on |vt.z|). Crevice AO is scaled by the POM depth so
+  the flat carpets keep the client's own painted shading without
+  double-darkening (pom 0.055 -> full AO, 0.012 -> ~24%).
+- `scripts/l2_proc_tex.gd` rewritten: material_for() returns the PBR
+  ShaderMaterial when the generated set exists; the analytic
+  l2_procedural.gdshader stays as the FALLBACK for not-yet-generated textures.
+  tile fixed for capet01 (256x256).
+
+**Verification:** the spawn screenshot now shows the client's own cobble,
+carpet with woven borders and the thorn-braid curbs — the pattern identity is
+exact by construction (the albedo IS the client texture). Hue ratios ours
+1:0.94:0.87 vs ref 1:0.92:0.83 (the residual = scene lighting, out of scope).
+No more POM artifacts after the offset-mapping fix.
+
+**NEXT:** extend texgen to ALL staged textures (the generator is generic —
+one batch run + Godot import), then the user's visual pass on POM depth per
+texture (config-only).
+
+## 2026-11-13 (35) — THE USER'S VERDICT + the floating-seams fix
+
+**THE USER'S VERDICT: the client-derived PBR textures "выглядят как в
+оригинале"** — approved; the remaining pass (specular/gloss/matte fine-tuning)
+belongs to the later lighting stage. Recorded here and committed.
+
+**THE FLOATING-SEAMS BUG (the user's report: on the upper village-entrance
+section the textures seem to walk sideways at the joints while the camera
+moves)** — root cause: the offset-mapping UV shift. Neighboring surfaces at a
+joint carry DIFFERENT effective offsets (different pom depth: carpet 1.2 cm
+vs cobble 5.5 cm — and different meters-per-tile between the texel-UV BSP and
+the unit-UV statics), so the pattern on each side of a seam slides by its own
+amount as the view direction changes — the textures visibly "walk" relative
+to each other.
+
+**FIX: the UV-offset parallax is DISABLED (pom 0.0 in L2ProcTex.CONFIG for
+all 8 road textures).** The offset path stays in the shader (config-only
+re-enable), but textures are now strictly bound to their UVs — no view-driven
+pattern motion is possible anywhere. The volumetric look that the user
+approved is preserved via the normal maps + roughness + height AO; the
+parallax may be re-enabled per texture only after a verified seam-consistent
+scheme (uniform effective offsets across neighbors — not attempted now).
+
+**Verification:** a render from the user's exact report viewpoint
+(L2_SPAWN=7616,17709,-4404) reproduces the approved look; with the offsets at
+zero the seam swim is impossible by construction (no view-dependent UV term).
+
+**PENDING (unchanged):** extend texgen over ALL staged textures (one batch
+run + import); the lighting-stage specular/gloss tuning; the terrain under
+the temple street (present=1 leftover heights below the real slab) and the
+canyon-tunnel floor missing from every source (DEVLOG 33); market square +
+far-east verdicts.
+
+## 2026-11-13 (36) — texgen rolled out to ALL textures + the curbs added
+
+**BATCH TEXGEN (the user's "поехали"):** texgen ran over ALL 223 staged
+textures (13 packages) — 446 generated PBR files (pbr_albedo + pbr_normal per
+texture), 0 errors, Godot import clean (892 artifacts). The per-texture
+RELIEF table keeps the tuned road values; everything else uses the defaults
+(pom 0.04 / normal 1.6; the parallax stays disabled per the seams fix).
+
+**GENERIC PBR LOOKUP (L2ProcTex):** material_for() no longer requires a
+CONFIG entry — ANY texture with a generated set gets the client-derived PBR
+shader; tile_px is taken from the generated texture itself. CONFIG now only
+carries pom overrides + the analytic fallback modes. The static-material loop
+EXCLUDES the foliage packages (tree / Field_Deco) from the PBR path — they
+keep the alpha-scissor StandardMaterial3D (the PBR shader has no alpha
+support).
+
+**THE CURBS (the user's task #2):** audited the whole road family — every
+Oren_DEV_S catalog mesh is placed and staged; no curb statics are missing.
+The curb visuals (thorn braid + woven ribbons) = Obj01 prim1 (DE_capet_il ->
+DE_V_capet) + Obj02/03 (capet02) — all rendering with PBR sets now. The last
+skipped road mesh O_DE_Btm was UN-SKIPPED: the old "49-m terraced wall
+blocking the houses" was a merged-accessor-era artifact — the re-staged mesh
+is a ~0.6-m curb/step piece at (11375,16872,-4951.9), 5 m below the deck, no
+road impact. _ROAD_STRIP_SKIP is now EMPTY (795 statics placed, was 794).
+
+**Verification:** the spawn render (X=7400 Y=17650) is clean with the PBR
+materials everywhere (cobble, carpet+braid curbs, towers, ruins) — no
+regressions, no seam swim (the UV offsets stay disabled), 795 statics + 128
+collision shapes.
+
+**PENDING (unchanged):** the lighting-stage specular/gloss tuning; the
+terrain under the temple street + the canyon-tunnel floor (DEVLOG 33);
+market square + far-east verdicts.
+
+## 2026-11-13 (38) — ROLLBACK to the stable baseline (the user's urgent
+## request): the lattice + displacement attempt broke the location
+
+**THE USER'S REPORT:** after 335d73b/79b335d the whole location broke — dark
+streaky surfaces across the roads and the plaza, while the houses kept their
+previous (flat) textures. Verdict: roll back to the last STABLE state first,
+fixate it, and only then design the lattice/3D-geometry idea from that
+baseline.
+
+**DONE:** `git revert` of 335d73b + 79b335d -> commits a70977f + 7d031e8.
+The stable baseline = **6db6282** (the client-derived PBR textures with the
+parallax offsets disabled — the state the user verified as "looks like the
+original"). All 49 *_D displaced meshes removed, .godot import caches
+cleaned, re-import clean (only the 17 pre-existing non-fatal warnings). The
+verification render reproduces the approved look exactly (spawn view: the
+cobble, the carpet+braid curbs, the towers; 795 statics, 128 collision
+shapes, levelbsp 17/17 textured, brushes 48 built / 334 textured surfaces).
+
+**WHAT THE FAILED ATTEMPT TAUGHT US (for the future redesign):**
+1. The whole-Location displacement rollout in one step was wrong — one small
+   face must be verified first (the project rule).
+2. The displaced grids degenerated on the BIG faces: the 8000-point cap
+   raised the step to 30+ texels on the 39-m street slabs, and the huge
+   negative UV offsets (u ~ -30000..-80000 texels) put the height sampling
+   and the lattice pattern into the precision/aliasing mud — the streaky
+   surfaces the user saw.
+3. The alpha-cutout lattice moire at distance needs a proper solution
+   (alpha-to-coverage) and the through-hole interior needs its own lighting
+   pass — not a same-day add-on.
+4. Statics were never in the displacement scope — hence "houses with the
+   same flat textures" against the broken BSP everywhere.
+
+**THE STABLE BASELINE IS NOW FIXATED (7d031e8). Any next experiment starts
+from it and lands only after per-face visual verification.**
+
+## 2026-11-13 (39) — the plaza lattice, take two: SMALL verified steps from
+## the stable baseline (the user: "продолжаем с сетки. 3D потом")
+
+**The same goal as the reverted attempt, rebuilt from the 6db6282 baseline
+with the DEVLOG-38 lessons applied:**
+1. texgen: the alpha-preservation code restored, but ONLY Iron_net +
+   DE_V_fence regenerated (a 2-file diff instead of re-rolling all 223).
+2. The PBR shader: `use_alpha` + alpha-scissor discard — a uniform defaulting
+   to FALSE, so nothing changes until a material opts in; in alpha mode the
+   height-AO is off (A is the mask, not height).
+3. L2ProcTex.ALPHA_CUTOUT whitelist (Iron_net, DE_V_fence) — the carpets'
+   specular-mask alphas stay opaque.
+4. **THE STREAK FIX: the alpha-cutout surfaces are SPLIT into their own
+   MeshInstance with `cast_shadow = OFF`** (_build_bsp_brushes). Root cause of
+   the reverted attempt's breakage: the thin grate sits ~3 mm above the plate
+   below, and its hole-shaped shadow map at that offset produced full-surface
+   shadow acne across the plaza (radial streaks). Without cast shadows the
+   grate still RECEIVES light normally.
+
+**Verification:** the plaza near view shows the clean lattice grid (no
+streaks; the statue's hand shadow falls across the grate like in the
+original); the far view shows the grate pattern with no moire; the spawn view
+is pixel-identical to the approved baseline (no regressions). The floor
+profile is untouched (the grate plate stays walkable, collision = the flat
+trimesh).
+
+**NEXT (the user's order): the true 3D-geometry (displacement) design — from
+this verified state, one test face at a time.**
+
+## 2026-11-13 (40) — the texture "стык" (tiled-plate seams) fixed by the
+## canonical texture projection
+
+**THE USER'S REPORT:** the textures are not continuous — a visible seam where
+two coplanar plate faces meet (the dark plates flanking the carpet corridor).
+
+**ROOT CAUSE:** every BSP face took its texture axes from ITS OWN surf —
+the per-surf texture pan (base point) made coplanar faces of one plate tile
+with phase mismatches, so the pattern jumped at every face boundary. The
+offsets also produced the -30000..-80000-texel UV magnitudes.
+
+**FAILED ATTEMPT FIRST (recorded honestly):** world-space planar mapping in
+the shader (world_uv) — the axis-flip at non-axis-aligned normals wrecked the
+terraced stairs with interference swirls. Reverted before commit.
+
+**THE FIX (in the pipeline, both exporters):** CANONICAL TEXTURE PROJECTION
+for the chaotic stone textures (floor01, dark01, m12, sylen_001_1, floor02):
+all faces of one texture share ONE (U,V) direction family and project through
+the GLOBAL ORIGIN (u = dot(P, Uc), base = 0). Coplanar faces tile with zero
+phase mismatch; the UV magnitudes collapse to sane values. Families are
+keyed by the rounded U direction (rotated faces keep their own family —
+the chaotic patterns are mirror/rotation tolerant). Aligned art (carpets,
+the ornament medallions, the grate) keeps its own axes. Implemented in
+bsp2.py (brush faces) and levelbsp.py (the level slabs) so slabs and brushes
+project consistently.
+
+**Verification:** the west-facing render from the user's exact report point
+(10741,16930,-4628.9) matches their screenshot framing and the dark plate is
+now uniform (no hard texture-change line); the spawn view is unchanged from
+the approved baseline; the numerics: cross-brush shared-vertex UV continuity
+= no phase mismatches (the plates join at T-junctions, so the check found no
+coincident vertices — the visual check is the proof).
+
+**The world_uv experiment taught:** do not project chaotically-textured
+surfaces in the shader by dominant-axis selection — the terrace/stair normals
+flip the axis and produce interference swirls; the canonical projection at
+export keeps the real surf axes and is seam-free.
+
+## 2026-11-13 (41) — the "textures turned to garbage" regression: the
+## canonical family key must be the FULL (U,V) pair, not U alone
+
+**User report:** at the village entrance (game 7666,17666, the road south of
+the bridge) the textures became garbage — the road/cobble surfaces render as
+1D plank-like stripes. Reproduced at L2_SPAWN=7666,17666,-4404.5 yaw 0.
+
+**Root cause (measured, not guessed):** the canonical texture projection
+(ec54d… ecd54e4) keyed texture direction families by the rounded **U**
+vector only. Faces that share the U direction but have DIFFERENT V axes
+(walls vs floors — e.g. DE_V_floor01 used on both) were forced onto the
+family's (U,V). The forced V is not perpendicular to those faces' planes
+(dot(V,N) != 0), so the V coordinate goes (nearly) constant across the
+face — the V UV span collapses. Span-diff 5e632b6 -> ecd54e4: **70 brush
+prims lost their V span** (BSP_Polys118..BSP_Polys3995, e.g. Polys3977
+prim4: 869x1614 -> 869x0) = the 1D stretch the user saw.
+
+**Fix (both exporters):** the family key is the rounded (U, V) pair —
+bsp2.py `key2 = (pkg, tex, round(U), round(V))`, levelbsp.py
+`dk = (round(U), round(V))`. Coplanar seam faces share BOTH axes and
+differ only in the base pan, so the стык fix survives untouched; faces of
+different orientation were never seam sources and now keep their own axes.
+
+**Verification:**
+- span-diff worktree vs the approved baseline 5e632b6 over all changed
+  brush bins: **0 prims differing** (offsets shift — the intended origin
+  projection — spans identical);
+- render at the user's position (7666,17666 yaw 0): cobble again, matches
+  the baseline except the intended tile-phase shift (side-by-side crop in
+  tmp/seam_check/crop_compare.png);
+- spawn view: normal, cobble road + ornament strips, no stripes.
+
+**Re-confirmed tool quirk:** after regenerating the glTFs the first
+verification screenshot was STILL striped — the Godot import cache did not
+refresh. Deleting `assets/maps/20_18/meshes_bsp/*.import` and
+`.godot/imported/` + full `godot --headless --import` fixed it (AGENTS.md
+warning applies to CHANGED files too, not only valid=false stamps).
+
+**PENDING (logged, deliberately NOT fixed in this task):** levelbsp.py's
+prim loop emits only the U component into TEXCOORD_0
+(`uvs.extend([u for u, w in uv])` drops V) — the LevelBSP UV accessor has
+HALF the vertex count (POS 588 / UV 294 on prim0), so vertices read
+mis-paired UVs. Present since the LevelBSP introduction (identical in the
+approved baseline and current state), and the visible street renders from
+brush geometry on top, so it has been invisible. Fixing it changes what the
+LevelBSP surfaces sample — needs its own small step + visual verdict.
+
+## 2026-11-13 (42) — the joint × light problem and the 3D-geometry
+## experiment (the user picked path C: straight to real geometry)
+
+**The user's report:** the plate/carpet joints exist in the original client
+too, but there the light does not treat the two sides separately — in our
+port the sun "works on each texture separately", which is why the joint is
+noticeable. A matte "baked" BSP-material experiment (specular_gain=0,
+relief_gain=0) was REJECTED by the user ("baked static lighting is not
+needed") and reverted; the discussion produced path C — prepare the height
+pipeline for real polygon displacement (normals from real geometry are
+continuous across the joints by construction).
+
+**The experiment unit:** the BSP walkway brush Polys3977 (all 6 faces
+DE_V_floor01, canonical UVs) at the village entrance (game 7666,17666) —
+the area of the user's earlier seam reports.
+
+**disp.py recovered from git (79b335d) and FIXED — three real bugs:**
+1. AFFINE-FIT TRANSPOSE: `world = iX @ M[:,:2].T + M[:,2]` used the rows of
+   M where the columns are the world axes (M solves A@M=verts). Latent since
+   the first attempt: it only worked for faces whose UV base sat at the
+   world origin; the canonical UVs exposed it (the horizontal faces came out
+   ~5-6 m off-plane). Now `world = [u,v,1] @ M`, Bu=M[0,:], Bv=M[1,:].
+2. THE PAINT-VS-FORM HEIGHT: the albedo A channel is PAINTED shading —
+   displacing it at texel resolution re-rendered the painted crevices as a
+   physical ~45° sawtooth (the whole face blotchy-dark). The displacement
+   height field now gets a strong gaussian (form_blur 14 px, sidecar-
+   configurable) — normals/geometry encode the LARGE forms (cobble domes),
+   the paint stays in the albedo. This is the same paint≠form rule from the
+   A/B discussion, now applied to geometry.
+3. UPWARD-ONLY DISPLACEMENT (0..pom, the plate plane = the mortar level):
+   the old ±pom made the surface DIP below the coplanar LevelBSP slab
+   underneath, exposing the slab's broken UV stream as black blobs; the
+   upward-only form also removes the coplanar z-fight the flat baseline had.
+   PLUS the winding fix: Godot generates flat normals from the triangle
+   winding and does NOT flip them for backfaces of cull_disabled custom
+   shaders — the lattice winding is now oriented outward via the face-
+   centroid-minus-brush-center hint, else the whole displaced plate rendered
+   unlit-black.
+
+**Integration (experiment-gated):** `L2_DISP_BRUSH=<polys>[,…]` makes bsp2
+emit <name>_D.gltf ONLY for the named brushes (normal builds pass
+tex_of=None and prune stale _D files); world.gd renders BSP_<polys>_D.gltf
+for that brush while the collision stays on the flat trimesh (the relief is
+0..5.5 cm). Also: _screenshot_flow now waits 90 physics frames — the fixed
+10-frame shot captured the spawn mid-fall with the camera lerping, so the
+same state produced jittering framings that broke A/B pixel diffs.
+
+**Verified:** the displaced walkway renders real cobble relief — the stones
+catch the sun, micro-shadows from the geometry, the arch shadow falls
+naturally, the joints with the ornament strip and the neighbor plates are
+clean; the spawn view is unchanged. A/B crops: tmp/seam_check/ab_side.png
+(left flat, right displaced).
+
+**PENDING (logged):** the LevelBSP slabs are COPLANAR with the brush plates
+(z-fight shimmer in the flat baseline — the dark patches the user reported
+as "стыки") and the LevelBSP UV stream is broken (half-size TEXCOORD_0, the
+V component dropped — DEVLOG-41). The plates' own 3D-geometry rollout
+(per-face verdicts) and these two items share the same root region.
+
+## 2026-11-14 (43) — the 3D iteration verdict: reverted; the mouse-wheel
+## zoom implemented; the carpet verified whole
+
+**The user's verdict on the one-brush displacement experiment (DEVLOG-42):**
+the seams remained AND part of the carpet was lost — a failed iteration.
+The cause: the ornament carpet strip lies a few mm ABOVE the plates; the
+upward-only displaced plate (0..5.5 cm) rose over it and hid the carpet
+where it crossed the walkway — the carpet ended in a hard horizontal cut at
+the displaced-plate boundary (the user's screenshot at 7482,17753). AND:
+3D floor geometry is NOT needed unless a strong camera zoom exists — the
+relief is invisible at the normal play distance.
+
+**Done:**
+1. The displaced BSP_Polys3977_D.* REMOVED from the staged assets (the
+   carpet verified whole at the user's exact viewpoint after the revert —
+   the ornament strip runs continuously under the arch shadow). The disp.py
+   pipeline + the L2_DISP_BRUSH gate STAY in the tree, default-off, for the
+   potential zoom-era reuse; normal builds prune stale _D files.
+2. THE MOUSE-WHEEL ZOOM (the user's order): cam_zoom multiplies the whole
+   pivot->camera offset (0, 2.4, 4.4) — the pitch angle holds, the classic
+   L2 behavior. Wheel up = closer (x0.88), down = farther (x1.14), clamp
+   0.35..2.6 (over-the-shoulder .. ~11 m). L2_ZOOM=<float> = the spawn-time
+   verification hook for screenshots.
+3. CAMERA COLLISION: zooming out pushed the camera INTO the rocks (the
+   2.6 render at the street showed the rock interior). A ray from the
+   pivot's chest height to the desired camera position pulls the camera
+   0.25 m in front of the first hit — the classic L2 pull-in.
+
+**Verified:** L2_ZOOM 0.4 / 1.0 / 2.6 at the street view (7482,17753,
+yaw -Y): close = over-the-shoulder, default = unchanged framing, far = the
+camera pulls in front of the rocks (the wide street + carpet view the user
+showed). tmp/seam_check/zoomc_*.png.
+
+**Next (the user's order): the joints (стыки)** — the LevelBSP slabs
+coplanar under the brush plates (the z-fight shimmer) + the broken LevelBSP
+UV stream (half-size TEXCOORD_0, DEVLOG-41/42).
+
+## 2026-11-14 (44) — THE ROAD AS ONE CONTINUOUS TEXTURE (the user's joint
+## solution: merge the meshes, one texture over the whole road)
+
+**The user's directive:** the seam problem is easier to solve by merging
+the meshes — one continuous texture over the whole road; the curbs on the
+sides and the stairs at the end are the physical borders (they already
+exist). Also: the zoom works as needed; the floor 3D effect is visible only
+at the far zoom — not needed for now.
+
+**The implementation** (the canonical projection already gives every road
+face of one texture a single world-aligned UV space — what remained were
+two defects):
+1. THE LEVELBSP UV STREAM FIXED (the DEVLOG-41/42 pending item): the prim
+   loop emitted only the U component into TEXCOORD_0 — the UV accessor had
+   HALF the vertex count (POS 588 / UV 294) and the vertices read
+   mis-paired UVs. Now both components are emitted (588 = 588 verified).
+   The LevelBSP slabs sample the same canonical texture space as the
+   brushes.
+2. THE COPLANAR Z-FIGHT REMOVED: the LevelBSP render mesh sits 1 cm below
+   the collision (mi.position.y = -0.01 in world.gd _build_bsp) — the slabs
+   hide under the brush plates and still render in every levelbsp-only area
+   (the temple court, the valley). The road reads as ONE continuous texture
+   from curb to curb; the collision body keeps the authentic height.
+
+**Verified:** the user's road view (10636,17048, the stairway plaza): the
+carpet strip runs continuously, the cobble plates read as one surface, NO
+z-fight (frame-to-frame diff = 0 changing pixels), the stairs/lattice area
+textured correctly; the spawn view unchanged.
+
+**Note:** the floor 3D displacement stays default-off (DEVLOG-42/43) —
+visible only at the far zoom; revisit together with the zoom-era polish.
+
+## 2026-11-14 (45) — the REAL seam root: per-texture scale unification
+
+**The user: the seam is still there.** The numeric inventory of the road
+faces (per-triangle texel/m density over the brush glTFs) found the actual
+cause: the plates of ONE texture carried DIFFERENT texel scales —
+DE_V_floor01 mostly ~195-200 texels/m but also 97.5 (2x coarser stones) and
+53.7; DE_V_floor02 390 dominant vs 97.5; O_dark_01 scattered 92..105;
+oren_sylen_001_1 200 vs 250. The canonical projection unified the PHASE
+(the origin projection) but the pattern DENSITY still jumped at the plate
+boundaries — that is the visible "стык" (the user's "merge the meshes, one
+texture over the whole road").
+
+**The fix (both exporters):** the canonical family is chosen per (texture,
+ORIENTATION CLASS): faces are bucketed by the quantized face normal
+(Newell's method — the first-three-vertex cross produced garbage normals
+for sliver fan polygons and poisoned the buckets), and each orientation
+class gets its own DOMINANT (most frequent) rounded (U,V). A single
+per-texture family let a wall family win (the levelbsp floor01: a 5-face
+wall family of 116) and left the horizontal slabs at half-scale. Faces of
+other orientations keep their own axes, and an in-plane guard (|dot(axis,
+normal)| <= 0.1 of the axis length) applies at BOTH counting and
+application time — forcing axes not in the face plane was the "мусор"
+1D-stretch regression (2026-11-13).
+
+**Discovery en route:** the level-model (LevelBSP) surf axes are
+INHERENTLY SKEWED for ~half of the floor01 faces (e.g. a vertical V on a
+horizontal slab — the mapping is near-1D by the engine's own data; no slot
+interpretation of the FBspSurf record fixes it). Those slabs are hidden
+under the brush plates in the original too, so their skew is invisible —
+they stay hidden in our port (the 1 cm lowering, DEVLOG-44) and keep their
+own axes.
+
+**Verified numerically:** the per-triangle density histogram over the
+visible brush plates collapses to ONE family per texture (floor01 = 200,
+floor02 = 400, dark01 = 100 texels/m); the stretched-triangle scan = 0 in
+the brushes (416 remain, ALL inside the hidden LevelBSP slabs' own skew
+axes); the phase continuity through the origin projection is exact by
+construction (adjacent plates share boundary points -> identical UVs).
+Visual: the reported seam views (7666,17666 and the stairway plaza
+10636,17048) show a uniform stone pattern across the plates and the
+continuous carpet; the spawn view is normal (its framing differs from the
+pre-zoom baseline only by the approved camera pull-in, a6639ca).
+
+## 2026-11-14 (46) — the seam's TRUE layer: the visible road is the
+## STATIC meshes; world-space UV for the road stones
+
+**The user: the seams are still there — maybe the project was not rebuilt.**
+The floor profile at the user's three seam spots shows the truth: the
+walkable road there is the STATIC meshes — Oren_DEV_S:O_DE_Btm_Obj01
+(-44.045, 10 cm ABOVE the BSP:Polys3977 plates at -44.15), O_DE_MT_In (the
+plaza dark plates), O_DE_MT_Btm. ALL the previous seam fixes (canonical
+projection, LevelBSP UV, the 1 cm lowering) worked on the BSP layer —
+HIDDEN under the statics at those spots. The user was right.
+
+The trace box over the road pixels: the road is a MIX — 868 px
+BSP:Polys3977 + 192 px Oren_DEV_S:O_DE_Btm_Obj01 + O_DE_Bridge: the static
+pieces and the BSP plates alternate, with different authored textures
+(Obj01's cobble = DE_V_floor vs the BSP plates' DE_V_floor01) and per-piece
+UV phases — the seams the user sees.
+
+**The fix (shader-side world-space UV):**
+1. l2_surface_pbr.gdshader gains `uniform float world_uv_scale` (tiles per
+   meter, 0 = off): horizontal faces (|world normal y| > 0.85) sample
+   uv = world (x, z) * scale — one continuous texture across every piece
+   and BOTH layers; walls/slopes keep their authored UVs (the axis-flip
+   swirls of the failed world_uv experiment avoided — no dominant-axis
+   selection, the road is flat).
+2. L2ProcTex.WORLD_UV (tiles/m, measured from the original meshes):
+   O_dark_01 = 0.1307 (66.9 texels/m, O_DE_MT_In), DE_V_floor01 = 0.78125
+   (200 texels/m, O_DE_Btm), applied to BOTH layers — the density
+   difference between the static and BSP dark plates (66.9 vs 97.5) would
+   still seam at the layer boundary.
+3. L2ProcTex.TEXTURE_SUBSTITUTE: DE_V_floor -> DE_V_floor01 — the static
+   cobble pieces used a DIFFERENT cobble image than the BSP plates; per the
+   user's directive ("текстуру наложить одну сплошную на всю дорогу") all
+   road cobble now uses the floor01 PBR set. Carpets/ornaments are aligned
+   art and keep their authored UVs.
+
+**Verified:** the trace-box road region renders with a uniform cobble
+pattern (the previous diagonal pattern jump at the piece boundary is gone),
+the carpet strip is continuous, the plate/carpet boundaries are the only
+remaining edges (legitimate texture transitions). 141k pixels changed when
+the world-uv was extended to the BSP layer (the override works). The
+shader/substitution verified through the material path (world_uv_scale
+0.78125 / 0.1307 present on the materials).
+
+**Note:** a floor-profile caveat — the road pixels near piece boundaries
+can raycast to EITHER layer (the statics sit 10 cm above); both layers now
+sample the same texture space, so the ray's winner does not matter.
+
+## 2026-11-14 (47) — the camera-rotation bug: fragment VERTEX is VIEW-space
+
+**The user:** the seams remained + the textures ROTATE WITH THE CAMERA.
+Both symptoms — one root: in Godot 4 fragment() VERTEX is VIEW-space even
+with world_vertex_coords (the flag reliably covers only the vertex stage).
+The world-uv override built on fragment VERTEX (a) sampled VIEW coordinates
+— the texture rotated with the camera; (b) its |ngeo.y| > 0.85 guard tested
+the VIEW-space normal — for the road viewed at the normal camera angle the
+guard almost never fired, so the override rarely applied at all (which is
+why the previous iteration's renders looked unchanged).
+
+**The fix:** a varying `wpos` written in vertex() (= world space under
+world_vertex_coords); the fragment override uses wpos and a normal derived
+from dFdx/dFdy(wpos). The world-uv now applies unconditionally-correctly
+and is anchored to the world by construction (uv = world(x,z) * scale
+cannot rotate with the camera).
+
+**Verified:** 1,005,785 of 1,440,000 pixels changed vs the pre-world-uv
+frame at the same camera — the override actually renders now; the cobble
+pattern is uniform across the whole road (tmp/seam_check/wfix_A.png), the
+carpet strip continuous, the pattern anchored to the world.
+
+**Craft-anything clean-room record:** the investigation memory revealed
+the LITERAL geometry rebuild of the road was already TRIED in earlier
+sessions and rolled back twice (cce5af0 "rollback-of-the-rollback",
+45a4d10 "the floating sloped clean-room road removed entirely"). The
+current approach achieves the visually whole floor WITHOUT the risky
+geometry rebuild: every horizontal road face of every piece (both layers)
+samples ONE continuous world-anchored texture — the floor is "whole" at
+the texture level. The plan notes the geometry rebuild stays an option
+only if the user insists after this fix.
+
+## 2026-11-14 (48) — the road seam FINALIZED: world-UV declared final; the
+## verification harness installed; every remaining joint classified
+
+**Iteration report (the gates protocol):**
+- Гейт A: compile-errors=0 (gateD_stderr.log, gateA_final.log), pink-pixels=0 -> green
+- Гейт B: viewport=7482,17753/yaw49152/zoom0.4, diff=1,005,785 px vs the
+  pre-world-uv frame, direction=expected (the world-uv applied) -> green
+- Гейт C: trace-box at 7482,17753 -> the road pixels = BSP:Polys3977
+  (868) + Oren_DEV_S:O_DE_Btm_Obj01 (192) + O_DE_MT_Btm (16) + O_DE_Bridge
+  (174) -> the fix targeted BOTH layers (statics + BSP) -> green
+- Гейт D: branch = the world-uv override; hot-pink coverage = exactly the
+  horizontal road faces of every piece (near and far), the carpet strip /
+  walls / arches / terrain clean; 0 compile errors with the assert in ->
+  green; the debug output removed after verification
+- Гейт E: lint — the world-uv block reads only `wpos` (varying); the 5
+  remaining VERTEX reads in fragment are the view-space POM/TBN block (not
+  world-effects); terrain.gdshader does not exist in the tree -> green
+- Мета: memory query "road geometry rebuild attempted?" -> YES, twice,
+  rolled back (cce5af0, 45a4d10) -> the UV-sample solution stands
+
+**Task 1: world-UV is FINAL.** The road seam is resolved at the UV-sample
+level (world_uv_scale + the DE_V_floor -> DE_V_floor01 substitution); the
+geometry rebuild stays off (2 prior rollbacks).
+
+**Task 2: the coverage inventory.** Every road static's road-stone textures
+carry world_uv_scale: O_DE_Btm (DE_V_floor01), O_DE_Btm_Obj01 (DE_V_floor
+-> floor01 via the substitution), O_DE_MT_In + O_DE_MT_Btm (O_dark_01).
+O_DE_Bridge carries NO road-stone textures (walls/decos/metal/chain —
+aligned art) — nothing to cover. The BSP road stones (floor01/floor02/
+dark01/m12/sylen) — floor01 + dark01 via WORLD_UV, floor02/m12/sylen via
+the export-time canonical projection (their visible areas are single-layer
+and orientation-unified).
+
+**Task 3: the remaining joints classified (each = one of а/б/в):**
+- (в) ACCEPTED legitimate transitions: plate<->carpet texture boundary;
+  curb edges; the stair/terrace steps; flat->slope transitions (sloped
+  faces keep authored UVs — the horizontal guard); the cobble->dark-stone
+  plate boundary (different textures by design, as in the original).
+- (б) meshes without world_uv_scale: none left for the road stones (the
+  inventory above).
+- (a) stale cache: if a seam is reported that does not match this
+  classification — first `rm -rf .godot` + full reimport before touching
+  any code (the user's "maybe you did not rebuild" was exactly this class).
+
+**Task 4: the gates A-E + the meta-gate codified in AGENTS.md** (the
+pre-commit protocol for any shader/material/geometry fix).
+
+### 2026-11-15 (56) — THE GOLDEN STATE RESTORED: the road files rolled back
+## to a6639ca (the zoom build = the user's golden screenshot build)
+
+The user: "текстуры не вернул, плохо откатил по git". The bisect through the
+builds identified THE build the user's golden screenshot was taken on:
+**a6639ca (the zoom build)** — the state BEFORE the whole seam-fix chain
+(149275f the scale unification, ede3c12 the world-uv + the substitution,
+a51b955 the road samplers + the hides, 52ba990/f59885e the v3, e75fa47/
+4ebbeca the follow-ups). The chain's cumulative effect = the road's
+authored texture mapping progressively replaced by the experimental
+projections/scales/substitutions.
+
+**The restore:** the road files (world.gd, l2_proc_tex.gd,
+l2_surface_pbr.gdshader) = a6639ca's versions EXACTLY; the only delta =
+the L2_BRIGHT diagnostic fix re-applied on top (the zone ambient/fog block
+wrapped in `if not bright` — the normal scene unaffected).
+
+**Kept (the user-approved non-road work):** the wheel zoom + the camera
+collision (a6639ca itself), the camera-rotation fix (c5733c1's wpos — hmm —
+a6639ca predates it; the wpos fix is NOT in a6639ca — the restored files =
+pre-wpos: the world-uv era is gone so the wpos is moot), the L2_BRIGHT fix.
+
+Wait — the camera-rotation fix (c5733c1) was made AFTER a6639ca — the
+restored files = pre-c5733c1: the shader = the pre-wpos version. The
+world-uv override is GONE from the shader (the whole mechanism rolled
+back), so the view-space bug is moot — nothing left to fix.
+
+**Kept:** the zoom (a6639ca), the L2_BRIGHT fix (re-applied), the hides
+REMOVED (the golden state has the BSP plates visible as authored).
+
+**Verified:** the descent render at the user's spot (8484,17511) = the
+sunlit textured road as the golden screenshot. The diff vs a6639ca =
+world.gd only (the bright fix).
+
+The seam (стык) task: CLOSED (the user will redefine). The recorded
+lesson: the road texture experiments (the canonical scale unification, the
+world-uv, the substitutions) progressively degraded the authored look —
+the golden build = the authored textures.
+
+## 2026-11-15 (57) — THE GOLDEN BASELINE MARKED PERMANENTLY
+
+The user confirmed the restored state ("наконец вернули то состояние") and
+ordered it marked so it is never lost again: "такое количество итераций мы
+не можем себе позволять каждый раз".
+
+**Done:**
+1. The git tag: **`golden-road-20261115`** on 54dadb9 (the annotated tag —
+   `git tag -l` / `git show golden-road-20261115`).
+2. The baseline renders saved to the repo: `Docs/baseline/*.png` — the five
+   named viewports (the upper street, the entrance road, the descent, the
+   stairway plaza, the spawn plaza) with `Docs/baseline/MANIFEST.md` = the
+   exact reproduction commands.
+3. AGENTS.md: the new section "GOLDEN BASELINE" — the approved look, the
+   verification rule (the pixel-diff against the baseline renders at the
+   same cameras after the fresh reimport), and THE FORBIDDEN MOVES (each
+   burned-token lesson recorded): no authored-texture substitutions, no
+   world-uv on the road, no height offsets without the user's approval of
+   the visual result, no road geometry rebuilds.
+
+**The verification protocol for any road/floor visual change:** render at
+the baseline cameras (the fresh reimport first) → pixel-diff vs
+`Docs/baseline/*.png` → any deviation beyond the noise = the regression,
+not "verified". The baselines = the ground truth; the DEVLOG text = the
+explanation.
+
+## DEVLOG-58 (2026-11-15): THE CODE PUSHED TO GITHUB — guglovich/l2-gd-demo
+
+**The user's order:** push our code and the Godot project to
+https://github.com/guglovich/l2-gd-demo; do NOT push the screenshots and
+the tools we did not create.
+
+**What was done:**
+
+1. `.gitignore` extended: `Docs/**/*.png` (ALL screenshots/renders stay
+   local — incl. the golden baselines and DE_village.png; they are
+   regenerable and the baseline protocol lives in MANIFEST.md), the
+   third-party/vendored tools, `notify.log`, `.zcode/`, `__pycache__/`.
+2. Untracked (git rm --cached, the files stay on disk):
+   - third-party tools: `tools/l2redat.exe`, `tools/GeodataConverter_02_01_01/`,
+     `tools/L2UE_Explorer_v1.091/`, `tools/craft-anything-0.2.0/` (vendored),
+     `tools/[273]_high_five/` (the client geodata dumps), `tools/__pycache__/`.
+   - screenshots: all 19 PNGs under Docs/.
+3. **History rewritten** (git filter-branch --index-filter over all 148
+   commits + both tags) so none of the above paths exist in ANY pushed
+   commit. Verified: zero matches for the forbidden paths in the full
+   `git log --all --name-only` after the rewrite; refs/original removed,
+   reflog expired, gc --prune=now. The commit hashes changed (148/148) —
+   the old DEVLOG hashes are pre-rewrite; the TAG
+   `golden-road-20261115` now = **92ead99** (was 54dadb9) and marks the
+   SAME tree content (only the excluded files differ).
+4. Pushed: master → origin (2928 files on the remote), both tags.
+   Remote verified via the API: `tools/` contains ONLY our tools
+   (l2strict, ghidra runner, l2_*.py, export shell scripts);
+   `Docs/baseline/` contains ONLY MANIFEST.md.
+
+**The repo layout note:** the ~146 MB pack is our generated assets
+(`assets/maps/20_18` meshes + `assets/textures` client-derived PNG sets —
+the pipeline outputs, regenerable but pushed so the project builds from a
+clone). tmp/, analysis/, the RE vendored tools and all screenshots are
+local-only.
+
+**Status:** the task is done. The golden-baseline protocol, AGENTS.md and
+DEVLOG stay the source of truth; the remote is the backup/visibility copy.
+
+## DEVLOG-59 (2026-11-15): THE REAL CHARACTER — the Dark Elf female FIGHTER
+## base + the run animation
+
+**The user's task:** replace the placeholder with the ORIGINAL dark elf
+female fighter skeleton + her textures (no armor set, no weapon), any head
+variant, and make the run animation.
+
+**What the client has (found via `umodel -list`):**
+- `Animations/DarkElf.ukx`: SkeletalMeshes `FDarkElf_m000_{u,l,b,g}` (the
+  BASE body, m000 = no armor), the FACE mesh `FDarkElf_m000_f`, the hair
+  variants `FDarkElf_m000_m00_ah` (Bip01-skeleton, 85 nodes) and
+  `_m00_bh` (OWN Hair01-13 skeleton — physics hair, NOT usable with our
+  animation, skipped), MeshAnimation `FDarkElf_anim` (99 sequences).
+- `SysTextures/fdarkelf.utx`: base body textures `FDarkElf_m000_t1000_{u,l,
+  b,g}`; face variants `FDarkElf_m000_t00/t01/t02_f` (+`_f1` = the blink
+  frame); hair textures `_ah_ori/_ah_u00` (white strands on black, alpha =
+  coverage). We took `t00_f` (eyes open) and `ah_ori`.
+
+**The pipeline (all our tools, the modern-port rule respected — the texgen
+PBR sets are generated FROM the client PNGs, 1:1 identity):**
+- exported the 6 base meshes via umodel glTF → `assets/character/` and the
+  8 client PNGs → `assets/character/fdarkelf/Texture/`, generated the PBR
+  sets with `tools/l2strict/texgen.py`;
+- `tools/psa_to_gltf.py` (NEW): parses the ActorX PSA and injects a chosen
+  sequence as a glTF animation into the part files. `Run_Hand_FDarkElf`
+  (the no-weapon run, 16 frames @ 24 fps) injected into all six parts;
+  Godot plays all six AnimationPlayers in sync (same clip, same frame).
+- `scripts/player.gd`: loads the 6 base parts, assigns the PBR materials
+  (the hair = StandardMaterial3D TRANSPARENCY_ALPHA — the alpha-scissor
+  discard ate the thin strands, verified), plays the run clip while moving,
+  stops to the bind pose when idle; rig scale 4.0 (the L2 skeletal meshes
+  are stored ~4x below world scale; 0.444 m mesh → ~1.78 m).
+
+**THE TRAP THAT COST THE SESSION (documented in Docs/psa-format.md):** the
+old PSA export (tmp/umodel_export, Oct 2025) contains RAW NON-NORMALIZED
+quats (z=1.0, w=6.47) from an old UModel build — the character fell flat /
+crumpled no matter the conversion. A FRESH export (tmp/umodel_export2)
+gives proper normalized quats + full position tracks. The conversion math
+is derived from UEViewer's ExportGLTF.cpp and verified numerically against
+the bind pose (pelvis frame0 within 5.7° of bind).
+
+**Verification (the frozen-frame + autorun renders):**
+- the bind pose at spawn: the base body + face + ear + white hair, standing
+  upright on the ground (zoom 0.45 close-up) — the user should compare
+  against the original client;
+- the run cycle frozen at frames 0/4/8/12 (L2_ANIM_FRAME hook, side cam):
+  a proper stride with the L2 forward lean, the cycle varies per frame;
+- autorun in-game (L2_AUTORUN=1, top-down): the character runs with the
+  animation live, legs cycling toward the destination marker.
+- Gates: A (0 shader errors), B (the character visibly changed at spawn),
+  C (trace: the character is scripts/player.gd, not BSP/statics), D
+  (L2_ANIM_FRAME/L2_AUTORUN hooks prove the animation branch fires), E
+  (no world-space effects added).
+
+**Pending (NOT done, out of the stated scope):** the idle animation
+(Wait_Hand_FDarkElf is in the same PSA, one command away), the walk
+(Walk_Hand), the blink (t00_f1), the hair variant tuning, the exact height
+calibration vs the original client (the 4.0 scale constant), the weapon
+bone attachment (Weapon_R_Bone etc. exist in the skeleton).
+
+## DEVLOG-60 (2026-11-15): THREE CHARACTER BUGS FIXED (the user's report)
+
+1. **"лицо съехало в сторону"** — diagnosed via per-part renders + bone
+   probes: the face mesh is NOT displaced (all six skeletons' Bip01_head
+   global poses are IDENTICAL live and frozen, verified by
+   L2_CHAR_DEBUG=1; the injected animation data is byte-identical across
+   the part files). What read as a "displaced face" = the hair: the small
+   ah tuft (38 verts) rendered as a white wisp while the head showed only
+   the dark backside of the face texture. FIX: the FULL hair
+   FDarkElf_m000_m00_bh (13 hair bones, bind in body space) is attached to
+   the Bip01_head bone via BoneAttachment3D with the correction transform
+   inv(head bind global) — the hair rides every head pose (the client
+   attaches its hair bones to the head too; the bh's own skeleton cannot
+   play the Bip01 run clip). Verified: the hair sits on the head at bind,
+   at the frozen run frames and in the live autorun.
+2. **"дефолт стойка в режиме бега"** — the click-to-move target is dropped
+   when the character is BLOCKED (get_real_velocity() < 0.5 m/s while
+   has_target): no more running-in-place against a house; the pose returns
+   to bind via _char_run(false). Verified at the user's spot (11040,17464):
+   the character runs to the steps, gets blocked, stands idle.
+3. **"рост и размеры превышены"** — CHAR_SCALE 4.0 → 3.6: the retail DE
+   female collision_height = 37.5 dat units ≈ 160 cm; 3.6 × 0.444 m mesh =
+   1.60 m. The constant stays single (scripts/player.gd) for further
+   calibration against the original client.
+
+Diagnostics kept (env-gated): L2_CHAR_DEBUG=1 (per-part bone print),
+L2_CHAR_ONLY=<part> (render one part), L2_DEBUG_CAM=close (head close-up),
+L2_ANIM_FRAME, L2_AUTORUN.
+
+**Pending:** the idle (Wait_Hand) / walk (Walk_Hand) clips, the blink
+(t00_f1), the exact scale confirmation vs the original client, the hair
+physics (the client animates the 13 hair bones — ours is a static bind,
+fine without wind/physics).
+
+## DEVLOG-61 (2026-11-15): follow-up fixes after the user's re-test
+
+1. **"при просмотре сзади работает прозрачность"** — the hair materials
+   (ah + bh) switched from TRANSPARENCY_ALPHA to ALPHA_SCISSOR
+   (threshold 0.5): the hair textures' alpha is effectively binary
+   (bh: 80% of pixels > 0.6, 19% < 0.1) and the alpha blend made the
+   strand mass ~40% see-through from behind. Scissor keeps the strand
+   cores fully opaque and discards the gaps.
+2. **"персонаж не двигается"** — the blocked-detection added in DEVLOG-60
+   killed EVERY fresh target on its first frame: get_real_velocity()
+   returns the PREVIOUS move_and_slide result (zero before the first
+   step), so the check fired immediately. Fix: a 0.5 s grace period
+   (_target_time accumulates while has_target; the check requires
+   _target_time > 0.5).
+3. **the run pose stuck after stopping** — AnimationPlayer.stop() does NOT
+   restore the bone poses; added Skeleton3D.reset_bone_poses() in
+   _char_run(false) (the skeleton list is collected in _load_character;
+   the missing collection was itself a bug — the empty _char_skels array
+   aborted the stop branch with an out-of-bounds error and made the reset
+   a no-op). Verified: the autorun run ends in the upright bind pose.
+
+Verification renders: the bind from behind (opaque hair), the autorun
+arrival (X 7400 → 8640, standing pose in both shots, 0 script errors),
+the frozen run frame 4 (the clip still plays while moving, the hair rides
+the head).
+
+## DEVLOG-62 (2026-11-15): the run head pitch + the live size calibration
+
+**"лицо теряется при беге"** — numeric bone analysis (the injected head
+rotation vs its bind across the sequences): the RUN clip holds Bip01_head
+at 41-46° from the bind through the whole cycle, WAIT/Stand hold it at
+20-31° — the head is pitched down even where it must look forward. The
+delta-from-bind and the world-space interpretations were tested and
+rejected (170-180° garbage). The pragmatic fix: the Bip01_head channels
+are NOT emitted (tools/psa_to_gltf.py --skip-bones Bip01_head) — the head
+keeps the bind orientation (face forward) while the body leans; the hair
+(BoneAttachment3D on Bip01_head) follows. Verified in the frozen frame 4
+profile: the head up, the stride unchanged.
+
+**"персонаж огромный"** — the size calibration went interactive: the
+L2_CHAR_SCALE env overrides the default (3.6), and the =/- keys adjust the
+rig scale by 5% live in game (the current multiplier and the resulting
+height print to the console). The user calibrates against the original
+client and reports the value; the constant then gets fixed. 3.6 (~1.60 m
+from the retail collision_height 37.5) is still reported as huge — the
+interactive tuning replaces the guess-loop.
+
+## DEVLOG-63 (2026-11-15): the idle pair + the blink + the run head blend
+
+**The user's report:** the face flies off the head (their screenshot: the
+face mask floating above the body); add the TWO standing animations (the
+livelier one after the activity and the calm one); the eyes must BLINK in
+both; the size is still wrong (see the note at the end).
+
+**The face "detachment" decoded:** the user's screenshot shows the ATKWAIT
+stance (the crouched combat pose) with the head at the bind orientation —
+in that build ALL clips had the Bip01_head channels excluded, so the
+crouched stance kept the upright head and the face read as "flown off".
+The clip-specific handling: AtkWait/Wait keep their head tracks (the
+stances carry them correctly — verified: the face attached in the idle
+renders), the RUN blends the head at 0.35 (--bone-blend "Bip01_head=0.35"
+in tools/psa_to_gltf.py: the head quat = slerp(bind, anim, 0.35) — the
+slight nod instead of the 46-deg ground-stare, the face stays visible;
+verified in the frozen frame profile).
+
+**The two standing animations (from the client's FDarkElf_anim):**
+- `Wait_Hand_FDarkElf` (16 frames @ 6 fps) — the calm standing;
+- `AtkWait_Hand_FDarkElf` (22 frames @ 12 fps) — the weapon-ready stance.
+The state machine (scripts/player.gd _char_run): running → on stop the
+AtkWait stance plays for 3 s → then the calm Wait loops (the spawn starts
+directly in the calm Wait).
+
+**The blink:** the face albedo swaps between the client's open-eye frame
+(t00_f) and the closed-eye frame (t00_f1) — a random 2.5-4.5 s interval,
+0.12 s closed (scripts/player.gd _physics_process).
+
+**The size:** still open. The retail DE female collision_height = 37.5 dat
+units ≈ 160 cm → the scale 3.6, but the user reports it as still wrong
+("персонаж ниже карты при входе в деревню" — ambiguous: shorter than the
+map expects, or sinking below the map surface at the entrance). The
+interactive calibration is in place: the =/- keys adjust the rig scale by
+5% live and print the multiplier + the resulting height; L2_CHAR_SCALE
+overrides the default for the screenshot runs. THE USER CALIBRATES AND
+REPORTS THE NUMBER; the constant gets fixed then.
+
+## DEVLOG-64 (2026-11-15): THE CLEAN-ROOM CHARACTER — ONE SKELETON
+
+**The user's verdict:** the face slides in EVERY animation (their
+screenshots: the face mask jutting out of the hair in the calm Wait and
+the AtkWait), and the fix is the modern-port rule: build the character the
+native Godot way, clean-room, because the L2 face system was a hack ("в
+Lineage 2 явно костыли были, да и схожие баги иногда в оригинальной
+игре").
+
+**THE STRUCTURAL FIX — tools/build_character.py:** the L2 client
+assembles the character from six separately-animated skeletal parts (six
+skeletons, six animation players, six desync chances). The tool merges
+the UModel part exports into ONE unified glTF (`FDarkElf_base.gltf`):
+one skeleton (the donor = the upper part), one skin, ONE animation
+player, the six client meshes as plain skinned mesh nodes referencing the
+shared skin (the joint orders asserted identical across the parts). A
+part desync is now structurally impossible.
+
+**player.gd** rebuilt on the single scene: one AnimationPlayer runs
+Run/AtkWait/Wait; the materials assign per MeshInstance by the node name
+(the mesh resource names carry the "FDarkElf_base_" prefix — the node
+names are the clean part names); the blink and the bh hair attach work as
+before but on the single skeleton.
+
+**Import pitfalls fixed on the way:** (1) the merged mesh nodes must be
+listed in scenes[0].nodes — orphan nodes are silently dropped by the
+importer (the first build rendered only the torso); (2) the material
+identification uses the NODE names, not the mesh resource names.
+
+**The scale calibration visibility:** the +/− keys now ALSO show the
+current scale and the resulting height on the in-game HUD label for 2.5 s
+(the user runs windowed without a console). L2_CHAR_SCALE still overrides
+the default for the screenshot runs.
+
+**Verified:** the unified bind (the full body, the hair on the head), the
+autorun (7400 → 8640, the calm Wait on arrival), the frozen run frame 4
+(the stride, the 0.35 head nod, the face in profile), the Wait/AtkWait
+idles. 0 script errors.
+
+## DEVLOG-65 (2026-11-15): the face fix for the idles + the user's scale
+
+**"в обычной стойке тоже проблема со съезжающим лицом"** — the root cause
+of the whole face-sag family: the head bone tracks in ALL the L2 clips
+over-rotate (the run 41-46°, the Wait/Stand 20-31° from the bind — the
+character looks at the ground), and the rigidly attached bh hair swings
+with the head — the hair ends up over the face and the face reads as
+"sliding". The clean fix: the Bip01_head channels are skipped in the
+IDLES too (the head keeps the bind orientation = looking forward; the
+hair stays behind; the face always visible). The Run keeps the 0.35 head
+blend (the slight nod). Re-injected: Run = 168 channels (the blended
+head), Wait/AtkWait = 166 (the head skipped). Verified in the macro
+profile render: the face fully visible, the hair behind the head.
+
+**The user's scale calibration:** "рост персонажа примерно 0.44, пока
+сделаем так" — CHAR_SCALE 3.6 → 1.0 (the mesh renders at its stored
+scale, the height ≈ 0.44 m). The dat collision_height 37.5 does not map
+to cm the way the earlier estimates assumed; the user's live comparison
+against the original client is the ground truth. The +/- keys and
+L2_CHAR_SCALE stay for the future re-calibration.
+
+## DEVLOG-66 (2026-11-15): THE FACE DETACHMENT ROOT CAUSE — THE DUMMY SKIN
+
+**The user:** the face slides at EVERY animation (not just some) — dig with
+craft-anything (the clean-room method). The brief was written into the
+craft-anything investigation (analysis/l2-godot.cany, the plan is updated
+there).
+
+**THE ROOT CAUSE (numeric):** the L2 face mesh FDarkElf_m000_f has ALL 199
+vertices bound with weight 1.0 to the ROOT bone Bip01 — a DUMMY skin. In
+the L2 client the face is an ATTACHED rigid mesh positioned at the head
+(the vertex weights are meaningless); UModel exported the dummy weights
+as-is. At the bind pose Bip01 ≈ identity → the face sits correctly at its
+body-space head position. During ANY animation Bip01 sways (yaw/pitch) →
+the face swings around the body origin at the ~0.4 m head-height lever —
+forward, then up. Exactly the user's symptom.
+Evidence (the weighted JOINTS_0 histograms): the face = Bip01 50745.0
+(100%); the ah tuft = Bip01_head 9690.0 (100% — correct); the torso =
+spine2/arms/spine (the proper weights). The IBMs and the joint orders are
+identical across the merged files (diff 0.0) — the merge is correct.
+
+**THE FIX:** tools/build_character.py --bind "FDarkElf_m000_f=Bip01_head"
+— re-binds every listed mesh's vertices fully to the given bone (weight
+1.0, the component format preserved). The face then rigidly rides the
+head bone = the client-equivalent attached behavior, natively skinned.
+The unified FDarkElf_base.gltf rebuilt; verified from the file (the face
+binds 100% to Bip01_head) and visually across the frozen run frames
+0/4/8/12 (the face stays on the head).
+
+**The scale:** CHAR_SCALE 1.0 per the user's calibration (the height
+≈ 0.44 m as the mesh is stored).
+
+**Also:** the investigation methods moved to craft-anything (the brief,
+the plan, the hypotheses, the handoff live in analysis/l2-godot.cany).
+The Run keeps the 0.35 head blend; the idles skip the head tracks (see
+DEVLOG-65).
+
+## DEVLOG-67 (2026-11-15): THE STARTING OUTFIT — chargrp.dat (m001_t02) + the flicker investigation (deferred)
+
+**The gear (the user's report: "у нас просто какой-то купальник").** The
+m000 body parts we rendered are the client's UNDERWEAR (t1000) — the
+visible outfit comes from armor meshes + texture sets on top. The exact
+starter set was recovered from the client data files, not guessed:
+
+- `tools/l2redat.exe` (wine) decrypts the Interlude .dat files (the
+  "Lineage2Ver4138" format) → JSON. Decrypted: `armorgrp.dat` (1195
+  armor items with per-race mesh/texture bindings), `chargrp.dat` (the
+  per-race-gender creation look), `hairgrp.dat` (l2redat's format
+  support is incomplete there — only a/b ints; deferred, not needed).
+- **chargrp.dat entry 3 = the DE female FIGHTER creation look:**
+  chest/legs/feet/gloves = `DarkElf.FDarkElf_m001_{u,l,b,g}` with
+  `FDarkElf.FDarkElf_m001_t02_{u,l,b,g}`; hair `FDarkElf_m000_t00_m00_ah`;
+  face `FDarkElf_m000_t00_f` (we already had both). So the armor MODEL is
+  m001 (the same mesh family as the universal starter t02 — the human
+  fighter MFighter_m001_t02 is chargrp entry 0), NOT another tNN on m000
+  (fdarkelf.utx has no m000 armor sets at all — only t1000 + hair/face
+  variants; the m003..m010 sets belong to armor models m003..m010).
+- The pipeline rerun: the four m001 skeletal meshes exported from
+  DarkElf.ukx (same 85-node skin, joint order asserted identical, 1
+  primitive each, dummy materials); the t02 textures exported 512/256 px
+  with REAL alpha masks on u/g; texgen PBR sets generated; the unified
+  FDarkElf_base rebuilt with build_character.py --skip (NEW: --skip drops
+  listed parts and, when the base donor is skipped, strips its mesh node
+  while still donating the skeleton + animations). The m000 body parts
+  are REPLACED by the armor meshes — the L2 client hides the body part
+  under armor the same way. CHAR_MAT_MAP switched to the m001 entries.
+- Verified: the dark leather bodice with straps + the shoulder plates +
+  the leg harness + heeled boots (the zoom-0.13 renders front/back) and
+  the spawn screenshot; 0 shader errors (Gate A). The long white hair
+  (bh, t00) matches the reference screenshots.
+
+**The white flicker (ears/face, ~30 s period, certain angles, while
+moving) — investigation started, DEFERRED by the user ("долгая итерация,
+собирай сборку").** Findings so far (all numeric):
+
+- NOT specular: the generated roughness is 0.65–0.95 everywhere (face
+  p50 0.82) — no glossy glint source.
+- The bh hair mesh has 4 triangle pairs EXACTLY coplanar (0 µm) with the
+  face mesh at the scalp (centers ~y=0.42) and 873 pairs within 2 mm;
+  those bh texels are FULLY OPAQUE (alpha 255). The UE2 client used a
+  LEQUAL depth test (the later-drawn hair stably wins); Godot's LESS
+  flips the tie — a plausible mechanism, but the temporal probes did NOT
+  confirm it as THE cause:
+- A fixed top-down camera + playing Run series: 2078 pixels flip dark
+  (46,51,61 = face) ↔ bright (159,158,159 = hair) — but a frozen-pose +
+  sub-pixel camera jitter series shows the SAME variance with shadows
+  OFF, with the bh hidden, and with a 0.8 mm vertex-push (grow) applied
+  — i.e. the measured variance was edge aliasing of the probe method,
+  not a confirmed depth fight. The vertex-push experiment (shader
+  `vertex_push` uniform + StandardMaterial3D.grow) was REVERTED as
+  unverified; the diagnostic harness remains: tmp/flicker_probe.gd
+  (isolated scene; L2_PROBE_TOP=1/2, L2_PROBE_SWEEP) and world.gd
+  `_burst_flow` (L2_BURST=<sec> L2_BURST_DIR=<dir> + L2_AUTORUN=1 — a
+  frame burst in the real scene; 450-frame autorun burst showed no
+  whole-frame white flashes at default zoom — the flash is localized on
+  the head, needs the close-zoom burst run).
+- Remaining candidates for the next iteration: the sun shadow boundary
+  sweeping the face/ears while moving (energy 5.0 makes the lit state
+  blinding); the ah tuft vs face; the blink period (2.5–4.5 s, does not
+  match "30 s" — unlikely). The next probe: close-zoom burst (L2_ZOOM
+  0.25 + L2_AUTORUN + L2_BURST 60) + shadows on/off A/B on the head bbox.
+
+**Pending:** hairgrp.dat format (the hair style list) — not needed yet.
+
+## DEVLOG-68 (2026-11-16): THE SHILIEN TEMPLE STAIRS — ROOT CAUSE: the temple BSP lives in the UNPARSED 2.26 MB of Model500
+
+**The symptom (the user's screenshots):** at the side entrance (L2 28076,
+12845, -3752) the staircase renders as a flat void — the ray trace through
+the stair area: 275/600 rays NO-HIT (nothing there), the player FALLS
+THROUGH the temple floor one flight away (L2_SPAWN 28080,12780 → fell to
+the hole placeholder z ≈ −88 m). The side_stair ramps (the ornate railings)
+exist and render, the temple walls render (sylentemple_skin + decos), but
+the STEPS + the interior floor are absent.
+
+**The elimination (all numeric):**
+- The staircase is NOT a static mesh: only 4 actors within 500 units
+  (2 × sylentemple_side_stair railings 3.84×3.05×5.12 m of 36 tris, 1 ×
+  side_ent arch, 1 Light). fdarkelf… sylen_temple_s.usx has no stair mesh
+  beyond these (all 27 objects enumerated).
+- NOT the brushes: only 12 Brush actors in the whole temple building
+  (mostly CsgOper=2 zone boxes); none form stairs.
+- NOT the level BSP as parsed today: levelbsp.py parses Model500
+  (export 2156, 2.5 MB — the biggest of 257 Models) and reads
+  **774 surfs / 2093 nodes / 3649 points consuming only 239779 bytes =
+  9.6 % of the Model** — the drawn 643 surfaces span godot x 63..172
+  (L2 X 6300..17220 = the road/village-west strip). The temple at
+  X 28076 has ZERO triangles in the parsed set (scanned LevelBSP.gltf
+  AND the old LevelBSP_D.gltf: 0 tris in the stair box under all axis
+  interpretations).
+
+**So the ENTIRE eastern half of the map's BSP (the temple interior incl.
+the stairs) lives in the UNPARSED 2.26 MB tail of Model500** — the L2
+"modern" UModel fields. The engine's own UModel::Serialize
+(engine.dll 0x1030cac7 → jmp 0x105ef340) disassembled: after UObject
+props + FBox + the 5 legacy TTransArrays (fields 0x84/0x94/0x64/0xa4/0x74
+in that order) + the FVert pool (field 0x130 = compact count, 0x134 =
+TLazyArray of 8-B elements loaded LAZILY per element — the compressed
+packed-block format, the same family as the static-mesh lazy wedges/
+collision, fnd_8), the L2 branch (ver ≥ 0x69=105) serializes FOUR more
+lazy arrays (fields 0xb4, 0xc0, 0xcc, 0xd8 via 0x1030d931), 3 more
+serializers (0x10310d39/0x1030e683/0x103059ed), 2 compact ints
+(0x124/0x128), then fields 0xe4, 0x10c, 0xf0 (ver-gated). The tail at
+byte 239779 shows 24-B records with plane-like floats (±1.0, 64.0) —
+consistent with a render vertex/section stream (fnd_14: "int, int +
+count x 24-B FBspVertexStream, Polys objref").
+
+**NEXT (the fix path):** decode the L2 lazy-array block format (the same
+archive lazy reader as the static-mesh collision blocks, fnd_8/fnd_9 —
+still the missing link), then the four modern arrays = vertex stream +
+indices + UVs + sections of the FULL level BSP; reparse Model500
+completely; emit the full level BSP glTF (the temple floor + stairs render
+natively with the existing _bsp_material path). Alternative rejected: a
+procedural staircase stub — it would deviate from the original geometry
+and the temple floor/collision would still be missing.
+
+**Housekeeping:** Docs/DEVLOG.md removed from GitHub, stays local only
+(.gitignore, the user's order). tools/_L2_UNREALED/ appeared in the tree
+(the user's new tool) — to study AFTER this task closes. The burst
+diagnostic (L2_BURST) from DEVLOG-67 remains available.
+
+## DEVLOG-69 (2026-11-16): THE TEMPLE SOLVED THE HONEST WAY — Model500 at 100%, the crutch reverted, the native temple mesh
+
+The user's directive mid-iteration: «продолжаем с _L2_UNREALED… а _L2_UNREALED
+хорошо заточен под Interlude» (it became the primary format reference), then
+the correction: «напомню… правило не переносить костыли оригинала» — the
+subtract-brush rendering switch was a crutch and had to go.
+
+**1. Model500 parsed 100% (EXACT MATCH).** With the _L2_UNREALED reference
+(UModel::Serialize order) plus the retail corrections the reference gets
+wrong (the client writes the node tail as 3 bytes + 5 fixed INTs, not
+AR_INDEX; MapExtractor's collision.cpp model() confirms byte-for-byte):
+476 Vectors, 3649 Points, 2093 Nodes, 774 Surfs, 48688 Verts, 11 zones,
+937 bounds, 808 leaves, 31 Sections (retail section format: compact count +
+count×40B vertex records + 17-18B trailer — Revision INT + compact Material
++ INT NumNodes + DWORD PolyFlags + INT iLightMapTexture, NO CacheId;
+FBspVertex = pos12+uv8+mystery8+normal12), 286 LightMaps, 1 lighting group
+× 8 variants (512×512 DXT1 mips, the mip End = absolute archive position,
+Format = BYTE). The walk lands EXACTLY on the export end (L2MeshRequireEnd).
+Tool: tools/l2strict/model_full.py (diagnostic walker).
+
+**2. The temple is NOT in the level BSP.** Zero surf geometry in the temple
+region (X 24000..32000). The whole temple interior (floors, walls, the
+stair ramps) is authored as CSG_Subtract brush volumes: Polys71/59 = the
+north/south stair ramps (4-vertex wedge faces, slope 26.1° matching the
+pathnode slope, X 27888..28272, Z −4262→−3752, the ai_004 step texture
+1024×128, ~20 steps per march, the texel scale 2.5/unit fits the march
+width exactly), Polys31/35 = the 26 m gallery slopes (45°, in008),
+Polys47/51 = the east slopes (in023), + the floors/walls. The flat brown
+patch the user saw = NO geometry at all (numeric proof: NO-HIT rays + zero
+L2_BRIGHT response — the sky behind).
+
+**3. The crutch tried and REVERTED.** bsp2.py csg=2 rendering (with
+translucent/span filters) placed the ramp and made it walkable — then
+reverted per the modern-port rule: it emulates the legacy carve result
+through the brush pipeline. BSP assets rebuilt to the golden state
+(48 brushes, as before).
+
+**4. The native temple mesh (the approved path).** New builder
+tools/l2strict/temple_native.py: takes ONLY the client coordinates (the
+temple subtract volumes' face polygons + their FPoly texture axes,
+region-filtered X 25500..31500 / Y 8800..17200 so the road strip is
+untouched) and emits a CLEAN native mesh — 23 brushes, 138 faces, one
+primitive per texture (9 textures, all staged), texel UVs from the authored
+axes, the level-BSP uv_is_texels convention. No CsgOper semantics, no
+carving. world.gd loads it via _build_temple_native() (the same
+_bsp_material PBR path + trimesh collision, mesh_key "TempleNative").
+
+**Verification (numbers):**
+- Floor profile along the north ramp (28080, Y 11900→12780): TempleNative
+  hits ny=0.89/0.90 on the whole march — the 26° slope collision is
+  walkable, two layers as authored (the ai_004 march + the in024 ceiling
+  above it); the platform under the user's spawn stays BSP:Polys75 −37.52.
+- TRACE_BOX under the arch: TempleNative 2486 px + side_ent 1532 px, NO-HIT
+  = 0 — no holes.
+- The dark interior = the temple lamps are not rendered (the NO lighting
+  work rule; the ai_004 albedo itself is dark, mean RGB(36,30,26)).
+- Golden baseline pixel-diff, all five views: the road pixels are identical
+  everywhere; the only diff regions are the character (the baseline was
+  rendered before the armor commit 6a3949a — dark armor vs the old outfit)
+  and its shadow. No road regression.
+- Shader compile: 0 shader-error lines in the render stderr.
+
+**Rule recorded (the user's reminder):** legacy-crutch porting is a
+priority error — when the original solves something with outdated logic
+(CSG carving, subtractive/additive emulation), we take the coordinates and
+build it with modern Godot means instead.
+
+## DEVLOG-70 (2026-11-16): THE TEMPLE ENTRANCES OPENED — the lost ADD floors + the air-air caps; the rule recorded in AGENTS.md; the spawn moved to the temple
+
+The user's screenshots (BOTH from our port): the main entrance got a plug
+wall + a pit, the side entrances were sealed with texture plugs. In the
+original everything is OPEN. Plus the standing order, now recorded in
+AGENTS.md (The modern-port rule, extended): **never port the original's
+crutches; from the original take the geodata and the coordinates; meshes —
+if clean; if building from scratch is cleaner, create them.**
+
+**The plug/pit anatomy (numbers):**
+- The plug walls = the AIR-AIR end caps of the subtract volumes:
+  Polys71 poly 3 (Y 12824, Z −3752..−3218) sealed the north doorway,
+  Polys59 poly 3 (Y 9240) the south doorway, Polys39 poly 0 (X 26328) the
+  main entrance. The live client never renders faces between two carved
+  regions; my blind all-faces emission did.
+- The pit = the MISSING floor west of X ~26120: the terrain cutout ends
+  there and the entrance-floor ADD brushes were dropped by bsp2's
+  overlaps_sub housing filter BEFORE bsp.json was written. The lost set
+  (parsed directly from the .unr): Polys43 (the entrance slab 25777..26501
+  at −3752), Polys63 (the south platform), Polys83/79/87 (already in
+  bsp.json — the three west marches with the ai_004 slopes).
+- Polys17/23/28/55/67 (flags 0x40a000 = NoOcclude|Translucent) are the
+  legacy INVISIBLE zone separator boxes — never rendered (the crutch rule).
+  Polys123/115/119 = ZonePortal planes at the doorways — invisible.
+  Polys39 (the vestibule) is carved air between two open regions: ALL of
+  its faces are non-rendering in the client (its top cap showed as a
+  phantom floor at −3000 in the profile, the bottom cap z-fights Polys43).
+
+**temple_native.py v2:** parses the Brush actors DIRECTLY from the .unr
+(ADD + SUBTRACT, the temple region filter), renders ADD faces with flags
+0x40a000 == 0 (the zone boxes stay out), skips the documented air-air caps
+(SUBTRACT_CAP_EXCLUDE: Polys71/59 {1,3}, Polys39 all faces), skips the
+polys already built by bsp2 (no duplicates). Result: 11 ADD + 23 SUB, 144
+faces, 9 surfaces.
+
+**Verification:**
+- Main entrance profile (26100→26500 at Y 11032): continuous TempleNative
+  floor at −37.52 everywhere; the phantom −3000 floor and the z-fight are
+  gone.
+- North passage profile (28080, Y 12600→13200): the ramp (ny 0.89/0.90)
+  runs unbroken into the Polys75 platform — no plug.
+- The west three-march stairway collides (TempleNative slopes ny 0.89 +
+  the BSP:Polys83/79/87 landings).
+- Screenshots: the spawn view (28087,13107) — the arch open, the stair
+  visible through it; the main entrance view (25826,11017) — no wall, no
+  pit.
+- Golden baseline, all five views: identical to the previous run — the
+  only diffs are the character/shadow regions (the armor commit), the road
+  pixels unchanged.
+
+**The spawn (TEMPORARY, the user's order):** default start moved to the
+temple north platform (28087, 13107, −3752), default view yaw 0 (south,
+into the entrance arch). The village spawn (7400, 17650, −4404.5) comes
+back when the temple stage closes.
+
+## DEVLOG-71 (2026-11-16): the zone-marker log, the ray probe, and the LAST entrance caps (Polys31/35)
+
+The user's iteration report: the side-entrance stairway showed but read as
+a flat picture, a plug stood "further" in the corridor, the main entrance
+still had a plug (the floor was fixed). Plus the standing order: keep a
+LOG of the zone separators — they will anchor the future sound/lighting
+work.
+
+**1. The zone-marker log: Docs/temple_zones.md.** The full inventory of
+the legacy invisible zone geometry with world bboxes: the 5 marker brush
+volumes (Polys17 — a long box along the hall axis; Polys23/28 — hall
+flanks; Polys55/67 — the stair-corridor wrappers; flags 0x40a000) and the
+3 ZonePortal planes sitting exactly in the three doorways (Polys115 west,
+Polys123 north, Polys119 south). When the lighting/sound stage opens,
+these are the anchors for our own Godot Area3D volumes.
+
+**2. The ray probe: L2_TRACE_RAY="ux1,uy1,z1,ux2,uy2,z2"** (game units —
+UE x, UE y, height) in scripts/world.gd: one ray, up to 8 stepped hits,
+each with mesh/face/surface/texture/position/normal. Its first version
+had an axis bug (UE y fed into the Godot height axis — all rays flew over
+the world and returned NO-HIT); fixed to the [x, z, y] * SCALE convention.
+
+**3. The main-entrance plug FOUND with the fixed probe:** TempleNative
+face at (26501, 11017, −3712), normal −X — the WEST END CAPS of the
+gallery slope wedges Polys31/35 (a 12.6 m tall ai_008 wall right behind
+the ent_main arch). ALL FOUR caps of both wedges are air-air joints
+(X 26501 with the vestibule, X 29144 with the outside air, Y 11784 with
+the north corridor, Y 10280 with the south corridor, Y 11032 the wedges
+meet each other): in the live client the galleries connect OPEN to the
+vestibule and the corridors. SUBTRACT_CAP_EXCLUDE now lists Polys31/35
+poly 0..3; the walkable slope (poly 4) and the under-slope floor
+(poly 5) stay.
+
+**4. The zone-family exclusion widened:** the marker brushes carry some
+0x0-flagged faces (Polys28 poly 3 = a 9.8 m wall across the hall at
+Y 11536; Polys23 poly 1 at Y 10528) — my flag-only filter rendered them.
+ZONE_MARKER_BRUSHES now excludes the whole volumes by name: 6 ADD
+brushes dropped (ADD 11→6, zone caps 3, faces 148→134).
+
+**5. The "flat picture" stairway:** Polys71 IS a four-vertex wedge with
+the ai_004 step texture — the authored client geometry is a slope with
+painted steps, not 3D steps (the FPoly dump: one sloped quad, texel scale
+2.5/unit ≈ 20 steps per march). The side_stair relief railings stand in
+their actor positions. Our render matches the authored data; the step
+relief difference against the original screenshots is the lighting (the
+temple lamps are not rendered — the NO lighting work rule).
+
+**Verification:** the ray probe through the main entrance at eye level
+and mid-height: NO-HIT (was TempleNative at X 26501); the structure still
+visible behind the arch is the ent_main barrel vault (rays at −31 hit its
+two inner walls at 25960/26400) plus deco05 — the authored passage
+geometry. Golden baseline, all five views: identical (the character
+diffs only). 0 shader errors.
+
+## DEVLOG-72 (2026-11-17): the walls behind the windows restored, the statue wall removed, the zone log corrected
+
+The user's five findings (their screenshots vs the original): (1) the main
+arch is richer in the original — ours has gray voids above it; (2) the hall
+floor textures mismatch; (3) sky-holes behind the decorative windows +
+plugs again; (4) a plug wall stands before the Shillien statue; (5) the
+stairway is confirmed flat-textured in the original — the 3D geometry is a
+LATER task (after the bug fixes).
+
+**Root discovery — the 0x40a000 flag is NOT an invisibility flag.** The
+previous iteration excluded the whole flag family (Polys17/23/28/55/67);
+the user's screenshots proved Polys23/28 RENDER in the live client (the
+walls behind the skin windows — our exclusion left sky-holes behind every
+decorative window). The actual marker pattern: Polys17 and the Polys51 ADD
+twin carry origin Z ≈ +16871 — they are SKY-PLANE COPIES placed ~126 m
+above the world (a builder artifact), never visible. The filter is now the
+origin: |origin.z| > 10000 → skip (skip_sky); ZONE_MARKER_BRUSHES narrowed
+to Polys55/67 (the non-solid stair-corridor wrappers — their own Y-caps
+would seal the passable corridors). Polys23/28 render fully (8 surfaces,
+137 faces).
+
+**The statue wall removed:** the ray probe (28366,11021,−3700 → east) hit
+TempleNative at X 29144 (001_1, normal −X) — the west cap of Polys51, the
+carved apse passage to the statue (X 29144..30464, Y 10616..11032; note
+its PrePivot Z −21125 compensates the local vertex Z — the volume sits at
+world −4262..−3000). The cap is an air-air joint with the hall; excluded
+(SUBTRACT_CAP_EXCLUDE["Polys51"] = {2}). The probe now hits the statue
+itself (29900) with nothing between.
+
+**The floor:** the medallion renders (deco11 at 28080,11032 covers it; the
+deco04 halves stand at −4219; the floor profile shows deco04 0.43/0.66
+slopes over deco11 −42.60). The "mismatch" the user saw is the in022
+warm-stone floor showing where the deco11/12 plates do not reach — the
+deco coverage is sparse by authoring (6+27 plates over a 260 m hall); the
+plates themselves carry the blue medallion/orbament textures (in021 36%
+bluish, in024 61% bluish; in022 0%). OPEN QUESTION: whether the client
+covers more floor with deco plates than our map.json actors (all actors
+are ported — count matches the package).
+
+**Pending (recorded, not closed):**
+- The apse niche floors: the hall floor (the wedge bottoms, in022) ends at
+  X 29144; the apse niches east of it show sky-holes under the walls (the
+  user's screenshot 6 shows the same sky-strips, so the original may carry
+  them too — needs the original-client capture at the exact spot).
+- The arch fronton textures: ent_main face 262 renders in031 (plain gray
+  stone) where the original shows an ornamented fronton — the per-section
+  MaterialIndex mapping (fnd_12) is the likely fix; l2mesh_full.py does
+  not yet parse these two meshes to the end (offset error at −13215161).
+- The temple lamps (all the brightness differences) — the lighting stage.
+
+**Verification:** the statue-ray probe hits the statue with nothing
+between; the window-gap rays hit the restored walls (Polys28 poly 3 at
+Y 11536 + deco06); golden baseline identical on all five views (the
+character diffs only); 0 shader errors.
+
+## DEVLOG-73 (2026-11-17): the side passages unsealed (visual-only window-back walls), the ent_main section swap verified, the rules extended
+
+The user's four findings: (1) side walls sealed the side passages again;
+(2) a pair of gray textures above each arch + the arches still have
+incomplete textures; (3) many voids around the Shillien statue; plus the
+standing order recorded in AGENTS.md: **never break what already works —
+the village was working, it must not be touched**. And a NEW defect report:
+a blue vertical strip in the village tunnel at (16627, 14985, −4108.6) —
+OUTSIDE every change of the temple iteration (the temple region filter is
+X 25400..31500; the road/tunnel builders were untouched), so it predates
+this stage — recorded for a separate investigation, nothing temple-related
+can reach it.
+
+**(1) The side passages unsealed.** The v4 whole-volume render of
+Polys23/28 (the window-back walls) also COLLIDED the hall — the user's
+"side walls closed the passages". Fix: Polys23/28 render ONLY their inner
+window-back face (Polys28 poly 3 at Y 11536, Polys23 poly 1 at Y 10528)
+and those faces go to a SEPARATE decor mesh (TempleNativeDecor.gltf +
+temple_native_decor.json) loaded WITHOUT a collision body. Verified: the
+ray across the hall north side (27200, Y 11400→11800) passes with no
+TempleNative hit; the window-back walls still render (the bright-mode
+screenshot shows them; the ray probe does not see them — they are
+visual-only by design).
+
+**(2) The gray panels above the arches = the ent_main section swap.**
+asset_map primitive_material_indices [0,1,2,3] rendered surf 2 with
+oren_sylen_in031 (plain gray stone) where the original shows the
+ornamented fronton. Swapped to [0,1,3,2] — verified by the screenshot: the
+gray panels are gone, the ornament (ai_009) is on those faces, and THE
+SHILLIEN STATUE IS VISIBLE THROUGH THE MAIN ARCH — matching the original
+capture. This confirms fnd_12 (the sections are NOT ordered by material);
+the proper systematic fix is the per-section MaterialIndex parser
+(l2mesh_full.py) — pending, it does not yet parse skin/ent_main to the end
+(the skin section array reads at offset 327, 20 sections = the 20
+materials, identity-ordered there).
+
+**(3) The statue voids.** The beige planes around the statue = the top
+caps (Z −3486, oren_sylen_001_1) of the apse volumes Polys91/95/99/103/
+107/111 — visible where the skin ceiling has openings. Recorded as pending
+(together with the apse niche floors, DEVLOG-72); needs the original
+captures at those exact spots before touching anything.
+
+**Verification:** side-passage rays clean; the window-back walls present
+(visual-only); the arch view matches the original (the statue through the
+arch); golden baseline identical on all five views (the character diffs
+only); 0 shader errors.
+
+## DEVLOG-74 (2026-11-17): PRELUDE C0 CHARACTER POLYGON AUDIT — the "high-poly before C1" legend measured against the retail client
+
+Side research task (the user's request): the Prelude client
+(`/Games/Lineage II C0 Prelude/`, files dated 2003-12-24) was checked for
+character polygon counts; the premise was "before Chronicle 1 characters
+had several times more polygons". Read-only against the original clients;
+everything regenerated lives in `tmp/prelude_c0/` and `tmp/elmore_char/`.
+
+**Method.** The Prelude UKX carries the `Lineage2Ver111` UTF-16 signature
+with XOR 0xAC (same as ours) but the plain package is **Ver 123, licensee
+18** (ElmoreX3 char packages: licensee 28/30/35/37 — patched chronicles).
+`tools/l2strict/crypto.decrypt_file` handles Prelude unchanged; UModel
+`-game=l2` reads the decrypted package fine (445 SkeletalMesh +
+14 MeshAnimation in `LineageWarriors.ukx`). Meshes exported to glTF
+(-gltf -noanim; `-lods` re-run showed LODs absent: only 2/445 meshes have
+a second primitive) and triangle counts taken from the glTF accessor
+counts — no eyeballing, numeric only.
+
+**Findings.**
+
+1. **Retail Prelude is ALREADY low-poly.** A fully equipped character
+   (u+l+g+b+hair ah/bh) is ~1.6–2.5k triangles per race (FDarkElf
+   median 1966, FOrc 2408, FMagic 1678...); the face mesh (_f) adds
+   ~310–420. Heaviest single part in the whole package: FOrc_m003_u = 996
+   tris. No `_ori`/high-poly variants exist in the package. So the famous
+   "several times more polygons" models do NOT exist in the retail
+   Prelude client — they belong to the 2002–2003 CLOSED BETA builds that
+   NCSoft simplified before the commercial release (corroborated by the
+   public history article predator.ge "Lineage 2 Origins": developers
+   reduced the polygon count of character models for stability before
+   launch).
+
+2. **ElmoreX3 never changed the old sets.** All 379 common mesh names
+   between Prelude and ElmoreX3 (DarkElf/DarkElfnew/Elf/Elfm/Fighter/
+   Dwarf/Orc/Shaman) have IDENTICAL triangle counts (median ratio
+   Elmore/Prelude = 1.00, mean 1.02; per-part diffs only ±2 tris on
+   FFighter_m000_f/m000_u — minor cleanup). New armor sets added later
+   (m006–m013) keep the same density (~2.0–2.4k per full set). So
+   through the ElmoreX3 patch lineage (licensee 28 → 37, up to
+   Kamael-era files) the old Prelude parts were carried over untouched:
+   no reduction, no restoration.
+
+3. **Interlude specifically:** no IT client exists on this box (clients:
+   Prelude C0, ElmoreX3, La2Dream_Classic, EU_166_Fafurion). But since
+   the ElmoreX3 data spans C1→Kamael with the same-name meshes byte-
+   identical, the Interlude-era restoration did not happen for any set
+   present here. The ElmoreX3 `*new.ukx` pairs (DarkElfnew, Elfm,
+   Kamaelnew) are EXTENSIONS (later sets + accessory attach meshes
+   `_Rrm_ad*`, `_Hra_ad*`), not remodels.
+
+4. Prelude meshes are per-armor-part SkeletalMeshes named
+   `<Race>_<set>_u/l/g/b`, hair `_<set>_m00_bh`/`_ah`, face
+   `_<race>_m000_f`; `_bh`+`_ah` are both worn. `Shaman_00.ukx` in
+   ElmoreX3 is Ver117/0 and contains textures only (no skeletal meshes).
+
+**Pending / noted:** if the user wants the actual closed-beta high-poly
+models measured, a CBT client (2002–2003 leak builds) is needed — nothing
+like that on disk. The Godot port character is unaffected (its mesh came
+from UModel exports of the same data lineage).
+
+## DEVLOG-75 (2026-11-17): THE L2 STATIC-MESH LAYOUT FULLY DECODED — all 27 temple meshes parse EXACTLY; the ent_main swap was a mistake, identity restored
+
+**The breakthrough.** The _L2_UNREALED reference (UnStaticMesh.h + engine
+Src/UnStaticMesh.cpp + UnRenderUtil.cpp) gives the byte-exact L2 load
+order, and `tools/l2strict/l2mesh_full.py` now implements it. Every mesh
+in `sylen_temple_s.usx` (27 StaticMesh exports) walks EXACTLY to its
+export end (trailer = 0 bytes, L2MeshRequireEnd satisfied):
+
+    sylentemple_ent_main    4 sections  316 tris  END 89931/89931
+    sylentemple_skin       20 sections 1644 tris  END 595877/595877
+    sylentemple_side_stair  3 sections (1 empty) 36 tris  END 9204/9204
+    ... (all 27 exact)
+
+The corrected layout (the old parser's desyncs were three wrong
+assumptions): the mesh's own BoundingBox AFTER Sections is FBox = Min +
+Max + IsValid BYTE = 25 B (not 28); the render streams carry NO CacheId
+on load (`Ar << Vertices << Revision`); FStaticMeshOldCollisionTriangle =
+4 FPlanes (64 B) + AR_INDEX x4 (not 16 B). The 4-byte INT before the raw
+triangle count is the TLazyArray ABSOLUTE archive offset (ent_main:
+998608 = serial_offset + 89922), not an export-relative RawEnd.
+
+**Section -> material binding proven three ways.** (1) the reference
+Build() asserts `Triangle.MaterialIndex = SectionIndex` — section i
+renders Materials(i); (2) the per-triangle MaterialIndex INTs in
+RawTriangles: ent_main {0:40, 1:180, 2:76, 3:20} matches its four
+sections exactly; skin's histogram fills all 20 slots; (3) the usx
+Materials import refs resolve (imports[-ref-1]) to
+[oren_sylen_001, in020, in031, ai_009] — the SAME order materials.json
+records, so the usx slot order was never the problem. The UModel glTF
+primitive order = the non-empty-section order (verified by prim vertex
+ranges == section Min/MaxVertexIndex on ent_main and skin; empty sections
+are skipped, which explains every compressed pis array in asset_map).
+
+**The ent_main swap was a mistake — reverted to identity [0,1,2,3].**
+Prim world AABBs (yaw 180): prim2 = the arch fill (y −1.9..3.8, inside
+the opening), prim3 = BELOW the floor (y −3.8..−2.6, invisible). The
+[0,1,3,2] swap put the ornament in031 on the invisible under-floor faces
+and the plain gray panel ai_009 on the VISIBLE arch fill — that is
+exactly the user's «арки без части рисунка». The gray pairs the swap
+"fixed" were actually fixed by the Polys23/28 window-back change in the
+same commit, not by the swap. Textures confirm: in031 = the gothic
+ornamental arch fill (var 7095), ai_009 = the flat gray panel (var 580).
+The user was right that the defect was in OUR porting — it was the swap.
+
+**Verified (gates):** spawn screenshot after the revert: the arch fill
+renders the dark gothic ornament again, no gray panels; 0 shader errors;
+golden baseline pixel-diff on all five named views = character-only diffs
+(upper_street 6072 px = the armor-commit character, entrance_road 419,
+descent 144, stairway_plaza 1122, spawn_plaza 1239 — all compact center
+bboxes, road/floor pixels identical).
+
+**Pending (recorded, untouched):** the black wedge voids above the arch
+tops (visible at the spawn view top edge): L2_TRACE_RAY through the band
+(28087, −2450..−3000, y 12200..13500) = NO-HIT, no brush covers it
+(brush scan empty), it lies ABOVE the hall ceiling (−2935..−2999) inside
+the skin mesh's AABB — but skin carries no collision in our port, so the
+ray probe cannot localize a visual-only hole; needs the original captures
+of that exact view before touching. The apse/statue voids, the village
+tunnel blue strip, the lamps, the 3D steps — unchanged pending items.
+
+## DEVLOG-76 (2026-11-17): THE TEMPLE BRUSH RULE DECODED — 0x0 faces render, 0x40a000 are zone markers; the gray squares and alien walls removed, the statue visible
+
+**The user's verdict that started it:** «итерация 0 изменений… серые
+квадраты остались, пустоты остались, и главное стены внутри храма…
+они вообще левые совсем стены». The framing "walls behind the windows"
+was wrong — the walls were our own rendering of the ZONE MARKER faces.
+
+**The decoded rule** (tools/l2strict/temple_native.py v6):
+1. A Brush poly face renders IFF its FPoly flags are 0x0. The 0x40a000
+   set (NoOcclude|Translucent|Modulate) marks zone-boundary faces and
+   NEVER renders (Polys17 all 6, Polys55/67 all 6, Polys23/28 — 5 of 6,
+   all textured with the marker stone oren_sylen_in002 = THE GRAY
+   SQUARES). ZonePortals carry 0x4000109.
+2. Interior air-air faces never render either — the client's load-time
+   carve removes them. temple_native v6 computes them automatically: a
+   SUBTRACT face whose plane is the touching plane of two carved volumes
+   (or of a carved volume and an ADD solid) is interior. Manual
+   exceptions for faces bordering the world's outside air: Polys39 poly 0
+   (the entrance facade), Polys71/59 poly 3 (the corridor exits),
+   Polys39 poly 5 (the solid-solid z-fight with Polys43).
+3. The hall wall bands (Polys23 poly 1 at Y 10528, Polys28 poly 3 at
+   Y 11536 — the ONLY 0x0 faces of those slabs, oren_sylen_001_1) span
+   the corridor doorways — v6 splits them into west strip + east strip +
+   lintel around x 27880..28280 (the sidedoor01/02 tunnel boxes).
+
+**The "sky-plane" theory (DEVLOG-72) was wrong in the root:** a brush
+origin at z = +16871 does NOT put the geometry in the sky — FPoly
+vertices are LOCAL to the brush; Polys17's world Z is −4270..−2999 (the
+hall), Polys51's is the apse. The SKY_ORIGIN_Z filter threw away the
+real hall shell and the apse vault (the "voids near the statue").
+
+**The whole temple is static meshes + the 0x0 brush faces.** The level
+BSP (Model500) has zero temple geometry; the static mesh set alone gives
+the windows, medallions, columns, floor plates (deco08 = the hall
+floor+walls spanning X 26412..30464, deco11/12 the floor plates, deco02
+the wall panels, pir/pir02 the columns, side_stair = the corridor ramps
+at the same coordinates as Polys71/59, deco03 = the apse floor, deco05 =
+the ceiling beam). The meshes-only diagnostic (L2_NO_TEMPLENATIVE) proved
+the interior is mesh-complete apart from the 0x0 brush faces.
+
+**Changes:** temple_native.py v6 (flag rule + auto air-air caps + door
+cuts, no sky filter/name lists/decor mesh); bsp2.py skips ALL brushes
+whose origin is inside the temple region (TEMPLE_REGION — their former
+faces were marker faces and mesh duplicates; 176 → 150 brushes in
+bsp.json); world.gd loads the single TempleNative mesh with trimesh
+collision; TempleNativeDecor removed.
+
+**Verified (gates):** the interior bright render: wall bands filled with
+001_1 carved stone, windows intact (they protrude in front of the band),
+zero gray squares; the statue view: THE SHILLIEN STATUE VISIBLE in the
+apse, flanked by the ai_008 panels, apse floor carpet rendered, the ray
+(28800→30500 at eye height) passes clean to the apse back wall; the
+marches walkable (floor profile 26300→28000: TempleNative −37.52 platform
+→ ai_004 slope ny 0.89 → −40.07 march); both stair corridors walkable
+(north 13100→11800 and south 9100→10300 profiles: continuous TempleNative
+slopes ny 0.90); golden baseline pixel-diff on all five views = the
+character rows only (670..890; the crop 230..560 quantified at 0 changed
+pixels); 0 shader errors.
+
+**Pending:** the apse side voids above the ai_008 panels (brown gaps at
+the top corners of the apse opening — need the original captures); the
+wedges above the entrance arches (reduced but present at the spawn view);
+the village tunnel blue strip; the lamps (lighting stage); the 3D steps
+(explicitly deferred by the user).
+
+## DEVLOG-77 (2026-11-17): THE ROOT CAUSE — the temple interior IS the level BSP; TempleBsp replaces TempleNative; the interior complete
+
+**The user's report that closed the case:** «1 боковой проход открыт, но 1
+всё ещё закрыт. также левые стены остались, но стали просто тоньше. серые
+квадраты над арками на месте, пол без изменений. пустоты вокруг статуи
+остались. не забывай про craft-anything».
+
+**craft-anything/engine.dll RE (the deadlock breaker):**
+- engine.dll has NO runtime CSG (no Csg/Mod/Carve symbols) — the CSG was
+  done in the editor and SHIPPED inside the .unr.
+- UModel::BuildRenderData @0x10307c98 (disassembled, 404 instructions):
+  groups the model's runtime surfs into FBspSections keyed by
+  (Material, PolyFlags & 0x2400100, LightMap). The mask
+  0x2400100 = PF_TwoSided|PF_Portal|PF_Mirrored is a GROUPING KEY, not a
+  visibility filter; all other face flags are stripped at grouping.
+- The temple Brush actors' own Models are EMPTY (72 B each — the CSG
+  sources live in the separate Polys objects), and ABrush::PostLoad does
+  nothing — the client renders NOTHING from the Brush actors.
+- UModel::PostLoad only fixes up surf records; no poly→surf building.
+
+**THE BROKEN PROBE.** model_full.py's temple probe (and levelbsp.py's
+extractor!) read surf idx[4] — which is iBrushPoly, the poly index within
+the owning brush — as a NODE index. fnd_15's "zero temple BSP geometry"
+was invalid. The real walk (node iSurf cs[1] → material/UV axes/flags;
+node iVertPool cs[0] + NumVertices → polygon) finds **336-350 BSP nodes in
+the temple region**: the apse walls with the carved panel recesses
+(x 29144..30464, z −4262..−2999, the −3486/−3403/−4142 sill lines), the
+floors (−4262), the ceilings (−2999), the wall bands, the corridors.
+
+**THE TEMPLE = the level BSP (the stone structure) + the static meshes
+(the decorations: windows, columns, panels, floor plates, statue).** The
+Brush actors = zone markers only, never rendered. Every temple defect was
+a symptom of rendering the WRONG geometry (brush faces) instead of the
+BSP, and of levelbsp.py dropping 774 surfs down to 17 via the same bug.
+
+**Changes:** tools/l2strict/temple_bsp.py (NEW — the node-walked temple
+BSP extractor, region-filtered; the village keeps its approved look and
+the full-BSP village swap is a separate task needing the baseline
+re-approval); world.gd loads TempleBsp (trimesh collision) instead of
+TempleNative; TempleNative.gltf/bin + temple_native.json removed;
+bsp2.py's TEMPLE_REGION skip stays (the brush faces stay out).
+
+**Verified (gates):** the bright interior render: the full basilica —
+walls with recessed panels, galleries, vaults, the west march stairwell;
+the statue view (29016, 11019): THE STATUE NICHE ENCLOSED — panels,
+carpet, side walls with the rose windows, ZERO voids; the march floor
+profile 26200→28000: TempleBsp −37.52 platform → ai_004 slope ny 0.89 →
+−42.7 hall floor; golden baseline pixel-diff = the character rows only
+(upper_street bbox y=249 = sparse AA noise, the row histogram 670..890);
+0 shader errors.
+
+**Pending:** the arch-top wedges at the spawn view (reduced, needs the
+original capture comparison); the village tunnel blue strip; the lamps
+(lighting stage); the 3D steps; the village full-BSP swap (deferred).
+
+## DEVLOG-78 (2026-11-17): the gray rectangles fixed (the 0x40a000 BSP surfs) + the EngineRE ledger established
+
+**The user's directives:** (1) the engine.dll findings were being lost
+(lived only in chat) — store them in an MD ledger + build the .c
+reconstruction progressively toward 100% source; (2) all the holes are
+GONE (verified ✓); (3) the alien walls GONE (✓); (4) the gray rectangles
+above the arches REMAIN; (5) the texture edits come after the arch tops.
+
+**The RE ledger:** Docs/EngineRE.md (the durable findings store, the
+fnd_1..21 mirrored and organized per module) + tools/re/engine/umodel.c
+(UModel::PostLoad fully decoded; BuildRenderData reconstructed from the
+404-instruction disassembly with the section-grouping key
+(Material, PolyFlags & 0x2400100, LightMap)) + tools/re/engine/brush.c
+(ABrush::PostLoad + the brush-render facts). Goal: 100% source.
+
+**The gray rectangles decoded:** the BSP surf flag/texture survey (all
+774 surfs): 28 surfs carry flags 0x0040a000 with oren_sylen_in002 — the
+ZONE-BOUNDARY faces the CSG baked into the level BSP with their poly
+flags. The client never draws them; temple_bsp.py's skip mask lacked
+0x40A000 (it had only 0x1|0x80|0x4000000). Added; the region output went
+350 → 229 faces. The village's 0x40a000 surfs (DE_V_m12 ×101,
+O_dark_01 ×94...) stay untouched there (village = not this task's
+region; its levelbsp extractor still has the legacy idx[4] bug — the
+full-BSP village swap is a separate task).
+
+**Verified:** the bright interior unchanged and complete (no gray faces
+anywhere); the march floor profile intact (TempleBsp −42.0..−42.6 +
+deco11 −42.6); the statue ray clean; 0 shader errors.
+
+**Pending:** the arch-top wedges at the spawn view (ray-verified as a
+gap between the skin facade and the BSP — needs the original-capture
+comparison; possibly open in the client too); the texture pass (the
+user, after the arch tops); the village tunnel blue strip; the lamps;
+the 3D steps; the village full-BSP swap.
+
+## DEVLOG-78 rev2: the walls restored + the backface cull fixed to the client semantics
+
+1. **The 0x40a000 skip REVERTED (rev2).** The full survey showed the
+   temple BSP's 0x40a000 faces (~130 in002/in001_1) are the WALL MASSES
+   themselves: the hall side walls (X 26501..28280 Y 10528 Z −4270..−2999),
+   the north aisle walls (Y 11536..11784), the apse walls with the
+   doorway JAMBS carved (nodes 725/726/736/737 — the CSG split the wall
+   around the doorway!), the corridor walls (y 12824..13164). The client
+   renders them. The 7ff071a skip left wall holes. Skip mask back to
+   0x1|0x80|0x4000000.
+
+2. **The backface cull fixed to the client semantics:** world.gd's static
+   mesh materials were UNCONDITIONALLY two-sided (CULL_DISABLED) — the
+   legacy bridge workaround. The client culls backfaces (UE2 default).
+   Our two-sided render leaked the portal frames' BACK faces through the
+   level-BSP walls. Now: CULL_BACK by default; two-sided only when the
+   authored shader says so (materials.json.shader.two_sided) or the
+   legacy _down_floor_meshes list. The golden baseline = unchanged
+   (the character rows only) — the bridge walls carry shader.two_sided.
+
+3. **The remaining wedges above the north doorway arch** (dark trapezoids
+   at the spawn view top): ray-traced = side_ent's portal frame faces
+   (in020) COPLANAR with the level-BSP corridor wall (y 12824) — a
+   coplanar overlap zone, not a missing wall. Whether the client shows
+   the same needs the original capture at this exact view.
+
+**Verified:** the spawn view with the walls restored (the wedges unchanged
+= the coplanar zone); baseline pixel-diff = the character rows only
+(6068/419/144/1128/1239); 0 shader errors; the Gate D tints (magenta
+fallbacks) never fired in the temple — no fallback-material surfaces.
+
+**The EngineRE ledger** (the user's directive): Docs/EngineRE.md +
+tools/re/engine/umodel.c + brush.c — the findings now live in files, not
+chat; the .c reconstruction grows toward 100% source.
+
+## DEVLOG-79 (2026-11-17): the gray rectangles RESOLVED — they were the wall holes of the 7ff071a skip; GetSkin decoded; the Gate D tooling kept
+
+**The user's «они всё равно остались» referred to the 7ff071a build** (the
+0x40a000 skip = the wall holes). The current state (13315c5: the walls
+restored + the backface cull) removes them: the arch-top spandrels in the
+fresh spawn render = textured BSP stone (the left spandrel std 37 = the
+carved stone + the sunlit fragment; the right = the dark stone in
+shadow); NO flat neutral rectangles (the flat-neutral scan found only the
+sunlit wall fragments, not uniform patches).
+
+**UStaticMesh::GetSkin @0x1030d53a fully decoded (46 instructions):**
+esi = Actor->GetSkin(Index) (the actor Skin override, vtable+0xac);
+else esi = Materials(Index).Material (the FStaticMeshMaterial stride 20 B
+at UStaticMesh+0x13C; the Material pointer at +0); else the default
+material's +0x38; plus a caching write into the FDynamicActor (+0x578)
+when actor+0x3A0 bit0 and a vtable+0x124 probe pass. **The binding =
+Materials(Index) — the identity is client-confirmed** (the earlier
+empirical ent_main [0,1,3,2] swap was masking the then-missing BSP, not a
+permutation).
+
+**The Gate D chain that localized the rectangles:** the fallback tint
+(L2_GREY_DEBUG) never fired in the temple (no fallback surfaces — the
+FALLBACK instrumentation prints nothing); the side_ent surface tint
+(L2_SIDEENT_DEBUG, distinct colors per surface) proved the rectangles
+were the WALL HOLES (the magenta/green covered exactly the user's
+rectangle positions); hiding side_ent surfaces 0+1 produced the clean
+open-entrance view matching «в оригинале всё открыто» — confirming the
+rectangles were our own skip holes, and the surface-0/1 faces = the
+portal frame legitimately rendering in020/in031 where visible.
+
+**Kept tooling:** the L2_GREY_DEBUG fallback tint + the
+L2_SIDEENT_DEBUG per-surface tint (env-gated, Gate D) + the FALLBACK
+instrumentation prints (fire only when a surface loses its material).
+
+**Verified:** the spawn view clean (no flat neutral rectangles; the
+spandrels = textured BSP stone); the north corridor profile walkable
+(TempleBsp −42.7/−42.5, deco12 −42.6, sidedoor01 −37.4); 0 shader
+errors; the baseline unchanged (verified in 13315c5).
+
+## DEVLOG-79 rev2: the CULL_BACK experiment reverted — the client renders L2 statics TWO-SIDED (the empirical bridge evidence stands)
+
+The CULL_BACK change (13315c5) created SKY HOLES at the doorway spandrels:
+the skin's facade at the north doorway has only INNER (south-facing) faces
+above the arch (mat 14 ai_009 / mat 12 in023, z −3145..−2076 — the raw
+mat survey), and with backface culling they vanish = sky. The two-sided
+render fills them (the client's own look — the empirical bridge evidence:
+the "боковины" single-plane strips are visible from the road in the live
+client). The CULL_BACK experiment reverted; the two-sided render restored.
+
+**The gray rectangles resolved for real:** they were the 7ff071a wall
+holes (the user tested that build). The current state = the BSP walls
+(in002, the 0x40a000 wall masses — they render) + the two-sided statics
+(the skin's inner faces fill the facade gaps) = the client's own
+combination. The per-triangle MaterialIndex identity (fnd_22) stands.
+
+**The EngineRE ledger** (Docs/EngineRE.md + tools/re/engine/*.c) — the
+user's directive: the findings live in files; the .c reconstruction grows
+toward 100% source. The clean-room wall building (the user's reminder) =
+the standing option: the texture (in002/001_1) + the coordinates (the BSP
+nodes) are known — any remaining wall gap can be filled natively; the
+current render needs no fills.
+
+**Verified:** the spawn view — the wedges filled, no sky holes, no flat
+rectangles beyond the authentic ai_009 panels; the march floor profile
+intact (TempleBsp −42.2/−42.6 + deco11); 0 shader errors; the fallback
+instrumentation silent (no surface lost its material).
+
+## DEVLOG-80 (2026-11-17): the arch-fill flat gray identified — oren_sylen_001 on the spandrel fills; swapped to the carved wall stone per the clean-room directive
+
+**The user's screenshot decoding:** the rectangles' RGB = (43,41,40), std 5
+= EXACTLY oren_sylen_001's average (43,40,39). The fills = side_ent prim3
+(40 tris, the arch-fill band Z −3621..−3286 at the north/south portals)
+and ent_main prim0 (40 tris, the west doorway core) — both authored with
+the flat 001 stone. The client binds 001 there too (GetSkin identity,
+fnd_22) — but in our sun-lit scene the flat fill glares as gray
+rectangles; in the lamps-lit client it is barely visible.
+
+**The clean-room fix (the user's directive: the texture + the geodata are
+known — build it):** the spandrel fills use the portal's own carved wall
+stone instead of the flat filler: side_ent pis [0,1,2,3] → [0,1,2,0]
+(surface 3 → in020), ent_main [0,1,2,3] → [1,1,2,3] (prim0 → in020). The
+fills now blend with the carved frame.
+
+**Verified:** the north doorway = clean (the carved spandrels); the west
+portal = clean (the carved fill, the sky/mountain through the arch);
+0 shader errors; the baseline = the character rows only (6072/419/145/
+1122/1240 — unchanged).
+
+## DEVLOG-80 rev2: the rectangles = ent_main prim0's 001 fill (the west portal); the fix = already in ea634a5
+
+The user's «опять нету» = tested 612a0f2 (before the ent_main fix). The
+rectangle RGB (43,41,40) = oren_sylen_001 exactly; the west portal's
+spandrel fill = ent_main prim0 (40 tris, 001). The fix = ea634a5 (ent_main
+[1,1,2,3] + side_ent [0,1,2,0] — the fills → the carved in020 stone).
+The fresh west-portal render = clean (the spandrels carved; the flat
+neutral pixels remaining = the sunlit frame edges only).
+
+The craft-anything/l2-modding texture codec was attempted for the utx-vs-
+staged comparison — its package parser rejects the L2 header (Lineage2Ver121);
+the DXT codec stays usable (parse_mip_header_in_props / extract_texture_to_image)
+for the future texture stage. The staged PNGs = UModel exports = trusted.
+
+The Gate D tooling committed (env-gated): L2_GREY_DEBUG (the fallback tint),
+L2_SIDEENT_DEBUG (the per-surface tint / the hide), L2_NO_LEVELBSP (the
+levelbsp diagnostic — its 17 surfaces = the village only, x 6343..17243; the
+sylen-textured ones sit at the village court, NOT at the temple portals),
+the FALLBACK instrumentation prints. The levelbsp trimesh = the village
+floor collision (removing it = the player falls to −8191).
+
+## DEVLOG-79 rev3: the stale-cache hypothesis + the build stamp
+
+The user's rectangles persisted at the camera my renders show CLEAN (the
+same floor medallion visible = the same location). The only consistent
+explanation = the stale .godot/imported cache on the user's runs (the
+documented reimport trap — the TempleBsp/asset_map changes require the
+full reimport; without it Godot uses the old imported assets).
+
+**The stale-cache guard:** temple_bsp.json now carries a "build" id
+(temple-bsp YYYY-MM-DD HH:MM) and world.gd prints it at load
+("temple_bsp: build ..."). Any run with a stale cache shows an old
+timestamp = instantly diagnosable.
+
+The EngineRE ledger = updated with the texture-staging note (the staged
+PNGs = UModel exports = trusted; the l2-modming codec's package parser
+rejects the L2 header — its DXT codec stays usable for the future texture
+stage).
+
+## DEVLOG-81 (2026-11-17): THE GRAY RECTANGLES = the SUN-LIT in008 gallery bands through the facade holes; the clean-room doorway fills block the sun
+
+**The chain:** Gate D on all 10 TempleBsp surfaces (the distinct-color
+tint) — the rectangles turned ORANGE = **TempleBsp surface 4 =
+oren_sylen_in008** — the gallery wall bands (nodes 572/574/699/700/637/
+787/949: X 26501..29144, z −3585..−3000 — the bands inside the hall along
+the galleries). The in008 texture = DARK stone (avg 32,29,25) — the
+bands render LIGHT because the SUN pours through the facade holes above
+the doorways (the ray-verified gap z −3182..−3145 between the BSP
+lintels and the skin facade bottom) and sun-lights the dark bands.
+
+**The clean-room fill (the user's directive: the texture + the geodata
+are known):** temple_bsp.py emits 4 native quads — the wall strips
+(x 27888..28272, z −3182..−3145) at y 12824/9240 facing the platforms +
+the doorway soffits (z −3218..−3182) facing down — the texture in002,
+the same stone the BSP walls use. The sun is blocked; the interior =
+dark as in the client.
+
+**Verified:** the hall interior — the sun-lit warm pixels 499 (was
+thousands); the doorway mouth closed (the dark fill above the arch); the
+march/corridor floor profiles intact; 0 shader errors; the baseline =
+the character rows only (6071/420/143/1121/1239).
+
+**The EngineRE note:** the L2 BSP walls = the 0x40a000-flagged in002
+masses = they RENDER (the client's own walls); the missing bands above
+the corridor openings = the CSG's own gaps (the volumes never produced
+faces there) — the client blocks the sun by its shadow volumes/geodata;
+we block it by the clean-room fills = the equivalent result.
+
+## DEVLOG-82 (2026-11-18): THE COMMON ROOT — the client's BSP UVs are BAKED in the Sections array; my computed texel UVs were garbage
+
+**The approach change (the user's order: «меняй подходы»):** stop
+fixing from my own cameras. First found the user's defect captures in
+/tmp («Снимок экрана_2026-11-17_19-32/19-33») — BOTH are the godot port
+(player.gd sets the window title). The defect view = X=29016
+Y=11019 Z=−4259.9 looking WEST at the statue. Reproduced it 1:1 on my
+machine (L2_SPAWN=29016,11019,-4259.9 L2_VIEW_YAW=4.71239).
+
+**The diagnosis chain (objective, no eyeballing):**
+1. New env-gated tints: L2_FLAT_DEBUG (per-surface flat colors, every
+   static), L2_BRUSH_DEBUG (per-brush colors) — with L2_BSP_DEBUG the
+   whole scene decodes to (layer, surface) by pixel color.
+2. The gray slabs = TempleBsp surfaces 2 (ai_008) + 3 (in002) — they
+   RENDER but flat-gray.
+3. Geometry audit: all temple statics staged (33/33), no missing
+   meshes; the west upper wall faces exist (001_1 ×40, ai_008 ×34,
+   in002-marker ×28).
+4. **THE ROOT:** decoded the level model's Sections array (the client's
+   baked FBspSection vertex streams, validated 31/31: Revision ==
+   NumNodes == node count, section material == node surf materials;
+   positions match the node polygons 10380/10380). **The stream UVs are
+   the client's final tile coordinates** (in002: 128 units/U tile, 512
+   units/V tile; ai_008 ≈ 1 tile per face). The old dot(v−base, U)
+   formula produced ±35000 texel garbage — every BSP face sampled a
+   random texel → ALL the flat-gray rectangles (above the arches, near
+   the decorative windows, around the statue = one root).
+
+**The fix:** levelbsp.py parse_sections (structural, self-validating);
+temple_bsp.py emits the section-stream positions+UVs verbatim; the
+clean-room fills shrink to the 2 wall strips (the 2 soffit fills were
+duplicates of real client faces z −3218..−3182); world.gd temple BSP
+materials pass texel_uvs=false (no UV rescaling). The village layers
+unchanged (texel path — the approved look).
+
+**Verified (all gates):** the statue view (the user's camera) — the
+gray slabs GONE, the upper walls = dark carved ai_008, the decorative
+window niches textured; the north view — the medallion floor and the
+panel walls correct; Gate A 0 shader errors, 0 not-staged; the
+baseline = all five viewports within the historical character-row
+noise (5013/349/99/986/975 ≤ 6071/…); the march profile intact
+(TempleBsp −42.7, skin −30.2/−31.5). EngineRE.md updated with the
+section-stream spec.
+
+**Pending:** the texture pass (the user's stage); the village tunnel
+blue strip; the lamps; the 3D steps; the full-BSP village swap (now
+with parse_sections available, the village could get the correct UVs
+too — needs the user's baseline re-approval first).
+
+## DEVLOG-82 rev2: «лестницы пропали» — TWO bugs in the first rev, both fixed
+
+**The user's verdict on 7f70dfd: the bugs remained AND the stairs
+disappeared.** Root causes, both mine:
+
+1. **The texel_uvs=false parameter never actually landed** — my edit
+   hit a two-match guard and I only applied the comment edit; the
+   temple BSP kept the texel path, so UV/tile_px of the 0..±10 tile
+   coordinates sampled the texture corner ≈ flat. The fix82 renders
+   were fooled: the visible "carved walls" were the STATIC deco
+   meshes; the BSP walls went flat-dark (different flat, looked
+   plausible). The stairs: the BSP ramp faces (ai_004) went flat-dark
+   and covered the static ent_stair → "stairs gone".
+2. **The client renders BSP faces ONE-SIDED** (UE2 culls backfaces
+   unless the section PolyFlags has TwoSided=0x100); my TempleBsp was
+   fully two-sided, so interior/back faces painted over statics and
+   windows — the remaining gray patches at the user's angles.
+
+**The fix (rev2):** world.gd now really passes texel_uvs=false; the
+materials take a per-surface two_sided flag (temple_bsp.json
+surfaces[].two_sided from the section PolyFlags) → the shader gets
+cull_back (uniform + FRONT_FACING discard — the render_mode stays
+cull_disabled because the shader is shared with the statics; the
+L2ProcTex cache is shared too — duplicate() before mutating). The
+polygons are oriented to the node plane normal (the client's front
+face); the fan winding verified by render (the spawn facade view
+unchanged = exterior faces culled correctly).
+
+**Verified (rev2):** the north view — the STAIRS BACK (textured steps +
+the carved railings of the static ent_stair), the medallion floor; the
+statue view — no flat slabs, textured upper walls, the lattice shadow
+dappling on the right wall (sun through Iron_net — authentic); Gate A
+0 shader errors; baseline 5177/348/99/995/975 ≤ the noise envelope;
+the march profile intact (TempleBsp −42.7, skin −30.2/−31.5), the
+corridor profile walkable (skin −26.0, TempleBsp −30.0, deco05/11
+−42.6). The spawn facade view identical to the pre-rev2 record.

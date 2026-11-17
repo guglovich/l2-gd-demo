@@ -14,6 +14,9 @@ render_mode world_vertex_coords, cull_disabled, diffuse_burley, specular_schlick
 uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap, repeat_enable;
 uniform bool uv_is_texels = true;
+// The client renders BSP faces one-sided (UE2 culls backfaces unless the
+// section is TwoSided); statics render both sides. Gated per material.
+uniform bool cull_back = false;
 uniform vec2 tile_px = vec2(256.0, 256.0);
 uniform float pom_scale = 0.05;  // visual depth, meters
 uniform int pom_steps : hint_range(4, 32) = 16;
@@ -75,6 +78,9 @@ float snoise3(vec3 v) {
 }
 
 void fragment() {
+	if (cull_back && !FRONT_FACING) {
+		discard;
+	}
 	vec2 uv = uv_is_texels ? UV / tile_px : UV;   // 0..1 per tile
 	// per-pixel tangent basis from the screen Jacobian (no mesh tangents)
 	vec3 sigX = dFdx(VERTEX);

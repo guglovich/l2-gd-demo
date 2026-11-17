@@ -607,8 +607,10 @@ func _emit_tri(st: SurfaceTool, p1: Vector3, p2: Vector3, p3: Vector3,
 ## (owner Brush, iBrushPoly = raw poly index). bsp2 writes per-face "tex"
 ## and the prim index into bsp.json; faces without a surf keep the neutral
 ## stone placeholder.
-func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true) -> Material:
-	var key := "%s:%s|%s" % [tex[0], tex[1], "t" if texel_uvs else "n"]
+func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true,
+		two_sided: bool = true) -> Material:
+	var key := "%s:%s|%s|%s" % [tex[0], tex[1], "t" if texel_uvs else "n",
+			"2s" if two_sided else "1s"]
 	if cache.has(key):
 		return cache[key]
 	# MODERN-PORT RULE: procedural clean-room shader first — no PNG in the
@@ -616,10 +618,16 @@ func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true) -> Mat
 	# texel UVs (uv_is_texels=true); the TEMPLE BSP carries the client's
 	# baked section-stream UVs = final tile coordinates (DEVLOG-82) —
 	# texel_uvs=false, no UV rescaling anywhere.
+	# The client renders BSP faces one-sided unless the section is TwoSided
+	# (UE2 backface culling; DEVLOG-82 rev2) — cull_back per surface. The
+	# L2ProcTex cache is SHARED with the statics: duplicate before mutating.
 	var pm := L2ProcTex.material_for(tex[0], tex[1], texel_uvs)
 	if pm != null:
-		cache[key] = pm
-		return pm
+		var dup: Material = pm.duplicate()
+		if dup is ShaderMaterial:
+			(dup as ShaderMaterial).set_shader_parameter("cull_back", not two_sided)
+		cache[key] = dup
+		return dup
 	var m := StandardMaterial3D.new()
 	var tp := _find_texture_path(tex[0], tex[1])
 	if tp != "":
@@ -636,7 +644,7 @@ func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true) -> Mat
 	else:
 		print("bsp: texture not staged ", key)
 	m.roughness = 0.95
-	m.cull_mode = StandardMaterial3D.CULL_DISABLED
+	m.cull_mode = StandardMaterial3D.CULL_DISABLED if two_sided else StandardMaterial3D.CULL_BACK
 	cache[key] = m
 	return m
 
@@ -879,7 +887,10 @@ func _build_temple_native() -> void:
 			textured += 1
 			continue
 		if si < surfaces.size() and surfaces[si].get("tex") != null:
-			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache))
+			# the temple BSP = the client's baked section-stream UVs (final
+			# tile coordinates) + per-section one-sidedness (DEVLOG-82 rev2)
+			var ts: bool = surfaces[si].get("two_sided", true)
+			mesh.surface_set_material(si, _bsp_material(surfaces[si]["tex"], mat_cache, false, ts))
 			textured += 1
 		else:
 			mesh.surface_set_material(si, _bsp_grey())

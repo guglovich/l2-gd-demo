@@ -160,7 +160,8 @@ def parse_level_model(pkg, midx):
         q += 3 + 8 + 12
         # the 5 fixed INTs: iLeaf0, iLeaf1, iSection, iFirstVertex, iLightMap
         sect = struct.unpack_from("<3i", d, q - 12)
-        return {"cs": cs, "nvert": nvert, "sect": sect, "end": q}
+        return {"cs": cs, "nvert": nvert, "sect": sect, "plane": plane,
+                "end": q}
 
     nodes = []
     for _ in range(nn):

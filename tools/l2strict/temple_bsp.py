@@ -109,7 +109,23 @@ def main() -> None:
                 and -6100 <= max(zs) and min(zs) <= -1500):
             stats["outside"] += 1
             continue
-        groups.setdefault(tuple(tex), []).append((poly, uvs))
+        # The client renders BSP faces ONE-SIDED unless the section is
+        # TwoSided (UE2 GRenderBspSection culls backfaces). Group by
+        # (tex, two_sided) so world.gd can set the cull mode per surface.
+        two_sided = bool(sections[isec]["poly_flags"] & 0x100)
+        # Orient the polygon to the node plane normal (the client's front
+        # face); the stream order is not guaranteed to match.
+        pl = nd["plane"]
+        e1 = [poly[1][k] - poly[0][k] for k in range(3)]
+        e2 = [poly[2][k] - poly[0][k] for k in range(3)]
+        # polygon normal (before orientation)
+        pn = [e1[1] * e2[2] - e1[2] * e2[1],
+              e1[2] * e2[0] - e1[0] * e2[2],
+              e1[0] * e2[1] - e1[1] * e2[0]]
+        if pn[0] * pl[0] + pn[1] * pl[1] + pn[2] * pl[2] < 0:
+            poly.reverse()
+            uvs.reverse()
+        groups.setdefault((tuple(tex), 1 if two_sided else 0), []).append((poly, uvs))
         stats["faces"] += 1
         stats["nodes"] += 1
 
@@ -120,6 +136,7 @@ def main() -> None:
     mesh_prims = []
     surfaces = []
     for key in sorted(groups.keys()):
+        tex, two_sided = key[0], bool(key[1])
         pos = []
         uvs = []
         idx = []
@@ -130,8 +147,12 @@ def main() -> None:
             for u, w in uvs2:
                 uvs.extend([u, w])
             n = len(verts3d)
+            # the polygons are oriented to the node plane normal (right-hand
+            # rule = CCW seen from the front). Godot's front face = the
+            # winding it keeps with cull_back — verified by render; flip the
+            # FAN order here once if the convention proves opposite.
             for k in range(1, n - 1):
-                idx.extend([vbase, vbase + k + 1, vbase + k])
+                idx.extend([vbase, vbase + k, vbase + k + 1])
             vbase += n
         if not idx:
             continue
@@ -166,15 +187,15 @@ def main() -> None:
         materials.append({"name": f"m{si}",
                           "pbrMetallicRoughness":
                               {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
-                          "doubleSided": True})
+                          "doubleSided": two_sided})
         mesh_prims.append({"attributes": {"POSITION": len(accessors) - 3,
                                          "TEXCOORD_0": len(accessors) - 2},
                            "indices": len(accessors) - 1, "material": si,
                            "mode": 4})
-        surfaces.append({"tex": list(key)})
+        surfaces.append({"tex": list(tex), "two_sided": two_sided})
 
     # the clean-room wall strips (the CSG's own gaps) with the client's
-    # tile density at the same wall
+    # tile density at the same wall — two-sided (no node plane to orient)
     for (x0, x1, y0, z0, z1, ny, ftex) in FILLS:
         corners = [(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)]
         if ny < 0:
@@ -183,7 +204,7 @@ def main() -> None:
                (float(x1 - x0) / FILL_UTILE, 0.0),
                (float(x1 - x0) / FILL_UTILE, float(z1 - z0) / FILL_VTILE),
                (0.0, float(z1 - z0) / FILL_VTILE)]
-        groups.setdefault(tuple(ftex), []).append((corners, uvs))
+        groups.setdefault((tuple(ftex), 1), []).append((corners, uvs))
         stats["faces"] += 1
 
     gltf = {
