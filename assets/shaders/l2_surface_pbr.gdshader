@@ -165,18 +165,21 @@ void fragment() {
 		alb.rgb *= 1.0 + 0.06 * detail * g;
 	}
 	ALBEDO = alb.rgb;
-	ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
 	if (use_baked) {
 		// the Blender bake: tangent-space normal at UV2 (mikktspace
 		// tangents ship with the mesh). The baked AO turned out too harsh
 		// (mean 0.42 with hard blacks — displaced-cavity occlusion) and
 		// double-darkened the base — the NORMAL alone carries the 3D
-		// reading (DEVLOG-90).
+		// reading (DEVLOG-90). The smooth interpolated normal over the
+		// flat panels produced a glossy sheen — clamp the roughness to a
+		// matte stone floor (DEVLOG-91).
 		NORMAL_MAP = texture(baked_normal_tex, UV2).rgb;
 		NORMAL_MAP_DEPTH = relief_gain;
+		ROUGHNESS = max(clamp(rough * rough_gain, 0.0, 1.0), 0.88);
 		AO = 1.0;
 		AO_LIGHT_AFFECT = 0.6;
 	} else {
+		ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
 		NORMAL_MAP = nrm * 0.5 + 0.5;
 		NORMAL_MAP_DEPTH = relief_gain;
 		// crevice shading from the height channel — scaled by the POM depth

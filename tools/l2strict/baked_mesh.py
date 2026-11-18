@@ -24,23 +24,44 @@ import subprocess
 import sys
 
 import numpy as np
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MAP_DIR = os.path.join(ROOT, "assets", "maps", "20_18")
 
 
-def height_png(albedo_path: str, out_path: str) -> None:
-    """Grayscale the alpha (height) channel, LOW-PASS filtered — the
-    displacement must be driven by the carved SHAPES, not the per-texel
-    luminance noise (the DEVLOG-89/90 lesson: noisy displacement = spiky
-    high-poly = garbage baked normals = dark blotches)."""
+# Per-texture height processing (DEVLOG-91). The shaft's natural stone
+# reads great with the strong low-pass (blur 12); the PAINTED ornate
+# textures need their molding structures preserved — a strong blur erases
+# the pilasters/cornices and the base reads as a flat glossy decal
+# (the user's verdict). The ornate set: light blur + contrast gamma so the
+# bright moldings displace raised and the dark panels recess.
+HEIGHT_STYLE = {
+    "oren_sylen_001": {"blur": 12, "gamma": 1.0},   # natural stone — keep
+    "oren_sylen_in001": {"blur": 5, "gamma": 1.4},  # painted moldings
+    "oren_sylen_in002": {"blur": 5, "gamma": 1.4},
+    "oren_sylen_in017": {"blur": 5, "gamma": 1.4},
+    "oren_sylen_in019": {"blur": 5, "gamma": 1.4},
+}
+DEFAULT_HEIGHT = {"blur": 12, "gamma": 1.0}
+
+
+def height_png(albedo_path: str, out_path: str, blur: float, gamma: float) -> None:
+    """Grayscale the alpha (height) channel, low-pass filtered to the
+    requested scale — the displacement must be driven by the carved SHAPES,
+    not the per-texel luminance noise (the DEVLOG-89/90 lesson: noisy
+    displacement = spiky high-poly = garbage baked normals = dark
+    blotches)."""
     img = Image.open(albedo_path)
     a = np.asarray(img)
     h = Image.fromarray(a[..., 3].astype(np.uint8), "L")
     w, hh = h.size
     h = h.resize((w * 2, hh * 2), Image.BILINEAR).filter(
-        ImageFilter.GaussianBlur(12)).resize((w, hh), Image.BILINEAR)
+        ImageFilter.GaussianBlur(blur)).resize((w, hh), Image.BILINEAR)
+    h = ImageOps.autocontrast(h, cutoff=(1, 99))
+    if gamma != 1.0:
+        lut = [int(round(255.0 * ((i / 255.0) ** gamma))) for i in range(256)]
+        h = h.point(lut)
     h.save(out_path)
 
 
@@ -70,7 +91,8 @@ def main() -> None:
                                    texs[pi]["package"].lower(), "Texture",
                                    tobj + ".pbr_albedo.png")
             hp = os.path.join(work, "%s_S%d_height.png" % (obj, pi))
-            height_png(alb, hp)
+            st = HEIGHT_STYLE.get(tobj, DEFAULT_HEIGHT)
+            height_png(alb, hp, st["blur"], st["gamma"])
             slot_specs.append({"slot": pi, "height_png": hp,
                                "displace_m": 0.05})
         man = {

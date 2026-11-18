@@ -6514,3 +6514,37 @@ it is the proven technique for flat wall/floor surfaces later.
 **Pending:** the baked route needs the outdeco05 mesh + the user's
 in-motion/angle verdict; if approved, extend the mesh list (the
 RemainingProps) and revisit the AO bake with a tuned ray distance.
+
+## DEVLOG-91 (2026-11-19): the ornate base depth — per-texture height styles + matte roughness
+
+The user's verdict on the baked-mesh pilot: "почти хорошо. верхушка как
+крутой настоящий камень. но как и с POM проблема с нижней текстурой где
+была PNG, там плоский глянцевый рисунок остался" — the shaft's natural
+stone reads great, but the PAINTED ornate base (in001/in017/in019) stayed
+a flat glossy decal. Two routes the user named: rework the PNG's depth,
+or extract the painted shapes into polygons and paint in Blender.
+
+**Route taken: the depth rework (procedural, option 1).** The flatness
+root: my uniform strong height blur (gaussian 12 at 2x) erased the
+PAINTED MOLDINGS — the pilasters/cornice rings live at a 10-30 texel
+scale and the painted luminance contrast is the only depth source there.
+Plus gloss: the smooth interpolated baked normal over the flat panels +
+moderate roughness = a broad soft sheen.
+
+**The fix:**
+- baked_mesh.py HEIGHT_STYLE — per-texture height processing: the ornate
+  set gets blur 5 (the moldings survive) + autocontrast (1,99) + gamma
+  1.4 (recesses deepen, moldings stay raised); the natural stone keeps
+  blur 12 (untouched — it was approved).
+- l2_surface_pbr.gdshader baked path: ROUGHNESS clamped to a matte
+  floor 0.88 (the gloss was the smooth-normal + procedural roughness
+  combination).
+
+**Verification:** Gate A 0 shader errors; Gate B A/B (baked vs
+L2_NO_BAKED) at the column = 14545 px, bbox = the column; the base crop:
+the pilasters read raised, the panel fields recessed with the X-pattern
+shading, matte. GOLDEN BASELINE PASS (five views, scene 0 px).
+
+**Pending:** the user's verdict on this iteration; outdeco05 bake; the
+polys-from-PNG route (option 2) stays the escalation if the procedural
+depth still under-reads at the user's close view.
