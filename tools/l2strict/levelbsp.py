@@ -297,6 +297,20 @@ def main():
             stats["nomat"] += 1
             continue
         nd = nodes[ni]
+        # The client renders per NODE using the node's AUTHORITATIVE surf
+        # (node.cs[1]). Nodes whose authority is PF_Invisible (0x1 — the
+        # zone portals, e.g. the cave-zone boundary plane in the canyon
+        # tunnel, node 4 = surf 186 flags 0x4000109) are NEVER rendered:
+        # their plane carries the stacked CSG history instead of the final
+        # geometry (123 stale surf records on the tunnel portal plane
+        # alone — drawing them sealed the tunnel with a DE_V_m12 slab,
+        # DEVLOG-85). All 11 such surfs outside the tunnel have tex None
+        # and are dropped by the no-material filter below, so this filter
+        # only removes the tunnel cluster — the approved road is untouched.
+        asi = nd["cs"][1]
+        if 0 <= asi < len(M["surfs"]) and M["surfs"][asi]["flags"] & 0x1:
+            stats["hidden"] += 1
+            continue
         pool, cnt = nd["cs"][0], nd["nvert"]
         if cnt < 3 or pool + cnt > len(verts):
             stats["nomat"] += 1

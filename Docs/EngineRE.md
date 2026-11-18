@@ -192,3 +192,25 @@ opened; in021 arc-center max 173 vs the client 255).
 The full reimport protocol (rm *.import + rm -rf .godot/imported +
 full import) is MANDATORY before every verification render — several
 mid-stream "verifications" ran against stale caches (DEVLOG-84).
+
+## The level-BSP node-authority rule ✔ (2026-11-18, DEVLOG-85)
+
+The client renders the level BSP per NODE using the node's AUTHORITATIVE
+surf (`node.cs[1]`); nodes whose authority surf carries **PF_Invisible
+(0x1)** are NEVER rendered — they are the ZONE PORTALS (the zone-boundary
+planes, e.g. the outdoor/cave boundary in the canyon tunnel: node 4 =
+surf 186, flags 0x4000109 = 0x1 | 0x100 | portal family).
+
+The model's surf list carries the FULL CSG HISTORY, not the final
+geometry: 123 surf records stacked on one portal plane (DE_V_m12 walls,
+DE_V_floor02, oren_sylen_ai_008/in016/... ghost layers, ZonePortal
+marks). The baked Sections (DEVLOG-82) hold the same portal polygon, but
+the renderer skips portal nodes — the tunnel stays open. Consequence for
+extraction: NEVER emit "one primitive per surf" from the surf list
+(that is the legacy levelbsp.py defect that sealed the tunnel with a
+123-layers-deep slab); the correct source remains the node walk +
+baked section streams (temple_bsp.py). The village LevelBSP fix keeps
+its legacy geometry/UVs (the user-approved road look) and only drops
+the invisible-authority-node faces — 585 of 774 model surfs sit on such
+nodes, 574 of them in the tunnel box; outside it every such surf has
+tex None and was already filtered.
