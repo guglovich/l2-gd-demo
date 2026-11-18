@@ -21,6 +21,18 @@ var _shape_cache := {}
 # surfaces only) for the tree cylinder colliders.
 var _veg_batch := {}
 var _foliage_trunk := {}
+# DEVLOG-87 POM pilot (the user's 3D-texture stage, opened 2026-11-18):
+# parallax offset mapping per MESH, not per texture — the column textures
+# (oren_sylen_001/in001/in002/in017/in019) are shared with the USER-APPROVED
+# temple interior (in002 = the hall walls), so a per-texture enable would
+# change the approved look. Free-standing props have no adjacent texture
+# seams (the 2026-11-13 "floating seams" bug lived on coplanar floor
+# joints), so the columns are the low-risk pilot. Values = meters of visual
+# depth (the pbr.json pom fields). L2_NO_POM=1 disables for the A/B.
+var _pom_pilot_meshes := {
+	"sylen_temple_s:sylentemple_outdeco04": 0.05,
+	"sylen_temple_s:sylentemple_outdeco05": 0.05,
+}
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
 # Предвычислено анализатором геометрии glTF.
@@ -1266,6 +1278,19 @@ func _get_mesh(key: String) -> Mesh:
 				have_tb = true
 		if have_tb:
 			_foliage_trunk[key] = tb
+	# DEVLOG-87 POM pilot: enable the shader's parallax offset mapping on
+	# the pilot meshes only (duplicate the shared ShaderMaterial per surface
+	# — the cull_back mechanism). Height source = the generated albedo's
+	# alpha channel (the painted luminance height).
+	if OS.get_environment("L2_NO_POM") == "" and _pom_pilot_meshes.has(key):
+		for pmi in range(mesh.get_surface_count()):
+			var psm: Material = mesh.surface_get_material(pmi)
+			if psm is ShaderMaterial and str((psm as ShaderMaterial).shader.resource_path) \
+					.ends_with("l2_surface_pbr.gdshader"):
+				var pdup: ShaderMaterial = (psm as ShaderMaterial).duplicate()
+				pdup.set_shader_parameter("pom_scale",
+						float(_pom_pilot_meshes[key]))
+				mesh.surface_set_material(pmi, pdup)
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's
 	# raised hand (the L2_TRACE_BOX: the foreign face texture on the hand).

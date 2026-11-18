@@ -6333,3 +6333,54 @@ corrected me: "они не серые. они плоские из-за отсу�
   character bbox, identical bboxes across runs = anim noise only).
 - March profile intact: the bridge carpet band y −45.28..−45.33 via
   O_DE_Btm_Obj01/Polys3987 — walkability unchanged.
+
+## DEVLOG-87 (2026-11-18): THE 3D-TEXTURE STAGE OPENS — POM pilot on the fallen columns
+
+The user opened the 3D-texture upgrade stage with the columns first
+("их мало, риск небольшой") and asked for the engine-means analysis
+(POM height+normal or other Godot means).
+
+**The means inventory (what the stack already has vs what Godot offers):**
+- l2_surface_pbr.gdshader ALREADY carries the POM machinery: per-pixel
+  screen-Jacobian tangents (no mesh tangents), single-step offset mapping
+  with grazing-angle fade (the full raymarch POM loop banded 2026-11-13 —
+  implicit-LOD sampling inside a dynamic loop is undefined in GLSL; the
+  fix when wanted = textureGrad/textureLod explicit LOD), painted-
+  luminance normals, height-driven AO (all ACTIVE — pom_scale was the
+  only disabled piece), detail grain.
+- Godot 4.7 means ranked for the stage: (1) offset mapping (active now —
+  1 tap, cheap, depth cue, no occlusion); (2) raymarched POM (occlusion +
+  self-shadow, needs the explicit-LOD fix, heavier — next iteration if
+  the user wants deeper); (3) baked displacement meshes (true silhouettes,
+  per-prop cost — viable for hero props later); (4) SSAO/SSIL/SDFGI —
+  lighting-adjacent, OUT of scope while the lighting stage is closed.
+
+**Why POM was off everywhere:** the 2026-11-13 "floating seams" bug —
+at coplanar floor joints neighbors with different pom/meters-per-tile
+visibly walk sideways. The pilot therefore enables POM PER MESH, not per
+texture: the column textures (oren_sylen_001/in001/in002/in017/in019)
+are shared with the USER-APPROVED temple interior (in002 = the hall
+walls). Free-standing props have no adjacent texture seams — zero seam
+risk. All 5 textures have full generated PBR sets (albedo+height in A,
+normal+roughness, pbr.json pom 0.04).
+
+**Implementation:** world.gd _pom_pilot_meshes = {sylentemple_outdeco04:
+0.05, sylentemple_outdeco05: 0.05} — in _get_mesh, duplicate the shared
+ShaderMaterial per surface (the cull_back mechanism) and set pom_scale.
+L2_NO_POM=1 = the A/B diagnostic (does not alter the normal scene).
+
+**Verification:**
+- Gate A: 0 shader errors, parse-check clean.
+- Gate B A/B at the user's camera (21044,11700,−3748.5, yaw 2.98): pom
+  on vs off = 7820 px changed, bbox x 754..1316 y 332..753 — exactly the
+  columns' screen region, nothing else; close-up A/B (19637,11890) =
+  1991 px on the stump column. The effect is confined to the pilot
+  meshes.
+- GOLDEN BASELINE PASS: all five views re-rendered — scene diff 0 px
+  (all diffs = the animated character, same bboxes across runs).
+- Depth strength is ONE constant per mesh (_pom_pilot_meshes) — taste
+  adjustment awaits the user's own look at their framing.
+
+**Roadmap for the stage (pending the user's look):** raymarched POM with
+explicit LOD (self-occlusion + shadowing) → more props by mesh list →
+possibly baked displacement for hero props.
