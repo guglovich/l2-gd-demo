@@ -107,6 +107,13 @@ in the DEVLOG entry), plus the meta-gate before any rebuild:
   and rolled back (cce5af0, 45a4d10) — the seam is solved at the UV-sample
   level (world_uv_scale + TEXTURE_SUBSTITUTE), not at the vertex level.
 
+**Rebuild rules (MANDATORY, 2026-11-18):** one session burned ~300k
+tokens on rebuild iterations that changed nothing visible. The full
+protocol — incremental rebuilds per region (never all 26 meshes for one
+fix), the stale-cache rule, reproduce the user's camera first, trace
+before fixing, one hypothesis per iteration, the 2–3-render cost budget
+— lives in `Docs/REBUILD_RULES.md`. Read it before any fix/rebuild loop.
+
 Reimport trap (both bit us): after regenerating glTFs delete
 `assets/maps/20_18/meshes_bsp/*.import` AND after shader edits delete
 `assets/shaders/*.import`, then `rm -rf .godot/imported` + a full
