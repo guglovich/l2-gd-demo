@@ -30,8 +30,8 @@ var _foliage_trunk := {}
 # joints), so the columns are the low-risk pilot. Values = meters of visual
 # depth (the pbr.json pom fields). L2_NO_POM=1 disables for the A/B.
 var _pom_pilot_meshes := {
-	"sylen_temple_s:sylentemple_outdeco04": 0.05,
-	"sylen_temple_s:sylentemple_outdeco05": 0.05,
+	"sylen_temple_s:sylentemple_outdeco04": 0.10,
+	"sylen_temple_s:sylentemple_outdeco05": 0.10,
 }
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
@@ -1290,6 +1290,7 @@ func _get_mesh(key: String) -> Mesh:
 				var pdup: ShaderMaterial = (psm as ShaderMaterial).duplicate()
 				pdup.set_shader_parameter("pom_scale",
 						float(_pom_pilot_meshes[key]))
+				pdup.set_shader_parameter("pom_steps", 24)
 				mesh.surface_set_material(pmi, pdup)
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's

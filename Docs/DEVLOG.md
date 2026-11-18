@@ -6384,3 +6384,42 @@ L2_NO_POM=1 = the A/B diagnostic (does not alter the normal scene).
 **Roadmap for the stage (pending the user's look):** raymarched POM with
 explicit LOD (self-occlusion + shadowing) → more props by mesh list →
 possibly baked displacement for hero props.
+
+## DEVLOG-88 (2026-11-18): the POM rewrite — single-step offset → raymarched POM
+
+The user's verdict on the DEVLOG-87 pilot: "текстуры гуляют при движении
+камеры. также колонки также и остались с плоским обычным рисунком" — the
+single-step offset mapping swims with the camera while giving no real
+depth (its uniform-ish UV shift reads as sliding, not occlusion).
+
+**The fix (l2_surface_pbr.gdshader):** a real raymarched POM — the view
+ray marched through the height field in tangent-space steps
+(pom_steps=24 on the pilot), stopping at the first height intersection
+with one lerp refinement between the straddling samples. Raised features
+now OCCLUDE what is behind them — the actual 3D reading. Fixes for the
+2026-11-13 banding root cause: textureLod(., 0) = explicit LOD inside the
+dynamic loop (implicit-LOD sampling in a loop is undefined in GLSL).
+Plus a distance fade (15→35 m): the parallax shift is view-dependent and
+reads as swimming/shimmer at range — beyond 35 m the surface returns to
+its flat client look. The grazing-angle fade stays.
+
+**Params:** pilot depth raised 0.05 → 0.10 m (the carved-base relief is
+real-world ~10-15 cm; the height channels are strong: alpha std 34..42,
+full 0..255, gradient p95 ~28/texel — the data was never the problem,
+the single-step sampler was).
+
+**Verification:**
+- Gate A: 0 shader errors (full reimport after each shader edit).
+- Gate B A/B (pom on vs L2_NO_POM): user camera 21044,11700 = 7322 px;
+  close-up = 4010 px with the diff bbox CONFINED to the two columns'
+  screen regions (x 768..896, x 1280..1386) — terrain and everything
+  else identical.
+- GOLDEN BASELINE PASS: all five views — scene diff 0 px (character-only
+  bboxes unchanged); the road materials carry pom_scale=0 and skip the
+  POM branch entirely.
+- The swim: raymarch + anchored intersections + angle fade + distance
+  fade — the final motion judgment is the user's (they test in motion).
+
+**Roadmap:** self-shadowing from the height field inside the POM (adds
+crevice darkening; material-level, not scene lighting) → more props by
+mesh list → baked displacement for hero props.

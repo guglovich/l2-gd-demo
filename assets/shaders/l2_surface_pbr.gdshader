@@ -102,16 +102,50 @@ void fragment() {
 
 	float h0 = texture(albedo_tex, uv).a;
 	vec2 uv_final = uv;
-	// Offset mapping (single-sample parallax). The full POM loop caused
-	// banding/smear artifacts: implicit-LOD sampling inside a dynamic loop is
-	// undefined in GLSL, and grazing angles explode the offsets. The single
-	// step + view-angle fade keeps the depth cue without artifacts.
+	// Raymarched parallax occlusion mapping (DEVLOG-88; replaces the
+	// single-step offset whose UVs swam with the camera while giving no
+	// real occlusion). The view ray is marched through the height field in
+	// tangent-space steps and stops at the first height intersection,
+	// refined by one lerp between the straddling samples — raised features
+	// occlude what is behind them, which is what reads as actual 3D.
+	// textureLod(., 0) = EXPLICIT LOD: implicit-LOD sampling inside a
+	// dynamic loop is undefined in GLSL (the 2026-11-13 banding).
 	if (abs(mdet) > 1e-12 && pom_scale > 0.0005) {
 		float angle_fade = smoothstep(0.12, 0.45, abs(vt.z));
-		vec2 parallax = -vt.xy / max(0.25, abs(vt.z))
-			* (pom_scale / max(tile_m, vec2(1e-5))) * (0.6 + 0.4 * h0)
-			* angle_fade;
-		uv_final = uv + parallax;
+		vec2 ray_uv = vt.xy / max(0.25, abs(vt.z))
+			* (pom_scale / max(tile_m, vec2(1e-5)));
+		float layer = 1.0 / float(pom_steps);
+		vec2 duv = ray_uv * layer;
+		float cd = 0.0;                       // ray depth below the surface
+		float ch = 1.0 - h0;                  // height depth (alpha = raised)
+		vec2 uvc = uv;
+		for (int i = 0; i < pom_steps; i++) {
+			if (ch <= cd) {
+				break;
+			}
+			uvc -= duv;
+			cd += layer;
+			ch = 1.0 - textureLod(albedo_tex, uvc, 0.0).a;
+		}
+		if (ch > cd) {
+			// never pierced the height field (flat texel / grazing) — no shift
+			uvc = uv;
+		} else {
+			// refine between the straddling samples: the ray (pd -> cd)
+			// crosses the height curve (ph -> ch) at t* from the previous
+			// sample, where pd<ph and cd>=ch
+			vec2 uvp = uvc + duv;
+			float ph = 1.0 - textureLod(albedo_tex, uvp, 0.0).a;
+			float pd = cd - layer;
+			float tw = clamp((ph - pd)
+					/ ((cd - pd) + (ph - ch) + 1e-6), 0.0, 1.0);
+			uvc = mix(uvp, uvc, tw);
+		}
+		// distance fade: the parallax shift is view-dependent — at 15+ m it
+		// reads as swimming/shimmer, not depth (VERTEX in fragment = view
+		// space, its length = the camera distance)
+		float dist_fade = 1.0 - smoothstep(15.0, 35.0, length(VERTEX));
+		uv_final = mix(uv, uvc, angle_fade * dist_fade);
 	}
 
 	vec4 alb = texture(albedo_tex, uv_final);
