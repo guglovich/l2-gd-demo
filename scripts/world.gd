@@ -1287,14 +1287,25 @@ func _get_mesh(key: String) -> Mesh:
 		if FileAccess.file_exists(np) and FileAccess.file_exists(ap):
 			var btex: Texture2D = load(np)
 			var atex: Texture2D = load(ap)
+			# the sidecar says which TEXCOORD holds the bake atlas (the
+			# Blender exporter's layer order is not the list order)
+			var atlas_in_uv2 := true
+			var sidecar := base + ".json"
+			if FileAccess.file_exists(sidecar):
+				var f := FileAccess.open(sidecar, FileAccess.READ)
+				var data = JSON.parse_string(f.get_as_text())
+				if data is Dictionary:
+					atlas_in_uv2 = bool(data.get("atlas_in_uv2", true))
 			for bi in range(mesh.get_surface_count()):
 				var bsm: Material = mesh.surface_get_material(bi)
 				if bsm is ShaderMaterial and str((bsm as ShaderMaterial).shader.resource_path) \
 						.ends_with("l2_surface_pbr.gdshader"):
 					var bdup: ShaderMaterial = (bsm as ShaderMaterial).duplicate()
 					bdup.set_shader_parameter("use_baked", true)
+					bdup.set_shader_parameter("atlas_in_uv2", atlas_in_uv2)
 					bdup.set_shader_parameter("baked_normal_tex", btex)
 					bdup.set_shader_parameter("baked_ao_tex", atex)
+					bdup.set_shader_parameter("relief_gain", 1.2)
 					mesh.surface_set_material(bi, bdup)
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's

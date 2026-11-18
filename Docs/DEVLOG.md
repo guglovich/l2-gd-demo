@@ -6548,3 +6548,60 @@ shading, matte. GOLDEN BASELINE PASS (five views, scene 0 px).
 **Pending:** the user's verdict on this iteration; outdeco05 bake; the
 polys-from-PNG route (option 2) stays the escalation if the procedural
 depth still under-reads at the user's close view.
+
+## DEVLOG-92 (2026-11-19): the dense baked body — 3360 tris, real pilaster/panel geometry, the full baked material
+
+The user's work order: count the column-body polys; if < 200 — densify to
+500-1000+ so the pilasters/panels get REAL geometry; rebuild the baked
+mesh; the material per spec (baked albedo, normal scale 1.0-1.5,
+roughness 0.7-0.9, metallic 0.0-0.1, specular 0.3-0.5, AO map with
+AO light affect 0.5-1.0).
+
+**The statistics (the user's items 1-2):** the import = 140 tris (prim 0
+= the shaft 12, prims 1/2 = the cornice rings 16+16, prim 3 = the ornate
+base 96) — far below the target → densified.
+
+**The pipeline (tools/l2strict/baked_mesh.py + blender_bake.py, Blender
+5.3 headless):** the LOW body = per-slot SIMPLE subsurf ×2 + a light
+Displace (0.03 → finally 0.0, see below) → 3360 tris of REAL geometry
+following the cornices/panels; the HIGH source = per-slot subsurf ×3 +
+full Displace 0.05 m with the CLIENT albedo images; bake tangent NORMAL +
+AO (Cycles, selected_to_active, 1024) + EMIT albedo. The runtime
+(l2_surface_pbr.gdshader use_baked path): ALBEDO = the client tile
+texture (the Blender-baked DIFFUSE/EMIT evaluated BLACK — mean 18/255 in
+both the Principled and the EMIT rewiring — DROPPED; the client texture
+at the tile channel is the same pattern 1:1), NORMAL = baked (UV2,
+relief_gain 1.2), ROUGHNESS 0.8 matte, METALLIC 0.0, SPECULAR 0.35,
+AO = the baked map (mix 0.85) with AO_LIGHT_AFFECT 0.7.
+
+**The four traps found on the way (all empirical):**
+1. The Blender glTF exporter emits the UV layers in REVERSE list order —
+   layer[1] always landed as TEXCOORD_0 (three rebakes proved it: name
+   sort, active flag — neither). Fix: swap the two layers' coordinate
+   DATA after the projection so the ATLAS sits at list index 0 →
+   TEXCOORD_0 = tile, TEXCOORD_1 = atlas; a sidecar
+   <Mesh>_baked.json {"atlas_in_uv2"} records the detection (range scan
+   over ALL prims — prim 0 alone is ambiguous, its tile UVs fit 0..1) and
+   the shader picks the channels by the atlas_in_uv2 flag.
+2. The baked AO went pitch-black (mean 3.7): the AO bake sees the WHOLE
+   scene — the leftover ORIGINAL imports (kept alive after the splits)
+   occluded everything. Fix: delete the originals before the bake →
+   AO mean 163.
+3. The manifest keyed the Blender slots by the glTF MATERIAL index
+   (0,1,2,4) while the importer compacts the used materials into slots
+   0..3 → the 96-tri ornate base was DROPPED from the dense low (the
+   floating shaft). Fix: slot = the SURFACE index; the texture = texs[pi].
+4. Decimate ate the thin cornice rings (holes); dropped — the dense low
+   stays at the subsurf count (3360 tris, above the 500-1000 band; the
+   props are few and the rings must survive).
+
+**Verification:** Gate A 0 shader errors; Gate B A/B (baked vs
+L2_NO_BAKED) 33889 px confined to the column; the column renders WHOLE
+(shaft → cornice → ornate base) with real cornice overhangs, recessed
+panels, raised pilasters — plus the baked normal/AO response. GOLDEN
+BASELINE PASS: five views, scene 0 px (character-only bboxes).
+
+**Pending:** the user's verdict; outdeco05 through the same pipeline; the
+displace_low experiment (real displacement on the dense body) is parked —
+per-part displacement cracked the prim seams (a welded single-height
+displacement is the clean way, needs a height-atlas).

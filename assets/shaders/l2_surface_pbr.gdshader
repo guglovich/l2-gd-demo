@@ -31,7 +31,16 @@ uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
 // DEVLOG-90 baked-mesh route: the *_baked.glTF variants carry UV2 + the
 // Blender-baked tangent-space normal and AO (from the displaced high-poly).
 // Sampled at UV2 — zero UV shift (no swimming), correct from any angle.
+// DEVLOG-92: the full baked material per the user's work order — baked
+// diffuse albedo at UV2, matte roughness 0.8, metallic 0, specular 0.35,
+// the AO map back with a softening weight (the dense displaced low body
+// bakes a much cleaner AO than the spiky high-poly did).
 uniform bool use_baked = false;
+// the Blender glTF exporter's TEXCOORD order does not follow the layer
+// list (it swapped once, DEVLOG-92): the sidecar json records which
+// channel holds the bake atlas (0..1) vs the client tile UVs.
+uniform bool atlas_in_uv2 = true;
+uniform sampler2D baked_albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D baked_normal_tex : hint_normal, filter_linear_mipmap;
 uniform sampler2D baked_ao_tex : filter_linear_mipmap;
 
@@ -166,18 +175,23 @@ void fragment() {
 	}
 	ALBEDO = alb.rgb;
 	if (use_baked) {
-		// the Blender bake: tangent-space normal at UV2 (mikktspace
-		// tangents ship with the mesh). The baked AO turned out too harsh
-		// (mean 0.42 with hard blacks — displaced-cavity occlusion) and
-		// double-darkened the base — the NORMAL alone carries the 3D
-		// reading (DEVLOG-90). The smooth interpolated normal over the
-		// flat panels produced a glossy sheen — clamp the roughness to a
-		// matte stone floor (DEVLOG-91).
-		NORMAL_MAP = texture(baked_normal_tex, UV2).rgb;
+		// the baked material (DEVLOG-92): the dense displaced low body
+		// carries the REAL pilaster/panel geometry; the Blender-baked
+		// tangent normal + AO on the ATLAS channel, the client albedo on
+		// the TILE channel (which is which comes from the sidecar json).
+		// The baked DIFFUSE was black in Blender 5.3 headless (both the
+		// Principled color pass and the EMIT rewiring — mean 18/255) and
+		// is DROPPED: the client albedo is the same pattern 1:1.
+		vec2 auv = atlas_in_uv2 ? UV2 : UV;
+		vec2 tuv = atlas_in_uv2 ? UV : UV2;
+		ALBEDO = texture(albedo_tex, tuv).rgb;
+		NORMAL_MAP = texture(baked_normal_tex, auv).rgb;
 		NORMAL_MAP_DEPTH = relief_gain;
-		ROUGHNESS = max(clamp(rough * rough_gain, 0.0, 1.0), 0.88);
-		AO = 1.0;
-		AO_LIGHT_AFFECT = 0.6;
+		ROUGHNESS = 0.8;        // matte stone, not plastic
+		METALLIC = 0.0;
+		SPECULAR = 0.35;        // fewer highlights
+		AO = mix(1.0, texture(baked_ao_tex, auv).r, 0.85);
+		AO_LIGHT_AFFECT = 0.7;
 	} else {
 		ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
 		NORMAL_MAP = nrm * 0.5 + 0.5;
