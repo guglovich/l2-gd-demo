@@ -6459,3 +6459,58 @@ the residual view-dependent shift is the nature of parallax — the final
 motion verdict is the user's. If it still reads as sliding at their
 camera, the next lever is pom_scale down (0.10 → 0.06-0.07) or POM off
 for the props and the baked-displacement route for true silhouettes.
+
+## DEVLOG-90 (2026-11-18): POM REVERTED on the columns — the baked-mesh route (Blender headless)
+
+The user's verdict: "откатывает POM для колонн, мы не убедились что это
+вообще возможно. возможное решение Baked mesh из Blender" (with the
+reference table: POM works on flat walls/floors, fails on multi-faceted
+columns — tangent-space breaks — and the baked-mesh pipeline).
+
+**The revert (full):** _pom_pilot_meshes and its material-duplication
+block removed from world.gd; texgen HEIGHT_BLUR emptied and the five
+column textures regenerated back to the pre-pilot sets. The raymarched
+POM stays in l2_surface_pbr.gdshader DORMANT (pom_scale=0 everywhere) —
+it is the proven technique for flat wall/floor surfaces later.
+
+**The baked-mesh pipeline (Blender 5.3 headless, works):**
+- tools/l2strict/baked_mesh.py — the launcher: per mesh key, per material
+  slot, grayscale the height (albedo alpha) and LOW-PASS it (2x upsample,
+  gaussian 12, downsample — the displacement must be driven by the carved
+  SHAPES, not the luminance noise; noisy displacement = spiky high-poly =
+  garbage baked normals = dark blotches — the DEVLOG-89 lesson repeated
+  in the new medium), run Blender, stage the outputs.
+- tools/l2strict/blender_bake.py — the bpy script: import the L2 glTF;
+  UV2 = Smart UV Project (unique bake unwrap; UV1 = the client tile UVs
+  stay untouched); high-poly = per-slot split + SIMPLE subsurf x3 +
+  Displace (image texture, UV coords, REPEAT, mid_level 0.5, strength
+  0.05 m) applied; bake tangent-space NORMAL + AO (Cycles CPU, 16
+  samples, selected_to_active, margin 8) at 1024; export the low mesh
+  (UV1 + UV2, the SAME 140 tris) as glTF.
+- Staged: <Mesh>_baked.gltf/bin + <Mesh>_baked_normal.png/_ao.png next to
+  the original. world.gd picks the *_baked variant automatically
+  (L2_NO_BAKED=1 = the A/B) and switches its surfaces to
+  use_baked=true.
+- Shader: the use_baked path samples the baked NORMAL at UV2. The baked
+  AO was DROPPED (mean 0.42 with hard blacks — displaced-cavity
+  occlusion double-darkened the base); AO=1.0 on the baked path.
+- LOD: deliberately skipped — the render mesh IS the original 140-tri
+  import (zero runtime cost, the detail lives in the maps); for
+  140-tri props LOD levels are meaningless.
+- The swim is gone BY CONSTRUCTION: the UVs never shift (the whole
+  failure mode of POM eliminated); the baked normal responds to light
+  from any angle (no tangent-space break per face — mikktspace tangents
+  ship with the glTF).
+
+**Verification:**
+- Gate A: 0 shader errors; parse-check clean (after removing the stale
+  pilot block the parser caught).
+- Gate B A/B (baked vs L2_NO_BAKED) at the user's column
+  (outdeco04 @(21020,11848), the ornate-base stub): 14343 px changed,
+  bbox = the column only. The baked version adds the bevel/cornice
+  highlights and panel-edge response; no mush.
+- GOLDEN BASELINE PASS: five views, scene 0 px.
+
+**Pending:** the baked route needs the outdeco05 mesh + the user's
+in-motion/angle verdict; if approved, extend the mesh list (the
+RemainingProps) and revisit the AO bake with a tuned ray distance.

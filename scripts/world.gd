@@ -21,18 +21,6 @@ var _shape_cache := {}
 # surfaces only) for the tree cylinder colliders.
 var _veg_batch := {}
 var _foliage_trunk := {}
-# DEVLOG-87 POM pilot (the user's 3D-texture stage, opened 2026-11-18):
-# parallax offset mapping per MESH, not per texture — the column textures
-# (oren_sylen_001/in001/in002/in017/in019) are shared with the USER-APPROVED
-# temple interior (in002 = the hall walls), so a per-texture enable would
-# change the approved look. Free-standing props have no adjacent texture
-# seams (the 2026-11-13 "floating seams" bug lived on coplanar floor
-# joints), so the columns are the low-risk pilot. Values = meters of visual
-# depth (the pbr.json pom fields). L2_NO_POM=1 disables for the A/B.
-var _pom_pilot_meshes := {
-	"sylen_temple_s:sylentemple_outdeco04": 0.10,
-	"sylen_temple_s:sylentemple_outdeco05": 0.10,
-}
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
 # Предвычислено анализатором геометрии glTF.
@@ -1139,6 +1127,17 @@ func _get_mesh(key: String) -> Mesh:
 	var info = asset_map_data.get("meshes", {}).get(key)
 	if info == null: _mesh_cache[key] = null; return null
 	var gp: String = info["gltf"]
+	# DEVLOG-90 baked-mesh route: the <Mesh>_baked.gltf variant (built by
+	# tools/l2strict/baked_mesh.py in Blender) carries UV2 + the baked
+	# normal/AO from the displaced high-poly — prefer it for the meshes
+	# that have one. L2_NO_BAKED=1 = the A/B diagnostic (the plain import).
+	var is_baked := false
+	if OS.get_environment("L2_NO_BAKED") == "" \
+			and not gp.contains("_baked"):
+		var gb := gp.replace(".gltf", "_baked.gltf")
+		if ResourceLoader.exists(gb):
+			gp = gb
+			is_baked = true
 	if not ResourceLoader.exists(gp): _mesh_cache[key] = null; return null
 	var scene: PackedScene = load(gp)
 	if scene == null: _mesh_cache[key] = null; return null
@@ -1278,20 +1277,25 @@ func _get_mesh(key: String) -> Mesh:
 				have_tb = true
 		if have_tb:
 			_foliage_trunk[key] = tb
-	# DEVLOG-87 POM pilot: enable the shader's parallax offset mapping on
-	# the pilot meshes only (duplicate the shared ShaderMaterial per surface
-	# — the cull_back mechanism). Height source = the generated albedo's
-	# alpha channel (the painted luminance height).
-	if OS.get_environment("L2_NO_POM") == "" and _pom_pilot_meshes.has(key):
-		for pmi in range(mesh.get_surface_count()):
-			var psm: Material = mesh.surface_get_material(pmi)
-			if psm is ShaderMaterial and str((psm as ShaderMaterial).shader.resource_path) \
-					.ends_with("l2_surface_pbr.gdshader"):
-				var pdup: ShaderMaterial = (psm as ShaderMaterial).duplicate()
-				pdup.set_shader_parameter("pom_scale",
-						float(_pom_pilot_meshes[key]))
-				pdup.set_shader_parameter("pom_steps", 24)
-				mesh.surface_set_material(pmi, pdup)
+	# DEVLOG-90: the baked-mesh variant switches its surfaces to the
+	# Blender-baked maps (UV2). The collision trimesh is unaffected — the
+	# baked variant carries the SAME low-poly geometry as the original.
+	if is_baked:
+		var base := gp.get_basename()
+		var np := base.replace("_baked", "_baked_normal") + ".png"
+		var ap := base.replace("_baked", "_baked_ao") + ".png"
+		if FileAccess.file_exists(np) and FileAccess.file_exists(ap):
+			var btex: Texture2D = load(np)
+			var atex: Texture2D = load(ap)
+			for bi in range(mesh.get_surface_count()):
+				var bsm: Material = mesh.surface_get_material(bi)
+				if bsm is ShaderMaterial and str((bsm as ShaderMaterial).shader.resource_path) \
+						.ends_with("l2_surface_pbr.gdshader"):
+					var bdup: ShaderMaterial = (bsm as ShaderMaterial).duplicate()
+					bdup.set_shader_parameter("use_baked", true)
+					bdup.set_shader_parameter("baked_normal_tex", btex)
+					bdup.set_shader_parameter("baked_ao_tex", atex)
+					mesh.surface_set_material(bi, bdup)
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's
 	# raised hand (the L2_TRACE_BOX: the foreign face texture on the hand).

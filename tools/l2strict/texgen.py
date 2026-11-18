@@ -39,20 +39,14 @@ RELIEF = {
 }
 DEFAULT_RELIEF = (0.04, 1.6)
 
-# DEVLOG-89: the POM height (albedo A) must be LOW-frequency — the ray march
-# displaces the UV by MANY texels, and a 1-texel noise height makes it sample
-# decorrelated texels = the "каша из текстур". The carved shapes survive the
-# blur; the per-texel grain stays in the NORMAL map (displacement-free, it
-# already carries it). Only the listed textures get the blurred POM height —
-# every other shipped set stays byte-identical (default radius 1.0 = old
-# behavior).
-HEIGHT_BLUR = {
-    "oren_sylen_001": 6.0,
-    "oren_sylen_in001": 6.0,
-    "oren_sylen_in002": 6.0,
-    "oren_sylen_in017": 6.0,
-    "oren_sylen_in019": 6.0,
-}
+# DEVLOG-90: HEIGHT_BLUR REVERTED with the POM pilot (the user's order —
+# POM on the columns never proved itself; the 3D-texture stage goes the
+# baked-mesh route). The mechanism stays documented here for the flat
+# wall/floor surfaces where POM is proven (DEVLOG-88): the POM height
+# (albedo A) must be LOW-frequency — the ray march displaces the UV by
+# MANY texels, and a 1-texel noise height makes it sample decorrelated
+# texels. Radius ~6 blurs the grain, keeps the carved shapes.
+HEIGHT_BLUR = {}
 
 
 def blur(a: np.ndarray, radius: float) -> np.ndarray:

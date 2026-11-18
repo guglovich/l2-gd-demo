@@ -28,6 +28,12 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
+// DEVLOG-90 baked-mesh route: the *_baked.glTF variants carry UV2 + the
+// Blender-baked tangent-space normal and AO (from the displaced high-poly).
+// Sampled at UV2 — zero UV shift (no swimming), correct from any angle.
+uniform bool use_baked = false;
+uniform sampler2D baked_normal_tex : hint_normal, filter_linear_mipmap;
+uniform sampler2D baked_ao_tex : filter_linear_mipmap;
 
 // ---- simplex noise (Ashima public-domain; only used when detail > 0) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -159,18 +165,30 @@ void fragment() {
 		alb.rgb *= 1.0 + 0.06 * detail * g;
 	}
 	ALBEDO = alb.rgb;
-	NORMAL_MAP = nrm * 0.5 + 0.5;
-	NORMAL_MAP_DEPTH = relief_gain;
 	ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
-	// crevice shading from the height channel — scaled by the POM depth so
-	// the flat weaves (pom ~0.012) keep the client's own painted shading
-	// without double-darkening it. In alpha-cutout mode A is the transparency
-	// mask, not height — no AO from it.
-	if (use_alpha) {
+	if (use_baked) {
+		// the Blender bake: tangent-space normal at UV2 (mikktspace
+		// tangents ship with the mesh). The baked AO turned out too harsh
+		// (mean 0.42 with hard blacks — displaced-cavity occlusion) and
+		// double-darkened the base — the NORMAL alone carries the 3D
+		// reading (DEVLOG-90).
+		NORMAL_MAP = texture(baked_normal_tex, UV2).rgb;
+		NORMAL_MAP_DEPTH = relief_gain;
 		AO = 1.0;
+		AO_LIGHT_AFFECT = 0.6;
 	} else {
-		AO = mix(1.0, clamp(0.55 + 0.45 * alb.a, 0.0, 1.0),
-				clamp(pom_scale * 20.0, 0.0, 1.0));
+		NORMAL_MAP = nrm * 0.5 + 0.5;
+		NORMAL_MAP_DEPTH = relief_gain;
+		// crevice shading from the height channel — scaled by the POM depth
+		// so the flat weaves (pom ~0.012) keep the client's own painted
+		// shading without double-darkening it. In alpha-cutout mode A is
+		// the transparency mask, not height — no AO from it.
+		if (use_alpha) {
+			AO = 1.0;
+		} else {
+			AO = mix(1.0, clamp(0.55 + 0.45 * alb.a, 0.0, 1.0),
+					clamp(pom_scale * 20.0, 0.0, 1.0));
+		}
+		AO_LIGHT_AFFECT = 0.6;
 	}
-	AO_LIGHT_AFFECT = 0.6;
 }
