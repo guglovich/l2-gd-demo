@@ -39,6 +39,20 @@ RELIEF = {
 }
 DEFAULT_RELIEF = (0.04, 1.6)
 
+# DEVLOG-93: the runtime LOW-PASS height (Silhouette POM stack — AMD's
+# technique: vertex-shader displacement for the real silhouette + the
+# fragment POM for interior detail, both driven by the SAME height field).
+# Emitted as <obj>.pbr_heightlp.png for the listed textures; the radii
+# match the per-texture structure scale (natural stone wide, painted
+# moldings narrow — the DEVLOG-91 lesson).
+HEIGHT_LP = {
+    "oren_sylen_001": 12.0,
+    "oren_sylen_in001": 5.0,
+    "oren_sylen_in002": 5.0,
+    "oren_sylen_in017": 5.0,
+    "oren_sylen_in019": 5.0,
+}
+
 # DEVLOG-90: HEIGHT_BLUR REVERTED with the POM pilot (the user's order —
 # POM on the columns never proved itself; the 3D-texture stage goes the
 # baked-mesh route). The mechanism stays documented here for the flat
@@ -114,6 +128,12 @@ def generate(path: str, out_dir: str) -> None:
     nrm = np.dstack([normal, rough])
     Image.fromarray((nrm * 255.0).astype(np.uint8), "RGBA").save(
         os.path.join(out_dir, f"{obj}.pbr_normal.png"))
+    # the Silhouette-POM height (DEVLOG-93): low-pass luminance height
+    if obj in HEIGHT_LP:
+        lp = blur(lum, HEIGHT_LP[obj])
+        lp_n = (lp - lp.min()) / max(1e-6, lp.max() - lp.min())
+        Image.fromarray((lp_n * 255.0).astype(np.uint8), "L").save(
+            os.path.join(out_dir, f"{obj}.pbr_heightlp.png"))
     # POM depth travels in the material config, not the texture; write a small
     # sidecar json so the runtime reads the tuned values per texture.
     import json
