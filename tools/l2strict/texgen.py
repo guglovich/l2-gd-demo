@@ -39,6 +39,21 @@ RELIEF = {
 }
 DEFAULT_RELIEF = (0.04, 1.6)
 
+# DEVLOG-89: the POM height (albedo A) must be LOW-frequency — the ray march
+# displaces the UV by MANY texels, and a 1-texel noise height makes it sample
+# decorrelated texels = the "каша из текстур". The carved shapes survive the
+# blur; the per-texel grain stays in the NORMAL map (displacement-free, it
+# already carries it). Only the listed textures get the blurred POM height —
+# every other shipped set stays byte-identical (default radius 1.0 = old
+# behavior).
+HEIGHT_BLUR = {
+    "oren_sylen_001": 6.0,
+    "oren_sylen_in001": 6.0,
+    "oren_sylen_in002": 6.0,
+    "oren_sylen_in017": 6.0,
+    "oren_sylen_in019": 6.0,
+}
+
 
 def blur(a: np.ndarray, radius: float) -> np.ndarray:
     """ separable gaussian (PIL for speed, normalized back to 0..1) """
@@ -84,12 +99,21 @@ def generate(path: str, out_dir: str) -> None:
     # height encodes painted relief: bright painted highlights = raised
     height_n = (height - height.min()) / max(1e-6, height.max() - height.min())
 
+    # DEVLOG-89: low-frequency POM height for the listed textures (see
+    # HEIGHT_BLUR above); everything else keeps the 1-texel field.
+    pom_blur = HEIGHT_BLUR.get(obj, 1.0)
+    if pom_blur != 1.0:
+        pb = blur(lum, pom_blur)
+        height_pom = (pb - pb.min()) / max(1e-6, pb.max() - pb.min())
+    else:
+        height_pom = height_n
+
     normal = sobel_normal(height, nstrength)
 
     # roughness: dark painted areas = rougher (0.95), bright = smoother (0.65)
     rough = 0.65 + 0.30 * (1.0 - height_n)
 
-    achan = src_a if has_mask else height_n
+    achan = src_a if has_mask else height_pom
     albedo = np.dstack([rgb, achan])
     Image.fromarray((albedo * 255.0).astype(np.uint8), "RGBA").save(
         os.path.join(out_dir, f"{obj}.pbr_albedo.png"))

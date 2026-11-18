@@ -6423,3 +6423,39 @@ the single-step sampler was).
 **Roadmap:** self-shadowing from the height field inside the POM (adds
 crevice darkening; material-level, not scene lighting) → more props by
 mesh list → baked displacement for hero props.
+
+## DEVLOG-89 (2026-11-18): the POM "каша" root — the height field was 1-texel noise
+
+The user's verdict on the raymarched POM: "всё равно каша из текстур +
+двигается из-за камеры" (close-up of the outdeco04 base: the carved
+panels smeared into mush).
+
+**The root (texgen.py):** `height = blur(lum, 1.0)` — the POM height
+field was the LUMINANCE NOISE of the stone texture (blur radius 1 texel
+≈ none). The ray march displaces the UV by MANY texels and a noisy
+height makes it sample decorrelated texels — the smear/mush. The height
+data was never "strong" — it was noise; my DEVLOG-88 check (std 34-42)
+measured the noise amplitude, not relief structure (my error).
+
+**The fix:** texgen.py HEIGHT_BLUR dict — the five column textures
+regenerate with the POM height (albedo A) blurred at radius 6 texels:
+the carved panel shapes survive, the per-texel grain is cancelled. The
+NORMAL map keeps the sharp 1-texel field (displacement-free — the grain
+lives there), so the normals and every other shipped texture set stay
+byte-identical. Height gradient after the fix: 13.3 → 4.5 mean per
+texel (3x smoother), relief range kept (alpha std 49/44).
+
+**Verification:**
+- Gate A: 0 shader errors (full reimport after the PNG regeneration).
+- Gate B A/B at the REAL column (outdeco04 @ (21020,11848), the
+  ornate-base stub next to the user's spot — identified by the world
+  AABB reconstruction from the actor transforms): 13915 px changed,
+  bbox = the column; the base crop comparison: POM on = coherent
+  recessed panels with standing frames, off = flat decal.
+- GOLDEN BASELINE PASS: five views, scene 0 px (character-only bboxes).
+
+**The swim:** raymarch + grazing fade + distance fade 15-35 m reduce it;
+the residual view-dependent shift is the nature of parallax — the final
+motion verdict is the user's. If it still reads as sliding at their
+camera, the next lever is pom_scale down (0.10 → 0.06-0.07) or POM off
+for the props and the baked-displacement route for true silhouettes.
