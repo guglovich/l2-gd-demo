@@ -1459,7 +1459,7 @@
    "package": "sylen_temple_s",
    "gltf": "res://assets/maps/20_18/meshes/sylen_temple_s/StaticMesh/sylentemple_ent_main.gltf",
    "primitive_material_indices": [
-    1,
+    0,
     1,
     2,
     3
@@ -1534,7 +1534,7 @@
     0,
     1,
     2,
-    0
+    3
    ]
   },
   "sylen_temple_s:sylentemple_side_stair": {
