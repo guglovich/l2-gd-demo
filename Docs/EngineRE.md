@@ -164,3 +164,31 @@ its nodes' surfs (31/31).
   bsp2 layers still use the computed texel UVs (approved look — do not
   touch without the baseline re-approval; they carry the same latent
   bug).
+
+## L2 static meshes — the UV v convention ✔ (2026-11-18, DEVLOG-83)
+The L2 client renders static-mesh UVs with the D3D9 convention:
+**v = 0 = the image TOP** — the SAME convention as glTF/Godot. UModel's
+glTF export flips v (v' = 1 − v_ue): wrong for L2; invisible on
+v-symmetric stone, catastrophic on asymmetric textures (in021's
+medallion arc: the 4 mirrored quadrants placed the arcs at the panel
+EDGES instead of the center; the statue's texture was flipped too).
+Byte-proof on deco11: the file UV stream (offsets 401..472) = correct
+4-mirrored quadrants, arc at the panel center. Also deco12's export was
+rebuilt by UModel with lost tiling (file: u 0..1, v −0.958..1.985).
+Fix: tools/l2strict/static_gltf_from_parse.py regenerates the glTFs
+from the byte-validated l2mesh_full parse (v verbatim; prim k =
+non-empty section k → material section index = identity per GetSkin
+fnd_22; strips expanded). All 26 sylen_temple_s meshes rebuilt;
+asset_map pis verified 0 mismatches.
+
+## THE APPROVED STATE (the user, 2026-11-18, on 97b6922)
+«Все текстуры внутри храма совпадают, пол тоже, окна тоже; текстуры
+над аркой исправлены, текстуры самой арки добавлены» — the temple
+interior texture stage is CLIENT-APPROVED: the floor (deco11/12/03/04
++ the BSP in022 base with the section-stream UVs), the windows, the
+arch and the arch tops (identity binding + BSP ai_008/in002). The
+medallion center glow = the temple lamp (the lighting stage, not yet
+opened; in021 arc-center max 173 vs the client 255).
+The full reimport protocol (rm *.import + rm -rf .godot/imported +
+full import) is MANDATORY before every verification render — several
+mid-stream "verifications" ran against stale caches (DEVLOG-84).
