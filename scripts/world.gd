@@ -16,6 +16,11 @@ var asset_map_data := {}
 var bsp_data := {}
 var _mesh_cache := {}
 var _shape_cache := {}
+# DEVLOG-86: the foliage (vegetation) batching — actor transforms per mesh
+# key rendered as one MultiMeshInstance3D, plus the trunk AABBs (the bark
+# surfaces only) for the tree cylinder colliders.
+var _veg_batch := {}
+var _foliage_trunk := {}
 
 # Меши, у которых пол имеет нормали, смотрящие вниз (backface culling делает их невидимыми сверху).
 # Предвычислено анализатором геометрии glTF.
@@ -931,11 +936,22 @@ func _build_meshes() -> void:
 		if mesh == null:
 			skipped.append(key)
 			continue
-		var inst := MeshInstance3D.new()
-		inst.mesh = mesh
 		var loc: Array = actor["location"]
 		var rot: Array = actor.get("rotation", [0, 0, 0])
 		var pos_z: float = loc[2]
+		# MODERN PORT (DEVLOG-86): foliage renders via one MultiMeshInstance3D
+		# per mesh key (GPU instancing — one draw call for the whole actor
+		# family) instead of 195 per-actor MeshInstance3D nodes.
+		if _is_foliage_key(key):
+			var vb := _ue_basis(int(rot[0]), int(rot[1]), int(rot[2])) \
+					* Basis.from_scale(Vector3.ONE * float(actor.get("draw_scale", 1.0)))
+			if not _veg_batch.has(key):
+				_veg_batch[key] = []
+			(_veg_batch[key] as Array).append(Transform3D(vb,
+					Vector3(loc[0] * UNIT_SCALE, pos_z * UNIT_SCALE, loc[1] * UNIT_SCALE)))
+			continue
+		var inst := MeshInstance3D.new()
+		inst.mesh = mesh
 		# Village floor slabs (O_De_01/02/03) read at Z -5541 but their top
 		# surface then sits at -56 m — 11.6 m BELOW the village floor level
 		# (-44.8, set by the bridge deck -44.05 and PlayerStart Zs -4478..-4493).
@@ -964,6 +980,71 @@ func _build_meshes() -> void:
 		body.scale = inst.scale
 		body.set_meta("mesh_key", key)
 		world.add_child(body)
+	# DEVLOG-86: build the foliage MultiMeshes (one per mesh key) + physics.
+	# Grass/bushes are NOT solid in the client (walk-through decoration —
+	# the legacy full-trimesh bodies blocked the player with invisible
+	# cards). Trees collide with a trunk cylinder per instance (the canopy
+	# cards are not solid).
+	var veg_trunk_shape := {}
+	var veg_instances := 0
+	for vkey in _veg_batch:
+		var vmesh := _get_mesh(vkey)
+		if vmesh == null:
+			continue
+		var vxs: Array = _veg_batch[vkey]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.mesh = vmesh
+		mm.instance_count = vxs.size()
+		for i in range(vxs.size()):
+			mm.set_instance_transform(i, vxs[i])
+		var mmi := MultiMeshInstance3D.new()
+		mmi.multimesh = mm
+		# the grass cards alias into noise far away; the trees read at
+		# distance (Godot 4 visibility ranges — the modern cull path); the
+		# stones stay unlimited (rock at distance = landmark)
+		if "grass" in vkey:
+			mmi.visibility_range_end = 70.0
+		elif "tree" in vkey:
+			mmi.visibility_range_end = 260.0
+		world.add_child(mmi)
+		veg_instances += vxs.size()
+		if "tree" in vkey and _foliage_trunk.has(vkey):
+			var tb: AABB = _foliage_trunk[vkey]
+			if not veg_trunk_shape.has(vkey):
+				var cs := CylinderShape3D.new()
+				cs.radius = clampf(maxf(tb.size.x, tb.size.z) * 0.5, 0.3, 1.2)
+				cs.height = clampf(tb.size.y, 1.5, 6.0)
+				veg_trunk_shape[vkey] = cs
+			var cshape: CylinderShape3D = veg_trunk_shape[vkey]
+			for vxf in vxs:
+				var body := StaticBody3D.new()
+				var col := CollisionShape3D.new()
+				col.shape = cshape
+				body.add_child(col)
+				var vs: float = vxf.basis.get_scale().y
+				body.position = vxf.origin + Vector3(0.0,
+						(tb.position.y + cshape.height * 0.5) * vs, 0.0)
+				body.set_meta("mesh_key", "Veg:" + vkey)
+				world.add_child(body)
+		elif not ("grass" in vkey):
+			# the field_deco stone boulders / artifact stones are SOLID —
+			# keep the full trimesh per instance (the legacy behavior)
+			if not _shape_cache.has(vkey):
+				var ms := vmesh.create_trimesh_shape()
+				ms.backface_collision = true
+				_shape_cache[vkey] = ms
+			for vxf2 in vxs:
+				var sbody := StaticBody3D.new()
+				var scol := CollisionShape3D.new()
+				scol.shape = _shape_cache[vkey]
+				sbody.add_child(scol)
+				sbody.position = vxf2.origin
+				sbody.transform.basis = vxf2.basis
+				sbody.set_meta("mesh_key", "Veg:" + vkey)
+				world.add_child(sbody)
+	print("foliage: %d instances in %d MultiMeshes, trunk colliders for %d tree meshes"
+			% [veg_instances, _veg_batch.size(), veg_trunk_shape.size()])
 	# GATE D (DEVLOG-79): tint side_ent surfaces with distinct colors
 	if OS.get_environment("L2_SIDEENT_DEBUG") != "":
 		var se_mesh: Mesh = _get_mesh("sylen_temple_s:sylentemple_side_ent")
@@ -1030,6 +1111,17 @@ func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
 	return mesh.create_trimesh_shape()
 
 
+## Foliage (vegetation) package keys: the tree packages and the field
+## decoration grasses/bushes. CASE-INSENSITIVE: the old inline check
+## (begins_with "Field_Deco") missed the lowercase "field_deco_S" package,
+## so the grass card clusters rendered OPAQUE (no alpha scissor — the
+## DEVLOG-86 flat poly piles). Cutout, not blending (the L2 alpha is a
+## hard mask; blending needs sorting and breaks the depth pass).
+func _is_foliage_key(key: String) -> bool:
+	var pkg := key.split(":")[0].to_lower()
+	return "tree" in pkg or pkg.begins_with("field_deco")
+
+
 func _get_mesh(key: String) -> Mesh:
 	if _mesh_cache.has(key): return _mesh_cache[key]
 	var info = asset_map_data.get("meshes", {}).get(key)
@@ -1084,8 +1176,7 @@ func _get_mesh(key: String) -> Mesh:
 		# with a generated set (generic lookup). Foliage is EXCLUDED — it
 		# needs the alpha-scissor StandardMaterial3D path below (the PBR
 		# shader has no alpha support).
-		var is_foliage_pkg := "tree" in parts[0].to_lower() \
-				or parts[0].begins_with("Field_Deco") or parts[0].begins_with("field_deco")
+		var is_foliage_pkg := _is_foliage_key(key)
 		var pm: Material = null
 		if not is_foliage_pkg:
 			pm = L2ProcTex.material_for(tpkg, tobj, false)
@@ -1128,12 +1219,17 @@ func _get_mesh(key: String) -> Mesh:
 				# mapped to floats here (honest limitation; see MECHANICS.md).
 				var shader_flags = t.get("shader", null)
 				var shader_two_sided: bool = shader_flags is Dictionary and bool(shader_flags.get("two_sided", false))
-				# Alpha-scissor ONLY for foliage: in L2 textures the alpha
-				# channel is often a mask (specular/blend), not transparency —
-				# applying it to structures made the bridge edges see-through.
-				var is_foliage := "tree" in parts[0].to_lower() \
-						or parts[0].begins_with("Field_Deco")
-				if is_foliage and img.detect_alpha():
+				# Alpha-scissor ONLY for the true foliage textures (grass
+				# tufts / leaf cards). The same packages also carry STONE
+				# meshes (deco_Doren_stone*, world_obj*) whose L2 alpha is
+				# a specular/blend MASK — cutting those would hole the rock.
+				# DEVLOG-86: the old inline predicate was CASE-SENSITIVE —
+				# "field_deco_S" (lowercase) failed begins_with("Field_Deco")
+				# and the grass card clusters rendered OPAQUE (the flat gray
+				# poly piles).
+				var is_foliage_tex := "grass" in tobj.to_lower() \
+						or "leaf" in tobj.to_lower()
+				if is_foliage_tex and img.detect_alpha():
 					m.transparency = StandardMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 					m.alpha_scissor_threshold = 0.35
 					m.cull_mode = StandardMaterial3D.CULL_DISABLED
@@ -1142,6 +1238,34 @@ func _get_mesh(key: String) -> Mesh:
 				mesh.surface_set_material(si, m)
 				if key == "Oren_DEV_S:O_DE_Bridge" and si == 10:
 					print("DIAG bridge floor surface %d: texture applied" % [si])
+	# DEVLOG-86: the trunk (bark surfaces) AABB for the tree cylinder
+	# colliders. The whole-mesh AABB is canopy-wide (the leaf cards span
+	# 8 m on tree12) — useless for collision.
+	if _is_foliage_key(key) and "tree" in parts[0].to_lower():
+		var tb := AABB()
+		var have_tb := false
+		for si in range(mesh.get_surface_count()):
+			if si >= pis.size():
+				continue
+			var tm := int(pis[si])
+			if tm < 0 or tm >= texs.size():
+				continue
+			if not ("bark" in str(texs[tm].get("object", "")).to_lower()):
+				continue
+			var tarrs := mesh.surface_get_arrays(si)
+			var tvv: PackedVector3Array = tarrs[Mesh.ARRAY_VERTEX]
+			if tvv.size() == 0:
+				continue
+			var sb := AABB(tvv[0], Vector3.ZERO)
+			for tv in tvv:
+				sb = sb.expand(tv)
+			if have_tb:
+				tb = tb.merge(sb)
+			else:
+				tb = sb
+				have_tb = true
+		if have_tb:
+			_foliage_trunk[key] = tb
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's
 	# raised hand (the L2_TRACE_BOX: the foreign face texture on the hand).

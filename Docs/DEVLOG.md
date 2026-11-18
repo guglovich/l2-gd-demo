@@ -6111,3 +6111,225 @@ dappling on the right wall (sun through Iron_net — authentic); Gate A
 the march profile intact (TempleBsp −42.7, skin −30.2/−31.5), the
 corridor profile walkable (skin −26.0, TempleBsp −30.0, deco05/11
 −42.6). The spawn facade view identical to the pre-rev2 record.
+
+## DEVLOG-82 rev3: «лестницы вообще исчезли» — the WINDING was inverted; proven by A/B, fixed
+
+The user's camera (28089,12871,−3752, looking down the north stairwell,
+reproduced 1:1 via the new L2_VIEW_PITCH env) showed a bare stairwell.
+Diagnosis: the tinted render (L2_BSP_DEBUG) showed a TempleBsp in002
+face occupying the ramp area — the ai_004 ramp slope (node 1028, plane
+(0,−0.44,0.90), the painted-step face) was CULLED from above while the
+under-stair faces showed instead. A/B test with the new env-gated
+L2_BSP_2SIDED (force two-sided): THE STAIRS CAME BACK → my fan winding
+(right-hand-rule normal = node plane normal) presents the plane-normal
+side as the BACK face in Godot: Godot's cull_back keeps the side
+OPPOSITE the right-hand normal. Fix: emit the fan REVERSED
+([v0, vk+1, vk] — clockwise from the plane-normal side).
+
+**Verified (rev3):** the stairwell view — the full painted staircase
+(ai_004 steps + railings) descends from the platform; the statue view
+and the north view unchanged-good; the spawn facade view identical;
+Gate A 0 shader errors; baseline 5013/349/99/987/975 within the noise
+envelope; the march profile intact (skin −31.5, TempleBsp −31.8/−42.7).
+The L2_BSP_2SIDED diagnostic and L2_VIEW_PITCH remain env-gated.
+
+## DEVLOG-82 rev4: the arch-top textures — the hand pis reverted to the client identity
+
+The user: «текстуры над арками ниразу за 10+ итераций не исправлены».
+The remaining suspect = my DEVLOG-80 hand substitutions: ent_main pis
+[1,1,2,3], side_ent [0,1,2,0] — put in when the gray rectangles were
+still misdiagnosed (they were the UV-garbage BSP faces, fnd_21/82).
+The ground truth (fnd_22 GetSkin decoded: the binding =
+Materials(Index) identity, client-confirmed; plus the glTF exports
+prim i → material i for both meshes) says the client binds mat0 =
+oren_sylen_001 on ent_main prim0 and mat3 = 001 on side_ent prim3.
+Reverted both to identity [0,1,2,3]. The other 11 non-identity pis
+(deco01..outdeco05, pir, side_stair, ent_stair02) came from the glTF
+exports themselves (assets.py reads the per-prim material index) —
+those are the export's real data (empty sections skipped), untouched.
+
+**Verified:** the spawn facade renders with the identity binding; the
+arch spandrels = the client's own material assignment. The user
+verifies against their client captures (the arch-top look was never
+client-approved — the substitutions were a guess made before the UV
+root cause).
+
+## DEVLOG-83 (2026-11-18): THE HALL FLOOR — the UModel v-flip root + deco12 rebuild; the statue unmasked
+
+The user opened the floor stage with the live-client reference (the
+medallion with the glowing center, the ornate panels, the carpet).
+The floor data (deco11 ×6 the medallions, deco12 ×27 the panels,
+deco04 ×2, deco03 ×2) was already staged and placed — but rendered
+wrong: the medallion arcs flew to the panel edges (the "two arcs"),
+the center = a dark slab, the statue = a dark blob.
+
+**The root (the user's clean-room directive, craft-anything data):**
+UModel's glTF export FLIPS the texture v (v' = 1 − v_ue). The L2
+client is D3D9: v = 0 = the image TOP — the SAME convention as
+Godot/glTF. The flip is invisible on v-symmetric stone but explodes
+every asymmetric texture: in021's medallion arc (top-right corner)
+landed at the quadrant's outer corner instead of the panel center.
+Byte-level proof: deco11's UV stream (offsets 401..472) = 4 mirrored
+quadrants with the arc at the center — the mesh file is correct; the
+export is not. Plus deco12's export was rebuilt by UModel with lost
+tiling (u 0..1.5 / v 0.265..1 vs the file's u 0..1 / v −0.958..1.985,
+2.94 tiles vertical).
+
+**The fix (clean-room, from the byte-validated parse):** new tool
+tools/l2strict/static_gltf_from_parse.py — regenerates the glTF+bin
+from l2mesh_full (UV v VERBATIM, no flip; one prim per non-empty
+section, prim k → material section index = identity per fnd_22;
+strips expanded; positions (x, z, y)/100). All 26 sylen_temple_s
+geometry meshes regenerated (volumlight has no export). The
+asset_map pis verified against the rebuilt prims (counts + values,
+0 mismatches).
+
+**Verified:** the medallion top-down = the centered ring + the web
+quadrants (the client composition); the statue view — THE SHILLIEN
+STATUE NOW VISIBLE (its texture was v-flipped too), the carpet strip,
+the diamond lattice, the ornate panels; the north view — the corner
+medallions + panels; Gate A 0 shader errors; the baseline
+5007/347/100/988/975 within the noise envelope; the march profile
+intact. The glowing medallion center itself = the temple lamp (the
+lighting stage — in021's arc-center max 173 vs the client's 255).
+
+## DEVLOG-84 (2026-11-18): THE TEMPLE TEXTURE STAGE — USER APPROVED
+
+**The user's verdict on 97b6922: «все текстуры внутри храма совпадают,
+пол тоже, окна тоже. также исправлены текстуры над аркой и добавлены
+текстуры самой арки»** — the temple interior textures MATCH the client:
+the floor (the medallion assemblies, the panels, the carpet strip), the
+windows (the decorative niches), the arch-top areas AND the arch itself
+(the arch faces got their own textures — ai_009/in020/in031 via the
+identity binding rev4 + the BSP arch faces with the client section UVs).
+
+**Why the fixes "appeared only now" (the user's question):** the gray
+rectangles had THREE stacked roots (the BSP section-UV garbage 7f70dfd;
+texel_uvs=false never actually applied 7c8b3da; the inverted fan
+winding 00afdef), and every intermediate verification ran through the
+documented reimport trap — .gltf/.gdshader changes do not take effect
+without deleting *.import + rm -rf .godot/imported + a full reimport;
+several mid-stream renders (mine included) were made against stale
+caches or with the fix not actually in the build (7f70dfd). The final
+iterations (rev3/rev4/83) each ended with a FULL reimport, so the whole
+stack landed at once. Lesson recorded: every asset-affecting change =
+the full reimport protocol before ANY verification render; verify the
+build stamp + the actually-loaded code path, not the intent.
+
+**The approved state:** the commit 97b6922 (+ d71b9f6, 00afdef,
+7c8b3da, 7f70dfd beneath it). The village unchanged (the baseline
+diffs within the character-row noise on all five viewports).
+
+**Pending (opened by the user):** the temple lamps / lighting stage
+(the medallion center glow, the interior brightness — in021's arc
+center max 173 vs the client 255 = a lamp, not a texture). Still
+deferred: the village tunnel blue strip (16627,14985,−4108), the 3D
+step geometry, the full-BSP village swap (needs the baseline
+re-approval).
+
+## DEVLOG-85 (2026-11-18): THE TUNNEL WALL — the level-BSP node-authority rule (the CSG-history stack)
+
+The user's order: "фиксим/убираем вертикальную стену в туннеле" (screenshot
+at X=16571 Y=14883 Z=−4064.9: the canyon tunnel sealed by a dark
+vertically-striped slab; this is also the deferred blue-strip defect at
+(16627,14985,−4108.6) — same cluster, seen from another angle).
+
+**The root (a new RE rule, same family as DEVLOG-82).** The wall was the
+village LevelBSP (the legacy levelbsp.py mesh). Trace chain: TRACE_RAY
+NO-HIT (the slab had no collider on the aim line) → TRACE_BOX at the
+user's reproduced camera (L2_SPAWN=16571,14883,−4064.9 L2_VIEW_YAW=3.64)
+named **LevelBSP face 785**, prim 2, tex DE_V_m12, plane y≈15151..15241,
+x 16619..17014, z −4305..−3468 (an 8.4 m wall across the tunnel).
+
+The original model's probe: **123 surf records share that one polygon**
+(the full CSG history: DE_V_m12 walls, floor02, sylen ai_008/in016/...
+ghost layers, ZonePortal marks) — all on node 4. The node's AUTHORITATIVE
+surf (node.cs[1]) is **surf 186, flags 0x4000109 — PF_Invisible (0x1) +
+portal family**: it is the OUTDOOR/CAVE ZONE BOUNDARY. The client renders
+per NODE and never renders nodes whose authority surf is Invisible —
+the baked section keeps the portal polygon but the renderer skips it.
+levelbsp.py walked ALL 774 surfs instead of the nodes and emitted every
+stale CSG record → the tunnel sealed by a 123-layers-deep slab.
+
+**The fix (surgical, verified confined):** levelbsp.py now skips surfs
+whose NODE's authority surf (cs[1]) has PF_Invisible — 585 of 774 model
+surfs sit on such nodes, 574 of them in the tunnel box (x 16449..17242,
+y 15099..15280); ALL 11 such surfs outside the tunnel have tex None and
+were already dropped by the no-material filter. ZERO faces removed
+outside the tunnel cluster. The 8 lost texture groups (floor02, wall07,
+ai_008, in008, in016, in023, in024, t010) are ALL stale portal-plane
+ghosts — every DE_V_floor02 surf in the level model lives on the tunnel
+portal plane (the road's floor02 comes from the brushes, untouched).
+
+**Verification (all gates):**
+- Gate A: 0 shader errors across all runs.
+- User's camera (16571,14883, yaw 3.64): the striped slab GONE, the cave
+  interior continues (dark rock, tunnel proceeds). A sun-lit wedge at the
+  passage center = the lighting stage (not touched).
+- Blue-strip spot (16627,14985,−4108.6, yaw π): no strip, continuous cave
+  walls.
+- GOLDEN BASELINE PASS: all five viewports re-rendered after the full
+  reimport (rm LevelBSP.gltf.import + rm -rf .godot/imported + headless
+  import); scene diff vs Docs/baseline/*.png = **0 px** on
+  upper_street / stairway_plaza / spawn_plaza; entrance_road 481 px and
+  descent 202 px are the animated character's limbs only (bbox check:
+  x 705..802 / x 794..805 — the player model), the 3x3 grids show the
+  bottom-center character cell exclusively.
+
+**Pending (noted, not worked):** our tunnel floor at (16627,14985) is at
+z≈−4348 while the user's live-client spot was z≈−4108.6 — the tunnel
+interior was never visually verified (DEVLOG-32 note); the floor height
+needs the user's client comparison at the lighting stage.
+
+Also this session: **Docs/REBUILD_RULES.md** (the $150 rebuild rules —
+incremental rebuilds, stale-cache rule, user's camera first, trace
+before fixing, one hypothesis per iteration, 2–3-render budget,
+same-turn DEVLOG numbers) + the AGENTS.md pointer (commit 2ae8ebf).
+
+## DEVLOG-86 (2026-11-18): THE VEGETATION — alpha cutout + MultiMesh (the modern port, Godot 4.7)
+
+The user's order: "фиксируем последний баг переноса ... сразу современным
+способом, на скриншоте кусты. и применить тоже самое к деревьям" — the
+bushes at (18514,12325,−3753.3) rendered as opaque flat card piles.
+
+**The root.** The vegetation (field_deco_S:grass_darkelf001 ×14 /
+grass_darkelf006 ×33, Oren_tree_S:Oren_Darkelf_tree01..12 ×148 — 195
+actors map-wide) carries CARD-CLUSTER geometry with alpha-cutout textures
+(Darkelf_grass001/006: RGBA, alpha 0..255, ~10% opaque coverage, dark-olive
+RGB — the authored dark-elf shrubs). world.gd's foliage predicate was
+CASE-SENSITIVE in the alpha-scissor branch (begins_with "Field_Deco"
+failed the lowercase "field_deco_S" package) → the cards rendered OPAQUE
+(the texture's transparent backdrop drawn as gray polys). The user
+corrected me: "они не серые. они плоские из-за отсутствия альфа канала".
+
+**The modern implementation (Godot 4.7):**
+- **Alpha cutout, not blending**: TRANSPARENCY_ALPHA_SCISSOR +
+  threshold 0.35, driven by the TEXTURE object name ("grass"/"leaf" in
+  tobj) — not the package: the same packages also carry STONE meshes
+  (deco_Doren_stone001..010 ×169, Field_Deco_Artifact_S world_obj17..22
+  ×30) whose L2 alpha is a specular/blend MASK — cutting it would hole
+  the rock.
+- **MultiMeshInstance3D** — one per mesh key (24 keys), 394 instances,
+  one draw call per key instead of 195 per-actor MeshInstance3D nodes.
+  Per-actor transforms = map.json location/rotation/draw_scale through
+  _ue_basis.
+- **Visibility ranges**: grass 70 m (cards alias into noise), trees
+  260 m, stones unlimited.
+- **Collision by client semantics**: grass/bushes = NO collision
+  (walk-through decoration — the legacy full-trimesh bodies blocked the
+  player with invisible cards); trees = trunk cylinder per instance
+  (radius/height from the BARK surfaces' union AABB — the whole-mesh
+  AABB is canopy-wide, 8 m on tree12; shape shared per mesh key); stones
+  = full trimesh per instance (solid, as before).
+
+**Verification:**
+- Gate A: 0 shader errors; parse-check clean.
+- User's camera (18514,12325,yaw 1.48): the gray poly piles GONE — the
+  cutout shrub clusters render with their authored dark-olive texture;
+  the tree leaves cut out correctly.
+- GOLDEN BASELINE PASS (full reimport before the runs): all five views —
+  scene diff 0 px (upper_street 7178 px / entrance_road 481 / descent
+  206 / stairway 1258 / spawn_plaza 1517 — ALL inside the animated
+  character bbox, identical bboxes across runs = anim noise only).
+- March profile intact: the bridge carpet band y −45.28..−45.33 via
+  O_DE_Btm_Obj01/Polys3987 — walkability unchanged.
