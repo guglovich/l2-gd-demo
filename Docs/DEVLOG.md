@@ -6631,3 +6631,51 @@ lesson for the deferred modern-texture stage.
 **Verification:** parse-check 0, 0 shader errors; the column renders in
 the DEVLOG-92 stable look; GOLDEN BASELINE PASS (five views, scene 0 px,
 character-only bboxes). Pushed: 5367064 on the remote master.
+
+## DEVLOG-95 (2026-11-19): the AUDIO stage prep — the full client sound inventory, the location audio graph, the sorted catalog
+
+The user's order (the prep for the next iterations, autonomous): find,
+deep and sort the sound sources for the 20_18 location — background
+music, footsteps, items, interactions, the Dark Elf voices/professions/
+skills.
+
+**The tool:** `tools/l2strict/audio_catalog.py` — decrypts the 29
+`Sounds/*.uax` packages (the Lineage2Ver111 crypto, same as the maps;
+the Sound exports = PCM WAV 22050 Hz mono 16-bit after a ~9-byte UE
+header — NOT ogg), parses the export tables, unwraps the `music/` L2SD
+ogg wrapper, and parses the MAP's own audio graph. The machine catalog:
+`tmp/audio/catalog.json` (+ samples in `tmp/audio/samples/` — ffprobe
+verifies 22050/1).
+
+**The numbers:** ~5900 sounds / 610 MB in 29 packages (ambsound 393+34,
+chrsound 1029+40, itemsound-family 428, SkillSound-family 556,
+MonSound-family 3246, stepsound 93, Interface 11, Etc 6, Messenger 4) +
+277 music tracks (L2SD-ogg) + 50 voice files.
+
+**The Deep finds (from the map itself):** 20_18.unr carries **1205
+AmbientSoundObject emitters + 6 MusicVolume zones + 9 ZoneInfo** — the
+strict map.json skipped them; `catalog_location` reads their property
+lists. The ambience map: the field crickets/cicadas dominate (nz/in/id_
+families, 800+ emitters), the canyon rock/waterfall loops (dt/wl_rock),
+the wind (dd/d_wind), the birds (an/ad_bird, an_crow), the dark-elf mood
+drones (dt/dd_horror). The MusicVolume zones: **nMusicID 201801_town /
+201802_guild / 201803_etcshop / 201804_weapon_blacksmith /
+201805_warehouse / 201806_start**.
+
+**The Dark Elf set:** `chrsound.uax` FDELF/MDELF = 122 entries (Death,
+Breath, the weapon attacks 1H/2H/Pole, Greeting, Followme, Victory,
+Sitdown/Standup); the other races + NPCs (FNPC/MNPC 36) for the village.
+The skills: `SkillSound*.uax` names ARE the skill names (flame_strike,
+wind_strike, aqua_swirl, drain_energy, curse_poison...). The music
+folder carries `CT_DarkElf.ogg` (the DE creation theme).
+
+**The blockers (documented, exact):** (1) `system/musicinfo.dat` +
+`system/skillsoundgrp.dat` = `Lineage2Ver413` (the l2enc RSA scheme) —
+the ID→music and skill→sound tables need the public l2encdec RSA key
+(next session with the network); (2) ProRender is not installed and AMD
+discontinued it — Cycles CPU fixed-seed is deterministic; (3) BC7/BC5 —
+the DEVLOG-93 compression experiment was reverted with the SilPOM stack
+(the floating-texture verdict), the redo requires the real-GPU import
+for BC7 and the roughness moved out of the normal alpha for BC5.
+
+**The deliverable:** `Docs/AUDIO.md` (the sorted catalog, in git).
