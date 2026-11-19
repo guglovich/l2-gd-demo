@@ -131,6 +131,17 @@ Per-monster voice/attack sets (the prefix survey is in catalog.json) —
 the 20_18 mobs (orcs, spiders, wolves, the Imps...) get filtered when
 the spawn list enters the stage.
 
+## The runtime-ready emitter data (prep done)
+
+`tmp/audio/emitters.json` (regenerable): **1202 emitters, 102 unique
+sounds**, each with sound/position_ue/radius/volume/pitch/type/group/
+start_time. The ambience GROUP system decoded: `s_insect_night_55` (400)
+/ `s_insect_night` (66) / `S_Insect_Day` (213) / `s_insect_day_55` (213)
+— the day/night crickets; `S_Bird_Day` (50) / `s_bird_night` (42);
+`s_village_wind` (45); `s_village_drone` (35 — the dark-elf mood);
+`s_rocks` (25) / `s_waves` (24). The emitter graph + the music zones +
+the WAV extraction = everything the Godot audio runtime needs.
+
 ## The next steps (blocked/queued)
 
 1. Decode `Lineage2Ver413` (`musicinfo.dat` + `skillsoundgrp.dat`) — the

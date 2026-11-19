@@ -6706,3 +6706,12 @@ stereo), then ogg pages with MANGLED headers (the fields zeroed — not
 just the capture). A proper page-header reconstruction (serial/seq/
 granule/CRC re-derivation) is a queued sub-task; the .uax PCM WAV path
 works completely (verified with ffprobe).
+
+## DEVLOG-95 addendum 3: the runtime-ready emitter data
+
+`tmp/audio/emitters.json`: 1202 of the 1205 AmbientSoundObjects resolved
+(sound/position/radius/volume/pitch/group/start_time; 3 lost = the no-
+Sound-props entries). The ambience GROUP system decoded — the day/night
+insect and bird families, the village wind and drone, the canyon
+rocks/waves. The housekeeping: the tracked __pycache__ .pyc files
+removed from the index (the .gitignore rule already existed).
