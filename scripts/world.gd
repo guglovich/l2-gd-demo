@@ -1296,11 +1296,6 @@ func _get_mesh(key: String) -> Mesh:
 				var data = JSON.parse_string(f.get_as_text())
 				if data is Dictionary:
 					atlas_in_uv2 = bool(data.get("atlas_in_uv2", true))
-			# DEVLOG-93 Silhouette POM stack (AMD's technique): the vertex
-			# displacement drives the REAL silhouette, the fragment POM the
-			# interior detail — both from the same low-pass height texture.
-			# L2_NO_SILPOM=1 = the A/B diagnostic.
-			var silpom := OS.get_environment("L2_NO_SILPOM") == ""
 			for bi in range(mesh.get_surface_count()):
 				var bsm: Material = mesh.surface_get_material(bi)
 				if bsm is ShaderMaterial and str((bsm as ShaderMaterial).shader.resource_path) \
@@ -1311,18 +1306,6 @@ func _get_mesh(key: String) -> Mesh:
 					bdup.set_shader_parameter("baked_normal_tex", btex)
 					bdup.set_shader_parameter("baked_ao_tex", atex)
 					bdup.set_shader_parameter("relief_gain", 1.2)
-					if silpom and bi < pis.size():
-						var smi := int(pis[bi])
-						if smi >= 0 and smi < texs.size() and texs[smi] is Dictionary:
-							var stobj: String = texs[smi]["object"]
-							var spkg: String = texs[smi]["package"]
-							var hp := "%s/textures/%s/Texture/%s.pbr_heightlp.png" % [MAP_DIR, spkg, stobj]
-							if not FileAccess.file_exists(hp):
-								hp = "%s/textures/%s/Texture/%s.pbr_heightlp.png" % [MAP_DIR, spkg.to_lower(), stobj]
-							if FileAccess.file_exists(hp):
-								bdup.set_shader_parameter("height_tex", load(hp))
-								bdup.set_shader_parameter("pom_displace_m", 0.10)
-								bdup.set_shader_parameter("pom_scale", 0.10)
 					mesh.surface_set_material(bi, bdup)
 	_mesh_cache[key] = mesh
 	# The Center_obj surface 5 (DE_V_new_deco3) intersects the statue's

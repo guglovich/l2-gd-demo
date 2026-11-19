@@ -43,21 +43,6 @@ uniform bool atlas_in_uv2 = true;
 uniform sampler2D baked_albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
 uniform sampler2D baked_normal_tex : hint_normal, filter_linear_mipmap;
 uniform sampler2D baked_ao_tex : filter_linear_mipmap;
-// DEVLOG-93 Silhouette POM (AMD's technique): the vertex stage displaces
-// the REAL silhouette by the low-pass height; the fragment POM adds the
-// interior detail from the SAME height field, so they agree. height_tex =
-// <obj>.pbr_heightlp.png (tile UV coords, REPEAT). pom_displace_m = the
-// total depth in meters (>0 enables the stack); pom_scale drives the
-// fragment march.
-uniform sampler2D height_tex : filter_linear_mipmap, repeat_enable;
-uniform float pom_displace_m = 0.0;
-
-void vertex() {
-	if (pom_displace_m > 0.001) {
-		float h = textureLod(height_tex, UV, 0.0).r;
-		VERTEX += NORMAL * ((h - 0.5) * pom_displace_m);
-	}
-}
 
 // ---- simplex noise (Ashima public-domain; only used when detail > 0) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -130,8 +115,7 @@ void fragment() {
 	vec3 view_w = normalize(INV_VIEW_MATRIX[3].xyz - VERTEX); // frag -> camera
 	vec3 vt = vec3(dot(view_w, T), dot(view_w, B), dot(view_w, ngeo));
 
-	float h0 = pom_displace_m > 0.001 ? textureLod(height_tex, uv, 0.0).r
-			: texture(albedo_tex, uv).a;
+	float h0 = texture(albedo_tex, uv).a;
 	vec2 uv_final = uv;
 	// Raymarched parallax occlusion mapping (DEVLOG-88; replaces the
 	// single-step offset whose UVs swam with the camera while giving no
@@ -141,9 +125,6 @@ void fragment() {
 	// occlude what is behind them, which is what reads as actual 3D.
 	// textureLod(., 0) = EXPLICIT LOD: implicit-LOD sampling inside a
 	// dynamic loop is undefined in GLSL (the 2026-11-13 banding).
-	// DEVLOG-93: with the Silhouette stack on, the march runs on the SAME
-	// low-pass height the vertex stage displaced (height_tex) — interior
-	// and silhouette agree.
 	if (abs(mdet) > 1e-12 && pom_scale > 0.0005) {
 		float angle_fade = smoothstep(0.12, 0.45, abs(vt.z));
 		vec2 ray_uv = vt.xy / max(0.25, abs(vt.z))
@@ -151,7 +132,7 @@ void fragment() {
 		float layer = 1.0 / float(pom_steps);
 		vec2 duv = ray_uv * layer;
 		float cd = 0.0;                       // ray depth below the surface
-		float ch = 1.0 - h0;                  // height depth (bright = raised)
+		float ch = 1.0 - h0;                  // height depth (alpha = raised)
 		vec2 uvc = uv;
 		for (int i = 0; i < pom_steps; i++) {
 			if (ch <= cd) {
@@ -159,9 +140,7 @@ void fragment() {
 			}
 			uvc -= duv;
 			cd += layer;
-			ch = 1.0 - (pom_displace_m > 0.001
-					? textureLod(height_tex, uvc, 0.0).r
-					: textureLod(albedo_tex, uvc, 0.0).a);
+			ch = 1.0 - textureLod(albedo_tex, uvc, 0.0).a;
 		}
 		if (ch > cd) {
 			// never pierced the height field (flat texel / grazing) — no shift
@@ -171,9 +150,7 @@ void fragment() {
 			// crosses the height curve (ph -> ch) at t* from the previous
 			// sample, where pd<ph and cd>=ch
 			vec2 uvp = uvc + duv;
-			float ph = 1.0 - (pom_displace_m > 0.001
-					? textureLod(height_tex, uvp, 0.0).r
-					: textureLod(albedo_tex, uvp, 0.0).a);
+			float ph = 1.0 - textureLod(albedo_tex, uvp, 0.0).a;
 			float pd = cd - layer;
 			float tw = clamp((ph - pd)
 					/ ((cd - pd) + (ph - ch) + 1e-6), 0.0, 1.0);
@@ -207,10 +184,7 @@ void fragment() {
 		// is DROPPED: the client albedo is the same pattern 1:1.
 		vec2 auv = atlas_in_uv2 ? UV2 : UV;
 		vec2 tuv = atlas_in_uv2 ? UV : UV2;
-		// the fragment POM's parallax delta shifts the TILE albedo sample
-		// so the color stays aligned with the displaced surface (the baked
-		// atlas normal is displacement-free and stays put)
-		ALBEDO = texture(albedo_tex, tuv + (uv_final - uv)).rgb;
+		ALBEDO = texture(albedo_tex, tuv).rgb;
 		NORMAL_MAP = texture(baked_normal_tex, auv).rgb;
 		NORMAL_MAP_DEPTH = relief_gain;
 		ROUGHNESS = 0.8;        // matte stone, not plastic
