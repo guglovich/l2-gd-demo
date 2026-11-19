@@ -6696,3 +6696,13 @@ bundled) and WINE IS INSTALLED on this box — the .dat decode ran:
 The audio stage is now UNBLOCKED end to end: the location music, the
 ambience emitter graph, the footsteps, the items, the DE voices and the
 DE skills are all identified with their client sources.
+
+## DEVLOG-95 addendum 2: the L2SD music container needs its own reverse pass
+
+The quick OggS-scan unwrap does NOT play: the L2SD layout is
+[magic "L2SD" 4][ver 4 = 2][zero 4][size 4][zero 4][hash 4] = 28 bytes,
+then the RAW 30-byte vorbis identification packet (NT_DarkElf = 44100 Hz
+stereo), then ogg pages with MANGLED headers (the fields zeroed — not
+just the capture). A proper page-header reconstruction (serial/seq/
+granule/CRC re-derivation) is a queued sub-task; the .uax PCM WAV path
+works completely (verified with ffprobe).
