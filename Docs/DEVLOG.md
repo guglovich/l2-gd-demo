@@ -6605,3 +6605,29 @@ BASELINE PASS: five views, scene 0 px (character-only bboxes).
 displace_low experiment (real displacement on the dense body) is parked —
 per-part displacement cracked the prim seams (a welded single-height
 displacement is the clean way, needs a height-atlas).
+
+## DEVLOG-94 (2026-11-19): the Silhouette POM stack REVERTED — the floating textures returned
+
+The user's verdict on the DEVLOG-93 stack: "вернулись баги на колонны с
+плавающими текстурами. откатываем на предыдущее стабильное состояние".
+
+**The rollback:** git revert of b235f32 (the whole DEVLOG-93 bundle —
+the vertex silhouette displacement, the fragment POM on height_tex, the
+heightlp textures, the BPTC/VRAM import changes) → 5367064. The runtime
+is the DEVLOG-92 stable state (8dc975a semantics): the dense baked body
++ the baked normal/AO at UV2 + matte material, static UVs — the swimming
+is impossible by construction there.
+
+**Why the float returned (the honest analysis):** the fragment POM's
+parallax delta shifted the TILE albedo sample while the baked normal
+stayed put — two sources of "detail" disagreeing per pixel as the camera
+moves reads as swimming. The vertex silhouette displacement moved the
+real geometry, but the interior mix (baked normal + parallax-shifted
+albedo) broke the per-pixel coherence. The AMD scheme needs ONE height
+driving EVERYTHING (geometry + albedo + normal from the height field),
+not a baked normal + a separate parallax layer — that is the design
+lesson for the deferred modern-texture stage.
+
+**Verification:** parse-check 0, 0 shader errors; the column renders in
+the DEVLOG-92 stable look; GOLDEN BASELINE PASS (five views, scene 0 px,
+character-only bboxes). Pushed: 5367064 on the remote master.
