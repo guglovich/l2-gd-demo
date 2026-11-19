@@ -47,12 +47,21 @@ The map ships **1205 AmbientSoundObject emitters + 6 MusicVolume zones +
 | 201805 | `201805_warehouse` | 13088, 17440, −2896 | the warehouse |
 | 201806 | `201806_start` | 28384, 12880, −4272 | the temple start |
 
-**BLOCKER:** the nMusicID → .ogg file mapping lives in
-`system/musicinfo.dat` — `Lineage2Ver413` (the l2enc RSA scheme; the key
-is public inside the l2encdec sources). Until that is decoded the music
-track for the DE village stays unidentified among the 277 tracks
-(the folder also carries `CT_DarkElf.ogg` — the Dark Elf character-creation
-theme, usable immediately for testing).
+**DECODED (2026-11-19):** `musicinfo.dat` decrypts with
+`wine l2encdec.exe -s <headerless dat>` — 358 records of
+[id][n][len-prefixed UTF-16 names]. THE LOCATION'S MUSIC:
+
+| nMusicID | Group | Files |
+|---|---|---|
+| 201801 | town | **NT_DarkElf** (the Dark Elf village theme, 1.9 MB) |
+| 201802 | guild | S01_F + S01_S01 |
+| 201803 | etcshop | S16_D |
+| 201804 | weapon_blacksmith | S17_D |
+| 201805 | warehouse | S19_D |
+| 201806 | start | CT_DarkElf |
+
+The whole 358-record table is in `tmp/audio/catalog.json`'s successor
+(see the audio stage notes).
 
 ## Sorted by the user's categories
 
@@ -104,8 +113,17 @@ aqua_swirl, aura_burn, drain_energy, curse_poison, disrupt_undead,
 bind_will, power_shot, critical_hit` (the starter/profession skills —
 including the Dark Elf mystic strikes), `crystal_carol, lightning_strike,
 hydro_blast, dance_of_*, fatal_cast, antaras_breath, baium_*` ...
-**BLOCKER:** the skill-id → sound-name table = `system/skillsoundgrp.dat`
-(the same Ver413 RSA blocker).
+**DECODED (2026-11-19):** `skillsoundgrp.dat` decrypts with
+`wine l2encdec.exe -d <full dat>` (the -s pair worked only for
+musicinfo). 1398 groups = [skill sounds][per-race voice variants]:
+**335 groups carry the `chrsound.m/f_darkelf_*` variants = the skills
+the Dark Elf classes cast** (68 unique sounds: wind_strike,
+flame_strike, aura_burn, drain_energy, curse_poison, vampiric_touch,
+sleep, heal, recharge, death_whisper, focus_sonic, hate, might,
+empower, poison_cloud, ice_bolt, wind_walk, mortal_blow, ...). The
+full list: `tmp/audio/de_skills.txt`. The per-race variants are the
+character VOICE lines layered over each skill cast
+(`chrsound.m_darkelf_sub/call/white/notarget/throw`).
 
 ### 7. Monsters — `MonSound*.uax` ×10 (3246 WAVs, ~290 MB)
 

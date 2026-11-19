@@ -6679,3 +6679,20 @@ the DEVLOG-93 compression experiment was reverted with the SilPOM stack
 for BC7 and the roughness moved out of the normal alpha for BC5.
 
 **The deliverable:** `Docs/AUDIO.md` (the sorted catalog, in git).
+
+## DEVLOG-95 addendum: BOTH dat blockers DECODED
+
+The network recovered enough to clone ellysh/L2FileEdit (l2encdec.exe
+bundled) and WINE IS INSTALLED on this box — the .dat decode ran:
+- `musicinfo.dat`: `wine l2encdec.exe -s <28-byte-header-stripped dat>`
+  → 358 records [id][n][len-prefixed UTF-16 names];
+  **201801_town → NT_DarkElf** (the DE village theme), 201802_guild →
+  S01_F+S01_S01, 201803_etcshop → S16_D, 201804_blacksmith → S17_D,
+  201805_warehouse → S19_D, 201806_start → CT_DarkElf.
+- `skillsoundgrp.dat`: `wine l2encdec.exe -d <full dat>` (the -s pair
+  fails on this file) → 1398 groups = [skill sounds][per-race voice
+  variants]; **335 groups carry the darkelf variants** = the DE classes'
+  skills (68 unique sounds, `tmp/audio/de_skills.txt`).
+The audio stage is now UNBLOCKED end to end: the location music, the
+ambience emitter graph, the footsteps, the items, the DE voices and the
+DE skills are all identified with their client sources.
