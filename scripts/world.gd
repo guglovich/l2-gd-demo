@@ -228,11 +228,9 @@ func _ready() -> void:
 		carrier.omni_range = 22.0
 		carrier.omni_attenuation = 2.0
 		carrier.shadow_enabled = OS.get_environment("L2_NO_CARRIER_SHADOW") == ""
-		# DEVLOG-151: the specular DOWN — the user's "непонятно откуда
-		# блики... не под любым ракурсом": the carriers' Schlick-GGX
-		# hotspot on the POM floor is view-dependent (the pools' emission
-		# is not) and read as mystery window glints.
-		carrier.light_specular = 0.15
+		# DEVLOG-151 rev2: the specular ZERO — 0.15 still read as "блики от
+		# фонарей" at the plaza camera angles (the user's verdict).
+		carrier.light_specular = 0.0
 		carrier.light_cull_mask = 3  # layers 1|2 — the PBR surfaces AND the placeholders
 		carrier.light_energy = 0.0
 		world.add_child(carrier)

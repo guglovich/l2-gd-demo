@@ -9844,3 +9844,56 @@ the map data — the census: only -1.0/1.0).
 **PENDING:** the user's visual check (the glints, the two shadows, the
 stairs at their spot, the pylons/chains); the plaza lattice = the lost
 BSP surf records (the tools/l2strict extraction recovery), unchanged.
+
+**DEVLOG-152 — the GitHub sync (the user's order: b519164 = DEVLOG-96..151
+pushed) + the follow-up fixes + the PYLON DECO SYSTEM investigation.**
+
+1. **The glints ("блики от фонарей есть")** — two layers: (a) the carrier
+   omnis' specular 0.15 still read at the plaza angles — set to 0.0; (b)
+   THE MAIN ONE: the physical pool's near field — 1/d^2 blows to 4.4x
+   albedo under the lamp head = the blown rectangles on the user's plaza
+   screenshot. Fix (both shaders): the per-lamp near-field cap
+   `latt = min(window * 1/d^2, 0.18)` — saturates the < 2.3 m zone to one
+   flat bright disc (the client's lamp wash, not a blowout).
+2. **The crystals ("посередине фонари без изменений")** — the glass
+   albedo is dark (~0.1): the albedo-scaled emission pulse (1.35-1.8)
+   read as unchanged. New `emission_flat` uniform (the pbr shader): a
+   lantern-colored glow NOT scaled by the albedo; the plafond material
+   sets emission_flat = 1.0 (the crystal burns with the lamp blue,
+   riding the same pulse).
+3. **THE PYLONS (the user: "опоры на старых местах, их 4 штуки")** — the
+   deep investigation trail:
+   - The raw .unr dump: exactly 8 Pir actors (4x O_DE_Pir01 = a 13 m
+     compact pylon, 4x O_DE_Pir02 = an 84.5 m VERTICAL composite: the
+     mesh spans from 48 m BELOW the anchor to 32 m above it — a tower
+     rising from the cave depths; the thin bands at the pivot level =
+     the chains at the village level). No separate chain meshes exist
+     in the map.
+   - False lead documented: the door-mesh actors 549/550/553/554 (my
+     dump's off-by-one: UE object refs are 1-based, ref -N =
+     imports[N-1]; the strict extractor's resolution is CORRECT).
+   - EVERY Pir actor (and 651 objects map-wide: the lamps, the stones,
+     the grass, the temple decos) carries a `StaticMeshInstance`
+     reference — an L2-native class (imported from Core; the property
+     list is EMPTY — the terminator at byte 0 — the whole payload is
+     native data). LineageDeco.u (decrypted, Ver111) = the event
+     decoration classes (x_mas_tree, the clan flags) — NOT the SMI
+     implementation. The SMI blobs = 2.4-15 KB per instance; the vertex
+     count correlates (the Pir02 SMI = 7796 bytes vs the Pir02 mesh =
+     731 vertices) — the L2 per-instance mesh/section data. The float
+     AND int scans found NO world coordinates inside.
+   - THE REMAINING UNCHECKED SOURCE: system/staticobject-e.dat =
+     Lineage2Ver413 (the RSA scheme, the same as musicinfo/
+     skillsoundgrp — Docs/AUDIO.md documents the wine l2encdec path;
+     the binary is missing from the wine drive, the re-acquisition is
+     the next step). THE HYPOTHESIS: the pylons' true client positions
+     live in the client-side deco dataset (the L2 staticobject system:
+     L2DecoLayer/Core — the .unr actors = the raw placements the deco
+     layer overrides).
+4. Gate A: the boot 0 script errors, "lantern crystals: 1 glass
+   materials", the carriers parked, the import rc=0.
+
+**PENDING:** the pylons = the staticobject-e.dat (Ver413) decode; the
+plaza lattice = the lost BSP surf records (the tools/l2strict surf
+extraction — the user's explicit order); the user's visual check of the
+glint cap + the crystal glow.

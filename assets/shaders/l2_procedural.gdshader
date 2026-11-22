@@ -399,12 +399,13 @@ void fragment() {
 		// DEVLOG-150: the PHYSICAL falloff = Godot's own omni curve
 		// (get_omni_attenuation, decay 2.0): window (1-(d/range)^4)^2
 		// times true inverse square. Same as the pbr shader and the
-		// carrier omnis — one function everywhere.
+		// carrier omnis — one function everywhere. DEVLOG-151 rev2: the
+		// near-field cap 0.18 (the blowout rectangles under the lamps).
 		float nd = ld / lantern_range;
 		nd *= nd; nd *= nd;            // (d/range)^4
 		nd = max(1.0 - nd, 0.0);
 		nd *= nd;                      // window^2
-		float latt = nd * pow(max(ld, 0.05), -2.0);
+		float latt = min(nd * pow(max(ld, 0.05), -2.0), 0.18);
 		lant_sum += latt * abs(dot(lwn, tol / max(ld, 1e-4)));
 	}
 	lant_sum = min(lant_sum, 1.3);

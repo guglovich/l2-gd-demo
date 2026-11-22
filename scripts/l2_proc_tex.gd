@@ -338,6 +338,11 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	# glass emission); every other texture stays inert (the energy 0)
 	if obj == "DE_V_cube_deco3":
 		m.set_shader_parameter("emission_energy", 1.6)
+		# DEVLOG-151 rev2: the FLAT lantern-colored term — the glass
+		# albedo is dark (~0.1) and the albedo-scaled pulse read as "the
+		# crystals unchanged" (the user's verdict); the flat term makes
+		# the crystal itself burn with the lantern blue.
+		m.set_shader_parameter("emission_flat", 1.0)
 		# DEVLOG-149: the glass meta — world.gd splits the lamp statics so
 		# the translucent glass renders without cast_shadow (its shadow
 		# would blob the ground under the lamp), and _process breathes the

@@ -35,8 +35,12 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
 // DEVLOG-144: the emissive surfaces — the DE village lantern plafonds
 // (DE_V_cube_deco3) glow as the lamp's own light; 0 = every other
-// texture inert (the village look is untouched).
+// texture inert (the village look is untouched). DEVLOG-151 rev2:
+// emission_flat adds a lantern-colored glow NOT scaled by the albedo —
+// the glass albedo is dark (~0.1), so the albedo-scaled pulse read as
+// "the crystals unchanged"; the flat term makes the crystal itself burn.
 uniform float emission_energy : hint_range(0.0, 8.0) = 0.0;
+uniform float emission_flat : hint_range(0.0, 4.0) = 0.0;
 // DEVLOG-147: the village lantern POOLS rendered IN THE SHADER. The audit
 // (L2_LIGHT_CAP_AUDIT=1, world.gd) proved the mechanism: the compat
 // renderer lights each object with at most 8 lights (a compile-time cap;
@@ -302,7 +306,11 @@ void fragment() {
 		nd *= nd; nd *= nd;            // (d/range)^4
 		nd = max(1.0 - nd, 0.0);
 		nd *= nd;                      // window^2
-		float latt = nd * pow(max(ld, 0.05), -2.0);
+		// DEVLOG-151 rev2: the near-field cap — 1/d^2 blows to 4.4x albedo
+		// under the lamp head (the blown rectangles the user circles as
+		// "блики от фонарей"); the cap saturates the < 2.3 m zone to one
+		// flat bright disc (the client's lamp wash, not a blowout).
+		float latt = min(nd * pow(max(ld, 0.05), -2.0), 0.18);
 		float lndl = mix(abs(dot(wn, tol / max(ld, 1e-4))), 1.0,
 				lantern_ndl_soft);
 		lant_sum += latt * lndl;
@@ -311,8 +319,11 @@ void fragment() {
 	// still sum up); with the physical falloff it only bites close-in.
 	lant_sum = min(lant_sum, 1.3);
 	// DEVLOG-144: the lamp glass glows with its own blue (the albedo
-	// pattern carries the plafond's glass/frame detail)
+	// pattern carries the plafond's glass/frame detail); DEVLOG-151 rev2:
+	// the flat lantern-colored term for the dark glass (the crystal
+	// reads at last), riding the same pulse energy.
 	EMISSION = alb.rgb * emission_energy
+			+ lantern_color * emission_flat * emission_energy
 			+ alb.rgb * lantern_color
 			* (lantern_energy * lantern_night * lant_sum);
 }
