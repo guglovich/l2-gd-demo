@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "sporeseastone05",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "sporestone",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "sporestone1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "sporeseastone05"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "sporeseastone05.bin",
+      "byteLength": 14056
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1352
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1352,
+      "byteLength": 1944
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3296,
+      "byteLength": 1944
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5240,
+      "byteLength": 2592
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7832,
+      "byteLength": 1296
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 9128,
+      "byteLength": 800
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 9928,
+      "byteLength": 1032
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 10960,
+      "byteLength": 1032
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 11992,
+      "byteLength": 1376
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 13368,
+      "byteLength": 688
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 675,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -1.43271,
+        -0.119583,
+        -0.916922
+      ],
+      "max": [
+        1.4261,
+        0.731284,
+        0.840342
+      ],
+      "componentType": 5126,
+      "count": 162,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 162,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 162,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 162,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 399,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -1.33872,
+        0.492492,
+        -0.811485
+      ],
+      "max": [
+        1.21086,
+        1.20679,
+        0.755102
+      ],
+      "componentType": 5126,
+      "count": 86,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 86,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 86,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 86,
+      "type": "VEC2"
+    }
+  ]
+}

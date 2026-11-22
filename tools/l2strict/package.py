@@ -421,7 +421,8 @@ class Package:
         return self.data[exp.serial_offset:end]
 
     def export_by_name(
-        self, name: str, class_name: str | None = None
+        self, name: str, class_name: str | None = None,
+        on_ambiguous: str = "raise",
     ) -> int | None:
         found = []
         for i, exp in enumerate(self.exports):
@@ -434,6 +435,15 @@ class Package:
             return None
         if len(found) > 1:
             classes = [self.class_name_of_export(i) for i in found]
+            if on_ambiguous == "first":
+                # DEVLOG-108: the L2 duplicate-name quirk (two Texture
+                # exports sharing one name; the payloads differed by 28
+                # bytes in the small-mip tails only). UE2 name binding
+                # resolves the FIRST export — follow it, loudly.
+                print(f"WARN {self.path or '<bytes>'}: object {name!r} is "
+                      f"ambiguous {classes} — using the first export "
+                      f"{found[0]} (UE2 name binding)")
+                return found[0]
             raise PackageError(
                 f"{self.path or '<bytes>'}: object {name!r} is ambiguous "
                 f"({classes})"
@@ -516,16 +526,19 @@ class PackageSet:
         class_name: str | None = None,
     ) -> tuple[Package, int]:
         candidates: list[tuple[Package, int]] = []
+        # Texture references use UE2 first-match name binding (the
+        # duplicate-name quirk, DEVLOG-108); everything else stays strict.
+        mode = "first" if class_name == "Texture" else "raise"
         if owner:
             package = self.get(owner)
             if package is not None:
-                idx = package.export_by_name(object_name, class_name)
+                idx = package.export_by_name(object_name, class_name, mode)
                 if idx is not None:
                     return package, idx
                 # Some L2 imports name a group package that is only an alias
                 # for the file package.  Fall through to the global search.
         for package in self._packages:
-            idx = package.export_by_name(object_name, class_name)
+            idx = package.export_by_name(object_name, class_name, mode)
             if idx is not None:
                 candidates.append((package, idx))
         if len(candidates) == 1:

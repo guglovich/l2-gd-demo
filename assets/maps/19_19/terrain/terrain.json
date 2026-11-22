@@ -1,0 +1,750 @@
+{
+  "schema": "l2-terrain-export-v1",
+  "map": "19_19",
+  "terrain_info": "TerrainInfo0",
+  "source_height_size": [
+    256,
+    256
+  ],
+  "height_world_size": [
+    257,
+    257
+  ],
+  "cell_size_game_xy": [
+    128.0,
+    128.0
+  ],
+  "origin_game_xy": [
+    -32768.0,
+    32768.0
+  ],
+  "origin_game_z": -9567.348739624023,
+  "extent_game_xy": [
+    32768.0,
+    32768.0
+  ],
+  "terrain_scale": [
+    128.0,
+    128.0,
+    76.0
+  ],
+  "location": [
+    -16384.0,
+    49152.0,
+    160.65126037597656
+  ],
+  "map_x": 19,
+  "map_y": 19,
+  "height_encoding": "float32-le",
+  "height_semantics": "absolute-game-z",
+  "row_order": "increasing-game-y",
+  "column_order": "increasing-game-x",
+  "surface_present_encoding": "uint8-0-hole-1-surface",
+  "edge_turn_encoding": "uint8-0-or-1",
+  "border_policy": "sample-neighbours-in-world-coordinates",
+  "clamped_border_samples": 1,
+  "visible_quad_count": 65511,
+  "hole_quad_count": 25,
+  "edge_turn_quad_count": 11679,
+  "height_min": -4543.6298828125,
+  "height_max": 103.94813537597656,
+  "layers": [
+    {
+      "slot": 0,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "Obase_1",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "T_texture",
+        "owner": "T_texture",
+        "object": "layer0",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Texture",
+          "T_texture"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.015625,
+          0.015625
+        ],
+        "uv_offset": [
+          512.0,
+          -512.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 1,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OG_57",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_S",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 2,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OG_41_t",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_G3",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 3,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OG_60_t",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_G",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 4,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OS_20",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_G2",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 5,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OG_41",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_G1",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 6,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OC_05",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_ST_C",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.5,
+      "v_scale": 1.5,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.0026041666666666665,
+          0.0026041666666666665
+        ],
+        "uv_offset": [
+          85.33333333333333,
+          -85.33333333333333
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 7,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OST_13",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_ST1",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.5,
+      "v_scale": 1.5,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.0026041666666666665,
+          0.0026041666666666665
+        ],
+        "uv_offset": [
+          85.33333333333333,
+          -85.33333333333333
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 8,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OS_12",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_R",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          128.0,
+          -128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 9,
+      "texture": {
+        "package": "t_oren",
+        "owner": "T_oren",
+        "object": "OC_03",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_oren"
+        ]
+      },
+      "mask": {
+        "package": "t_19_19",
+        "owner": "T_19_19",
+        "object": "19_19_DB",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_19_19"
+        ]
+      },
+      "u_scale": 3.0,
+      "v_scale": 3.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        76.0
+      ],
+      "use_alpha": true,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.005208333333333333,
+          0.005208333333333333
+        ],
+        "uv_offset": [
+          170.66666666666666,
+          -170.66666666666666
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    "1 terrain border sample(s) clamped to available heightmaps",
+    "southeast terrain neighbour unavailable"
+  ],
+  "neighbours": [
+    {
+      "map": "18_18",
+      "origin": [
+        -65536.0,
+        0.0,
+        -9568.0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "18_19",
+      "origin": [
+        -65536.0,
+        32768.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "19_18",
+      "origin": [
+        -32768.0,
+        0.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "19_20",
+      "origin": [
+        -32768.0,
+        65536.0,
+        -9567.348739624023
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "20_18",
+      "origin": [
+        0.0,
+        0.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "20_19",
+      "origin": [
+        0.0,
+        32768.0,
+        -9567.348739624023
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    }
+  ],
+  "files": {
+    "height_source_g16": {
+      "path": "tmp/l2/19_19/terrain/height_source_g16.raw",
+      "sha256": "60a8e715bd04bbcf3c9d1776d170b93cb735551ab136b77ec544d7c458c94b9d",
+      "size": 131072
+    },
+    "height_world_f32": {
+      "path": "tmp/l2/19_19/terrain/height_world_f32.raw",
+      "sha256": "4ef8222bcddb79d9a6d06d3c4710b28dc0956e40f89f0f0f9749abb1de99a007",
+      "size": 264196
+    },
+    "surface_present_u8": {
+      "path": "tmp/l2/19_19/terrain/surface_present_u8.raw",
+      "sha256": "69c5822fe65a55d9a3300ddb827f46ad9d91450903d5eda433a97808d51832a1",
+      "size": 65536
+    },
+    "edge_turn_u8": {
+      "path": "tmp/l2/19_19/terrain/edge_turn_u8.raw",
+      "sha256": "d5b23efc5422c4199e3cf6889a0d65b214180b7ad7c56e516aba1802b0bde375",
+      "size": 65536
+    },
+    "heightmap_preview_png": {
+      "path": "tmp/l2/19_19/terrain/heightmap_preview.png",
+      "sha256": "dbfc97bbb46cd1ddaf51a066582c6e84ab4ab53a23f34a0e9c4cf9ec074a7578",
+      "size": 16903
+    }
+  }
+}

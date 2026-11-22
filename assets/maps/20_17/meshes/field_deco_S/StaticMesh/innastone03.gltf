@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "innastone03",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "innadestone01",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "innadestone02",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "innastone03"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "innastone03.bin",
+      "byteLength": 8388
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1020
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1020,
+      "byteLength": 1440
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2460,
+      "byteLength": 1440
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3900,
+      "byteLength": 1920
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5820,
+      "byteLength": 960
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6780,
+      "byteLength": 168
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6948,
+      "byteLength": 360
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7308,
+      "byteLength": 360
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7668,
+      "byteLength": 480
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 8148,
+      "byteLength": 240
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 510,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -1.7203,
+        0.117475,
+        -1.37766
+      ],
+      "max": [
+        1.59384,
+        1.48004,
+        1.38594
+      ],
+      "componentType": 5126,
+      "count": 120,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 120,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 120,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 120,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 84,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -1.7203,
+        -0.269012,
+        -1.37766
+      ],
+      "max": [
+        1.59384,
+        0.193779,
+        1.37766
+      ],
+      "componentType": 5126,
+      "count": 30,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 30,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 30,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 30,
+      "type": "VEC2"
+    }
+  ]
+}

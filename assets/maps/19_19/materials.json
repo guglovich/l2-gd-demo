@@ -1,0 +1,2476 @@
+{
+  "schema": 1,
+  "meshes": {
+    "FX_E_S": {
+      "darkfallwater": [
+        {
+          "package": "FX_E_T",
+          "owner": "FX_E_T",
+          "object": "darkfallwater01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 27
+        }
+      ]
+    },
+    "Field_Deco_Artifact_S": {
+      "DElf_Guard_1": [
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -236
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "field_deco_artifact_t",
+          "object": "delfguard_alpa01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 28
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_deco01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -238
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_sada01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -239
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_bl01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -240
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_badak01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -241
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delfguard_dan01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Guard",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -242
+        }
+      ],
+      "DElf_TombTower": [
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -177
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "field_deco_artifact_t",
+          "object": "delf_tomb_alpa01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 34
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_03a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -281
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_bl01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -175
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_02a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -167
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_deco01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -171
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -170
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_deco02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -279
+        }
+      ],
+      "DElf_TombTower_Btm": [
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -177
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "field_deco_artifact_t",
+          "object": "delf_tomb_04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 35
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_badak01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -291
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_bl01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -175
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_stair",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -290
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_deco01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -171
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -170
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_01a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -288
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -285
+        },
+        {
+          "package": "field_deco_artifact_t",
+          "owner": "Field_Deco_Artifact_T",
+          "object": "delf_tomb_02a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DElf_Tomb",
+            "Field_Deco_Artifact_T"
+          ],
+          "raw": -167
+        }
+      ],
+      "world_obj17": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -198
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -244
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco3a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -246
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -79
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -118
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -251
+        }
+      ],
+      "world_obj18": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -198
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -253
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        }
+      ],
+      "world_obj19": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -79
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -166
+        }
+      ],
+      "world_obj20": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -79
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -118
+        }
+      ],
+      "world_obj21": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -79
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -166
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -118
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -165
+        }
+      ],
+      "world_obj22": [
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco13",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -79
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_wall05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_roof_deco1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "oren_dev_t",
+          "owner": "Oren_DEV_T",
+          "object": "DE_V_deco08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_DEV_T"
+          ],
+          "raw": -165
+        }
+      ]
+    },
+    "Oren_tree_S": {
+      "Oren_Darkelf_tree02": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark000",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf00_",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 14
+        }
+      ],
+      "Oren_Darkelf_tree03": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark000",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf00_",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 14
+        }
+      ],
+      "Oren_Darkelf_tree04": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 22
+        }
+      ],
+      "Oren_Darkelf_tree05": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 22
+        }
+      ],
+      "Oren_Darkelf_tree07": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp6_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp6_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "swamp6_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        }
+      ],
+      "Oren_Darkelf_tree08": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp6_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp6_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_darkelf_tree01_s3",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 16
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_darkelf_tree01_s4",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_darkelf_tree01_s5",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 13
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_darkelf_tree01_s6",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 12
+        }
+      ],
+      "Oren_Darkelf_tree09": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -48
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -49
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf003",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        }
+      ],
+      "Oren_Darkelf_tree10": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp5_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -37
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "swamp5_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -40
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "swamp5_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "Oren_Darkelf_tree11": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark007",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf004",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "Oren_Darkelf_tree12": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark007",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf004",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "Oren_elf_tree01": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf07",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 42
+        }
+      ],
+      "Oren_elf_tree02": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_treeleaf1",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 44
+        }
+      ],
+      "Oren_elf_tree03": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_treeleaf1",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 44
+        }
+      ],
+      "Oren_elf_tree04": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree1_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 46
+        }
+      ],
+      "Oren_elf_tree05": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -22
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree2_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 40
+        }
+      ],
+      "Oren_elf_tree07": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -19
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 38
+        }
+      ],
+      "Oren_elf_tree09": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark5rt",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark5",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf05",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 34
+        }
+      ],
+      "Oren_elf_tree10": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -19
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 38
+        }
+      ],
+      "Oren_elf_tree12": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "neworenbarkrt",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "neworenbark",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -54
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_treeleaf5",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 51
+        }
+      ],
+      "Oren_elf_tree13": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -22
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree2_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 40
+        }
+      ],
+      "Oren_elf_tree14": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree1_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 46
+        }
+      ],
+      "Oren_elf_tree15": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_treeleaf6",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 1
+        }
+      ]
+    },
+    "Waterfall": {
+      "Waterfall": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_b",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_down",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_n",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -9
+        },
+        null,
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_n",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -9
+        }
+      ],
+      "waterfall_D": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        }
+      ],
+      "waterfall_rock_1": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_b",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_down",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -12
+        }
+      ],
+      "waterfall_rock_10": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        }
+      ],
+      "waterfall_rock_11": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        }
+      ],
+      "waterfall_rock_12": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_b",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "waterfall_rock_13": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        }
+      ],
+      "waterfall_rock_2": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        }
+      ],
+      "waterfall_rock_3": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "DWaterFall_f",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_g",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -7
+        }
+      ],
+      "waterfall_rock_4": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_g",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "waterfall_rock_5": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_g",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "waterfall_rock_6": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_g",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_side01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "waterfall_rock_9": [
+        {
+          "package": "delfwaterfall_t",
+          "owner": "DelfwaterFall_T",
+          "object": "dwaterfall_b",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DelfwaterFall_T"
+          ],
+          "raw": -6
+        }
+      ]
+    },
+    "field_deco_S": {
+      "O_DEF_F_obj1": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -64
+        }
+      ],
+      "O_DEF_F_obj7": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        }
+      ],
+      "deco_Doren_stone001": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -121
+        }
+      ],
+      "deco_Doren_stone002": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        }
+      ],
+      "deco_Doren_stone003": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        }
+      ],
+      "deco_Doren_stone004": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -121
+        }
+      ],
+      "deco_Doren_stone005": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -93
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -113
+        }
+      ],
+      "deco_Doren_stone006": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -113
+        }
+      ],
+      "deco_Doren_stone007": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -93
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -113
+        }
+      ],
+      "deco_Doren_stone008": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -121
+        }
+      ],
+      "deco_Doren_stone009": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -93
+        }
+      ],
+      "deco_Doren_stone010": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -93
+        }
+      ],
+      "grass_darkelf007": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Darkelf_grass007",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 90
+        }
+      ]
+    }
+  },
+  "material_packages": {
+    "DelfwaterFall_T": [
+      "DWaterFall_f",
+      "dwaterfall_b",
+      "dwaterfall_down",
+      "dwaterfall_g",
+      "dwaterfall_n",
+      "dwaterfall_side01",
+      "dwaterfall_side02",
+      "dwaterfall_side03",
+      "dwaterfall_top"
+    ],
+    "FX_E_T": [
+      "darkfallwater01",
+      "darkfallwater01_pan",
+      "darkfallwater01_sh"
+    ],
+    "Field_Deco_Artifact_T": [
+      "delf_tomb_01",
+      "delf_tomb_01a",
+      "delf_tomb_02",
+      "delf_tomb_02a",
+      "delf_tomb_03",
+      "delf_tomb_03a",
+      "delf_tomb_04_2sm",
+      "delf_tomb_alpa01_2sm",
+      "delf_tomb_badak01",
+      "delf_tomb_bl01",
+      "delf_tomb_deco01",
+      "delf_tomb_deco02",
+      "delf_tomb_stair",
+      "delfguard_01",
+      "delfguard_alpa01mask",
+      "delfguard_badak01",
+      "delfguard_bl01",
+      "delfguard_dan01",
+      "delfguard_deco01",
+      "delfguard_sada01"
+    ],
+    "Oren_DEV_T": [
+      "DE_V_deco02",
+      "DE_V_deco08",
+      "DE_V_deco10",
+      "DE_V_deco13",
+      "DE_V_roof",
+      "DE_V_roof_deco",
+      "DE_V_roof_deco1",
+      "DE_V_roof_deco3a",
+      "DE_V_wall",
+      "DE_V_wall02",
+      "DE_V_wall05",
+      "DE_V_wall07"
+    ],
+    "Oren_tree_T": [
+      "Oren_Darkelf_Leaf002_1",
+      "Oren_Darkelf_Leaf003_1",
+      "Oren_Darkelf_Leaf004_1",
+      "Oren_Darkelf_Leaf00_1",
+      "Oren_Darkelf_bark000",
+      "Oren_Darkelf_bark001",
+      "Oren_Darkelf_bark002",
+      "Oren_Darkelf_bark003",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "neworenbark",
+      "neworenbarkrt",
+      "oren_darkelf_tree01_s3_1",
+      "oren_darkelf_tree01_s4_1",
+      "oren_darkelf_tree01_s5_1",
+      "oren_darkelf_tree01_s6_1",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04_1",
+      "oren_elfleaf05_1",
+      "oren_elfleaf07_1",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf_1",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf_1",
+      "oren_treebark1",
+      "oren_treebark5",
+      "oren_treebark5rt",
+      "oren_treebarkrt1",
+      "oren_treeleaf1_1",
+      "oren_treeleaf5_1",
+      "oren_treeleaf6_1",
+      "swamp5_bark1",
+      "swamp5_bark2",
+      "swamp5_leaf_1",
+      "swamp6_bark1",
+      "swamp6_bark2",
+      "swamp6_leaf_1"
+    ],
+    "delfwaterfall_t": [
+      "DWaterFall_f",
+      "dwaterfall_b",
+      "dwaterfall_down",
+      "dwaterfall_g",
+      "dwaterfall_n",
+      "dwaterfall_side01",
+      "dwaterfall_side02",
+      "dwaterfall_side03",
+      "dwaterfall_top"
+    ],
+    "field_deco_T": [
+      "Darkelf_grass007",
+      "Darkelf_grass007_1",
+      "O_darkston_01",
+      "O_darkston_02",
+      "d_ston01",
+      "oren_stone003",
+      "oren_stone004",
+      "oren_stone005",
+      "oren_stone006"
+    ],
+    "field_deco_artifact_t": [
+      "delf_tomb_01",
+      "delf_tomb_01a",
+      "delf_tomb_02",
+      "delf_tomb_02a",
+      "delf_tomb_03",
+      "delf_tomb_03a",
+      "delf_tomb_04",
+      "delf_tomb_04_2sm",
+      "delf_tomb_alpa01",
+      "delf_tomb_alpa01_2sm",
+      "delf_tomb_badak01",
+      "delf_tomb_bl01",
+      "delf_tomb_deco01",
+      "delf_tomb_deco02",
+      "delf_tomb_stair",
+      "delfguard_01",
+      "delfguard_alpa01",
+      "delfguard_alpa01mask",
+      "delfguard_badak01",
+      "delfguard_bl01",
+      "delfguard_dan01",
+      "delfguard_deco01",
+      "delfguard_sada01"
+    ],
+    "oren_dev_t": [
+      "DE_V_deco02",
+      "DE_V_deco08",
+      "DE_V_deco10",
+      "DE_V_deco13",
+      "DE_V_roof",
+      "DE_V_roof_deco",
+      "DE_V_roof_deco1",
+      "DE_V_roof_deco3a",
+      "DE_V_wall",
+      "DE_V_wall02",
+      "DE_V_wall05",
+      "DE_V_wall07"
+    ],
+    "oren_tree_t": [
+      "Oren_Darkelf_Leaf002",
+      "Oren_Darkelf_Leaf002_1",
+      "Oren_Darkelf_Leaf003",
+      "Oren_Darkelf_Leaf003_1",
+      "Oren_Darkelf_Leaf004",
+      "Oren_Darkelf_Leaf004_1",
+      "Oren_Darkelf_Leaf00_",
+      "Oren_Darkelf_Leaf00_1",
+      "Oren_Darkelf_bark000",
+      "Oren_Darkelf_bark001",
+      "Oren_Darkelf_bark002",
+      "Oren_Darkelf_bark003",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "neworenbark",
+      "neworenbarkrt",
+      "oren_darkelf_tree01_s3",
+      "oren_darkelf_tree01_s3_1",
+      "oren_darkelf_tree01_s4",
+      "oren_darkelf_tree01_s4_1",
+      "oren_darkelf_tree01_s5",
+      "oren_darkelf_tree01_s5_1",
+      "oren_darkelf_tree01_s6",
+      "oren_darkelf_tree01_s6_1",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04",
+      "oren_elfleaf04_1",
+      "oren_elfleaf05",
+      "oren_elfleaf05_1",
+      "oren_elfleaf07",
+      "oren_elfleaf07_1",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf",
+      "oren_tree1_leaf_1",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf",
+      "oren_tree2_leaf_1",
+      "oren_treebark1",
+      "oren_treebark5",
+      "oren_treebark5rt",
+      "oren_treebarkrt1",
+      "oren_treeleaf1",
+      "oren_treeleaf1_1",
+      "oren_treeleaf5",
+      "oren_treeleaf5_1",
+      "oren_treeleaf6",
+      "oren_treeleaf6_1",
+      "swamp5_bark1",
+      "swamp5_bark2",
+      "swamp5_leaf",
+      "swamp5_leaf_1",
+      "swamp6_bark1",
+      "swamp6_bark2",
+      "swamp6_leaf",
+      "swamp6_leaf_1"
+    ]
+  },
+  "texture_packages": {
+    "FX_E_T": [
+      "darkfallwater01"
+    ],
+    "delfwaterfall_t": [
+      "DWaterFall_f",
+      "dwaterfall_b",
+      "dwaterfall_down",
+      "dwaterfall_g",
+      "dwaterfall_n",
+      "dwaterfall_side01",
+      "dwaterfall_side02",
+      "dwaterfall_side03",
+      "dwaterfall_top"
+    ],
+    "field_deco_T": [
+      "Darkelf_grass007",
+      "O_darkston_01",
+      "O_darkston_02",
+      "d_ston01",
+      "oren_stone003",
+      "oren_stone004",
+      "oren_stone005",
+      "oren_stone006"
+    ],
+    "field_deco_artifact_t": [
+      "delf_tomb_01",
+      "delf_tomb_01a",
+      "delf_tomb_02",
+      "delf_tomb_02a",
+      "delf_tomb_03",
+      "delf_tomb_03a",
+      "delf_tomb_04",
+      "delf_tomb_alpa01",
+      "delf_tomb_badak01",
+      "delf_tomb_bl01",
+      "delf_tomb_deco01",
+      "delf_tomb_deco02",
+      "delf_tomb_stair",
+      "delfguard_01",
+      "delfguard_alpa01",
+      "delfguard_badak01",
+      "delfguard_bl01",
+      "delfguard_dan01",
+      "delfguard_deco01",
+      "delfguard_sada01"
+    ],
+    "oren_dev_t": [
+      "DE_V_deco02",
+      "DE_V_deco08",
+      "DE_V_deco10",
+      "DE_V_deco13",
+      "DE_V_roof",
+      "DE_V_roof_deco",
+      "DE_V_roof_deco1",
+      "DE_V_roof_deco3a",
+      "DE_V_wall",
+      "DE_V_wall02",
+      "DE_V_wall05",
+      "DE_V_wall07"
+    ],
+    "oren_tree_t": [
+      "Oren_Darkelf_Leaf002",
+      "Oren_Darkelf_Leaf003",
+      "Oren_Darkelf_Leaf004",
+      "Oren_Darkelf_Leaf00_",
+      "Oren_Darkelf_bark000",
+      "Oren_Darkelf_bark001",
+      "Oren_Darkelf_bark002",
+      "Oren_Darkelf_bark003",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "neworenbark",
+      "neworenbarkrt",
+      "oren_darkelf_tree01_s3",
+      "oren_darkelf_tree01_s4",
+      "oren_darkelf_tree01_s5",
+      "oren_darkelf_tree01_s6",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04",
+      "oren_elfleaf05",
+      "oren_elfleaf07",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf",
+      "oren_treebark1",
+      "oren_treebark5",
+      "oren_treebark5rt",
+      "oren_treebarkrt1",
+      "oren_treeleaf1",
+      "oren_treeleaf5",
+      "oren_treeleaf6",
+      "swamp5_bark1",
+      "swamp5_bark2",
+      "swamp5_leaf",
+      "swamp6_bark1",
+      "swamp6_bark2",
+      "swamp6_leaf"
+    ]
+  },
+  "unresolved": []
+}

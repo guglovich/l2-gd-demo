@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "waterfall_rock_6",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "dwaterfall_g",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "dwaterfall_side01",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "waterfall_rock_6"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "waterfall_rock_6.bin",
+      "byteLength": 8160
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 408
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 408,
+      "byteLength": 996
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1404,
+      "byteLength": 996
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2400,
+      "byteLength": 1328
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3728,
+      "byteLength": 664
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4392,
+      "byteLength": 456
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4848,
+      "byteLength": 828
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5676,
+      "byteLength": 828
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6504,
+      "byteLength": 1104
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7608,
+      "byteLength": 552
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 204,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -2.62581,
+        0.041943,
+        -1.20202
+      ],
+      "max": [
+        2.69764,
+        0.470978,
+        1.23027
+      ],
+      "componentType": 5126,
+      "count": 83,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 83,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 83,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 83,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 228,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -2.69764,
+        -0.470979,
+        -1.23027
+      ],
+      "max": [
+        2.69764,
+        0.176174,
+        1.23027
+      ],
+      "componentType": 5126,
+      "count": 69,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 69,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 69,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 69,
+      "type": "VEC2"
+    }
+  ]
+}

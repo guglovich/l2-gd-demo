@@ -33,6 +33,10 @@ RELIEF = {
     "DE_V_m12": (0.06, 2.0),
     "O_dark_01": (0.05, 1.6),
     "oren_sylen_001_1": (0.05, 2.2),
+    # the temple floors (the interior stone floor + the raised platform):
+    # grooved tile relief, medium strength (2026-11-21)
+    "oren_sylen_ai_004": (0.05, 2.0),
+    "oren_sylen_in022": (0.05, 2.0),
     "DE_V_capet01": (0.012, 1.0),
     "DE_V_capet02": (0.012, 1.0),
     "DE_V_capet": (0.012, 1.0),
@@ -47,6 +51,14 @@ DEFAULT_RELIEF = (0.04, 1.6)
 # MANY texels, and a 1-texel noise height makes it sample decorrelated
 # texels. Radius ~6 blurs the grain, keeps the carved shapes.
 HEIGHT_BLUR = {}
+
+# The Shillien Temple 3D-texture transition (the user's directive
+# 2026-11-21, SPOM walls + built-in heightmap floors): the whole temple
+# package gets a LOW-FREQUENCY POM height by default — radius 4 keeps the
+# carved panel shapes, kills the 1-texel grain that makes the march sample
+# decorrelated texels (the DEVLOG-89 lesson). Village packages keep the
+# 1-texel field (pom=0 there since the 2026-11-13 seams fix).
+PACKAGE_HEIGHT_BLUR = {"sylen_temple_t": 4.0, "t_oren": 4.0}
 
 
 def blur(a: np.ndarray, radius: float) -> np.ndarray:
@@ -94,8 +106,16 @@ def generate(path: str, out_dir: str) -> None:
     height_n = (height - height.min()) / max(1e-6, height.max() - height.min())
 
     # DEVLOG-89: low-frequency POM height for the listed textures (see
-    # HEIGHT_BLUR above); everything else keeps the 1-texel field.
+    # HEIGHT_BLUR above); the temple package gets the low-frequency field
+    # by package default (PACKAGE_HEIGHT_BLUR); everything else keeps the
+    # 1-texel field.
     pom_blur = HEIGHT_BLUR.get(obj, 1.0)
+    if pom_blur == 1.0:
+        norm_path = path.replace("\\", "/")
+        for pkg, radius in PACKAGE_HEIGHT_BLUR.items():
+            if f"/{pkg}/" in norm_path:
+                pom_blur = radius
+                break
     if pom_blur != 1.0:
         pb = blur(lum, pom_blur)
         height_pom = (pb - pb.min()) / max(1e-6, pb.max() - pb.min())
@@ -114,6 +134,14 @@ def generate(path: str, out_dir: str) -> None:
     nrm = np.dstack([normal, rough])
     Image.fromarray((nrm * 255.0).astype(np.uint8), "RGBA").save(
         os.path.join(out_dir, f"{obj}.pbr_normal.png"))
+    # Standalone grayscale height — Godot's built-in heightmap deep parallax
+    # (BaseMaterial3D) wants its own texture (the temple floors, the user's
+    # directive 2026-11-21). The SAME height_pom field the albedo's A channel
+    # carries — one height source for the albedo shift, the normal and the
+    # built-in march (the DEVLOG-94 rule: never two disagreeing sources).
+    hgray = np.dstack([height_pom, height_pom, height_pom])
+    Image.fromarray((hgray * 255.0).astype(np.uint8), "RGB").save(
+        os.path.join(out_dir, f"{obj}.pbr_height.png"))
     # POM depth travels in the material config, not the texture; write a small
     # sidecar json so the runtime reads the tuned values per texture.
     import json

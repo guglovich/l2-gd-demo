@@ -1,0 +1,3308 @@
+{
+  "schema": 1,
+  "meshes": {
+    "Oren_HDT_PART2_S": {
+      "hdrtower_p2_base": [
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t009",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t011",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t015",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -8
+        }
+      ],
+      "hdrtower_p2_base_deco": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t008",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -11
+        }
+      ],
+      "hdrtower_p2_chain": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -9
+        }
+      ],
+      "hdrtower_p2_chain_deco": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -9
+        }
+      ],
+      "hdrtower_p2_door": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t008",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -11
+        }
+      ],
+      "hdrtower_p2_kedan": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -18
+        }
+      ],
+      "hdrtower_p2_kidung": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t007",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -19
+        }
+      ],
+      "hdrtower_p2_main": [
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t005",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 1
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t006",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 3
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t010",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 2
+        }
+      ],
+      "hdrtower_p2_main_down": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t015",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -10
+        }
+      ],
+      "hdrtower_p2_roof": [
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "hdrtower_p2_second_deco": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -5
+        }
+      ],
+      "hdrtower_p2_second_roof": [
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "hdrtower_p2_top_kidung": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -5
+        }
+      ],
+      "hdrtower_p2_top_roof": [
+        {
+          "package": "oren_hwt_t",
+          "owner": "oren_hwt_t",
+          "object": "oren_hwtt010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hwt_t"
+          ],
+          "raw": -7
+        }
+      ]
+    },
+    "Oren_HDT_S": {
+      "Door": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -5
+        }
+      ],
+      "Main": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t015",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t011",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -17
+        }
+      ],
+      "badak": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -6
+        }
+      ],
+      "base_deco": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -6
+        }
+      ],
+      "hand": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t011",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t009",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t008",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -16
+        },
+        null
+      ],
+      "kidung": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -6
+        }
+      ],
+      "ringbase": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "ringdeco": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "ringdecof": [
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "ringdown": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -7
+        }
+      ],
+      "ringmain": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t012",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -18
+        }
+      ],
+      "second_deco": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -5
+        }
+      ],
+      "second_roof": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "oren_hdt_part2_t",
+          "owner": "oren_hdt_part2_t",
+          "object": "oren_hdtp2_t010",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_part2_t"
+          ],
+          "raw": -12
+        }
+      ],
+      "tomb_stone": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -9
+        }
+      ],
+      "top_deco": [
+        {
+          "package": "oren_hdt_t",
+          "owner": "oren_hdt_t",
+          "object": "oren_hdt_t003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "oren_hdt_t"
+          ],
+          "raw": -5
+        }
+      ]
+    },
+    "Oren_sporesea_S": {
+      "base_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "base_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_wood09",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 9
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_bine04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 8
+        }
+      ],
+      "base_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "cobweb": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_bine03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 2
+        }
+      ],
+      "cobweb01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_bine05",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 1
+        }
+      ],
+      "mush_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_07",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 6
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 7
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -11
+        }
+      ],
+      "mush_piece_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_05",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 12
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 4
+        }
+      ],
+      "mush_piece_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_05",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 12
+        }
+      ],
+      "mush_piece_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_06",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 11
+        }
+      ],
+      "mush_piece_04": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -22
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -14
+        }
+      ],
+      "mush_piece_05": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_04a",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 14
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -13
+        }
+      ],
+      "mush_piece_06": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_04a",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 14
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -10
+        }
+      ],
+      "mush_piece_07": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_01a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_06a",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        }
+      ],
+      "root_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_05_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "root_05_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_05_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -12
+        }
+      ],
+      "root_06_1": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "root_06_2": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_06_3": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -12
+        }
+      ],
+      "root_08": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -12
+        }
+      ],
+      "root_09": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -12
+        }
+      ],
+      "root_1_1": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_1_2": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        }
+      ],
+      "root_1_3": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -5
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        }
+      ],
+      "spore_bine": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_bine",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 5
+        }
+      ],
+      "spore_bine01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_bine02",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 10
+        }
+      ],
+      "sporesea_mc": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_mc",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 3
+        }
+      ],
+      "stone_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "stone_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "stone_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "stone_04": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_stone01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "wood_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood08a",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_bine02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_bine",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -28
+        }
+      ],
+      "wood_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "Oren_sporesea_T",
+          "object": "spore_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oren_sporesea_T"
+          ],
+          "raw": -17
+        }
+      ],
+      "wood_web_01": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 4
+        },
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 4
+        }
+      ],
+      "wood_web_02": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 4
+        }
+      ],
+      "wood_web_03": [
+        {
+          "package": "oren_sporesea_t",
+          "owner": "oren_sporesea_t",
+          "object": "spore_web",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 4
+        }
+      ]
+    },
+    "Oren_tree_S": {
+      "Oren_Darkelf_tree09": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -48
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -49
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf003",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        }
+      ],
+      "Oren_Darkelf_tree11": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark007",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf004",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "Oren_Darkelf_tree12": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "Oren_Darkelf_bark007",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "DarkElf",
+            "Oren_tree_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "Oren_Darkelf_Leaf004",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "Oren_elf_tree05": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -22
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree2_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 40
+        }
+      ],
+      "Oren_elf_tree07": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -19
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 38
+        }
+      ],
+      "Oren_elf_tree08": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark5rt",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_treebark5",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf05",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 34
+        }
+      ],
+      "Oren_elf_tree10": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -19
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_elflbark03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -20
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_elfleaf04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 38
+        }
+      ],
+      "Oren_elf_tree13": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -22
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree2_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 40
+        }
+      ],
+      "Oren_elf_tree14": [
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -14
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "Oren_tree_T",
+          "object": "oren_tree1_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Elf_Color",
+            "Oren_tree_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "oren_tree_t",
+          "owner": "oren_tree_t",
+          "object": "oren_tree1_leaf",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 46
+        }
+      ]
+    },
+    "Quest_worldcamp_S": {
+      "fx_e_magic_evil_obj0555": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_m4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -68
+        },
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_m222",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -67
+        },
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        },
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_magic01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -58
+        }
+      ],
+      "fx_e_magic_evil_obj06": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        }
+      ],
+      "fx_e_magic_evil_obj07": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        }
+      ],
+      "fx_e_magic_evil_obj10": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "quest_worldcamp_t",
+          "object": "quest_jewel_magic01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 2
+        }
+      ],
+      "fx_e_magic_evil_obj11": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        }
+      ],
+      "fx_e_magic_evil_obj12": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "Quest_worldcamp_T",
+          "object": "quest_jewel_M2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "jewel_magic",
+            "Quest_worldcamp_T"
+          ],
+          "raw": -11
+        }
+      ],
+      "fx_e_magic_evil_obj13": [
+        {
+          "package": "quest_worldcamp_t",
+          "owner": "quest_worldcamp_t",
+          "object": "quest_jewel_magic06",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 1
+        }
+      ]
+    },
+    "field_deco_S": {
+      "O_DEF_F_obj3": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        }
+      ],
+      "O_DEF_F_obj4": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        }
+      ],
+      "O_DEF_F_obj6": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -64
+        }
+      ],
+      "O_DEF_F_obj8": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -64
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "O_darkston_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "d_ston01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "o_dark_ston",
+            "field_deco_T"
+          ],
+          "raw": -43
+        }
+      ],
+      "Sporemushroom1": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -107
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -106
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -104
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarkrt2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -159
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarktop",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -85
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombine",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 35
+        }
+      ],
+      "Sporemushroom2": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -107
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -106
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -104
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarkrt2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -159
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarktop",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -85
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombine",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 35
+        }
+      ],
+      "Sporemushroom3": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -107
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushhead2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -106
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -104
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarktop",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -85
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Smushbarktop",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -85
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombine",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -160
+        }
+      ],
+      "deco_Doren_stone001": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -121
+        }
+      ],
+      "deco_Doren_stone002": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        }
+      ],
+      "deco_Doren_stone003": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        }
+      ],
+      "deco_Doren_stone004": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone004",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -121
+        }
+      ],
+      "deco_Doren_stone005": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone005",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -93
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -113
+        }
+      ],
+      "deco_Doren_stone006": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone006",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -113
+        }
+      ],
+      "deco_oren_stone001": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -115
+        }
+      ],
+      "deco_oren_stone002": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        }
+      ],
+      "deco_oren_stone003": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        }
+      ],
+      "deco_oren_stone004": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -115
+        }
+      ],
+      "deco_oren_stone005": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "orne_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -115
+        }
+      ],
+      "deco_oren_stone006": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "oren_stone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Oman_stone_t",
+            "field_deco_T"
+          ],
+          "raw": -58
+        }
+      ],
+      "mushroom3": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombarkrt",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -112
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombarkrt1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -131
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombarkrt2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -111
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroomhead",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 43
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroom1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "mushroom",
+            "field_deco_T"
+          ],
+          "raw": -108
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "mushroombine",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 35
+        }
+      ],
+      "sporeseabugstone": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestoneA1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -231
+        }
+      ],
+      "sporeseabugstoneA": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "spiderweb01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 21
+        }
+      ],
+      "sporeseastone01": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastone02": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastone03": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastone04": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastone05": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastone06": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -59
+        }
+      ],
+      "sporeseastoneA01": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -79
+        }
+      ],
+      "sporeseastoneA02": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2A",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -151
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -79
+        }
+      ],
+      "sporeseastoneA03": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2A",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -151
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -79
+        }
+      ],
+      "sporeseastoneA04": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sporestone2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "sporeseastone",
+            "field_deco_T"
+          ],
+          "raw": -79
+        }
+      ]
+    }
+  },
+  "material_packages": {
+    "Oren_sporesea_T": [
+      "spore_01",
+      "spore_01a",
+      "spore_02",
+      "spore_03",
+      "spore_03_m",
+      "spore_04a_2sm",
+      "spore_05_2ms",
+      "spore_06_2sm",
+      "spore_06a_m",
+      "spore_07_m",
+      "spore_bine",
+      "spore_bine02",
+      "spore_bine02_m",
+      "spore_bine03_m",
+      "spore_bine04_m",
+      "spore_bine05_m",
+      "spore_bine_m",
+      "spore_mc_m",
+      "spore_stone",
+      "spore_stone01",
+      "spore_web",
+      "spore_web_m",
+      "spore_wood00",
+      "spore_wood01",
+      "spore_wood02",
+      "spore_wood03",
+      "spore_wood08",
+      "spore_wood08a",
+      "spore_wood09_b"
+    ],
+    "Oren_tree_T": [
+      "Oren_Darkelf_Leaf003_1",
+      "Oren_Darkelf_Leaf004_1",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04_1",
+      "oren_elfleaf05_1",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf_1",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf_1",
+      "oren_treebark5",
+      "oren_treebark5rt"
+    ],
+    "Quest_worldcamp_T": [
+      "quest_jewel_M2",
+      "quest_jewel_m222",
+      "quest_jewel_m4",
+      "quest_jewel_magic01",
+      "quest_jewel_magic06_sh",
+      "quest_jewel_magic_sh01"
+    ],
+    "field_deco_T": [
+      "O_darkston_01",
+      "O_darkston_02",
+      "Smushbarkrt1",
+      "Smushbarkrt2",
+      "Smushbarktop",
+      "Smushhead1",
+      "Smushhead2",
+      "d_ston01",
+      "mushroom1",
+      "mushroombarkrt",
+      "mushroombarkrt1",
+      "mushroombarkrt2",
+      "mushroombine",
+      "mushroombine_1",
+      "mushroomhead",
+      "mushroomhead_1",
+      "oren_stone001",
+      "oren_stone002",
+      "oren_stone003",
+      "oren_stone004",
+      "oren_stone005",
+      "oren_stone006",
+      "spiderweb01",
+      "spiderweb01_1",
+      "sporestone",
+      "sporestone1",
+      "sporestone2",
+      "sporestone2A",
+      "sporestoneA1"
+    ],
+    "oren_hdt_part2_t": [
+      "hdtp2_t006",
+      "hdtp2_t10_shiny",
+      "oren_hdtp2_t003",
+      "oren_hdtp2_t004",
+      "oren_hdtp2_t005",
+      "oren_hdtp2_t005_shiny",
+      "oren_hdtp2_t006",
+      "oren_hdtp2_t007",
+      "oren_hdtp2_t008",
+      "oren_hdtp2_t009",
+      "oren_hdtp2_t010",
+      "oren_hdtp2_t011",
+      "oren_hdtp2_t015"
+    ],
+    "oren_hdt_t": [
+      "oren_hdt_t001",
+      "oren_hdt_t003",
+      "oren_hdt_t004",
+      "oren_hdt_t005",
+      "oren_hdt_t006",
+      "oren_hdt_t008",
+      "oren_hdt_t009",
+      "oren_hdt_t010",
+      "oren_hdt_t011",
+      "oren_hdt_t012"
+    ],
+    "oren_hwt_t": [
+      "oren_hwtt001",
+      "oren_hwtt003",
+      "oren_hwtt005",
+      "oren_hwtt010"
+    ],
+    "oren_sporesea_t": [
+      "spore_01",
+      "spore_01a",
+      "spore_02",
+      "spore_03",
+      "spore_03_m",
+      "spore_04a",
+      "spore_04a_2sm",
+      "spore_05",
+      "spore_05_2ms",
+      "spore_06",
+      "spore_06_2sm",
+      "spore_06a",
+      "spore_06a_m",
+      "spore_07",
+      "spore_07_m",
+      "spore_bine",
+      "spore_bine02",
+      "spore_bine02_m",
+      "spore_bine03",
+      "spore_bine03_m",
+      "spore_bine04",
+      "spore_bine04_m",
+      "spore_bine05",
+      "spore_bine05_m",
+      "spore_bine_m",
+      "spore_mc",
+      "spore_mc_m",
+      "spore_stone",
+      "spore_stone01",
+      "spore_web",
+      "spore_web_m",
+      "spore_wood00",
+      "spore_wood01",
+      "spore_wood02",
+      "spore_wood03",
+      "spore_wood08",
+      "spore_wood08a",
+      "spore_wood09",
+      "spore_wood09_b"
+    ],
+    "oren_tree_t": [
+      "Oren_Darkelf_Leaf003",
+      "Oren_Darkelf_Leaf003_1",
+      "Oren_Darkelf_Leaf004",
+      "Oren_Darkelf_Leaf004_1",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04",
+      "oren_elfleaf04_1",
+      "oren_elfleaf05",
+      "oren_elfleaf05_1",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf",
+      "oren_tree1_leaf_1",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf",
+      "oren_tree2_leaf_1",
+      "oren_treebark5",
+      "oren_treebark5rt"
+    ],
+    "quest_worldcamp_t": [
+      "quest_jewel_M2",
+      "quest_jewel_m222",
+      "quest_jewel_m4",
+      "quest_jewel_magic01",
+      "quest_jewel_magic06",
+      "quest_jewel_magic06_sh",
+      "quest_jewel_magic_sh01"
+    ]
+  },
+  "texture_packages": {
+    "field_deco_T": [
+      "O_darkston_01",
+      "O_darkston_02",
+      "Smushbarkrt1",
+      "Smushbarkrt2",
+      "Smushbarktop",
+      "Smushhead1",
+      "Smushhead2",
+      "d_ston01",
+      "mushroom1",
+      "mushroombarkrt",
+      "mushroombarkrt1",
+      "mushroombarkrt2",
+      "mushroombine",
+      "mushroomhead",
+      "oren_stone001",
+      "oren_stone002",
+      "oren_stone003",
+      "oren_stone004",
+      "oren_stone005",
+      "oren_stone006",
+      "spiderweb01",
+      "sporestone",
+      "sporestone1",
+      "sporestone2",
+      "sporestone2A",
+      "sporestoneA1"
+    ],
+    "oren_hdt_part2_t": [
+      "oren_hdtp2_t003",
+      "oren_hdtp2_t004",
+      "oren_hdtp2_t005",
+      "oren_hdtp2_t006",
+      "oren_hdtp2_t007",
+      "oren_hdtp2_t008",
+      "oren_hdtp2_t009",
+      "oren_hdtp2_t010",
+      "oren_hdtp2_t011",
+      "oren_hdtp2_t015"
+    ],
+    "oren_hdt_t": [
+      "oren_hdt_t001",
+      "oren_hdt_t003",
+      "oren_hdt_t004",
+      "oren_hdt_t005",
+      "oren_hdt_t006",
+      "oren_hdt_t008",
+      "oren_hdt_t009",
+      "oren_hdt_t010",
+      "oren_hdt_t011",
+      "oren_hdt_t012"
+    ],
+    "oren_hwt_t": [
+      "oren_hwtt001",
+      "oren_hwtt003",
+      "oren_hwtt005",
+      "oren_hwtt010"
+    ],
+    "oren_sporesea_t": [
+      "spore_01",
+      "spore_01a",
+      "spore_02",
+      "spore_03",
+      "spore_04a",
+      "spore_05",
+      "spore_06",
+      "spore_06a",
+      "spore_07",
+      "spore_bine",
+      "spore_bine02",
+      "spore_bine03",
+      "spore_bine04",
+      "spore_bine05",
+      "spore_mc",
+      "spore_stone",
+      "spore_stone01",
+      "spore_web",
+      "spore_wood00",
+      "spore_wood01",
+      "spore_wood02",
+      "spore_wood03",
+      "spore_wood08",
+      "spore_wood08a",
+      "spore_wood09"
+    ],
+    "oren_tree_t": [
+      "Oren_Darkelf_Leaf003",
+      "Oren_Darkelf_Leaf004",
+      "Oren_Darkelf_bark004",
+      "Oren_Darkelf_bark005",
+      "Oren_Darkelf_bark006",
+      "Oren_Darkelf_bark007",
+      "oren_elflbark03",
+      "oren_elflbark04",
+      "oren_elfleaf04",
+      "oren_elfleaf05",
+      "oren_tree1_bark1",
+      "oren_tree1_bark2",
+      "oren_tree1_leaf",
+      "oren_tree2_bark1",
+      "oren_tree2_bark2",
+      "oren_tree2_leaf",
+      "oren_treebark5",
+      "oren_treebark5rt"
+    ],
+    "quest_worldcamp_t": [
+      "quest_jewel_M2",
+      "quest_jewel_m222",
+      "quest_jewel_m4",
+      "quest_jewel_magic01",
+      "quest_jewel_magic06"
+    ]
+  },
+  "unresolved": []
+}

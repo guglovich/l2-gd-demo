@@ -91,3 +91,75 @@ An iteration without its numbers (Gate A stderr shader-error count,
 Gate B pixel counts, profile lines) did not happen. The DEVLOG entry is
 written in the SAME turn as the verification, not at the end of the
 session from memory.
+
+## Import cost (measured 2026-11-20, the multi-tile world)
+
+- `tmp/.gdignore` is MANDATORY: without it Godot's import scans tmp/'s
+  22 862 junk files every run — the no-op import was 36 s; with the
+  ignore file it is **4 s**. The full `rm -rf .godot/imported` + import
+  = ~36 s (the real re-import of ~6.6k asset files).
+- The tile builds are INCREMENTAL: a repeat `build` of an already-staged
+  tile = ~3 s (the manifest hashes skip the UModel exports and the
+  decodes). The FIRST build of a new tile pays the one-time UModel
+  export + decode cost (minutes).
+- The per-tile builds are independent: editing 20_18's assets does NOT
+  rebuild 19_18/20_17/21_18 (their staged hashes are unchanged; their
+  builds only run when explicitly invoked).
+- The runtime load grows ~1.5-1.7 s per tile (4 tiles = ~6.6 s).
+
+## Where an iteration's CPU actually goes (audit 2026-11-20, DEVLOG-110
+## addendum 4)
+
+The build/import is NOT the cost: a repeat `build --assets-dir` = 9 s
+(it re-runs all ~237 per-object UModel exports, ~25 ms each — wasteful
+but harmless), `godot --import` = 3.6 s with ZERO re-imports (Godot 4.7
+re-imports by source MD5, not mtime — re-staging identical content
+triggers nothing; docs: tutorials/assets_pipeline/import_process.html).
+**The cost is the RENDERS**: one standard L2_SCREENSHOT run = 166 s wall
+at 720% CPU (~20 CPU-minutes), of which 117 s = the 90-rendered-frame
+settle on llvmpipe. An iteration chains 3-5 renders = the CPU pegged
+for ~10-15 wall minutes — what the task manager shows as "the build".
+Corollary: the settle (and the render count) is the first lever to
+cut, the build never was the problem; project splitting gains nothing
+for the import, which is already per-resource incremental.
+
+## Render harness (fixed 2026-11-20, DEVLOG-111 — the user approved A+B)
+
+- **The renders run on the REAL display** (`DISPLAY=:0`, no xvfb):
+  `godot --path . --rendering-driver opengl3` picks radeonsi / Radeon
+  RX 6400 — one render = **21-22 s** (was 166 s on llvmpipe). A game
+  window flashes on the desktop for those seconds — expected.
+- **xvfb-run = the llvmpipe FALLBACK only** (8x slower AND different
+  pixels): never pixel-diff llvmpipe shots against the GPU baselines.
+- **The settle counts PHYSICS TICKS** (`_await_settle_ticks` in
+  world.gd, default 720 = 12 s of game time; `L2_SETTLE_TICKS`
+  overrides), **anchored AT THE SPAWN** (`_spawn_physics_frame`): the
+  frames between the spawn and the settle loop carry a machine-
+  dependent tick drift (the first-frame shader-compile hitch), and
+  12 s of tumbling down the descent stairs amplifies it into a
+  different place — unanchored, the descent differed by 1.12M px
+  run-to-run; anchored, it is 0 px. Do NOT raise
+  `max_physics_steps_per_frame` in the settle (it trades exactness
+  for speed).
+- **The diagnostic runs IGNORE ALL USER INPUT** (`player.input_locked`
+  + `WINDOW_FLAG_NO_FOCUS`, set by world.gd when L2_SCREENSHOT/L2_BURST
+  is present): the renders run on the real desktop in parallel with
+  the user's work — their right-drag orbits the camera, the arrows
+  move the character, a click sends it running. The first capture
+  attempt was contaminated exactly this way (entrance_road,
+  stairway_plaza: 1M px run-to-run). Never remove the lock.
+- The golden baselines are RE-CAPTURED on the GPU (the MANIFEST has
+  the note); the final GPU-vs-GPU noise floor: **≤30 px >8 per view,
+  mean ~0.001**.
+- The fresh-import rule stands: one `rm -rf .godot/imported` + import
+  before a capture session; the views share it when no assets changed
+  between them.
+
+## Process discipline (2026-11-20, the two hangs)
+
+- NEVER launch a godot run without a quit flow (L2_SCREENSHOT /
+  L2_BURST): the game idles at 0% CPU forever after the world build —
+  a no-quit run hung 7 minutes before the kill.
+- NEVER run concurrent godot instances on ONE project dir: 5 parallel
+  baseline renders deadlocked at 0% CPU (4 of 5 hung ~10 min — the
+  .godot cache contention). The golden baseline stays SERIAL.

@@ -1,0 +1,849 @@
+{
+  "schema": "l2-terrain-export-v1",
+  "map": "20_17",
+  "terrain_info": "TerrainInfo0",
+  "source_height_size": [
+    256,
+    256
+  ],
+  "height_world_size": [
+    257,
+    257
+  ],
+  "cell_size_game_xy": [
+    128.0,
+    128.0
+  ],
+  "origin_game_xy": [
+    0.0,
+    -32768.0
+  ],
+  "origin_game_z": -9568.0,
+  "extent_game_xy": [
+    32768.0,
+    32768.0
+  ],
+  "terrain_scale": [
+    128.0,
+    128.0,
+    76.0
+  ],
+  "location": [
+    16384.0,
+    -16384.0,
+    160.0
+  ],
+  "map_x": 20,
+  "map_y": 17,
+  "height_encoding": "float32-le",
+  "height_semantics": "absolute-game-z",
+  "row_order": "increasing-game-y",
+  "column_order": "increasing-game-x",
+  "surface_present_encoding": "uint8-0-hole-1-surface",
+  "edge_turn_encoding": "uint8-0-or-1",
+  "border_policy": "sample-neighbours-in-world-coordinates",
+  "clamped_border_samples": 0,
+  "visible_quad_count": 65503,
+  "hole_quad_count": 33,
+  "edge_turn_quad_count": 5469,
+  "height_min": -4735.171875,
+  "height_max": 2428.421875,
+  "layers": [
+    {
+      "slot": 0,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_IE01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "T_texture",
+        "owner": "T_texture",
+        "object": "layer0",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Texture",
+          "T_texture"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.015625,
+          0.015625
+        ],
+        "uv_offset": [
+          -0.0,
+          512.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 1,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_G03_4",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_E01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 2,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_G01_3",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_G01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 3,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_G03_7",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_G02",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 4,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "RUC_02",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_M02",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 2.0,
+      "v_scale": 2.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.001953125,
+          0.001953125
+        ],
+        "uv_offset": [
+          -0.0,
+          64.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 5,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_MC01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_M01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 2.0,
+      "v_scale": 2.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.001953125,
+          0.001953125
+        ],
+        "uv_offset": [
+          -0.0,
+          64.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 6,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_OE01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_OE01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 7,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_OG03",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_OG01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 8,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_S01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_S01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        76.0
+      ],
+      "use_alpha": true,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.015625,
+          0.015625
+        ],
+        "uv_offset": [
+          -0.0,
+          512.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 9,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_BS01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_SS01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        76.0
+      ],
+      "use_alpha": true,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.015625,
+          0.015625
+        ],
+        "uv_offset": [
+          -0.0,
+          512.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 10,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_OG04",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_OG02",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 1.0,
+      "v_scale": 1.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 0,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": true,
+        "uv_scale": [
+          0.00390625,
+          0.00390625
+        ],
+        "uv_offset": [
+          -0.0,
+          128.0
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "slot": 11,
+      "texture": {
+        "package": "t_rune",
+        "owner": "T_Rune",
+        "object": "PR_ST01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "T_Rune"
+        ]
+      },
+      "mask": {
+        "package": "t_20_17",
+        "owner": "T_20_17",
+        "object": "20_17_ST01",
+        "class": "Texture",
+        "kind": "import",
+        "outer_chain": [
+          "Height",
+          "T_20_17"
+        ]
+      },
+      "u_scale": 7.0,
+      "v_scale": 10.0,
+      "u_pan": 0.0,
+      "v_pan": 0.0,
+      "texture_map_axis": 2,
+      "texture_rotation": 0.0,
+      "layer_rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        32.0,
+        32.0,
+        76.0
+      ],
+      "use_alpha": false,
+      "mapping": {
+        "verified": false,
+        "uv_scale": [
+          0.0005580357142857143,
+          0.000390625
+        ],
+        "uv_offset": [
+          -0.0,
+          12.8
+        ],
+        "mask_uv": [
+          0.0,
+          0.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "warnings": [],
+  "neighbours": [
+    {
+      "map": "19_17",
+      "origin": [
+        -32768.0,
+        -32768.0,
+        -9888.651275634766
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "21_17",
+      "origin": [
+        32768.0,
+        -32768.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "19_18",
+      "origin": [
+        -32768.0,
+        0.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "20_18",
+      "origin": [
+        0.0,
+        0.0,
+        -9567.348724365234
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    },
+    {
+      "map": "21_18",
+      "origin": [
+        32768.0,
+        0.0,
+        -9596.348739624023
+      ],
+      "scale": [
+        128.0,
+        128.0,
+        0.296875
+      ],
+      "terrain_info": "TerrainInfo0"
+    }
+  ],
+  "files": {
+    "height_source_g16": {
+      "path": "tmp/l2/20_17/terrain/height_source_g16.raw",
+      "sha256": "cb4cedc0d4da110a1c19a905ee3f1052335d9deaccdbe2f94a712ddd5d0e669c",
+      "size": 131072
+    },
+    "height_world_f32": {
+      "path": "tmp/l2/20_17/terrain/height_world_f32.raw",
+      "sha256": "6092517ba002ffc60ed4b97191a59bbc1aaac465869b2143aed62a1034747d34",
+      "size": 264196
+    },
+    "surface_present_u8": {
+      "path": "tmp/l2/20_17/terrain/surface_present_u8.raw",
+      "sha256": "602b8a2efa87a62613640d15ce4097dec03fa44c71ba7c3b7ab7265ad17ece01",
+      "size": 65536
+    },
+    "edge_turn_u8": {
+      "path": "tmp/l2/20_17/terrain/edge_turn_u8.raw",
+      "sha256": "5fc2813d6a83783cd0b1ea43a2c8584b5d5690b1dfe056af2edefc7bf67ee658",
+      "size": 65536
+    },
+    "heightmap_preview_png": {
+      "path": "tmp/l2/20_17/terrain/heightmap_preview.png",
+      "sha256": "8555079dd187825e74829aa8f20af39fcca8b54fb524cbf6afe44a4bfc406d29",
+      "size": 20740
+    }
+  }
+}

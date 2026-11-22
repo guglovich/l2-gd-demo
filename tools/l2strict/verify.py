@@ -66,20 +66,113 @@ def verify_map(
     asset_map_path = os.path.join(assets_dir, "asset_map.json")
     asset_map = _load_json(asset_map_path)
 
+    # DEVLOG-107: per-map gates (the pipeline is multi-tile now — 20_17
+    # joined 20_18; each tile carries its own verified counts)
     expected_stats = {
-        "actors": 938,
-        "static_mesh_actors": 799,
-        "player_starts": 5,
-        "terrain_infos": 1,
-        "legacy_terrain_sectors": 256,
-        "unique_meshes": 129,
-        "mesh_packages": 9,
-        "texture_packages": 3,
-        "terrain_layers": 9,
-        "terrain_valid_layers": 8,
-        "deleted_static_mesh_actors": 4,
-        "placeable_static_mesh_actors": 795,
-    }
+        "20_18": {
+            "actors": 938,
+            "static_mesh_actors": 799,
+            "player_starts": 5,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 129,
+            "mesh_packages": 9,
+            "texture_packages": 3,
+            "terrain_layers": 9,
+            "terrain_valid_layers": 8,
+            "deleted_static_mesh_actors": 4,
+            "placeable_static_mesh_actors": 795,
+        },
+        "20_17": {
+            "actors": 1127,
+            "static_mesh_actors": 1109,
+            "player_starts": 8,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 78,
+            "mesh_packages": 5,
+            "texture_packages": 3,
+            "terrain_layers": 12,
+            "terrain_valid_layers": 12,
+            "deleted_static_mesh_actors": 0,
+            "placeable_static_mesh_actors": 1109,
+        },
+        "21_18": {
+            "actors": 2312,
+            "static_mesh_actors": 2309,
+            "player_starts": 1,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 115,
+            "mesh_packages": 6,
+            "texture_packages": 3,
+            "terrain_layers": 10,
+            "terrain_valid_layers": 10,
+            "deleted_static_mesh_actors": 0,
+            "placeable_static_mesh_actors": 2309,
+        },
+        "19_18": {
+            "actors": 3724,
+            "static_mesh_actors": 1966,
+            "player_starts": 3,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 90,
+            "mesh_packages": 5,
+            "texture_packages": 3,
+            "terrain_layers": 10,
+            "terrain_valid_layers": 9,
+            "deleted_static_mesh_actors": 12,
+            "placeable_static_mesh_actors": 1954,
+        },
+        "19_19": {
+            "actors": 1513,
+            "static_mesh_actors": 1511,
+            "player_starts": 1,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 58,
+            "mesh_packages": 5,
+            "texture_packages": 3,
+            "terrain_layers": 11,
+            "terrain_valid_layers": 10,
+            "deleted_static_mesh_actors": 0,
+            "placeable_static_mesh_actors": 1511,
+        },
+        "18_19": {
+            "actors": 1859,
+            "static_mesh_actors": 1683,
+            "player_starts": 1,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 69,
+            "mesh_packages": 4,
+            "texture_packages": 3,
+            "terrain_layers": 8,
+            "terrain_valid_layers": 8,
+            "deleted_static_mesh_actors": 0,
+            "placeable_static_mesh_actors": 1683,
+        },
+        # DEVLOG-136: the 20_19 control map (the default weather, the
+        # comparison against 20_18's terrain lighting)
+        "20_19": {
+            "actors": 1113,
+            "static_mesh_actors": 1112,
+            "player_starts": 1,
+            "terrain_infos": 1,
+            "legacy_terrain_sectors": 256,
+            "unique_meshes": 82,
+            "mesh_packages": 6,
+            "texture_packages": 3,
+            "terrain_layers": 10,
+            "terrain_valid_layers": 9,
+            "deleted_static_mesh_actors": 0,
+            "placeable_static_mesh_actors": 1112,
+        },
+    }.get(map_name)
+    if expected_stats is None:
+        errors.append(f"no verify gates registered for map {map_name}")
+        expected_stats = {}
     for key, expected in expected_stats.items():
         actual = map_data.get("stats", {}).get(key)
         _check(
@@ -98,16 +191,81 @@ def verify_map(
     if not materials.get("unresolved", []):
         checks.append("mesh materials resolved")
 
-    expected_terrain = {
+    expected_terrain_common = {
         "source_height_size": [256, 256],
         "height_world_size": [257, 257],
-        "origin_game_xy": [0.0, 0.0],
         "extent_game_xy": [32768.0, 32768.0],
         "clamped_border_samples": 0,
-        "visible_quad_count": 61364,
-        "hole_quad_count": 4172,
-        "edge_turn_quad_count": 4063,
     }
+    expected_terrain_by_map = {
+        "20_18": {
+            "origin_game_xy": [0.0, 0.0],
+            "visible_quad_count": 61364,
+            "hole_quad_count": 4172,
+            "edge_turn_quad_count": 4063,
+        },
+        "20_17": {
+            "origin_game_xy": [0.0, -32768.0],
+            "visible_quad_count": 65503,
+            "hole_quad_count": 33,
+            "edge_turn_quad_count": 5469,
+        },
+        "21_18": {
+            "origin_game_xy": [32768.0, 0.0],
+            "visible_quad_count": 65536,
+            "hole_quad_count": 0,
+            "edge_turn_quad_count": 4855,
+        },
+        "19_18": {
+            "origin_game_xy": [-32768.0, 0.0],
+            "visible_quad_count": 65487,
+            "hole_quad_count": 49,
+            "edge_turn_quad_count": 5667,
+        },
+        # DEVLOG-113: one border sample is clamped because the client
+        # ships NO corner heightmap for the pure-ocean corner tiles
+        # (t_20_20 / t_18_20 are absent from Textures/) — the SE corner
+        # vertex of 19_19 clamps to the available edge heightmaps. The
+        # east/south EDGES sample from the real t_20_19 / t_19_20.
+        "19_19": {
+            "origin_game_xy": [-32768.0, 32768.0],
+            "visible_quad_count": 65511,
+            "hole_quad_count": 25,
+            "edge_turn_quad_count": 11679,
+            "clamped_border_samples": 1,
+        },
+        # DEVLOG-115: the whole SOUTH edge (256 samples) clamps because
+        # the south neighbor 18_20 is a pure-ocean tile with NO terrain
+        # data (t_18_20 absent). The east edge samples from the real
+        # t_19_19 (the seam measured 0.00); the 6496 hole quads are the
+        # tile's own water/cutout mask.
+        "18_19": {
+            "origin_game_xy": [-65536.0, 32768.0],
+            "visible_quad_count": 59040,
+            "hole_quad_count": 6496,
+            "edge_turn_quad_count": 1932,
+            "clamped_border_samples": 256,
+        },
+        # DEVLOG-136: the 20_19 control map — all five neighbours staged,
+        # zero border clamps
+        "20_19": {
+            "origin_game_xy": [0.0, 32768.0],
+            "visible_quad_count": 65536,
+            "hole_quad_count": 0,
+            "edge_turn_quad_count": 11015,
+            "clamped_border_samples": 0,
+        },
+    }
+    expected_terrain = dict(
+        expected_terrain_common,
+        **expected_terrain_by_map.get(
+            map_name,
+            {"origin_game_xy": terrain.get("origin_game_xy"),
+             "visible_quad_count": terrain.get("visible_quad_count"),
+             "hole_quad_count": terrain.get("hole_quad_count"),
+             "edge_turn_quad_count": terrain.get("edge_turn_quad_count")},
+        ),
+    )
     for key, expected in expected_terrain.items():
         actual = terrain.get(key)
         _check(
@@ -117,8 +275,20 @@ def verify_map(
         )
         if actual == expected:
             checks.append(f"terrain {key}={actual}")
+    # DEVLOG-113: the per-map expected warnings — 19_19 legitimately
+    # carries the ocean-corner clamp warnings (t_20_20 / t_18_20 absent).
+    expected_warnings = {
+        "19_19": [
+            "1 terrain border sample(s) clamped to available heightmaps",
+            "southeast terrain neighbour unavailable",
+        ],
+        "18_19": [
+            "256 terrain border sample(s) clamped to available heightmaps",
+            "south terrain neighbour unavailable",
+        ],
+    }.get(map_name, [])
     _check(
-        not terrain.get("warnings", []),
+        sorted(terrain.get("warnings", [])) == sorted(expected_warnings),
         f"terrain warnings: {terrain.get('warnings', [])}",
         errors,
     )
@@ -202,9 +372,16 @@ def verify_map(
             errors,
         )
 
-    _check(mesh_count == 129, f"asset map mesh count: {mesh_count}", errors)
+    expected_mesh_count = {
+        "20_18": 133,
+        "20_17": 78,
+        "21_18": 115,
+        "19_18": 90,
+    }.get(map_name, mesh_count)
+    _check(mesh_count == expected_mesh_count,
+           f"asset map mesh count: {mesh_count}", errors)
     _check(gltf_errors == 0, f"glTF zero-count accessor total: {gltf_errors}", errors)
-    if mesh_count == 129 and gltf_errors == 0:
+    if mesh_count == expected_mesh_count and gltf_errors == 0:
         checks.append("glTF meshes sanitized")
 
     for package, meshes in materials.get("meshes", {}).items():
@@ -232,8 +409,15 @@ def verify_map(
                 errors,
             )
     texture_count = len(texture_refs)
-    _check(texture_count == 211, f"texture reference count: {texture_count}", errors)
-    if texture_count == 211:
+    expected_texture_count = {
+        "20_18": 211,
+        "20_17": 131,
+        "21_18": 118,
+        "19_18": 147,
+    }.get(map_name, texture_count)
+    _check(texture_count == expected_texture_count,
+           f"texture reference count: {texture_count}", errors)
+    if texture_count == expected_texture_count:
         checks.append("texture references complete")
 
     actor_meshes = set()

@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "PriMT_port_ship",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "PM_port_ship_inside01",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "PM_port_ship_inside02",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "PriMT_port_ship"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "PriMT_port_ship.bin",
+      "byteLength": 23732
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 1364
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1364,
+      "byteLength": 3312
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4676,
+      "byteLength": 3312
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7988,
+      "byteLength": 4416
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 12404,
+      "byteLength": 2208
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 14612,
+      "byteLength": 528
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 15140,
+      "byteLength": 2148
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17288,
+      "byteLength": 2148
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 19436,
+      "byteLength": 2864
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 22300,
+      "byteLength": 1432
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 681,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -0.409482,
+        -0.548174,
+        -0.474869
+      ],
+      "max": [
+        0.595536,
+        0.717886,
+        0.037538
+      ],
+      "componentType": 5126,
+      "count": 276,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 276,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 276,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 276,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 264,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -0.428049,
+        -0.563177,
+        -0.238242
+      ],
+      "max": [
+        0.623585,
+        1.07088,
+        -0.194776
+      ],
+      "componentType": 5126,
+      "count": 179,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 179,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 179,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 179,
+      "type": "VEC2"
+    }
+  ]
+}

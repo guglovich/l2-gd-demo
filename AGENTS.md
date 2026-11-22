@@ -145,9 +145,12 @@ Reimport trap (both bit us): after regenerating glTFs delete
 - The headless import on this machine: `godot --headless --import --path .`
   (~1–2 min for 190 glTF + 3400 PNG).
 - Screenshots for agent verification: `L2_SCREENSHOT=<abs dir> godot --path .`
-  (saves shot1/shot2.png then quits); render via `xvfb-run -a … godot …
-  --rendering-driver opengl3` (mesa llvmpipe works, vulkan-swrast present
-  for Forward+ if needed). `L2_VIEW_YAW` overrides spawn view yaw;
+  (saves shot1/shot2.png then quits); render on the REAL display
+  (`godot … --rendering-driver opengl3` with DISPLAY=:0 — radeonsi/RX 6400,
+  a render ~21 s; a game window flashes on the desktop, that is expected).
+  `xvfb-run -a … godot …` = the llvmpipe fallback ONLY (8x slower AND
+  different pixels — never pixel-diff llvmpipe shots against the GPU
+  baselines). `L2_VIEW_YAW` overrides spawn view yaw;
   `L2_BRIGHT=1` (diagnostic only, isolated in `_build_environment()`)
   forces flat white ambient so black regions are recognisable as missing
   geometry rather than shadowed dark textures.
@@ -242,6 +245,36 @@ Details: `Docs/craft-anything.md`.
 - Terrain UVs use `su = 2 * layer.Scale.x / (128 * 128 * UScale)` and the
   matching V formula; masks use tile UV `0..1`.
 
+## The foliage/trees pattern (PERMANENT rule — the user's directive, 2026-11-21)
+
+Every tree/foliage family in EVERY tile — the existing ones and every
+new tile — goes through the full pattern. No per-tile exceptions, no
+"old type" leftovers. When a new tile brings new tree/foliage families,
+CHECK them against all five points before the tile is called done:
+
+1. **MultiMesh batching** — one `MultiMeshInstance3D` per mesh key
+   (the DEVLOG-86 path), never per-actor `MeshInstance3D` clones.
+2. **Alpha scissor BY CONTENT** — a foliage texture gets
+   `TRANSPARENCY_ALPHA_SCISSOR` (0.35) when the texture IMAGE itself
+   has a real alpha channel (`Image.detect_alpha()`), NEVER by the
+   texture name. The new tiles name their moss/leaf textures without
+   "leaf"/"grass" (the 19_19 Darkelf_tree08 moss cards, the tomb
+   banners, the guard's flag rendered as OPAQUE cards — the user's
+   report). The name check remains ONLY for the non-foliage keys (the
+   carpet alpha = a specular/blend mask — never cut).
+3. **Trunk cylinder colliders** — from the bark-surface AABB,
+   positioned at the BARK CENTER (not the mesh pivot — off-center
+   meshes exist), rotated by the instance basis. The canopy cards are
+   NEVER solid: a tree key without a trunk entry is pass-through, and
+   the boot prints `WARN: tree key without trunk collider` — that WARN
+   is a pattern violation, not an acceptable state.
+4. **Visibility ranges** — the trees 260 m, the grass 70 m.
+5. **The per-tile verification** — the boot log must show
+   `trunk colliders for N tree meshes` with N = ALL of the tile's tree
+   keys; a close-up screenshot of every NEW tree family (the alpha
+   check against the client); `L2_TRACE_RAY` through a canopy returns
+   no card hits.
+
 ## The modern-port rule (the user's directive, 2026-11-12; extended 2026-11-16)
 
 - **NEVER port the original's crutches** (the user's rule, restated
@@ -269,3 +302,13 @@ Details: `Docs/craft-anything.md`.
   regression by definition. The golden-road baseline pixel-diff gates this
   for the road; for everything else, changes must stay inside the task's
   region (e.g. the temple work may not alter the village).
+
+## The weather scope (PERMANENT rule — the user's directive, 2026-11-21)
+
+The overcast sky + the day/night cycle (DEVLOG-120..122) apply ONLY to
+the currently built maps (the Dark Elf territories: 20_18, 20_17, 21_18,
+19_18, 19_19, 18_19). The border zones between the DE territory and the
+rest of the world will be adjusted MANUALLY per-zone, never as a global
+weather for all maps. Every NEW map (a new territory) gets its OWN
+individual weather. Do not extend the sky/weather system beyond the
+built DE tiles without the user's explicit per-map order.

@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "oren_elf_worldtree1",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "oren_elf_worldtree1_bark1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "oren_elf_worldtree1_leaf_1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "oren_elf_worldtree1"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "oren_elf_worldtree1.bin",
+      "byteLength": 143972
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 2864
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2864,
+      "byteLength": 3612
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6476,
+      "byteLength": 3612
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 10088,
+      "byteLength": 4816
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 14904,
+      "byteLength": 2408
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17312,
+      "byteLength": 10884
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 28196,
+      "byteLength": 28944
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 57140,
+      "byteLength": 28944
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 86084,
+      "byteLength": 38592
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 124676,
+      "byteLength": 19296
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 1431,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -3.68534,
+        -0.086856,
+        -2.94886
+      ],
+      "max": [
+        3.57289,
+        9.14547,
+        4.55108
+      ],
+      "componentType": 5126,
+      "count": 301,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 301,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 301,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 301,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 5442,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -10.2581,
+        -0.336147,
+        -10.6843
+      ],
+      "max": [
+        10.6152,
+        12.6962,
+        10.9448
+      ],
+      "componentType": 5126,
+      "count": 2412,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 2412,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 2412,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 2412,
+      "type": "VEC2"
+    }
+  ]
+}

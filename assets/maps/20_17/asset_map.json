@@ -1,0 +1,716 @@
+{
+  "schema": 1,
+  "map": "20_17",
+  "meshes": {
+    "FX_E_S:20_17_WATER01": {
+      "package": "fx_e_s",
+      "gltf": "res://assets/maps/20_17/meshes/fx_e_s/StaticMesh/20_17_WATER01.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Innadrill_tree_S:inna_Spalmtree01": {
+      "package": "Innadrill_tree_S",
+      "gltf": "res://assets/maps/20_17/meshes/Innadrill_tree_S/StaticMesh/inna_Spalmtree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Innadrill_tree_S:inna_Spalmtree02": {
+      "package": "Innadrill_tree_S",
+      "gltf": "res://assets/maps/20_17/meshes/Innadrill_tree_S/StaticMesh/inna_Spalmtree02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Innadrill_tree_S:inna_Stree01": {
+      "package": "Innadrill_tree_S",
+      "gltf": "res://assets/maps/20_17/meshes/Innadrill_tree_S/StaticMesh/inna_Stree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_OBJ_02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_OBJ_02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_OBJ_03": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_OBJ_03.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_OBJ_al_01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_OBJ_al_01.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_OBJ_al_02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_OBJ_al_02.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_SetOBJ": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_SetOBJ.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_SetOBJ_01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_SetOBJ_01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_SetOBJ_02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_SetOBJ_02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_SetOBJ_03": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_SetOBJ_03.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Primitive_FieldOBJ_S:PM_Plain_SetOBJ_04": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PM_Plain_SetOBJ_04.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Boss001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Boss001.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_BossTree01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_BossTree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Boss_Obj01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Boss_Obj01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Boss_Obj02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Boss_Obj02.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Boss_dome": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Boss_dome.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_LandMark1_tree01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_LandMark1_tree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_LandMark2_tree02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_LandMark2_tree02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_LandMark3_Saurs001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_LandMark3_Saurs001.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_LandMark3_Saurs_Deco": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_LandMark3_Saurs_Deco.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_LandMark4_Statue01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_LandMark4_Statue01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel001.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel002": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel002.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel003": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel003.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel_Entrance01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel_Entrance01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        4
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel_Entrance_Deco": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel_Entrance_Deco.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_Tunnel_stone01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_Tunnel_stone01.gltf",
+      "primitive_material_indices": [
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_Box01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_Box01.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_Box_set": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_Box_set.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_Bridge01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_Bridge01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_drum02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_drum02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_drum_set": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_drum_set.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_hou01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_hou01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_ship": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_ship.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_tent01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_tent01.gltf",
+      "primitive_material_indices": [
+        1,
+        2
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriMT_port_wood_x": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriMT_port_wood_x.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_LandMark1_tree01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_LandMark1_tree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_stone01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_stone01.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_stone02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_stone02.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_stone03": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_stone03.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_stone04": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_stone04.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:PriPlain_tree01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/PriPlain_tree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_Bigtree001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_Bigtree001.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco000": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco000.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long001.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long002": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long002.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long003": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long003.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long004": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long004.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long005": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long005.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INDeco_Long006": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INDeco_Long006.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INtree001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INtree001.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_INtree002": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_INtree002.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_InDecotree001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_InDecotree001.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_InDecotree002": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_InDecotree002.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_InDecotree003": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_InDecotree003.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_MDtree001": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_MDtree001.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_MDtree003": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_MDtree003.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_MDtree004S": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_MDtree004S.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Primitive_FieldOBJ_S:Primitive_codex_stone": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/Primitive_codex_stone.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Primitive_FieldOBJ_S:pm_landmark_camp01": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/pm_landmark_camp01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        8
+      ]
+    },
+    "Primitive_FieldOBJ_S:pm_landmark_camp02": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/pm_landmark_camp02.gltf",
+      "primitive_material_indices": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        9
+      ]
+    },
+    "Primitive_FieldOBJ_S:pm_landmark_camp03": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/pm_landmark_camp03.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Primitive_FieldOBJ_S:pm_landmark_camp04": {
+      "package": "Primitive_FieldOBJ_S",
+      "gltf": "res://assets/maps/20_17/meshes/Primitive_FieldOBJ_S/StaticMesh/pm_landmark_camp04.gltf",
+      "primitive_material_indices": [
+        0,
+        3,
+        4,
+        6,
+        7
+      ]
+    },
+    "Rune_stakatonest_S:stakato_A_obj01": {
+      "package": "Rune_stakatonest_S",
+      "gltf": "res://assets/maps/20_17/meshes/Rune_stakatonest_S/StaticMesh/stakato_A_obj01.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Rune_stakatonest_S:stakato_A_obj02": {
+      "package": "Rune_stakatonest_S",
+      "gltf": "res://assets/maps/20_17/meshes/Rune_stakatonest_S/StaticMesh/stakato_A_obj02.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:Inna_underwater_clam": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/Inna_underwater_clam.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:beachBossstone": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBossstone.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:beachBstone1": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBstone1.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:beachBstone2": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBstone2.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:beachBstone3": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBstone3.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:beachBstone4": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBstone4.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:beachBstone5": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/beachBstone5.gltf",
+      "primitive_material_indices": [
+        1
+      ]
+    },
+    "field_deco_S:inna_underwater_star": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/inna_underwater_star.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:innastone03": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/innastone03.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:sea_object06": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/sea_object06.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:sea_sora01": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/20_17/meshes/field_deco_S/StaticMesh/sea_sora01.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    }
+  }
+}

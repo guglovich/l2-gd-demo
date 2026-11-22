@@ -12,6 +12,8 @@ const ARRIVE_DIST := 0.6
 var terrain: Node3D
 var yaw := 0.0
 var _last_title_ms := 0
+# DEVLOG-150: the step-probe cadence print (where does the walk time go).
+var _probe_t := 0.0
 var _coord_label: Label
 var move_target: Vector3
 var has_target := false
@@ -27,6 +29,11 @@ func _init() -> void:
 	if OS.get_environment("L2_VIEW_PITCH") != "":
 		pitch = float(OS.get_environment("L2_VIEW_PITCH"))
 var pitch := -0.35
+# The diagnostic runs (L2_SCREENSHOT/L2_BURST) run on the REAL display where
+# the mouse/keyboard belong to the user working in parallel — a right-drag
+# rotated the camera mid-render and contaminated the captures (DEVLOG-111).
+# world.gd sets this for every non-interactive run: ALL input ignored.
+var input_locked := false
 # Mouse-wheel camera zoom (the classic L2 camera distance): 1.0 = default,
 # the wheel scales the whole pivot->camera offset so the pitch angle holds.
 # L2_ZOOM=<float> overrides it at spawn (the screenshot-verification hook).
@@ -221,6 +228,17 @@ func _load_character() -> void:
 	# materials — UModel does not bind L2 character textures); the mesh names
 	# identify the parts
 	for mi in inst.find_children("*", "MeshInstance3D", true, false):
+		# DEVLOG-150: the character is back on LAYER 1 with every other PBR
+		# surface. The DEVLOG-148 layer-2 routing predates the pools' return:
+		# with the pools AND the 32 lantern omnis (cull_mask = 2) both
+		# lighting the body it was double-lit AND the omni side hit the
+		# per-object 8-light cap — an angle-dependent lottery on the body
+		# (the "отключения от ракурса" on the character). Layer 1 = the
+		# deterministic pools (with the shadow-carrier skip) + the two
+		# carriers — the same light the ground receives, so the character's
+		# cast shadows land on consistently-lit ground. The sun/moon (cull
+		# mask = all) still light and shadow the body as before.
+		mi.layers = 1
 		# the imported MeshInstance node names are the clean part names
 		# (the mesh resource name carries the "FDarkElf_base_" file prefix)
 		var mesh_name: String = str(mi.name)
@@ -235,28 +253,65 @@ func _load_character() -> void:
 		mat.set_shader_parameter("uv_is_texels", false)
 		mat.set_shader_parameter("pom_scale", 0.0)
 		mat.set_shader_parameter("use_alpha", cfg[1])
-		if cfg[1]:
-			# the hair: alpha-SCISSOR, not alpha blend — the hair textures'
-			# alpha is binary (bh: 80% of pixels > 0.6, 19% < 0.1) and the
-			# alpha blend made the strands 40% see-through from behind
-			# (the user's transparency bug, 2026-11-15)
-			var hm := StandardMaterial3D.new()
-			hm.albedo_texture = load("%s/%s.pbr_albedo.png" % [CHAR_TEX_ROOT, tex_obj])
-			hm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-			hm.alpha_scissor_threshold = 0.5
-			hm.roughness = 0.55
-			hm.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-			hm.cull_mode = BaseMaterial3D.CULL_BACK
-			for s in mi.mesh.get_surface_count():
-				mi.set_surface_override_material(s, hm)
-		else:
-			for s in mi.mesh.get_surface_count():
-				mi.set_surface_override_material(s, mat)
+		# DEVLOG-148 rev2: the lantern POOLS return to the body. The omni
+		# cannot light it: the plafond sits at knee height (~0.3-0.5 m up)
+		# and the character standing at the post puts the light INSIDE the
+		# body volume — every outward face has N*L <= 0 (probe 6: the body
+		# black with the omni shadows off AND cull_mask = all). The pool
+		# (abs(N*L), the same 32 positions) is deterministic and lights the
+		# body the same way it lights the ground.
+		mat.set_shader_parameter("lantern_pos", L2ProcTex.lantern_uniform())
+		mat.set_shader_parameter("lantern_count", L2ProcTex.lanterns_size())
+		# DEVLOG-148 rev3: the body's pool is STRONGER than the ground's
+		# (energy 4.0) with a softened N*L (half-flat): the black suit
+		# (albedo ~0.05) becomes readable at night, the client-like look —
+		# the ground pools keep the approved 2.6/full-N*L.
+		mat.set_shader_parameter("lantern_energy", 12.0)
+		mat.set_shader_parameter("lantern_ndl_soft", 0.5)
+		# DEVLOG-150: track the body materials — the shadow-carrier skip and
+		# the lantern-night factor must reach them like every other PBR
+		# material (untracked, the body kept lighting itself from the two
+		# skipped lanterns' pools ON TOP of the carrier omnis).
+		L2ProcTex.track_pbr_material(mat)
+		# DEVLOG-148 rev4: the alpha-cutout parts (the bodice FDarkElf_m001_u,
+		# the gloves _g — the binary strap/plate alpha) STAY ON THE PBR
+		# SHADER with use_alpha (the shader cuts the binary mask with the
+		# same 0.4 scissor the old StandardMaterial3D override used). The
+		# old override had NO lantern pool — the whole UPPER body rendered
+		# pitch black at night while the legs (the _l part, the plain
+		# ShaderMaterial) were pool-lit — the user's "half body" split.
+		for s in mi.mesh.get_surface_count():
+			mi.set_surface_override_material(s, mat)
 		if mesh_name == "FDarkElf_m000_f":
 			_face_mat = mat
 			_face_open = load("%s/FDarkElf_m000_t00_f.pbr_albedo.png" % CHAR_TEX_ROOT)
 			_face_closed = load("%s/FDarkElf_m000_t00_f1.pbr_albedo.png" % CHAR_TEX_ROOT)
 	_attach_full_hair()
+	# DEVLOG-149: the scripted step test (L2_STEP_TEST="x,z" godot meters —
+	# the click-to-move target; the headless run walks the character into
+	# the obstacle and L2_STEP_DEBUG prints the assist's probes).
+	# DEVLOG-150: "x1,z1,x2,z2" = a start teleport by the down-cast; the
+	# 5-value "x1,z1,y1,x2,z2" = an explicit start height (the down-cast
+	# from y=50 lands on the MT_Out mountain shell 58 m above the plaza —
+	# the village is INSIDE the mountain; the roofs cover the roads).
+	var step_test := OS.get_environment("L2_STEP_TEST")
+	if step_test != "":
+		var sp := step_test.split(",")
+		if sp.size() >= 5:
+			position = Vector3(float(sp[0]), float(sp[2]), float(sp[1]))
+		elif sp.size() >= 4:
+			var st := Vector3(float(sp[0]), 50.0, float(sp[1]))
+			var sq := PhysicsRayQueryParameters3D.create(
+					st, st + Vector3(0, -100, 0))
+			var sh := get_world_3d().direct_space_state.intersect_ray(sq)
+			if sh:
+				st.y = sh.get("position").y   # the origin IS the feet
+			position = st
+			print("STEP TEST: start teleport=", st)
+		has_target = true
+		move_target = Vector3(float(sp[sp.size() - 2]), 0.0,
+				float(sp[sp.size() - 1]))
+		print("STEP TEST: target=", move_target, " start=", position)
 
 func _attach_full_hair() -> void:
 	# the bh hair (its own 13-bone physics skeleton, bind in body space)
@@ -334,6 +389,8 @@ func _char_run(active: bool) -> void:
 				ap.play(want)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if input_locked:
+		return
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		# the camera orbit on the held right button (the classic L2 camera);
 		# the mouse stays visible and free for aiming
@@ -390,7 +447,8 @@ func _physics_process(delta: float) -> void:
 			var hp: Vector3 = chit.get("position")
 			cam.global_position = hp + (cam_pivot.global_position + Vector3(0, 1.2, 0) \
 					- hp).normalized() * 0.25
-	var input := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var input := Vector2.ZERO if input_locked \
+			else Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var dir := Vector3.ZERO
 	var moving := false
 	var speed := 0.0
@@ -440,6 +498,77 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= GRAVITY * delta
 	move_and_slide()
+	# DEVLOG-148: the STEP ASSIST (the user's report: the character cannot
+	# walk over the curbs and the stairs). DEVLOG-151 REWRITE — the FEET
+	# BUG: the capsule (radius 0.3, height 1.7) sits at the local +0.85,
+	# so the BODY ORIGIN IS THE FEET; the old feet_y = body - 0.9 measured
+	# every rise 0.9 m too high (the 1.05 limit passed only rises <= 0.15
+	# — the plaza rim and the stairs never climbed), shifted the step-down
+	# window (only drops >= 0.92 fired), popped the teleports 0.92 m into
+	# the air, and ran the ankle ray 0.78 m UNDERGROUND (hit_from_inside =
+	# false => garbage/no hits) while the "knee" ray actually ran at
+	# feet+0.25 (ankle height — the stair faces blocked it, the veto
+	# stalled every stairway).
+	if moving and is_on_floor():
+		var fwd2 := Vector3(dir.x, 0.0, dir.z)
+		if fwd2.length_squared() > 0.01:
+			fwd2 = fwd2.normalized()
+			var space := get_world_3d().direct_space_state
+			var feet_y := global_position.y   # the origin IS the feet
+			var step_dbg := OS.get_environment("L2_STEP_DEBUG") != ""
+			# the assist acts only on the actual PRESS (rv < 0.5 = the
+			# blocked-target killer's own threshold) — never mid-stride on
+			# slopes (a free-running slope crossing would teleport-pop).
+			var blocked := get_real_velocity().length() < 0.5
+			var ankle_from := global_position + Vector3(0, 0.15, 0)
+			var ankle_q := PhysicsRayQueryParameters3D.create(
+					ankle_from, ankle_from + fwd2 * 0.55)
+			ankle_q.exclude = [get_rid()]
+			var ankle_hit := space.intersect_ray(ankle_q)
+			var knee_from := global_position + Vector3(0, 1.15, 0)
+			var knee_q := PhysicsRayQueryParameters3D.create(
+					knee_from, knee_from + fwd2 * 0.55)
+			knee_q.exclude = [get_rid()]
+			var knee_hit := space.intersect_ray(knee_q)
+			if step_dbg and (ankle_hit or blocked):
+				print("STEP body=", global_position,
+						" rv=%.2f" % get_real_velocity().length(),
+						" ankle=", ankle_hit.is_empty() == false,
+						" knee_clear=", knee_hit.is_empty())
+			# DEVLOG-151: the UNIFIED landing search — one deep column per
+			# distance (feet+1.15 down to feet-1.25) serves BOTH the climb
+			# (a tread 0.02..1.05 above) and the step-down (a floor
+			# 0.02..1.15 below, the sunken plaza rim the shallow casts
+			# could not see). A real tread has an UP normal; the wall-face
+			# garbage is filtered by normal.y > 0.55 (the knee veto's old
+			# job). The teleport puts the FEET ON the landing (no pop).
+			if blocked:
+				var landed := false
+				for dist in [0.40, 0.50, 0.65]:
+					var down_q := PhysicsRayQueryParameters3D.create(
+							global_position + fwd2 * dist + Vector3(0, 1.15, 0),
+							global_position + fwd2 * dist + Vector3(0, -1.25, 0))
+					down_q.exclude = [get_rid()]
+					var down_hit := space.intersect_ray(down_q)
+					if down_hit and down_hit.get("normal").y > 0.55:
+						var floor_y2: float = down_hit.get("position").y
+						var dy: float = floor_y2 - feet_y
+						if step_dbg:
+							print("STEP dist=", dist, " dy=%.2f" % dy,
+									" n_y=%.2f" % down_hit.get("normal").y,
+									" landed=", down_hit.get("position"))
+						var climb := dy > 0.02 and dy <= 1.05
+						var descend := dy < -0.02 and dy >= -1.15
+						if climb or descend:
+							global_position.y = floor_y2
+							velocity.y = 0.0
+							landed = true
+							break
+				# DEVLOG-149 rev2: the hop fallback — a genuinely low
+				# odd-shaped face (the ankle hit at feet+0.15, the knee
+				# clear at feet+1.15) with no usable landing.
+				if not landed and ankle_hit and knee_hit.is_empty():
+					velocity.y = 4.5
 	# the real L2 run animation (Run_Hand_FDarkElf, rotation-only from the
 	# PSA); the procedural bob/lean is retired — the clip carries the gait
 	# the eye blink: swap the face albedo between the open (t00_f) and the
@@ -467,7 +596,12 @@ func _physics_process(delta: float) -> void:
 			if Time.get_ticks_msec() < _scale_hold_ms:
 				_coord_label.text = "CHAR SCALE %.2f = %.2f m  (+/-)" % [rig.scale.x, 0.444 * rig.scale.x]
 			else:
-				_coord_label.text = "X=%.0f  Y=%.0f  Z=%.1f" % [g.x, g.z, g.y]
+				var txt := "X=%.0f  Y=%.0f  Z=%.1f" % [g.x, g.z, g.y]
+				# the game-clock display (the user's 2026-11-21 request — the
+				# day/night comparisons need the visible time)
+				if terrain != null and terrain.has_method("tod_label"):
+					txt += "   " + terrain.tod_label()
+				_coord_label.text = txt
 	if terrain:
 		var game_x: float = position.x / 0.01
 		var game_y: float = position.z / 0.01
@@ -480,3 +614,12 @@ func _physics_process(delta: float) -> void:
 			if position.y < t and t - position.y < 0.8:
 				position.y = t
 				velocity.y = 0
+	# DEVLOG-150: the step-probe cadence print — the walk's position, the
+	# real speed and the target state every 0.5 s (the time-sink locator).
+	if OS.get_environment("L2_STEP_TEST") != "" and OS.get_environment("L2_STEP_DEBUG") != "":
+		_probe_t += delta
+		if _probe_t >= 0.5:
+			_probe_t = 0.0
+			print("STEPPOS p=(%.2f, %.2f, %.2f) rv=%.2f floor=%s tgt=%s" % [
+					position.x, position.y, position.z,
+					get_real_velocity().length(), is_on_floor(), has_target])

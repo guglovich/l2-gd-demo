@@ -1,0 +1,127 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "sporeseabugstoneA",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "spiderweb01_1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        }
+      ],
+      "name": "sporeseabugstoneA"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "sporeseabugstoneA.bin",
+      "byteLength": 31680
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 3360
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3360,
+      "byteLength": 7080
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 10440,
+      "byteLength": 7080
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17520,
+      "byteLength": 9440
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 26960,
+      "byteLength": 4720
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 1680,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -2.32758,
+        -0.033381,
+        -2.28879
+      ],
+      "max": [
+        2.32758,
+        2.32834,
+        3.92629
+      ],
+      "componentType": 5126,
+      "count": 590,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 590,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 590,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 590,
+      "type": "VEC2"
+    }
+  ]
+}

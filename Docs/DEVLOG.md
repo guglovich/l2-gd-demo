@@ -6715,3 +6715,3132 @@ Sound-props entries). The ambience GROUP system decoded — the day/night
 insect and bird families, the village wind and drone, the canyon
 rocks/waves. The housekeeping: the tracked __pycache__ .pyc files
 removed from the index (the .gitignore rule already existed).
+
+## 2026-11-19 — DEVLOG-96: the /Media handoff kit for external 3D services (the user's order)
+
+The user takes the column textures/model to EXTERNAL 3D services (our own
+image->3D attempts failed twice: POM swam, SilPOM floated — a service may
+re-derive the depth instead). Kit at /Media/l2_column_sylentemple_outdeco04/:
+per-texture RGB albedo (alpha STRIPPED — our alpha is height, services read
+it as transparency) + raw height-from-alpha + the processed low-pass heights
++ the baked maps, and `sylentemple_outdeco04.glb` — the ONE-file model for
+the service upload dialog (OBJ/FBX/STL/GLB accepted): the dense render mesh
+only (3360 tris, the S0_HI bake source stripped), 4 PBR materials with the
+albedos at texCoord 1, the baked normal(scale 1.2)+AO at texCoord 0 (sidecar
+atlas_in_uv2=false), metallic 0 / roughness 0.8 / double-sided; 2.6 MB,
+validated by a headless Blender import (1 mesh / 4 mats / 6 images).
+
+PENDING (noticed, NOT fixed — the runtime visual is user-approved):
+`sylentemple_outdeco04_baked.gltf` (the RUNTIME asset) exports BOTH meshes —
+the dense low AND the S0_HI high-poly source (26854 verts). Godot imports
+both into the scene; the approved look may include the HI surface rendered
+on top of the low body. If a later fix touches the column, check the
+double-surface first (strip the HI mesh from the export in blender_bake.py).
+
+DEVLOG-96 addendum — the external-service height map attempt CANCELLED by the
+user after visual mismatch ("3D рисунок не совпадает с нашей PNG"). Measured:
+/Media/oren_sylen_in019_height.png (64x256, the service's take on in019)
+correlates with the client albedo's own alpha/luminance only ~0.30 (all
+orientation variants <= 0.31) — the service redrew the relief, the pattern
+structure is NOT preserved. Baking it would re-create the two-disagreeing-
+height-sources defect (the POM/SilPOM lesson). Recorded so this path is not
+retried blind: a service height is usable ONLY if its correlation with the
+client pattern is high (> ~0.7) in SOME orientation.
+
+## 2026-11-19 — DEVLOG-97: the external service PBR maps FOR the albedo pattern — the in019 displacement wired into the bake
+
+The user ran our RGB albedo through an image->PBR service
+(cpetry.github.io) for oren_sylen_in019 (4 maps: ambient/displacement/
+normal/specular, 64x256). THE CORRELATION GATE passed decisively (the
+cancelled /Media height attempt this morning failed at 0.30):
+displacement corr(luminance)=0.999 corr(alpha)=0.935 as-is — the service
+derived the maps FROM our pattern. specular (1.000) and ambient (0.983)
+are luminance derivatives — skipped; the service normal (corr ~0 on
+luminance — expected for direction data) is ALSO skipped: the normal is
+baked from the displaced geometry (ONE height source — the DEVLOG-94
+lesson; two disagreeing sources = the floating-textures defect).
+
+**Implementation:** baked_mesh.py EXT_HEIGHT override (oren_sylen_in019
+-> /Media displacement map): 2x upsample + FULL-RANGE numpy stretch, no
+blur/gamma. Trap found: ImageOps.autocontrast(cutoff=(1,99)) is a NO-OP
+on this map (the outliers sit outside the 1/99 percentiles — measured
+min/max unchanged) — the raw map is nearly flat (std 0.035, range
+0.34..0.58) and would have displaced ~1 cm; the numpy stretch restores
+std 0.154 (our alpha-derived heights ~0.118).
+
+**Verification (stale-cache protocol: .import stamps deleted, fresh
+--import):**
+- Gate A: 0 shader errors in the full render stderr.
+- Objective: all 5 baked outputs changed (git M) — the rebake is real.
+- Gate B A/B at the user's column camera (21044,11700,-3748.5 yaw 2.98):
+  1373 px changed at thr 6 (862 at thr 12, mean |dRGB| 53 on the strong
+  subset) — the bar is met, but modest: in019's surfaces cover a small
+  screen area at 1.5 m. ALL changed px are INSIDE the column bbox
+  (x735..1330 y360..840), 0 outside — the change is strictly the column.
+  Local contrast in the region unchanged (tile std 18.42 -> 18.42): the
+  relief REDISTRIBUTED (light patterns moved on the moldings), not
+  intensified at this distance. Compare crop for the user:
+  tmp/shots/col_svc_ab_compare.png (left=before right=after).
+- GOLDEN BASELINE PASS: five views, scene 0 px (diffs confined to the
+  character strip x~630..830 — the idle-anim phase).
+
+**Status:** NOT committed — awaiting the user's visual verdict at their
+camera. Levers if more depth is wanted: displace_m up for the
+EXT_HEIGHT slot (0.05 -> 0.08-0.10) or a gamma push on the service map
+(moldings brighter). The service-normal route stays rejected (source
+splitting).
+
+## 2026-11-19 — DEVLOG-98: the BUMP-from-albedo bake for the ornate slots + the roughness atlas (the user's Blender recipe)
+
+The user rejected the service displacement ("не помогло") and gave the
+Blender recipe: bake the ornate slots' normal from the SAME PNG through
+RGB->BW -> Bump -> Principled (Distance tuning), bake a roughness ramp
+(stone parts light/rough, glossy elements dark), then Godot: albedo =
+the client PNG, normal scale 1.5-2.0, ROUGHNESS MAP (the glossy film
+killer), metallic 0, NO height/POM.
+
+**Implementation:**
+- baked_mesh.py: per-slot MODE (DEVLOG-98). oren_sylen_001 (the shaft)
+  keeps MODE_DISPLACE (the approved rocky top — subsurf x3 + Displace
+  0.05); the ornate slots in001/in002/in017/in019 switch to MODE_BUMP:
+  no geometric displacement at all (the high stays the same-shape
+  densified surface), BUMP_DISTANCE 0.03 m, ROUGH_LO 0.45 / ROUGH_HI
+  0.95. The EXT_HEIGHT service route is removed. The manifest carries
+  mode/bump_distance/rough_lo/rough_hi.
+- blender_bake.py: the bump/roughness node graphs on the HIGH materials
+  (albedo UV1 REPEAT -> RGBtoBW -> Bump -> Principled.Normal; Math
+  SUBTRACT 1-lum -> ColorRamp -> BAKE_ROUGH EMIT; displace slots get a
+  FLAT 0.8 roughness emission so the shared atlas keeps the approved
+  shaft look). NEW: _wire_surface() switches every material's OUTPUT
+  Surface per pass — EMIT(albedo) / Principled(NORMAL — the bump-
+  perturbed shading normal, selected->active) / BAKE_ROUGH(EMIT) / AO.
+  The displace-apply guard extended to the HIGH section (strength 0 =
+  remove, the DEVLOG-92 trap).
+- l2_surface_pbr.gdshader: baked_roughness_tex + use_baked_roughness;
+  the baked branch ROUGHNESS = clamp(map.r, 0.15, 1.0) instead of the
+  flat 0.8. NORMAL_MAP_DEPTH stays relief_gain.
+- world.gd: loads <Mesh>_baked_roughness.png when present
+  (use_baked_roughness + texture), relief_gain 1.2 -> 1.5 (the user's
+  1.5-2.0 band, low end first).
+- baked_mesh.py stages <Mesh>_baked_roughness.png.
+
+**Verification (stale-cache: mesh .import stamps + shader .import
+deleted, fresh --import):**
+- Gate A: 0 shader compile errors (the 5408 log "error" lines = the
+  quit-time GL texture-leak noise, pre-existing).
+- Objective: the roughness atlas is REAL (std 0.44: 33% < 0.6 moldings,
+  60% > 0.85 recesses; the shaft regions flat 0.8).
+- Gate B A/B vs the DEVLOG-92 stable state (col_svc_before, the user's
+  camera 21044,11700,-3748.5 yaw 2.98): **5865 px** at thr 6 (4487 at
+  thr 12, 2347 at thr 48 — deep light-response shifts), vs the service
+  route's 1373. All changed px are the column (the 558 "outside" =
+  the same column one crop-row above, x1278..1315 y331..359).
+  Local tile-contrast 18.42 -> 18.44 at the fixed sun angle — the
+  relief redistributes highlights rather than adding global contrast;
+  the camera-angle response is the user's visual call.
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strip only,
+  identical numbers to the pre-change run ±3 px).
+- Compare crop: tmp/shots/col_bump_ab_compare.png (left = stable,
+  right = bump route).
+
+**Status:** NOT committed — awaiting the user's visual verdict. Levers:
+BUMP_DISTANCE (0.03 -> 0.05-0.08 for stronger relief), relief_gain
+(1.5 -> 2.0), ROUGH_LO/HI re-span. The POM/height stays OFF in the
+baked branch (the user's "no smearing" requirement — zero UV shift by
+construction).
+
+## 2026-11-19 — DEVLOG-99: the MODELED pilaster/panel geometry for the ornate slots (the user's modeling work order)
+
+The user rejected the bump-bake depth ("не помогло") and ordered REAL
+geometry: subdivide the ornate lower part, EXTRUDE the pilaster edges
+outward 0.05-0.1 m, INSET + extrude the panels inward 0.02-0.05 m, bake
+Normal+AO from a further-subdivided duplicate, export low + maps.
+
+**Implementation (headless automation of the manual recipe):**
+- baked_mesh.py MODE_GEOM: the pilaster/cornice bands are DETECTED from
+  the albedo itself — 1D luminance profiles (u columns / v rows, 5px
+  smoothing), threshold p70, band width 2%..14% (wider bright regions
+  are ornament fields, NOT moldings — the first p25/p75 attempt caught
+  30%-wide fields and was tightened). v bands flipped to UV space (PIL
+  rows are top-down). The dark-panel threshold = the luminance p40.
+  Detected: in001 1 u-band + 7 v-bands; in002 1+3; in019 2+6 (all
+  narrow, 2-8%). The manifest carries the bands + pilaster_d 0.05 m +
+  panel_d 0.02 m (the user's low ends) + the roughness ramp.
+- blender_bake.py _model_geom(): bmesh on the dense low part. Face
+  classification by the UV1 tile center (mod 1): in a u OR v band ->
+  molding; else luminance at the UV (bpy pixels are LINEAR — 2.2 gamma
+  back to sRGB to match the manifest threshold) below dark_thr -> panel.
+  Moldings: per CONNECTED component — extrude_face_region, new verts
+  translated along their SOURCE vertex normals (wrap-around rings push
+  radially; an averaged normal would collapse a full ring to zero), the
+  originals deleted (z-fighting/AO occlusion under the shell). Panels:
+  inset_region(thickness=d2, depth=0, use_even_offset) then the inner
+  verts pushed inward by their own normals (per-vertex — the region
+  average would collapse too). The luminance sampler reads bpy image
+  pixels (no PIL inside Blender) with a per-texel cache.
+- The HIGH bake source for geom slots = the MODELED low duplicate +
+  SIMPLE subsurf x2 (the user's step 2; the features are in the low
+  already, the high smooths them for the bake). The bump-node branch is
+  kept for mode "bump" but unused; the roughness ramp (1-lum) serves
+  BOTH bump and geom slots.
+- world.gd: relief_gain back to 1.2 (modeled normals are TRUE normals —
+  no exaggeration; the approved DEVLOG-92 shaft value).
+- The mesh: 3360 -> 4624 tris (+1264 of real pilaster walls + panel
+  insets). NO POM/height in the shader — zero UV shift by construction.
+
+**Verification (stale-cache: mesh + shader stamps, fresh --import):**
+- Gate A: 0 shader compile errors.
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera 21044,
+  11700,-3748.5 yaw 2.98): **17193 px** at thr 6 (14690 at 12, 11994 at
+  24, 9385 at 48 — silhouette-level changes), vs the bump route 5865
+  and the service route 1373. The bbox GREW (x to 1422 — the extruded
+  pilasters stand out past the old outline); the 235 "outside" px = the
+  same column's grown silhouette past the fixed crop. Local tile-
+  contrast 18.43 -> 18.57 (first route to raise it).
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips
+  identical to the pre-change runs).
+- Compare crop: tmp/shots/col_geom_ab_compare.png (left = stable,
+  right = modeled).
+
+**Status:** NOT committed — awaiting the user's visual verdict. Levers:
+pilaster_d/panel_d (0.05/0.02 -> up to 0.1/0.05 per the user's band),
+roughness span. The outdeco05 + the rest of the prop list extend the
+same way if approved.
+
+## 2026-11-19 — DEVLOG-100: the column ROLLED BACK to the DEVLOG-92 stable state (the user's verdict)
+
+The modeled-geometry route (DEVLOG-99) is rejected: "ИИ OCR плохо понял
+где текстуры" — the automated band detection misread WHERE the
+moldings/textures lie on the ornate pieces (texture-profile -> geometry
+mapping is unreliable at 64-128 px source textures). The user takes a
+new direction: THEY will upscale the texture (external upscaler) and
+the rework continues from a better-resolved albedo.
+
+**The revert:** full git checkout of the uncommitted column work (all
+three iterations — the service maps DEVLOG-97, the bump bake DEVLOG-98,
+the modeled geometry DEVLOG-99 — were never committed; HEAD stays
+0ac8199): baked_mesh.py, blender_bake.py, l2_surface_pbr.gdshader,
+world.gd, the 5 baked assets restored; the untracked
+baked_roughness.png + its .import removed. The stale-cache reimport
+(mesh + shader stamps, fresh --import).
+
+**The verification:** the render at the user's camera (21044,11700,
+-3748.5 yaw 2.98) vs the DEVLOG-92 stable baseline (col_svc_before):
+**5 px** total (an 8x25 llvmpipe-noise strip, no column pixels) — the
+runtime is byte-equivalent to the approved state.
+
+**Queued:** when the user brings the UPSCALED albedo for the ornate
+textures, re-derive from it (the depth data quality was the root
+blocker all along — 64x256 and 128x512 sources). The /Media kit and
+the one-file GLB stay for reference.
+
+## 2026-11-19 — DEVLOG-101: the user's 4x upscale wired into the bake + the runtime albedo override
+
+The user upscaled the TWO ornate textures (oren_sylen_in001, in019 — the
+depth-starved ones) ×4 externally (/Media/upscale, JPG): in001
+256->1024, in019 64x256->256x1024. THE CORRELATION GATE passed:
+downscale-4x vs the originals corr R/G/B = 0.975/0.975/0.970 and
+0.982/0.978/0.970 (bar 0.9), mean|dRGB| ~0.025 (JPEG noise) — the
+pattern is preserved 1:1. Only RGB came back, so:
+
+- baked_mesh.py UPSCALED override: the albedo is JPG->PNG converted and
+  drives BOTH the bake and the runtime; the HEIGHT = the client alpha
+  (the true depth structure) LANCZOS-upscaled to the new size, blur
+  radius x4 (20 instead of 5) to keep the same PHYSICAL smoothing
+  scale, gamma 1.4 kept. Staged as <tex>.pbr_albedo_x4.png next to the
+  originals.
+- world.gd baked block: if <albedo_tex path>_x4.png exists, the BAKED
+  mesh swaps its albedo_tex to it (other meshes sharing the texture
+  keep the original — the village is untouched by construction).
+- The bake re-ran on the DEVLOG-92 displacement route (the approved
+  geometry; the finer 4x height feeds the Displace directly).
+
+**Verification (stale-cache: mesh + the two new _x4 stamps, fresh
+--import):**
+- Gate A: 0 shader compile errors.
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera):
+  4715 px at thr 6 (2831 at 12, 1525 at 24), ALL inside the column
+  region, 0 outside. Local contrast 18.40->18.39, HF energy +0.15% —
+  EXPECTED: the geometry is the same approved shape (the 4x height at
+  the same physical blur displaces the same moldings); the change is
+  the finer displacement detail + the 4x-sharp albedo. A refinement
+  iteration, not a restructure — the safe direction.
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips
+  identical to all previous runs).
+- Compare crop: tmp/shots/col_up4x_ab_compare.png (left = stable,
+  right = 4x upscale).
+
+**Status:** NOT committed — awaiting the user's visual verdict (their
+camera, closer inspection). If approved: commit; the remaining ornate
+texture (in002) can be upscaled the same way. The depth/alpha for the
+upscaled textures is DONE (the client alpha IS the depth).
+
+## 2026-11-19 — DEVLOG-102: the modeled geometry RESTORED on the 4x textures (the user's "flat column" verdict on DEVLOG-101)
+
+The user: the 4x-albedo iteration renders a FLAT column — the task was
+the Blender 3D from the previous attempt, which failed on the weak
+low-res texture. The DEVLOG-99 modeling route is RESTORED (the code was
+reverted uncommitted; re-applied) with the key change: the band
+detection runs on the 4x-upscaled albedos (4x texels per molding).
+
+**The detection improvement (measured):** at 4x the profiles find
+bands the 1x detection missed — in001 +u(0.968..0.991) (an edge
+pilaster), in019 +u(0.465..0.594) (the central molding); the in019
+v-band (0.465..0.512) present at 1x is GONE at 4x (it was merged
+noise). in002 is NOT upscaled yet — it stays DISPLACE (the approved
+look) until its upscale arrives; MODEL_TEXTURES = the upscaled set
+{in001, in019}.
+
+**Wired:** baked_mesh.py MODE_GEOM for the upscaled slots (bands from
+the 4x albedo, pilaster_d 0.05 / panel_d 0.02, rough ramp 0.45/0.95, no
+height_png — no displacement); blender_bake.py re-applied (_lum_sampler,
+_model_geom, the LOW modeling + the stash, the HIGH from the stash +
+subsurf x2, the roughness EMIT pass, _wire_surface); the shader
+roughness uniforms + world.gd roughness loading re-added (reverted with
+the rollback); the _x4 albedo override stays (DEVLOG-101).
+
+**Verification (stale-cache: mesh + roughness + shader stamps, fresh
+--import):**
+- Gate A: 0 shader compile errors.
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera):
+  **15831 px** at thr 6 (13153 at 12, 10259 at 24, 7551 at 48 — real
+  silhouette-level changes), ALL inside the column region, 0 outside.
+  Local contrast 18.40 -> 18.51 (up).
+- vs the REJECTED 1x-modeled route: **12160 px differ** — the 4x
+  detection + in002-displace produce materially different geometry,
+  not a repeat of the rolled-back mistake.
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips).
+- Compare: tmp/shots/col_geom4x_ab_compare.png (left = stable, right =
+  modeled on 4x).
+
+**Status:** NOT committed — awaiting the user's visual verdict. If
+approved: commit; in002 joins after its upscale (one dict entry).
+
+## 2026-11-19 — DEVLOG-103: the PILASTERS corrected to the UV-seam corners (the user's client screenshot)
+
+The user's verdict on DEVLOG-102 + the CLIENT screenshot of the column:
+"not the central pattern — the PILASTERS themselves forward". The
+screenshot shows the structure: the polygonal base has ONE dark marble
+panel per face with the carved ornament in its center; the PILASTERS
+are the raised stone bands AT THE CORNERS, and the corner wraps at the
+UV seam — so in tile space a pilaster is SPLIT across u=0/1, while the
+bright central band (in019 u 0.465..0.594) is the ornament ON the
+recessed panel.
+
+**The fix (one rule, both files):**
+- detect_bands: keep only u-bands TOUCHING the seam (a <= 0.03 or
+  b >= 0.97), expanded to cover the wrap (a face at u=0.01 sat outside
+  a (0.016..) band). Result: in001 u=[0.968..1.0]; in019
+  u=[0.0..0.0703]+[0.8984..1.0] (one corner pilaster, both halves); the
+  central ornament band DROPPED. v-bands (the horizontal cornice rings)
+  unchanged — the panel frames ARE raised in the client.
+- _model_geom: EVERYTHING between the moldings is now the panel field —
+  the dark stone AND the bright ornament on it — inset together at
+  panel_d (the ornament extrusion was the "pattern in the middle"
+  mistake). The luminance sampler and the dark_thr panel test are
+  REMOVED (dead code; the classification is purely band-based now).
+
+**Verification (stale-cache: mesh + roughness + shader stamps, fresh
+--import):**
+- Gate A: 0 shader compile errors.
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera):
+  16217 px at thr 6 (13742 at 12, 7856 at 48), all inside the column
+  region, 0 outside. Local contrast 18.40 -> 18.51.
+- vs the DEVLOG-102 central-pattern route: 8313 px differ — the
+  geometry changed materially (the ornament no longer extrudes; the
+  panel fields inset whole).
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips).
+- Compare: tmp/shots/col_pilast_ab_compare.png (left = stable, right =
+  seam-pilaster route).
+
+**Status:** NOT committed — awaiting the user's visual verdict at
+their camera.
+
+## 2026-11-19 — DEVLOG-104: per-face TEXTURE-CONTENT classification (the band routes are dead)
+
+The user's verdict on the seam route + the OUR-RENDER screenshot: the
+volume still extrudes from the middle of the picture, not the pilasters.
+
+**The diagnostic (measured, not guessed — tmp/diag_uv3d.py in Blender):**
+for in001 the 8 v-band faces sit EXACTLY at the 8 prism-corner angles
+(-164, -119, -74, -29, +16, +61, +106, +151 — an octagon; the 88 panel
+faces cluster BETWEEN them); for in019 all 16 faces are PAIRS at the
+corners (every UV center in the seam bands). So the seam mapping was
+NOT the error — but the band classification still broke the RINGS: a
+cornice ring crosses both pilasters and panels; band-center
+classification extruded ring pieces at the corners and inset the ring
+pieces over the panels — jagged slabs, exactly the user's screenshot.
+
+**The new rule (no layout assumptions at all):** a dense-mesh face is a
+MOLDING face iff its WHOLE UV footprint is bright (the luminance
+sampled at the UV centroid + every loop UV, all above bright_thr = the
+texture's p70; Blender-side sampler linear->sRGB 2.2). EVERYTHING else
+— dark panel, ornament, faces straddling a molding edge — is the panel
+field: inset whole. Bright islands fully inside the panel (the ornament
+motifs) are killed by the STRIP-SHAPE test: an extruded component must
+be a long strip in UV space (one axis >= 0.6 of the tile, the other
+<= 0.4; pilasters span v ~1.0, cornice rings u ~1.0, ornament spots
+fail) with >= 6 faces. The detect_bands machinery is REMOVED — the
+manifest now carries bright_thr only.
+
+**Verification (stale-cache: mesh + roughness + shader stamps, fresh
+--import):**
+- Gate A: 0 shader compile errors.
+- Objective: the modeled mesh = 4096 tris (+736 over the stable 3360 —
+  the strip filter is stricter than the band route's +1264).
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera): 11555
+  px at thr 6 (9037 at 12, 4157 at 48), all inside the column, 0
+  outside; **13911 px differ from the seam-band route** — materially
+  different geometry. Local contrast 18.40 -> 18.39 (flat at the fixed
+  sun angle — the structure redistributed; the depth verdict is the
+  user's).
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips).
+- Compare: tmp/shots/col_pface_ab_compare.png (left = stable, right =
+  per-face route).
+
+**Status:** NOT committed — awaiting the user's visual verdict.
+Levers: bright_thr (p70), the strip-shape thresholds, pilaster_d/panel_d.
+
+## 2026-11-19 — DEVLOG-105: the extruded faces go FLAT COLOR (the user's work order)
+
+The user's recipe: for EVERY extruded face (pilaster, ring, base) —
+take its source PNG zone, average it to ONE color, fill the whole face
+flat, NO UV mapping on the convex faces; the flat panels between keep
+the original PNG with UV.
+
+**Implementation:**
+- _model_geom tags the extruded faces with a per-face float attribute
+  "mold_mask" (bmesh faces layer; survives the join; set on the mold
+  tops AND the new side walls).
+- blender_bake.py _flat_fill_albedo(): after the EMIT albedo bake, the
+  connected mold-face components are collected on the joined mesh; each
+  component's color = the AVERAGE of its slot's albedo over the
+  component's UV1 footprint (a Blender-side linear-space RGB sampler,
+  2.2-gamma-consistent with the bake); every component face's UV2
+  polygon is rasterized (even-odd point-in-poly) and its pixels in the
+  1024 bake atlas overwritten with the flat color. The panel islands
+  keep the baked texture content (the EMIT bake through UV2). Verified:
+  44.8% of the atlas is now flat-adjacent (the mold islands).
+- The sidecar gains "flat_mold": true; world.gd loads baked_albedo.png
+  and sets albedo_from_atlas for flat_mold meshes ONLY (other meshes
+  keep the tile-channel albedo). Shader: uniform bool albedo_from_atlas
+  — the baked branch ALBEDO = the atlas sample when set (the panels
+  show the same source pixels through UV2 — visually identical, the
+  moldings flat).
+
+**Verification (stale-cache: mesh + roughness + shader stamps, fresh
+--import):**
+- Gate A: 0 shader compile errors.
+- Gate B A/B vs the DEVLOG-92 stable state (the user's camera): 16886
+  px at thr 6 (14861 at 12, 8113 at 48), all inside the column, 0
+  outside; **15036 px differ from the textured-mold route** (DEVLOG-104)
+  — the flat fill changed the render materially.
+- GOLDEN BASELINE PASS: five views, scene 0 px (character strips).
+- Compare: tmp/shots/col_flat_ab_compare.png (left = stable, right =
+  flat-color molds).
+
+**Status:** NOT committed — awaiting the user's visual verdict.
+
+## 2026-11-19 — DEVLOG-106: the column experiments CLOSED (revert #2) + the missing-shore investigation (the "oldest bug")
+
+**The revert:** the user rejected the flat-color mold route (DEVLOG-105)
+— "способ опять неудачный. откатываем на исходное". Full git checkout
+back to HEAD (0ac8199; DEVLOG-101..105 were never committed):
+baked_mesh.py, blender_bake.py, the shader, world.gd, the 6 baked
+assets; the untracked roughness png + the two _x4 albedos + their
+.imports removed; fresh reimport. Verified at the user's column camera:
+49 px diff vs the stable render — an 20x33 grass-patch strip
+(x789..809, y724..756, llvmpipe alpha-cutout jitter), the column region
+0 px. The runtime = the DEVLOG-92 stable state.
+
+**The shore investigation (the user: 20_18 = village + temple + sea
+shore, ours is a bare square):**
+- The extraction is NOT cut: the terrain heightmap covers the FULL tile
+  (256x256 cells = 32768x32768 units, extent matches, one TerrainInfo,
+  holes only 6.4% — the village plaza + a small pond). The square edges
+  are the TILE BOUNDARY: the client streams the neighbor tiles
+  seamlessly; we render only 20_18.
+- 20_18 has NO WaterZone/WaterVolume at all — the water is NOT in this
+  package.
+- The neighbors (decrypted + their heightmaps read from
+  Textures/t_<map>.utx, the G16 terrain-map textures): 19_17 (north-west)
+  = 83% flat ocean floor at Z **-4700**; 20_17 (north) = 20% floor
+  -4700 (its north-west is sea); 19_18 (west) = floor -4700 (13%) +
+  beach shelf -3730/-3740; 19_19 = shelf -3790/-3800.
+- The water level measured from the client's own actors: 19_17 has 10
+  WaterVolume brush actors at Z **-3840** (coastal) / -4864 (deep) —
+  the sea surface = -3840, the beach shelf sits just above it.
+- OUR tile: **13.2% of the land cells (8091) are below -3840**, 6320 of
+  them in the north strip (y < 30 cells ≈ game y < 3900) — the
+  coastline crosses OUR tile's north edge; in the client the north of
+  the village map is the sea shore, seamlessly continuing into 20_17 /
+  19_17. The village valley (-4404) is also below the nominal sea level
+  but DRY — UE2 water is placed explicitly (the sheets exist only where
+  the client put them).
+
+**The fix (a NEW STAGE, awaiting the user's opening):**
+1. The neighbor ring as seamless terrain (at least 20_17 + 19_18; their
+   heightmaps + QuadVisibility extract with the same verified pipeline —
+   the statics of the neighbors are a separate decision).
+2. A native Godot water plane at Z = -3840 over the below-level regions
+   (modern water shader; NOT the client's BSP/WaterVolume crutches —
+   the modern-port rule).
+3. The client-side ground truth for the coastline = the 19_17 WaterVolume
+   extents (their brush models bound where the client actually floods).
+
+## 2026-11-20 — DEVLOG-107: the multi-tile world — 20_17 (the north neighbor) implemented
+
+The user's orders after the shore investigation (DEVLOG-106): the water
+we add ourselves (its presence in the client data irrelevant); the tile
+BORDERS matter for the clean future expansion; 19_19 = a lake, no sea;
+19_18 definitely has the sea shore (confirmed); the reference map = the
+C5 geodata grid (the user keeps it, with the caveat that the map
+variants have slightly different borders). THE STAGE: implement 20_17
+(the north neighbor).
+
+**The offline build:** `tools.l2strict build --map 20_17 --neighbor
+19_17 --neighbor 21_17 --neighbor 19_18 --neighbor 20_18 --neighbor
+21_18 --assets-dir assets/maps/20_17 --expect StaticMeshActor=1109
+PlayerStart=8 TerrainInfo=1 TerrainSector=256` — rc 0: 78 meshes, 131
+textures, 65503 visible quads / 33 holes / 5469 edge-turns, ZERO
+clamped border samples. The tile spans world y -32768..0 (its terrain
+origin (0,-32768)), 39% below the future sea level -3840.
+`verify` extended to PER-MAP gates (the stats/terrain/mesh/texture
+counts were 20_18-hardcoded; the 20_18 mesh gate updated 129 -> 133 =
+the current committed asset_map). Both tiles verify: status ok.
+
+**THE SEAM (measured):** 20_18's north border row vs 20_17's south
+border row: **max |dZ| = 0.00** — the tiles stitch exactly (both derive
+from the client's own continuous heightmaps).
+
+**The runtime refactor (world.gd):**
+- `const TILES` = [(20_18, root), (20_17)] + `_load_data()` loads every
+  tile into `tiles: Array[Dictionary]` (map/materials/asset_map/bsp/
+  terrain raws per tile); `_activate(tile)` points the builder globals
+  (map_data, materials_data, asset_map_data, bsp_data, terrain_*) at
+  one tile; `active_dir` replaces MAP_DIR in the per-tile resource
+  lookups (the textures, levelbsp, brushes); the temple stays
+  MAP_DIR-scoped (the root-only extra; missing file = early return).
+- `_ready()`: per tile — a Node3D parent at (origin.x, 0, origin.y) *
+  UNIT_SCALE, then _build_terrain/_build_meshes/_build_bsp/_build_lights
+  under it (`_tile_root`); the tile-local coordinates need NO offsets.
+  After the loop: re-activate the root tile for the debug flows and the
+  spawn.
+- The terrain builder builds in LOCAL coords (ox/oz = 0; the parent
+  carries the origin); terrain_height/has_terrain_surface resolve the
+  covering tile via `_tile_at` (world coords) with the root fallback;
+  _height_at takes the tile.
+- The foliage batch (`_veg_batch`, `_foliage_trunk`) CLEARED after each
+  tile's flush — otherwise the next tile's MultiMeshes would re-include
+  the previous tile's local transforms.
+- The debug flows (floor profile etc.) run with the root tile active.
+
+**Verification:**
+- Gate A: 0 shader errors; the world builds in ~3.2 s (both tiles).
+- Counts: 20_18 = 61361 quads / 401 statics / 112 lights (IDENTICAL to
+  the pre-refactor runs); 20_17 = 65503 quads / 958 statics / 10 lights
+  / 151 foliage instances.
+- THE SEAM IN THE RUNNING WORLD: L2_FLOOR_PROFILE across game y=0
+  (9000,600 -> 9000,-600): y=-47.034 on both sides, continuous
+  -47.034 -> -47.040 into 20_17, "via terrain" on every step — no
+  step, no void, both tiles' colliders live.
+- GOLDEN BASELINE PASS: the five village views — the scene identical
+  (the character strips as always); OUTSIDE the character strip only
+  ~302 px (upper_street) / ~304 px (entrance_road) of NEW distant
+  20_17 silhouettes on the horizon — the very content this stage adds.
+- The seam screenshots: tmp/shots/seam_view/ (the character ON the
+  border, looking north — the fields continue, the 20_17 mountains
+  ahead), tmp/shots/seam_view2/.
+
+**Known cosmetic:** a subtle ground-color band at the border — the two
+tiles blend their OWN terrain layer sets (12 layers in 20_17 vs 9 in
+20_18), the same per-tile layering the client shows at tile borders.
+
+**Status:** NOT committed — awaiting the user's seam inspection. Next
+steps when opened: the water plane at -3840 over the below-level
+regions; 19_18 (the west neighbor with the confirmed sea shore) by the
+same recipe.
+
+## 2026-11-20 — DEVLOG-108: 21_18 (Sea of Spores, the east neighbor) implemented — the third tile
+
+The user's order: implement 21_18; the water is ours to add (irrelevant
+in the source data); the borders follow the C5 geodata grid.
+
+**The build:** `build --map 21_18 --neighbor 20_18 20_19 20_17 21_17
+21_19 22_18 22_17 22_19` — rc 0: 2309 statics, 115 meshes, 118 texture
+refs, 10 terrain layers, 65536 visible quads / 0 holes / 4855
+edge-turns, origin (32768, 0) = east of the village tile. THE SEAM
+MEASURED: 20_18's east border vs 21_18's west border — max |dZ| = 0.00.
+verify: per-map gates added, status ok.
+
+**The pipeline quirk fixed (the L2 duplicate-name binding):**
+`field_deco_T.utx` contains TWO Texture exports named `oren_stone001`
+(payloads differ by 28 bytes in the small-mip tails only — 99.94%
+identical). UE2 name binding resolves the FIRST export; our strict
+stager raised. `Package.export_by_name` now accepts on_ambiguous="first"
+(loud WARN) and `PackageSet.find_object` uses it for class=="Texture"
+lookups only — every other class stays strict. The 21_18 build passes.
+
+**The runtime:** the TILES registry gains 21_18 — the same per-tile
+parent at (32768, 0); no other code changed (the refactor held). The
+world builds in ~4.9 s for THREE tiles: 20_18 (401 statics / 61361
+quads / 112 lights), 20_17 (958 / 65503 / 10), 21_18 (1445 / 65536 /
+21 lights). Gate A: 0 shader errors.
+
+**The east seam in the running world:** L2_FLOOR_PROFILE across
+x=32768 (32368,12000 -> 33168,12000): y -36.284 -> -36.286 -> -36.290
+(2-4 mm steps, a gentle slope), "via terrain" everywhere — no step, no
+void. Golden baseline: the totals identical to the pre-21_18 runs; the
+pixels outside the character strip 0/0/0/5/8 — the 20_18 scene is
+pixel-stable. The east-border screenshot: tmp/shots/east_view/ (the
+temple seen from outside its east side, the ground continuous).
+
+**ARE THE MAPS CONNECTED WITHOUT THE LINEAGE 2 CRUTCHES? YES.**
+The original L2 (UE2) treats each tile as a self-contained "room/cube"
+LEVEL: its own ZoneInfo (the sky/fog per cube), its own BSP world, the
+level streaming at the borders (the engine swaps the level as the
+player crosses), the movement blocking via the separate .geodata files
+plus the invisible barrier brushes (20_18 carries 38 BlockingVolumes,
+21_18 has 38 of its own) — the "invisible walls" the user remembers.
+OUR port ports NONE of that (the modern-port rule: from the old client
+only the geodata and the coordinates):
+- the three tiles are sibling Node3D subtrees in ONE continuous scene
+  graph at their true world offsets — pure coordinate frames, no zone
+  logic, no streaming, no level swaps, no barriers;
+- the terrain heights and the colliders continue across the borders by
+  construction (both seams dZ = 0.00; the ray queries cross the borders
+  transparently — one physics space);
+- the player walks 20_18 -> 20_17 / 21_18 with no transition, no load,
+  no invisible walls; the 38+38 BlockingVolumes are NOT ported (when
+  the world ring ends, the edge policy is a gameplay decision, not an
+  inherited crutch);
+- the per-cube ZoneInfo sky/fog switching is replaced by ONE global
+  environment.
+The cost of not streaming: the whole built world lives in memory (3
+tiles now — a few tens of MB of meshes); the render cost is handled by
+the visibility ranges + the cluster culling. If the tile count grows,
+Godot's own streaming (visibility ranges / MeshInstance3D visibility /
+async loads) covers it WITHOUT reintroducing the room-cube machinery.
+
+**Status:** NOT committed — awaiting the user's inspection of the east
+seam. The water plane (-3840) and 19_18 (the west, the confirmed shore)
+remain queued.
+
+## 2026-11-20 — DEVLOG-109: 19_18 (the west neighbor, the confirmed sea shore) — the FOURTH tile
+
+The user approved the multi-tile stage ("крупных багов нету, мелочи
+позже") and ordered 19_18. 19_19 (the south) has a LAKE, no sea (the
+user's correction); the sea shore is in 19_18 (confirmed) and the
+north-west.
+
+**The build:** `build --map 19_18 --neighbor 18_18 19_17 19_19 20_18
+20_17 20_19 18_17 18_19` — rc 0: 1966 statics (12 deleted, 1954
+placeable), 90 meshes, 147 texture refs, 10 layers (9 valid), 65487
+quads / 49 holes / 5667 edge-turns, origin (-32768, 0). **28.4% of the
+tile is below the future sea level -3840** — the shore tile. THE SEAM
+MEASURED: 19_18's east border vs 20_18's west border — max |dZ| =
+0.00. verify: the per-map gates added, status ok.
+
+**The runtime:** one TILES entry — the same per-tile parent at
+(-32768, 0); no other code changed. The world: FOUR tiles in ~6.6 s
+(20_18: 401 statics / 61361 quads; 20_17: 958 / 65503; 21_18: 1445 /
+65536; 19_18: the new build). Gate A: 0 shader errors.
+
+**The west seam in the running world:** L2_FLOOR_PROFILE across x=0 at
+y=8000 (-400 -> +400): y -32.574..-32.590 (a gently rolling field, no
+step), "via terrain" everywhere. GOLDEN BASELINE PASS: 0/0/0/5/8 px
+outside the character strip — the village scene pixel-stable.
+The shore view: tmp/shots/west_view/ (the descent from the hills west,
+the flat SEA FLOOR visible as bare land — the water plane at -3840 is
+a separate pending stage; on the horizon the straight tile edge into
+18_18, which is not built yet).
+
+**Status:** NOT committed — the user inspects; the water stage and the
+18_18 expansion follow when opened.
+
+DEVLOG-109 addendum — the build/import cost measured and optimized (the
+user's questions): the repeat tile build = 3 s (incremental, the
+manifest hashes skip the UModel exports); the per-verification import
+was paying a 32 s tax scanning tmp/'s 22 862 junk files — tmp/.gdignore
+added (MANDATORY now, in REBUILD_RULES.md): the no-op import 36 s -> 4 s,
+the full re-import = ~36 s; 4032 stale .import files under tmp/ removed.
+The per-tile builds are independent (an 20_18 asset edit does not
+rebuild the other tiles). The runtime load +~1.5-1.7 s per tile.
+
+## 2026-11-20 — DEVLOG-110: the multi-tile placement bug FIXED (the double offset)
+
+The user's bug report on 19_18: all the objects vanished from their
+places and hung over the sea to the north, the mutual spacing intact.
+
+**The root cause (measured):** the map.json actor locations are
+WORLD-frame for EVERY tile — the extractor normalizes them (20_17's
+actors y -26227..-1811 = the north tile's world coords; 19_18's
+x -31331..-347 = the west tile's; 21_18's x 33596..65171 = the east
+tile's). The DEVLOG-107 tile parents offset by the terrain origin
+ADDED a second shift to the already-world actor positions: 19_18's
+statics landed 32768 west, 20_17's — 32768 north (in the ocean void),
+21_18's — 32768 east. The 20_18 tile (origin 0,0) hid the bug.
+
+**The fix:** the tile parents REMOVED entirely — every builder
+(terrain/meshes/bsp/lights) writes to the world root; the terrain mesh
+applies its own terrain.json origin (the pre-DEVLOG-107 behavior — the
+heights are absolute Z, the grid is local), the actors keep their raw
+world positions. `_tile_root` deleted; the veg batch clearing stays
+(the transforms are world-frame now — the clear prevents the cross-tile
+duplication). For 20_18 the result is bit-identical (origin 0,0).
+
+**Verification:**
+- The user's broken-view camera (-30016,25499 yaw west): the rocks
+  STAND on the hillside, the floating fleet gone
+  (tmp/shots/west_fix/).
+- The static spot-check (tree10 at -13358,24145): the collider hit at
+  y=-35.59 via Veg:Oren_Darkelf_tree10, the terrain below at -37.29
+  (the interpolated -3729.18 vs the authored -3727.56 — the normal
+  trunk-base delta), and 19_18's own SSQ_BRoom03_Top deeper — the
+  tile's dungeon content present.
+- GOLDEN BASELINE PASS: 0/0/0/5/8 px outside the character strip.
+- Gate A: 0 shader errors; the four tiles build in ~6.5 s.
+
+**Status:** NOT committed. The water plane (-3840) and 18_18 remain
+queued.
+
+DEVLOG-110 addendum 2 — the spawn moved to the 19_18/20_18 border (x=0,
+y=8000; faces east) per the user's order, and the build/cycle COSTS
+measured with the L2_TILES diagnostic + the phase timestamps:
+- The repeat tile build: 19_18 = 9 s (incremental, deterministic).
+- The import: the no-op 4 s (with tmp/.gdignore), the full wipe ~36 s.
+- The RUN decomposition (L2_TILES + the phase timestamps): the settle
+  (90 physics frames = 90 RENDERED frames) dominates: 0.38 s/frame on
+  1 tile -> 0.83 with 21_18 visible -> 1.26 on 4 tiles. The terrain
+  LOD (TERRAIN_LOD_DIST=5000, layer-0-only beyond 5 km) halved the
+  frame time on the 4-tile world (1.26 -> 0.65-0.9); the LOD at 800 m
+  regressed stairway/spawn (2784 px of the in-tile far terrain) — 5000
+  is the working threshold, the baseline views stay intact (0/0/0/5/8).
+- The lamp gate (19_18 = 1755 Light actors!) implemented and measured:
+  NO frame effect (the lights were not the cost) — kept as hygiene.
+- The settle 45 test: NOT deterministic (235 px — the camera lerp is
+  time-based, incomplete at 45 slow frames); the 90-frame settle stays.
+- The two 10-minute hangs = the process errors, not the rebuilds: a
+  no-quit run idling forever + the 5-instance .godot deadlock (4 of 5
+  at 0% CPU). The discipline is in REBUILD_RULES.md. No full rebuild
+  exists for small edits: the .gd edits need NO import, the tile
+  rebuilds are 3-9 s.
+- The remaining per-frame cost = the multi-tile scene graph + the
+  near-band terrain fragments on llvmpipe — the Godot profiler is the
+  next diagnostic; the tile streaming is the structural option.
+
+DEVLOG-110 addendum 3 — the descent-view nondeterminism (the multi-tile
+frame rate exposed it): the descent spawn sits on the SLOPED stair mesh —
+the character slides down the stairs under gravity during the settle; the
+slide distance = the GAME time, and the game time per 90-await settle now
+varies with the frame rate (the slow multi-tile render = the physics
+catch-up ticks per iteration vary). The descent baseline diff exploded to
+133015 px (the character slid out of the frame; the camera followed). The
+other four views PASS (0/0/0/5/8). The cause-level fixes (the user picks):
+A. the settle counts PHYSICS TICKS from the spawn (a fixed 5 s of game
+   time — the deterministic slide distance) + the descent baseline
+   re-capture (the character lands on a different stair step than the
+   2026-11-15 reference);
+B. the descent spawn moved OFF the sloped stairs (a flat spot nearby —
+   the character stands still, the deterministic view, no re-capture).
+The measured performance facts of this session: tmp/.gdignore (the
+import scan 36 -> 4 s), the terrain LOD 5000 m (the frame 1.26 -> 0.65 s
+on the 4-tile world), the lamp gate (no frame effect — kept as hygiene),
+the lights of the expansion tiles exonerated (the full removal = no
+change), the cast_shadow gates exonerated AND reverted (they flattened
+the distant self-shadowing), directional_shadow_max_distance BROKE the
+sun in the compatibility renderer (the village went night-dark) and was
+removed. The shadow per-pixel sampling = 43% of the frame on llvmpipe
+(measured via the L2_BRIGHT shadows-off) — unfixable at the geometry
+level; the GPU rendering or the resolution scale are the remaining
+levers (the user declined the GPU tests for now).
+
+DEVLOG-110 addendum 4 — the honest end-to-end cost audit (the user's
+"the build burns ~10 CPU minutes every iteration" vs my "9 s build"
+claim; both numbers are real — they measure DIFFERENT phases). Measured
+serially 2026-11-20 (tmp/audit_cost.sh, tmp/demo_render_cost.sh):
+
+- `build --assets-dir` (repeat, full canonical command): **9.0 s** wall
+  / 4.1 s CPU. It re-runs ALL 237 UModel exports (one process per
+  object, ~25 ms each) and re-copies 337 asset files with identical
+  content. Wasteful but harmless. (The earlier "9 s" was this phase —
+  I wrongly presented it as the iteration cost.)
+- `godot --headless --import` right after the build: **3.6 s, 0
+  artifacts re-imported**. Godot 4.7 decides re-import by the source
+  MD5 (docs: tutorials/assets_pipeline/import_process.html), NOT mtime
+  — re-staging identical content triggers nothing. Warm import 3.2 s.
+  Project splitting gains nothing for the build: the import is already
+  per-resource incremental.
+- `verify`: 0.15 s.
+- **THE REAL HOG — one standard verification render**: 166 s wall at
+  **720% CPU (peak 723%)** = ~20 CPU-minutes per render. Phases: the
+  world build 7.4 s; the 90-frame settle **117 s (70%)** — the settle
+  awaits 90 RENDERED frames (`for i in settle: await physics_frame`),
+  on llvmpipe ~1.26 s/frame; the two screenshots ~32 s.
+- The attribution: an iteration chains 3-5 renders (the fix check +
+  the golden baseline views) = the CPU pegged for ~10-15 wall minutes.
+  THAT is what the user watches as "compiling the project file". The
+  19_18 slowdown = the per-frame cost tripling (0.38 -> 0.65-1.26
+  s/frame), tripling every settle; the build/import stayed fast.
+- The root fix candidate (also the descent nondeterminism fix): the
+  settle counts PHYSICS TICKS (`Engine.get_physics_frames()` target)
+  with `Engine.max_physics_steps_per_frame` raised during the settle —
+  deterministic game time AND a few rendered frames instead of 90
+  (the render ~45-60 s). Requires the descent baseline re-capture
+  (the pending option A). Optional extras: L2_TILES=20_18 for the
+  village-scoped baseline renders (the neighbors are invisible in
+  those views — the 0-8 px diffs prove it); the real GPU.
+
+## 2026-11-20 — DEVLOG-111: A+B done — the tick-counted settle + the GPU
+## render harness (the user approved both)
+
+**A — the settle counts PHYSICS TICKS** (scripts/world.gd): a new
+`_await_settle_ticks()` loop (`Engine.get_physics_frames()` target +
+`await get_tree().physics_frame`), default **720 ticks = 12 s of game
+time** = exactly the llvmpipe-era 90-frame settle (90 x the 8-tick
+catch-up cap), so the standing baselines keep their state.
+`L2_SETTLE_TICKS` overrides. The burst flow uses it too. The old
+90-awaited-frame scheme made the game time a function of the machine:
+720 ticks on llvmpipe but ~90-360 on a fast renderer (the descent slide
+and the framing varied). `max_physics_steps_per_frame` stays at the
+default 8 — a higher cap trades tick exactness for speed. Parse OK.
+
+**B — the renders run on the real GPU**: DISPLAY=:0,
+`godot --path . --rendering-driver opengl3` picks **radeonsi / Radeon
+RX 6400 (navi24, ACO, Mesa 26.3.1)**. Probes: `--display-driver
+headless --rendering-driver opengl3` does NOT render (hangs — dummy
+display); the real X display works out of the box (glxinfo already
+reported radeonsi as the default GL driver).
+
+**The measured costs (one standard render, the default spawn):**
+- llvmpipe (before): 166 s wall at 720% CPU (~20 CPU-minutes); the
+  90-frame settle 117 s (70%).
+- GPU (after): **21-22 s wall**, boot 7.7 s + the 720-tick settle 12.3 s
+  (real-time 60 ticks/s) + the shots ~1 s. The whole baseline loop
+  (fresh import + 6 renders) = **165 s** vs ~15 min before.
+
+**Pixel parity and determinism (measured):**
+- GPU vs llvmpipe, the same 720-tick state (the default spawn):
+  66% pixels identical, mean |delta| 3.8, 1.9% of pixels >32 — the
+  rasterizer rounding noise; on the standing baseline views it is
+  2-14k px >8 per view. This EXCEEDS the diff gate => the golden
+  baselines are RE-CAPTURED on the GPU (the user approved the
+  re-capture as part of B).
+- GPU run-to-run (upper_street rendered twice): **99.89% identical
+  pixels, 426 px >8, 62 px >32, mean 0.008** — deterministic for the
+  gates; ~430 px >8 is the new noise floor.
+- Brightness sanity of the 5 new captures: 4 views match the old
+  means to ±0.1 (the same exposure); descent 55.3 vs 59.3 — its far
+  field legitimately changed (the terrain LOD 5000 m shifted the
+  far-south pixels since 2026-11-15 — this, not only the settle
+  variance, was the 133015 px descent explosion).
+
+**Docs updated:** the MANIFEST (the re-capture note + the real-display
+commands + the noise floor), REBUILD_RULES.md (the render harness
+section: the GPU first, xvfb = the llvmpipe fallback only, the tick
+settle), AGENTS.md (the render instruction line).
+
+**Status:** NOT committed. The commit of the whole multi-tile stage +
+A+B awaits the user's word.
+
+DEVLOG-111 addendum — the descent chaos root-caused and the input
+contamination (the user confirmed they were using the mouse/keyboard
+during my renders):
+
+- The unanchored tick settle ("current + 720") was NOT enough: between
+  the spawn and the settle loop the physics tick count drifts
+  machine-dependently (the first-frame shader-compile hitch + the
+  shader cache state), and 12 s of tumbling down the descent stairs
+  AMPLIFIES the drift — the descent differed by **1.12M px (78% of the
+  frame, mean 51.4)** run-to-run. Fix: the settle anchors AT THE SPAWN
+  (`_spawn_physics_frame = Engine.get_physics_frames()` in
+  `_spawn_player`; `_await_settle_ticks` measures from there). The
+  descent became **0 px** run-to-run.
+- The real display exposes the REAL user input: the first baseline
+  capture had the user's right-drag orbit the camera mid-render
+  (the DEBUG camera prints: the pitch -1.079 contaminated vs the -0.35
+  default) — entrance_road and stairway_plaza differed by ~1M px.
+  Fix: `player.input_locked` (all input ignored) +
+  `DisplayServer.WINDOW_FLAG_NO_FOCUS` (the game window does not steal
+  focus), both set automatically when L2_SCREENSHOT/L2_BURST is
+  present. The user confirmed: the mouse and keyboard were theirs.
+- **The final noise floor (every view rendered twice, GPU + anchored
+  settle + input lock):** upper_street 30 px >8 / entrance_road 1 /
+  descent 0 / stairway_plaza 6 / spawn_plaza 0; mean delta ~0.001.
+  The baselines re-captured (3rd pass, Docs/baseline/*.png), the
+  MANIFEST + REBUILD_RULES updated with the lock/anchor rules.
+
+## 2026-11-21 — DEVLOG-112: the 19_18 trees per the new pattern (the
+## canopy alpha cards were SOLID)
+
+The user's report: the 19_18 trees are "the old type", and when moving
+near them the cursor hits the alpha channel and the character cannot
+run further.
+
+**The root cause — three stacked defects (all measured):**
+1. `_foliage_trunk` (the bark-surface AABB table for the trunk
+   cylinders) is populated inside `_get_mesh` ONLY on the mesh-cache
+   miss (the cache lives for the whole session), but was CLEARED after
+   every tile flush (the DEVLOG-107 hygiene). The tiles build in order
+   20_18 → 20_17 → 21_18 → 19_18: the first tile computed the trunk
+   entries for its 6 tree keys, the flush consumed and cleared them.
+   In 19_18 only ONE key (Oren_Darkelf_tree10 — not seen in the earlier
+   tiles) got a fresh entry; tree02/03/09/11/12 (195 instances) had
+   NONE — and the flush's fallback branch (`elif not ("grass" ...)`)
+   gave them the FULL TRIMESH: the whole tree mesh including the
+   canopy ALPHA CARDS as solid geometry. The click ray stopped on
+   invisible foliage; the character ran into the invisible canopy and
+   stopped — the exact report. L2_TRACE_RAY before the fix: a vertical
+   ray through tree09 hit `Veg:...tree09 face=66` (a trimesh FACE, not
+   a cylinder; tree10's cylinder shows face=-1).
+2. The trunk block's own gate checked "tree" in the PACKAGE name only —
+   the north tile's Primitive_FieldOBJ_S trees (InDecotree/INtree/
+   MDtree/PriPlain, ~700 instances) were missed by _is_foliage_key
+   entirely and built as old per-actor statics with full trimesh
+   colliders (the same solid-canopy symptom).
+3. The trunk cylinder was positioned at the MESH ORIGIN (x/z) — wrong
+   for off-center meshes: Darkelf_tree10's bark spans z -6.64..1.09
+   with the pivot at the edge, so its r=1.2 cylinder floated inside
+   the canopy spread.
+
+**The fixes (scripts/world.gd):** `_foliage_trunk` is never cleared
+(keyed by the mesh key — tile-independent); the trunk gate matches the
+object name too; the cylinder offset = the bark AABB center transformed
+by the instance basis; the flush fallback explicitly EXCLUDES trees —
+a tree key without a trunk entry is pass-through (the canopy cards are
+not solid), never the full trimesh.
+
+**Verification (all numeric):**
+- The flush counts: 20_18 = 6, 20_17 = 11, 21_18 = 9, 19_18 = 6 tree
+  keys with trunk colliders — every tree key in every tile.
+- L2_TRACE_RAY after: tree09 (19_18) = the cylinder (face=-1) at the
+  expected height; tree10 = the cylinder at the rotated bark center
+  (the yaw -20352 + roll 1360 applied); the canopy rays PASS THROUGH
+  (no card hits); the 20_17 INtree001 = the cylinder (face=-1).
+- GOLDEN BASELINE PASS: 19/0/0/3/1 px >8 (the noise floor ≤30) — the
+  collider fixes are invisible.
+- The render = the GPU path, ~21 s per view.
+
+**Pending (noted, out of scope):** the 20_17 decotree textures
+Primitive_INDecotree_02/03 carry cutout alpha (0..255), but the
+alpha-scissor check keys on "leaf"/"grass" texture names — the deco
+trees render their cards opaque. A separate visual task if the user
+opens the 20_17 look.
+
+## 2026-11-21 — DEVLOG-113: 19_19 (the southwest neighbor, the lake
+## tile) — the FIFTH tile
+
+The user's order: «переносим теперь 19_19». The user's earlier note:
+the tile has a LAKE, no sea.
+
+**The build:** `build --map 19_19 --neighbor 18_18 18_19 19_18 19_20
+20_18 20_19 --assets-dir assets/maps/19_19` — SIX neighbors: the client
+ships NO corner heightmaps for the pure-ocean corner tiles (t_20_20 and
+t_18_20 are absent from Textures/). rc 0: 1513 actors, 1511 statics
+(0 deleted), 1 PlayerStart (−12373, 44613, −3606), 58 meshes, 112
+texture refs, 11 layers (10 valid), 65511 quads / 25 holes / 11679
+edge-turns, origin (−32768, 32768). **1 border sample clamped** — the
+SE corner vertex (the missing t_20_20); the east/south EDGES sample
+from the real t_20_19 / t_19_20. Mesh families: field_deco 1031,
+Oren trees 344, artifacts 97, Waterfall 38, FX 1.
+
+**The verify gates:** the per-map 19_19 entry (the stats + the terrain
+counts + `clamped_border_samples: 1` override + the expected-warnings
+list — the ocean-corner clamp is legitimate). verify: ok.
+
+**THE SEAM MEASURED:** 19_19's north border vs 19_18's south border,
+all 257 vertices: max |dZ| = 0.00.
+
+**The TILES entry appended** (the 5th tile); no other code changes.
+
+**The reimport trap AGAIN:** the first boot placed **0 static meshes**
+for 19_19 — the post-build `godot --headless --import` was forgotten
+(REBUILD_RULES Rule 2). The foliage still rendered because its mesh
+keys are shared with the earlier tiles (the session mesh cache); the
+19_19-only keys (Waterfall, FX_E_S, the new foliage meshes) silently
+failed (`ResourceLoader.exists` false → skipped). The 4.2 s incremental
+import fixed it: the 19_19 foliage 594 → 1472 instances / 44
+MultiMeshes / 22 tree keys with trunk colliders, the statics 0 → 39
+(38 Waterfall + 1 FX).
+
+**The runtime (the 5-tile world):** the boot ~8.6 s; the placement:
+20_18 401 statics / 112 lights, 20_17 272/10, 21_18 1445/2, 19_18
+1119/1755, 19_19 39/1; the foliage total 4402 instances in 168
+MultiMeshes.
+
+**The visual checks:** the lake view from the PlayerStart
+(tmp/lake_view) — the terrain blends, the trees, the horizon hills,
+structurally sane. The waterfall cliff (tmp/waterfall_view2) — the
+waterfall rocks + the ledge + the water card render; the water card is
+OPAQUE (the dwaterfall textures carry NO alpha — the client's water
+transparency is a material property, not texture alpha; the animation
+is a separate stage).
+
+**GOLDEN BASELINE PASS:** 190/5/3/6/21 px >8 (the character-strip idle
+noise, below the 1000-px gate).
+
+**Pending:** the lake water plane (the water stage — the basin renders
+bare), the waterfall transparency/animation, and when 20_19 is built:
+its west seam vs 19_19's east edge is sampled from the real t_20_19
+except the ONE clamped corner vertex — check the corner then.
+
+## 2026-11-21 — DEVLOG-114: the bad-alpha trees in 19_19 fixed; the
+## foliage pattern is now a PERMANENT rule in AGENTS.md
+
+The user's report: minimum 2 tree types with bad alpha — the canopy
+cards rendered as OPAQUE polygons (the screenshots: the moss-card pile
+and the mossy tree with the flat cards).
+
+**The root cause:** the alpha-scissor predicate keyed on the texture
+NAME ("grass"/"leaf" in the name) — a 20_18-era heuristic. The 19_19
+families name their foliage differently, so their alpha cards rendered
+opaque. The scan of all 44 foliage keys of 19_19 found every violation:
+- `Oren_tree_S:Oren_Darkelf_tree08` (20 instances): 4 moss textures
+  oren_darkelf_tree01_s3..s6 with cutout alpha (min 0), no name match;
+- `Field_Deco_Artifact_S:DElf_TombTower` / `DElf_TombTower_Btm`:
+  delf_tomb_alpa01 / delf_tomb_04 (the banners);
+- `Field_Deco_Artifact_S:DElf_Guard_1` (14): delfguard_alpa01 (the flag).
+
+**The fix:** the cutout is decided BY CONTENT for every foliage key —
+`_is_foliage_key(key) or "grass"/"leaf" in the name`, gated on
+`Image.detect_alpha()`. The scissor on an all-opaque alpha is a no-op;
+the stone meshes in the same packages carry no alpha at all (the scan
+verified). The name check remains ONLY for the non-foliage keys (the
+carpet alpha = a specular/blend mask — never cut). Plus: the boot
+prints `WARN: tree key without trunk collider` for every tree key
+missing its trunk entry — the pattern violation is now visible on every
+boot (currently flags the 20_17 card-cluster decotrees, an intentional
+pass-through).
+
+**The verification:** the tomb area close-up (tmp/alpha_fix/tomb) —
+the moss cards cut with the torn edges, the obelisks render; the
+tree08 close-up (tmp/alpha_fix/tree08) — the moss cards cut (the sky
+shows through); the guard/tower alpha textures take the same path.
+
+**The PERMANENT rule (the user's order «закрепи это в MD») written into
+AGENTS.md — "The foliage/trees pattern":** the five points (the
+MultiMesh batching, the alpha by CONTENT, the trunk colliders at the
+bark center, the visibility ranges, the per-tile verification with the
+WARN/trace/screenshot gates) apply to EVERY tile — the existing and
+every future one.
+
+## 2026-11-21 — DEVLOG-115: 18_19 (the west-southwest tile, the Dark Elf
+## dungeon area) — the SIXTH tile; the dungeon interiors are BSP (NOT ported)
+
+The user's order: «делаем теперь 18_19».
+
+**The build:** `build --map 18_19 --neighbor 18_18 19_18 19_19 19_20
+17_20 17_19 17_18 --assets-dir assets/maps/18_19` — SEVEN neighbors
+(the client ships t_17_17..20 for the west ring, but NO t_18_20 — the
+south neighbor 18_20 is a pure-ocean tile without terrain data). 2.6 min
+(the first UModel export). rc 0: 1859 actors, 1683 statics (0 deleted),
+1 PlayerStart (−39625, 37999, −3154), 69 meshes (45 NEW keys — the
+Oren_ded_s dungeon package: wall_deco, bridg, altar, slav_deco,
+topcage, stair, torch, lamps, sewage, DEd_board/lamp), 90 textures,
+8 layers (8 valid), 59040 quads / **6496 holes** (the dungeon footprint
+≈ 10% of the tile) / 1932 edge-turns, origin (−65536, 32768).
+**clamped_border_samples: 256** — the whole south edge (the missing
+t_18_20). verify: ok (the per-map gates + the expected warnings).
+
+**THE SEAM MEASURED:** 18_19's east border vs 19_19's west border, all
+257 vertices: max |dZ| = 0.00.
+
+**The import was run IMMEDIATELY after the build** (the 19_19 lesson):
+3.8 s incremental. The boot: **placed 1033 static meshes + 650 foliage
+instances = 1683** (the exact actor accounting), 403 collision shapes,
+175 lights. The foliage: 650 instances / 28 MultiMeshes / **5 tree keys
+with trunks = ALL of the tile's tree keys** (the known Oren_Darkelf
+family; no new tree families). The WARN lines caught one PRE-EXISTING
+violation in 20_17: `Innadrill_tree_S:inna_Stree01` (4 palms) has no
+bark-named surface → pass-through — pending.
+
+**The runtime check caught the honest boundary of the port:** a test
+spawn at (−47500, 55000) fell into the void (Z −1013 m) — the point
+sits inside the terrain-hole block (5×5 quads = 0), and the floor
+profiles over the dungeon complex (the torch line, the diagonal sweep)
+return NO-HIT except the deco meshes themselves. **The dungeon
+interiors (the walls/floors of the halls) are the client's BSP LEVEL
+GEOMETRY** — only 20_18 has the BSP stage in this project
+(bsp.json/levelbsp.json/meshes_bsp, built by the dedicated 20_18-era
+tools); the expansion tiles carry the terrain + the statics only. The
+largest 18_19 statics (topcage 29 m, bridg_rest 22 m, wall_deco 19 m)
+are decos, not floor slabs — the floors do not exist as statics.
+
+**GOLDEN BASELINE PASS:** 187/4/0/6/1 px >8.
+
+**Frames:** the PlayerStart forest view (tmp/1819_view/spawn — the
+mossy trees with the working alpha), the torch area profile evidence
+(the torch meshes hit, the floors absent).
+
+**PENDING / the user's decision:** the 18_19 dungeon interiors need the
+BSP level-geometry stage (the 20_18-style dedicated pipeline run for
+this tile — the room walls/floors/ceilings) — the terrain, the statics
+and the foliage of the tile are ported and verified. Also pending: the
+inna_Stree01 palm trunk (20_17), the water plane, the waterfalls.
+
+## 2026-11-21 — DEVLOG-116: the BSP stage of 18_19 OPENED and DONE —
+## the dungeon renders from the client's section vertex streams
+
+The user's order: «открываем BSP стадию 18_19» (18_19 = the last Dark
+Elf map; the others carry only small DE pieces).
+
+**The first attempt (the licensee-23 surf path) FAILED — the root cause
+measured:** the maps ship in MULTIPLE licensee generations (20_18/19_18/
+19_19 = licensee 23, 21_18/18_19 = 25, 20_17 = 28; all ver 123). The
+levelbsp.py node/surf/points parse was built against the licensee-23
+Model500. For 18_19's Model5 (4.6 MB, 3932 nodes / 1487 surfs / 78650
+verts) the COMPACT arrays parse fine (the section validation
+rev == numnodes == the per-section node count passes!) but the POINTS
+float array reads as garbage: the drawn polys collapsed to slivers
+(the bbox-corner pattern ±327680/±262144/±16384 — the exact corners of
+the zone box; the unique z values = ±16384 exactly). The header-skip
+scan (1..119) found no valid alternative — the licensee-25 POINTS
+layout differs structurally.
+
+**The engine.dll RE (the craft-anything memory + a fresh decompile):**
+UModel::Serialize is licensee-uniform for LicenseeVer ≥ 9; FBspSurf has
+an extra int only for LicenseeVer ≥ 21 (both 23 and 25 ≥ 21 — not the
+difference). The arrays' element serializers = ??6...FBspNode (530 B)
+/ ??6...FBspSurf (381 B) / ...FBspVertex / ...FBspSection — decompiled
+into the evidence memory (ev_bfeff29c).
+
+**THE WORKING PATH — the client's own render data: the SECTION vertex
+streams.** parse_sections (DEVLOG-82-era code) validates structurally
+for 18_19 and carries the REAL geometry: 18 sections / 18758 vertices
+of 40-byte records (pos12 + uv8 + 8 mystery + normal12), the sane
+coordinates x[−51513,−43271] y[42332,59084] z[−5947,−3383] = the exact
+dungeon levels. The node runs map onto the streams: sum(node.nvert) ==
+section.nvert for 18/18 sections; each run = one polygon (a fan); the
+UVs = the client's FINAL tile coordinates (texel_uvs=false — the
+runtime _build_bsp now honors a per-surface "texel_uvs" key from
+levelbsp.json; the 20_18 licensee-23 artifact keeps its default true).
+
+**New tool: tools/l2strict/level_sections.py** (the section-stream
+exporter, the same LevelBSP.gltf/levelbsp.json contract). The filters:
+the ZonePortal/AntiPortal sections, the no-material sections, the span
+> 7000, and the |z| > 130 m (the zone-box corner polys leak at exactly
+±163.84 m — beyond any real L2 geometry). Result: **3002 polygons in 10
+surfaces, 380 KB**, all 8 materials = the dungeon textures
+(dark_dgn_001_1/006/020/021/022/029/111/119 + DE_V_roof — 4 of them
+exported and staged fresh via UModel).
+
+**The verification:**
+- The floor profile through the torch hall (−47533,55269 →
+  −47334,55211): EVERY step = `y=-38.947 via LevelBSP`, ny=1.00 — the
+  hall floor exists, flat, exact; the before-state = NO-HIT.
+- The character spawns inside and STANDS (the trimesh collider with
+  backface collision; Z −3894.6 = on the floor).
+- The interior render (tmp/dungeon_view): the stone floor with the
+  hex pattern at the authentic scale, the gothic arch colonnades, the
+  golden bas-reliefs, the light shafts, the sky through the openings.
+- GOLDEN BASELINE PASS: 174/3/0/9/3 px >8.
+
+**Note for the future BSP stages:** the same section-stream path applies
+to any licensee-25+ tile (21_18 = 25, 20_17 = 28 — the latter may need
+its own layout check); the licensee-23 tiles (19_18/19_19) can use
+either path. The tool consumes only the .unr + shader_diffuse.json (the
+empty map is fine — the direct Texture materials resolve without it).
+
+## DEVLOG-117 — 2026-11-21: the spawn on the village→Shrine road + the Shillien Temple 3D-texture transition (SPOM walls + built-in heightmap floors)
+
+**The user's orders:** (1) the respawn point moves onto the road between
+the DE village and the Shillien Temple (both on 20_18 — the temple is
+NOT 18_19; 18_19's dungeon is a different structure); (2) begin the
+old-textures → 3D-like transition for the temple: WALLS through SPOM
+(godotshaders.com "SPOM with horizon detection, self shading, silhouette
+clipping, parallax occlusion mapping, self shading, horizon trimming
+erosion" by Amose05, CC0 — the user provided the link after "AMD GPUOpen
+Silhouette POM" turned out to be a made-up name), FLOORS through Godot
+4.7's built-in heightmap (BaseMaterial3D deep parallax, configurable
+min/max layers); (3) the temple STAIRS postponed — the geometry gets
+CREATED natively later (the modern-port rule).
+
+**The spawn:** (21109, 12819, ground −36.66, ny 1.00), yaw −1.2313
+facing the temple entrance (26180,11032). Chosen from the route floor
+profile (7400,17650 → 26180,11032: the terrain stretch f≈0.4..0.95 sits
+at z −36.5..−37.5, ny≈1.00) + the tree-distance scan (the first
+candidate (19607,13348) spawned INSIDE a canopy — the trees come from
+map.json, the clear spot keeps the nearest tree 1238 units away). The
+temple silhouette is visible ahead from the spawn.
+**VERIFICATION MODE CHANGE (the user's directive, this stage):** NO
+automatic mass re-renders (the golden-baseline 5-view village suite and
+friends are NOT run for temple iterations) — the village is not what we
+are touching, and every rebuild re-renders untouched content. The
+verification = the USER'S screenshots against the original client. The
+golden baseline itself stays untouched (all 5 baseline viewports use
+ABSOLUTE L2_SPAWN positions — the default-spawn move cannot shift them).
+
+**The texture transition (one height source — the DEVLOG-94 rule):**
+- texgen.py: + PACKAGE_HEIGHT_BLUR (sylen_temple_t → radius 4.0, the
+  DEVLOG-89 low-frequency lesson) + the standalone `<obj>.pbr_height.png`
+  (the SAME height_pom field the albedo's A channel carries) + RELIEF for
+  the floors (ai_004/in022: 0.05, 2.0). 40 oren_sylen_* sets regenerated.
+- assets/shaders/l2_spom.gdshader (NEW): the Amose05 SPOM ported onto the
+  project conventions — the screen-Jacobian TBN (the meshes have no
+  tangents), meters-based pom_scale via tile_m, the angle/distance
+  anti-swim fades, explicit textureLod in the loops, the albedo's A
+  channel as the marched height, the SPOM layer ladder (min/max layers),
+  the self-shadow march in light() (the published BRDF, transmittance
+  semantics), silhouette clipping + curved-silhouette horizon erosion as
+  per-material toggles. ONE compile fix: SPECULAR is not readable in
+  light() — the published shader's own `specular` uniform restored (0.35,
+  the DEVLOG-92 matte stone).
+- scripts/l2_proc_tex.gd: SPOM_WALLS (30 sylen keys — the skin, pillars,
+  entrances, doors, interior walls/ceilings) → _spom_material; HEIGHTMAP
+  _FLOORS (ai_004, in022 — the interior floor + the platform, the same
+  textures also floor the court in the level BSP) → _floor_heightmap
+  _material (BaseMaterial3D: heightmap_enabled + deep_parallax + min 8 /
+  max 32 layers + pbr_height + the height-derived normal + the roughness
+  channel from the normal's alpha). L2_SPOM_OFF=1 = the A/B toggle (pom
+  0 / the floor material falls through to the flat PBR path).
+- world.gd: _with_normals_for() — flat normals + tangents (SurfaceTool,
+  deindexed) for the sylen surfaces of BOTH BSP meshes (LevelBSP 4/9 =
+  the court, TempleBsp 10/10) — the built-in heightmap needs the mesh
+  tangent frame; the jac-TBN shader surfaces pass through pixel-identical.
+
+**What is OFF and why (audited, not forgotten):** silhouette clipping
+and the horizon erosion — the temple UVs TILE (the skin spans
+u −5.3..6.3, pir −0.66..2.74, deco12 v −0.96..1.99; UModel strips the
+accessor min/max — measured from the buffers): a 0..1 clip would erase
+the walls. The toggles stay in the shader for per-texture enablement
+once a true-0..1 surface needs the carved edge. The pillar horizon mode
+needs per-mesh material instances (the pillar textures are shared with
+flat walls) — follow-up.
+
+**The numbers that ran (before the verification-mode change):**
+- Gate A: 0 shader-error lines in all 4 render logs.
+- Gate B (A/B, L2_SPOM_OFF): the interior view 13827 px >8 (780 >32,
+  max 97) — the POM + self-shading move pixels on the walls (top half
+  9876) and the floor (bottom 3951).
+- The spawn floor profile: standing at −36.66 over terrain ny=1.00; the
+  route profile clean (one tree canopy above the path at f=0.5, 3.8 m
+  clearance).
+- The renders: tmp/spom_verify/{spawn_road2,temple_facade,temple_
+  interior,temple_interior_nopom} — the facade shows the carved panels
+  + the lit spider emblem; the interior shows the ai_004 tile floor +
+  the SPOM walls/pillars.
+**NOT run:** the golden-baseline village suite (cancelled by the user's
+verification-mode directive above).
+
+**Pending:** the temple stairs geometry (create natively); the silhouette
+carving per-UV-audit; the deco/statue textures (silen_statue_*, in101,
+ai_001..003) still on the flat PBR path; the interior is dim (the
+lighting stage is not opened); commit authorization for everything.
+
+## DEVLOG-118 — 2026-11-21: the user's three verdicts — the road columns restored, the sun-side film fixed, the statue light off
+
+**The user's report (their screenshots):** (1) the road columns were
+never rolled back to the stable state (top after Blender, bottom with
+the 4x upscale) — the order predates this session; (2) the temple
+outside: in shadow perfect (better than the original), but on the sun
+side a matte gray film vs the native textures flips with the angle
+("бегает переход"); (3) the artificial light on the Shillien statue
+must be OFF so the statue can be judged bare.
+**The verification mode stands (DEVLOG-117): NO agent-run render
+batches — the user tests with their own screenshots.** Four temple
+views launched before the second directive completed (0 shader errors,
+the light-skip prints confirmed) and sit in tmp/spom_verify/ unused.
+
+**(1) The columns — root cause found, the stable state restored.**
+The DEVLOG-117 SPOM routing hijacked the shared texture keys
+(oren_sylen_001/in002/in017/in019/in001 = the outdeco04 column's
+surfaces AND the temple walls'), and the baked switch in world.gd keyed
+on the material's shader path ending with l2_surface_pbr.gdshader — it
+silently stopped firing, so the Blender bake was lost. The DEVLOG-101
+_x4 albedo override was ALSO gone (dismantled somewhere in the 103-116
+sessions; the _x4 PNGs no longer exist). The restore:
+- l2_proc_tex.gd: `pbr_material_for()` — the public plain-PBR route,
+  bypassing SPOM/floor, its own "|pbr" cache suffix (the SPOM and PBR
+  materials for one texture key coexist).
+- world.gd baked block: rebuilds each baked-mesh surface's material
+  from `L2ProcTex.pbr_material_for` (not from the whatever-was-assigned
+  check), sets use_baked + the baked normal/AO (UV2) + relief_gain 1.2,
+  then the DEVLOG-101 override: if
+  `res://assets/textures/upscale/<obj>_albedo_rgb_upscale.jpg` exists
+  (only the ornate in001/in019) the albedo swaps to it; the other
+  surfaces keep the client tile texture.
+
+**(2) The sun-side film — two view/angle instabilities in the SPOM
+self-shadow, fixed in l2_spom.gdshader:**
+- The march and the crevice AO read the VIEW-DEPENDENT displaced UV
+  (base_uv) — the occlusion pattern swam with the camera (the march
+  start and the AO pattern move as the camera orbits within the
+  angle/distance-fade range). Both now read the STABLE surface UV
+  (the new flat_uv varying); the POM'd albedo/normal sampling at
+  base_uv is unchanged (that is the relief itself).
+- Grazing light: travel.z -> 0⁻ explodes the march steps (P ~
+  1/travel.z) and the walk samples arbitrary texels — whole faces
+  flipped to blocked (the film) depending on the sun angle. New gate:
+  travel.z > −0.3 → transmittance 1.0 (no shadow info — the native
+  texture, stable), plus a ±2.0 UV step clamp. The shadow-side look is
+  untouched (the march only runs on sun-lit faces; in shadow
+  ATTENUATION=0 kills the term anyway).
+
+**(3) The statue light off:** _build_lights skips the Light actors
+within 150 units of the statue (30044,11021) — Light69 (br 550) +
+Light55 (250); the boot prints "light skipped (the Shillien statue
+judgment): <name>". The next-nearest lights are 290+ units away
+(outside their 60-120 radii). The statue renders bare for the
+replace-or-not decision.
+
+**Pending:** the user's visual verdicts on all three; the statue
+replace-or-not; the commit authorization.
+
+## DEVLOG-119 — 2026-11-21: the user's verdicts round 2 — the film's sun-side darkening removed, the statue "hat" diagnosed and cut
+
+**The verdicts:** (1) the road columns — OK (the restored stable state
+approved); (2) the gray film REMAINS outside under the main camera
+angle + at distance; (3) the statue light-off — OK, but the old porting
+bug shows: a dark "hat"/wrong texture over the statue's head.
+
+**(2) The film, round 2 — the remaining sun-side darkening layers
+removed (l2_spom.gdshader):**
+- The crevice AO removed: weight clamp(pom_scale*20)=0.8 darkened the
+  dark painted texels ~36% (AO = mix(1, 0.55+0.45h, 0.8)) — a STATIC
+  matte film vs the client's flat albedo, present at every angle and
+  distance (the village never had it: pom=0 → weight 0 there). AO=1.0.
+- The self-shadow march disabled (use_self_shadow=false, the uniform
+  remains): the binary blocked/lit patches over the blur-4 height field
+  are large smooth darkening regions on the sun-lit walls — the film
+  itself. The client carries no wall self-shadow. The POM relief (the
+  UV-shift march) stays — that is the 3D read. The grazing gate +
+  flat_uv stability from round 1 remain in the shader.
+- Diagnosis method: data, no renders (the verification mode stands).
+
+**(3) The "hat" over the statue's head — the old additive/mask port
+bug, content-verified (no godot runs):**
+- The statue mesh's 5 surfaces share one bbox (the primitives
+  interleave — no geometric isolation); the textures decide.
+  silen_statue_3/2/4 = RGB (opaque, correct). silen_statue_1 = RGBA,
+  27% real alpha-0, dark RGB — the texture IS a masked atlas: the
+  face/crown parts sit on black=transparent surroundings; rendered
+  OPAQUE the black texels became the dark cap over the head.
+  silen_statue_chain = RGBA 67% transparent (the chain links) — the
+  same class (the "thick dark bars" across the arms in the renders).
+- The runtime's alpha-scissor branch was foliage-only (the DEVLOG-114
+  content rule + the carpet guard). Fix: an explicit non-foliage
+  TRUE-mask list in the static PNG-fallback —
+  sylen_temple_t:silen_statue_1 + sylen_temple_t:silen_statue_chain →
+  TRANSPARENCY_ALPHA_SCISSOR 0.35 + CULL_DISABLED, gated by
+  img.detect_alpha(). The carpet alphas stay opaque — the DEVLOG-114
+  rule holds: only the verified true masks cut, only by this list.
+
+**State:** import 0 / headless boot 0 / 0 shader+script errors; the
+boot prints "light skipped (the Shillien statue judgment): Light55/
+Light69". NO renders run (the user tests with their screenshots).
+
+**Pending:** the user's verdict on the film (if anything remains, the
+next suspects are the POM displacement itself at close range and the
+GGX specular); the statue bare-look verdict (replace or not); the
+commit authorization.
+
+## DEVLOG-120 — 2026-11-21: the day/night cycle + the overcast sky + the full moon + the random-time test mode; the statue "hat" = the deco07 slot binding
+
+**The user's verdicts:** the film is GONE (approved); the "hat" over the
+statue's head REMAINS; the lighting stage OPENS: overcast weather (the
+dimmer sun), the day/night cycle (a game day = 4 real hours, the night =
+1 of them), the real sun path (east -> west, the zenith at 1-2 pm), the
+random start time for the lighting/shadow/angle comparisons, and the
+FULL moon at night (no phases; the eclipse in the far drawer).
+
+**The "hat" — the data chase (no godot runs, the user banned the
+display launches twice):** the hat box above the crown contains exactly
+ONE piece of geometry — sylentemple_deco07 (StaticMeshActor25, d=131
+units, the 9.6 x 4.9 m curved apse strip behind the statue, its top
+z -2998 vs the crown top -3014). TempleBsp and the statue itself have
+NOTHING there. The strip's runtime texture = **oren_sylen_t004** (the
+asset_map primitive_material_indices [2] — the facade band with the
+plaster field) while the strip's UV window (u 0.585..0.854,
+v 0.314..0.769) fits the carved-arch atlas **oren_sylen_in031** (slot
+0, the mesh's primary material). The t004 band over the head read as
+"some cap with the wrong texture". The same section->material binding
+class as the 2026-11-10 statue-hand bug (fnd_12). FIX: a per-key
+override in _get_mesh — deco07's surfaces take slot 0 (in031). The
+candidates compared at that UV window: in031 (the carved arch atlas),
+in005 (the pointed-arch wall window), t004 (the facade band — the
+current wrong pick). The user's screenshot is the arbiter; in005 is
+the next candidate if in031 reads wrong.
+
+**The day/night system (world.gd, DEVLOG-120):**
+- The clock: 24 game hours per 4 REAL hours (= 1/600 game-h per real
+  second). L2_TIME=<hour> pins the start (the DEFAULT = RANDOM — the
+  user's order: every launch a random time to compare lighting/
+  shadows/sun angle); L2_TIME_SCALE=<x> multiplies the clock speed.
+  The boot prints "day/night: game time <h> (random|L2_TIME), sun elev
+  <deg>".
+- The sun path: east (+X) horizon at 04:30 -> the ZENITH at 13:30 ->
+  west (-X) horizon at 22:30 (the night = 22:30..04:30 = 6 game hours =
+  1 real hour). _tod_sun_dir(): (cos a, sin a, 0) in the east-up-west
+  plane; a = PI*(clock-4.5)/18.
+- The OVERCAST weather: the sun energy capped at 2.8 (the old fixed 5.0
+  read too hot on the temple textures — the user's "без излишнего
+  света"), warm (1.0,0.75,0.5) at low elevations -> (1.0,0.97,0.93) at
+  the zenith; the shadow stays on (the user compares the shadows).
+- The night: the FULL moon — the moon light (bluish 0.72,0.8,1.0,
+  energy 0.55 at full night, shadowed) rides the ANTI-SUN (it rises in
+  the east at sunset — physically consistent); the moon DISC = a
+  clean-room generated texture (tmp/make_moon.py, seed 20261121:
+  limb-darkened disc + deterministic maria blotches + a soft edge,
+  512x512 -> assets/textures/sky/moon_full.png) on a camera-following
+  billboard Sprite3D at 700 m (depth-tested — the terrain occludes it),
+  ~46 m across.
+- The sky: the overcast palette day/dusk/night lerped by the elevation
+  factors (the gray day 0.40..0.64, the warm dusk horizon 0.62,0.45,0.33,
+  the dark night); the fog color follows the horizon; the zone ambient
+  dims to 35% and shifts bluish at night. The dawn/dusk band =
+  smoothstep windows over the sun elevation.
+- The L2_BRIGHT diagnostic bypasses the cycle entirely (_bright_mode) —
+  its flat-white ambient survives.
+- THE ECLIPSE: the far drawer (the user's words), not implemented.
+
+**State:** import 0 / headless boot 0 / 0 errors; the randomizer prints
+"game time 10.00 h (random), sun elev 55.0 deg" (the math cross-checked:
+10:00 -> 55 deg). NO display runs (the user tests with their
+screenshots and the L2_TIME pinning).
+
+**Pending:** the user's verdict on the hat (in031 vs in005 vs t004 —
+the strip is the only geometry above the head); the day/night look
+across the random launches; the commit authorization.
+
+## DEVLOG-121 — 2026-11-21: the day/night round 2 — the "eclipse" moon fixed, the shadow-acne PWM fixed, the sheen killed, the HUD clock
+
+**The user's four problems:** (1) the hat over the statue remains, black
+now; (2) "either you made an eclipse or the wrong sun/moon" — the night
+sky showed a BLACK disc ringed by a bright glow; (3) the textures read
+B/W with 3D under unclear camera-dependent lighting; (4) inside the
+temple the sun/moon light "travels in waves like LED on camera" (the
+stipple visible in their shot).
+
+**(2) The "eclipse" — two real bugs, both fixed:**
+- The moon texture was premultiplied-UNSAFE: the RGB outside the disc
+  stayed bright (0.77) with alpha 0 — under the premultiplied
+  interpretation the outside leaks as the bright ring (the glow), and
+  the depth fog at 700 m blackened the disc (the black disc). The
+  texture regenerated premultiplied-safe (the outside RGB = 0, the edge
+  RGB scaled by alpha; tmp/make_moon.py).
+- The Sprite3D replaced by a QuadMesh + StandardMaterial3D (unshaded,
+  transparency alpha, billboard, `disable_fog` guarded by `"disable_fog"
+  in mat`): the fog can no longer touch the disc.
+
+**(4) The "PWM/waves" = the shadow-map acne** (the stipple in the
+user's shot — the classic depth-fight at this world scale): the sun AND
+the moon get shadow_bias 0.25 (the default 0.1), shadow_normal_bias 4.0
+(the default 2.0), shadow_blur 1.4.
+
+**(3) The B/W camera-dependent sheen = the SPOM GGX fresnel** at the
+grazing angles whitening the walls under the moonlight: the `specular`
+uniform 0.35 -> 0.0 (the temple stone is matte; F0 = 0 kills the term).
+The moon energy 0.55 -> 0.45 (the B/W wash contribution).
+
+**(1) The hat — the texture-window scan settles the texture part:**
+the strip's UV window (u 0.585..0.854, v 0.314..0.769) is DARK on ALL
+three candidates (in031 mean 0.189/std 0.166, in005 0.213/0.128, t004
+0.127/0.110) — the strip is dark carved stone in ANY assignment, and at
+night ANY of them is black (unlit). in031 KEPT (the richest carving).
+**The ROOT of the perception is geometric: the apse VAULT above the
+temple is missing from the TempleBsp build** (the hat box above z -3300
+contains only the strip — the client encloses the same strip with the
+vault, so it never reads as a floating cap). QUEUED as the
+temple_bsp-coverage task (the geometry rebuild needs the user's day
+reference first).
+
+**The time display (the user's request):** the HUD label now shows
+"HH:MM фаза" (день / утро-вечер / сумерки / ночь by the sun elevation)
+next to the coordinates — world.gd tod_label(), player.gd renders it.
+
+**State:** import 0 / headless boot 0 / 0 errors; the boot printed
+"game time 18.79 h (random), sun elev 37.1 deg" (the math
+cross-checked). NO display runs (the user tests).
+
+**Pending:** the hat = the temple_bsp vault coverage (the geometry);
+the day-look texture verdict on in031 (the alternates in005/t004 are
+one-word switches); the night look after the moon/bias fixes; the
+commit authorization.
+
+## DEVLOG-122 — 2026-11-21: the OVERCAST = the cloud dome, the ground fog REMOVED; the deco07 strip deleted from the render
+
+**The user's day verdicts:** the textures OK, the shadows OK (the
+temple transition + the day/night lighting approved for the day); BUT
+"не пасмурная погода а просто туман" — the recolored gradient + the
+distance fog read as FOG, not overcast; and the hat over the statue is
+"not needed at all — remove it from the meshes and textures".
+
+**The weather (the user's spec: "затянутое небо, но земля без тумана"):**
+- The ground fog REMOVED: the ZoneInfo DistanceFog block (the depth fog
+  1..100 m) is disabled in _build_environment; the client values stay
+  recorded in the comment for the restore. The per-frame fog-color
+  update is gone with it.
+- The overcast SKY: a procedural cloud dome (NEW
+  assets/shaders/l2_sky_clouds.gdshader) — a camera-following SphereMesh
+  (r 780 m, cull_front, unshaded, shadows_disabled) with a clean-room
+  FBM cloud layer: the perspective projection on the drift plane, the
+  coverage 0.62, the drift tied to the game clock (the clouds move with
+  the day). The palette (day/dusk/night) rides the SAME phase factors as
+  before — the world.gd sets the uniforms per frame. The gaps let the
+  moon glimmer through (the night moon stays visible).
+- The ProceduralSkyMaterial stays as the BG fallback behind the dome.
+
+**The hat: DELETED (the user's order — "она вообще не нужна"):** the
+key sylen_temple_s:sylentemple_deco07 returns null in _get_mesh — both
+instances (StaticMeshActor25/28) drop out of the render WITH their
+colliders; the t004/in031 slot experiments are dead code, removed. The
+staged glTF and the asset_map reference stay intact (the removal is
+render-path only — regenerable, reversible). The root-cause note stands:
+the client hides the same strip inside the apse VAULT that our TempleBsp
+build does not have above z -3300 — if the vault geometry gets built
+later, the strip's absence vs the client must be re-judged.
+
+**State:** import 0 / headless boot 0 / 0 errors; the boot printed
+"game time 16.11 h (random), sun elev 63.9 deg" (the math
+cross-checked). One indent slip (the dome block landed inside the
+bright-mode gate) caught by the headless compile gate and fixed. NO
+display runs.
+
+**Pending:** the user's overcast/fog verdict; the night sky + the moon
+through the cloud gaps; the commit authorization (everything since
+DEVLOG-96 is uncommitted).
+
+## DEVLOG-123 — 2026-11-21: the hat is NOT deco07 — the ceiling-hole / statue-surface candidates + the ledge-film clamp; the trace handed to the user
+
+**The user's verdicts:** the hat REMAINED after the deco07 removal (⇒
+deco07 was never the hat — my box scans were vertex-based on the shared
+vertex pools and missed the truth); a few temple protrusions get the
+film in the sun again (the other textures don't). The day textures and
+shadows: approved.
+
+**The ledge film — the mechanism + the fix (one line):** the small
+ornate faces (the skin's trim surfaces, the tilted deco09 pieces) carry
+a tiny tile_m (meters per tile from the Jacobian) — pom_scale/tile_m
+explodes and the POM march samples fly across the whole texture = the
+wash, view/sun-angle dependent. FIX: the ray_uv clamp to ±0.35 UV in
+l2_spom.gdshader (the parallax physically cannot exceed a fraction of
+the tile; the big wall faces sit at ~0.01-0.08 — untouched; the approved
+columns/walls can't change).
+
+**The hat — the honest state of the evidence (all data, no renders):**
+- The triangle-level scan (the vertex pools are SHARED between the
+  primitives — the vertex-in-box test was meaningless; the centroids of
+  the INDEXED triangles is the truth): above the crown top (z -3014)
+  there is NO real geometry — only ~17 tiny skin fragments (cornices at
+  z -2876..-2956) and the 0x40a000 in002 wall-top plane at -2999 (in
+  our TempleBsp surf 3, rendered).
+- The level BSP band scan (tmp/hat_nodes.py): NO ceiling nodes above
+  the apse — the client's enclosure above the statue is NOT in the
+  level BSP, NOT in the skin shell, NOT in our scans.
+- The statue's own surfaces sit in the region BELOW the crown top but
+  visually ABOVE it from the user's low camera: surf 1 (silen_statue_2,
+  the upper drapery atlas) has 640/732 triangles at z -3695..-3379 —
+  the statue's own unlit upper body reads as a dark mass over the crown
+  in the dark, and with the statue light OFF (the user's judgment
+  order) everything there is black.
+- The two remaining candidates: (a) the SKY through the missing apse
+  enclosure (the client frames the same view with vault geometry we
+  haven't found in the data), (b) the statue's own unlit upper surfaces.
+- DECISION: the agent cannot disambiguate without a render — the trace
+  is handed to the USER (their machine, their launch):
+    L2_SPAWN="29850,11040,-3350" L2_VIEW_YAW=-1.474 L2_VIEW_PITCH=0.55 \
+    L2_TRACE_BOX="500,60,1340,460" godot --path . --rendering-driver opengl3
+  The TRACE lines name the mesh/face/texture per hit in the hat region;
+  the paste-back gives the exact answer.
+
+**State:** import 0 / headless boot 0 / 0 errors (the shader clamp).
+
+## DEVLOG-124 — 2026-11-21: the hat SOLVED — the UE2-Masked statue atlas; the gloss killed on both material paths; the weather scope fixed in AGENTS.md
+
+**The hat — the root found by the texture sampling (no renders):** the
+statue's hat-band triangles were UV-sampled against their atlases:
+**surf 0 (silen_statue_3): 344 triangles, 69% sample BLACK texels**
+(mean brightness 0.075; the UVs TILE u -0.52..1.76 / v -0.83..1.97 and
+wrap into the atlas's black margins; the chain surface = 100% black).
+This is the UE2 PF_Masked class: in the client the palette index 0 (the
+black) is TRANSPARENT; our staged RGB made the margins opaque — the
+same class as the 2026-11-10 statue-hand bug. FIX:
+- tmp/statue_alpha.py: statue_3 + statue_4 restaged RGBA with the binary
+  alpha (the luminance < 0.06 -> transparent; the carve shadows 0.1-0.2
+  stay opaque); the black-margin fractions 0.17 / 0.28.
+- world.gd: the scissor list += statue_3/statue_4 (the detect_alpha gate
+  now passes). statue_1 (the real alpha) and statue_chain were already
+  in; statue_2's UVs never leave 0..1 (its margins are unreachable).
+- The hat's earlier candidates (deco07, the vault hole) were wrong; the
+  deco07 removal stays (the user judged the strip not needed).
+
+**The protrusion gloss — killed on BOTH material paths:**
+- l2_spom.gdshader: ROUGHNESS matte floor 0.82 (the roughness 0.59-0.86
+  + the bright overcast dome = the environment specular sheen on the
+  sun-facing ornate faces) + SPECULAR = 0.0 explicit.
+- l2_surface_pbr.gdshader: the NEW specular_strength uniform (the
+  DEFAULT 0.5 = Godot's own — the approved village look untouched);
+  l2_proc_tex.gd sets it to 0.0 for the sylen_temple keys only.
+- The earlier ray_uv clamp (±0.35 UV) stays (the march blow-up guard).
+
+**The weather scope (the user's directive — PERMANENT, now in
+AGENTS.md):** the overcast sky + the day/night cycle apply ONLY to the
+built Dark Elf territory maps; the border zones are adjusted manually
+per-zone; every new map gets its own individual weather. Never extend
+the weather system beyond the built DE tiles without the user's
+explicit per-map order.
+
+**State:** import 0 / headless boot 0 / 0 errors; "game time 16.80 h
+(random), sun elev 57.0 deg". NO display runs.
+
+**Pending:** the user's verdict on the hat (the masked-alpha fix) and
+the gloss; the commit authorization (everything since DEVLOG-96).
+
+## DEVLOG-125 — 2026-11-21: the night dimmed, the moon shadows OFF (the PWM root), the 4 Hz light quantization, the terrain matte, the FULL cache clean
+
+**The user's night verdicts:** the side ornate textures stand out with a
+"fixed tint/light" at night; the hat remains (the Godot cache suspected
+— "несколько итераций пересобираешь без очищения кеша"); the moon's PWM
+on the stairs persists (the moon "has a refresh frequency"); the rocks
+get the film under the moon (the terrain textures = the direct client
+transfer, no update).
+
+**(1) The fixed-tint look = the AMBIENT term:** the constant night
+ambient (0.165, bluish) lit the pale ornate albedos in the dark while
+the dark walls went black. The night dims: the ambient floor 0.35 ->
+0.20 of the tuned day value, the moon energy 0.45 -> 0.32, the night
+ambient tint subtler (0.33,0.35,0.42).
+
+**(3) The moon PWM — the root + the fix:** the light direction updated
+EVERY frame -> the shadow map re-rasterized every frame -> the shimmer
+on the moonlit stairs (the user read it as the moon's "refresh
+frequency"). TWO fixes: the moon light carries NO shadows at all (the
+client's night has no dynamic shadows — the moon is a soft fill), and
+BOTH lights' directions quantize to 4 Hz (the angular step ~0.002 deg —
+imperceptible, the shadow map stays static between the ticks).
+
+**(4) The rocks' film = the terrain shader's Godot-default specular**
+(the terrain = the direct client texture transfer, no PBR — the user's
+note): SPECULAR 0.1 -> 0.0 in scripts/terrain.gdshader (the rock is
+fully matte).
+
+**(2) The cache — the user's suspicion honored:** the FULL clean
+reimport run (rm -rf .godot/imported + a fresh import). The statue_3
+file verified RGBA on disk; the masked-alpha scissor now guaranteed in
+the imported state. If the hat STILL shows after this build, the two
+remaining candidates stand (the apse enclosure hole vs the statue's own
+unlit drapery) and the TRACE from the user's machine decides:
+    L2_SPAWN="29850,11040,-3350" L2_VIEW_YAW=-1.474 L2_VIEW_PITCH=0.55 \
+    L2_TRACE_BOX="500,60,1340,460" godot --path . --rendering-driver opengl3
+
+**State:** the clean import 0 / headless boot 0 / 0 errors; "game time
+12.93 h (random), sun elev 84.3 deg" (the near-zenith at 13:00 = the
+user's spec). NO display runs.
+
+## DEVLOG-126 — 2026-11-21: the temple horns = sylentemple_deco10 identified (the user's "rebuilt without SPOM" — literal truth); in030 joins SPOM
+
+**The identification (the mesh dims + the instance positions):** the
+horn/finial protrusions on the temple's second story = sylentemple_deco10
+(4 instances, z -2957): 5.7 x 10.7 x 0.44 m thin ornate panels. The
+user's diagnosis was LITERAL: deco10's textures = in030 + ai_007, and
+in030 was NOT in SPOM_WALLS (the PBR path — no POM, a different shading)
+while ai_007 was — ONE mesh, TWO material paths = the standout look in
+both the dark and the light versions.
+
+**FIX:** oren_sylen_in030 added to SPOM_WALLS — deco10 renders fully
+through the building's material path. The thin-geometry guards stay
+(the ray_uv clamp ±0.35, the angle_fade, the matte floor 0.82).
+
+**State:** headless boot 0 / 0 errors. NO display runs.
+
+## DEVLOG-127 — 2026-11-21: the night darkened further (the moon 0.18, the ambient floor 12%) — the pale-albedo contrast vs the client's near-black night
+
+**The user's verdict:** the horns still stand out at night (either an
+incomplete rebuild or the wrong fix). The data check: the horn textures
+carry NO alpha (the masked class excluded); ai_007 = the palest atlas
+(mean RGB 0.331) vs the walls' 0.16 — the horns' albedo is ~2x brighter,
+and OUR night (the moon 0.32 + the ambient 0.20 floor) was brighter than
+the client's near-black night — the pale surfaces read first.
+
+**FIX:** the moon energy 0.32 -> 0.18; the ambient night floor 0.20 ->
+0.12. The client-like near-black night; the moon disc and the lamp
+proximity lights stay the night's visible elements.
+
+**Note on "неполная пересборка":** the previous fix (in030 -> SPOM) was
+a script-only change — no import involved; the boot compiles the script
+fresh. The rebuild was complete for that change; the standout at night
+was the night brightness, not the path.
+
+**State:** headless boot 0 / 0 errors. NO display runs.
+
+## DEVLOG-128 — 2026-11-21: the temple's static black = the INWARD WINDING — the SPOM lighting now uses the Jacobian normal (two-sided correct)
+
+**The user's finding:** "the horns work with light and shadows while the
+whole temple has been working WITHOUT them — always statically black."
+The check: deco10 carries NO normals either (all the temple meshes are
+POSITION+TEXCOORD) — the normals theory died. THE ANSWER: the skin
+shell is wound INWARD (the client renders everything two-sided and
+never cares); the SPOM light() took the built-in NORMAL — on the
+outside view it points AWAY from the sun -> NdotL = 0 -> the diffuse
+never arrived -> the temple = the ambient-only static black. The
+outward-wound deco10 horns lit fine — the exact asymmetry the user saw.
+
+**FIX (one line):** l2_spom.gdshader light(): N = normalize(vN) — the
+screen-Jacobian geometric normal (already computed and view-transformed
+for the shadow march), correct on BOTH faces. The two-sided lighting is
+now geometric, winding-independent.
+
+**State:** import 0 / headless boot 0 / 0 errors ("game time 2.29 h,
+sun elev -22.1 deg" — the night boot, the math consistent). NO display
+runs.
+
+**Pending:** the user's verdict (the temple walls must now receive the
+sun/moon light with the shadows); the hat (the trace or the
+enclosure-hole decision); the commit authorization.
+
+## DEVLOG-129 — 2026-11-21: the moon 30 Hz, all the temple lamps OFF, the hat = the skin's upper walls (the offline render proof), the terrain SPOM
+
+**The user's four orders:** (1) the mountains at night are especially
+bad — redo with SPOM; (2) the 30 Hz is THE MOON's update frequency (not
+the temple lamps — "у нас их нету"); (3) the hat remains; (4) remove ALL
+artificial lighting from the Temple and check whether the natural light
+suffices.
+
+**(2) The moon 30 Hz:** the direction quantization applies to the MOON
+only (33 ms tick); the sun stays per-frame. The temple lamps were
+already gone (the DEVLOG-129 region skip below).
+
+**(4) ALL the temple lights OFF:** _build_lights skips every Light actor
+inside the temple region Rect2(25400, 8800, 6100, 8400) (= the
+temple_bsp.py REGION). The statue-radius exception is superseded — the
+whole temple is natural-light-only. The light sufficiency is the user's
+check (with the DEVLOG-128 two-sided lighting the walls finally receive
+the sun/moon).
+
+**(3) The hat — SOLVED BY THE OFFLINE SOFTWARE RENDER (no godot):** a
+numpy z-buffer rasterizer (tmp/statue_render.py) rendered the statue +
+the skin + TempleBsp from the user's hat camera with the alpha-aware
+scissor. THE VERDICT: the "hat" = THE SKIN'S DARK UPPER WALLS behind the
+statue's head (the surfaces in105/t010/t004/ai_007 filling the frame
+behind the crown) — the enclosure EXISTS (no sky, no hole, no foreign
+object). The earlier scans missed them because the big wall triangles'
+CENTROIDS fall outside the hat box while the triangles cover it. The
+walls read as a featureless cap because they had no light — after the
+DEVLOG-128 two-sided fix they receive the moon/sun like everything
+else. The remaining hat perception = the user's natural-light
+sufficiency check (the order 4).
+
+**(1) The terrain SPOM:** texgen ran for the 8 t_oren layer textures
+(Obase_1, OG_52/34/48/36, OC_05/03, OST_11 — the low-frequency heights,
+PACKAGE_HEIGHT_BLUR += t_oren: 4.0). world.gd builds the heights
+Texture2DArray (8 x 512x512 RGBA, the height = the albedo's A; the
+missing set = the flat 0.5 gray) + the per-layer uv scales.
+terrain.gdshader: the jac tangent frame + the dominant-layer march (the
+argmax of the masks picks the array layer; the masks stay UNSHIFTED —
+they are the coverage; the detail textures sample at the displaced
+tile_uv) + the angle fade and the distance fade 30..90 m + the ±0.35 UV
+clamp. The blend order, the base layer and the debug modes are
+unchanged. The trap fixed: Texture2DArray.create_from_images is an
+INSTANCE method (the parse error caught by the headless gate).
+
+**State:** the clean import 0 / headless boot 0 / 0 errors; "game time
+17.31 h (random), sun elev 51.9 deg". NO display runs.
+
+**Pending:** the user's verdicts (the mountains' relief, the night
+brightness balance, the temple's natural-light sufficiency = the hat's
+final look); the commit authorization (everything since DEVLOG-96).
+
+## DEVLOG-130 — 2026-11-21: the day mountain film = FACETED TERRAIN NORMALS; the hat = the DEAD scissor branch (the PBR path intercepts); the temple BSP normals were never built (the real "static black")
+
+**The user's two reports:** (1) the mountains got more detailed but the
+day film increased; (2) the hat above the statue did not disappear.
+
+**(1) The day film = the faceted terrain normals, not the POM.** Data
+first: the mountains in the user's 15:24 screenshot are pure terrain
+(the heightfield peaks z=+2483 at game (22400,27520); ZERO MT/rock
+statics in the box). My terrain POM shifts ZERO pixels beyond 90 m
+(dist_fade) and the specular only went DOWN (0.1→0.0) — the shader edit
+cannot have changed distant mountains. The real change: _emit_tri set
+no normals and generate_normals() on the UNINDEXED triangles produced
+per-face FLAT normals; at the old static south-east sun the north faces
+sat in ambient only (facets invisible), but the moving day/night sun
+lights them directly and the adjacent facets diverge — MEASURED on the
+northern slopes at 15:24: the adjacent-facet brightness delta mean
+0.184, p95 0.667 (an 18%..67% shimmering mosaic = the film). The client
+smooth-shades its terrain (vertex lighting on the heightfield). FIX:
+_build_terrain builds a smooth analytic normal grid
+(N = normalize(-dz/dx, 1, -dz/dy) per heightfield vertex, the slope
+clamped ±4 at the cut-cell borders), _emit_tri takes 3 normals and sets
+them per corner, generate_normals() call removed. The POM march is
+untouched (it reads the Jacobian, not the mesh normals).
+
+**(2) The hat root cause = the DEVLOG-124 scissor branch is DEAD CODE.**
+_get_mesh routes every texture with a generated PBR set through
+L2ProcTex.material_for() FIRST and continues; the statue textures have
+PBR sets, so the alpha-scissor branch below never fired. material_for
+falls to _pbr_material with use_alpha = key in ALPHA_CUTOUT — the
+statue keys were not there (only Iron_net/DE_V_fence) → the PF_Masked
+palette-0 texels rendered OPAQUE = the black hat. Two-part fix:
+  a. texgen re-run for the 5 statue textures — their pbr_albedo alphas
+     were STALE (built before the staged mask regeneration; statue_1's
+     pbr alpha cut 40% of VISIBLE texels, chain 79%). Verified after the
+     re-run: pbr A == staged A (1.000) for 1/3/4/chain; the masks are
+     the real client ones (statue_1 27%, 3 17%, 4 28%, chain 66% —
+     chain's transparent background is NON-black RGB, a legit PF_Masked
+     layout).
+  b. ALPHA_CUTOUT += sylen_temple_t:silen_statue_1/3/4/chain. statue_2
+     stays OPAQUE: its staged PNG is RGB (an alpha-less client format —
+     the black texels are genuine paint, not palette 0). Headless probe:
+     use_alpha=true on the real material path.
+
+**(3) THE BIG FIND — the temple BSP normals were NEVER built (the real
+"статично чёрный храм", the user's msg-19 discovery).** The boot log had
+48 silent errors per boot (24 surfaces x generate_normals
+"primitive != PRIMITIVE_TRIANGLES" + generate_tangents "no NORMAL") in
+_with_normals_for: it called st.create_from_arrays(arr, format_mask)
+but Godot 4.7's signature is create_from_arrays(arrays, primitive_type)
+— the FORMAT BITMASK was the primitive → the tool sat on a garbage
+primitive and both generators failed on EVERY temple BSP surface. The
+BSP glTF carries only POSITION+TEXCOORD_0 (verified), so the whole
+temple BSP (the interior vault, the floors, the court) rendered with NO
+normals: zero diffuse, ambient-only. DEVLOG-128's inward winding was
+the SKIN's story; the BSP static black is THIS. The floors' built-in
+heightmap route was also silently dead (it needs the tangent frame).
+FIX: create_from_arrays(arr, Mesh.PRIMITIVE_TRIANGLES). The boot now has
+ZERO mesh errors and the counts 4/9 + 10/10 temple surfaces with real
+normals+tangents. The natural-light sufficiency check (the order from
+the previous session) is now run against a renderer that actually
+lights the interior.
+
+**State:** the clean reimport 0 / headless boot: terrain per tile, the
+player spawned, "game time 4.18 h (random)", ZERO mesh/shader/script
+errors. NO display runs (the standing ban).
+
+**Pending:** the user's screenshot verdicts — the day mountains without
+the mosaic film, the hat gone above the statue's head (the 4 masked
+surfaces now cut; behind them the real vault/walls show), the temple
+interior under the now-working natural light. The commit since DEVLOG-96
+awaits the user's word.
+
+## DEVLOG-131 — 2026-11-21: the 08:47 black ground = the shadow map's all-shadow within its range (the sun → SHADOW_ORTHOGONAL); the night near-mountain film = the POM tightened (the scale, the fades, the dominance margin)
+
+**The user's verdicts:** the statue WON (the DEVLOG-130 cutout), the
+mountains are film-free in daylight. New: at ~08:30 and ~14:30 the sun
+lights the trees and the distant mountain faces while the ground and the
+mountains measure ambient-only; plus the film remains at night on the
+NEAR mountains.
+
+**The 08:47 diagnosis (the user's screenshot, pixel-measured):** the
+ground 10/255 (the ambient-only would be ~69, the sun-lit ~206), the
+trees 42-45 (= the ambient on the dark foliage), the temple 8.5-29 (the
+west facade away from the eastern sun — correct physics), the sky 187,
+BUT the right/left mountain peaks have 23-29% of the pixels above 150
+(the max 255) — THE SUN IS ON AND WORKS on the geometry beyond ~100 m.
+The terrain east of the player DESCENDS (no physical morning shadow is
+possible — computed). Conclusion: the shadow map returns ALL-SHADOW for
+everything inside its range (the default max_distance = 100 m from the
+camera) and passes light beyond it. The angle is NOT the variable (the
+user's 14:30 ≈ 15:24 by sun angle, opposite outcomes). This is the
+compatibility renderer's directional-shadow pathology class already
+documented in the DEVLOG-110 note (max_distance=300 killed the sun's
+direct light entirely). The Godot source (renderer_scene_cull) anchors
+the shadow frustum on the CAMERA frustum — the light node position and
+the sun-following are irrelevant. FIX: the sun's shadow mode →
+SHADOW_ORTHOGONAL (one cascade, no split-range math, the same 100 m =
+2.4 cm/texel at 4096²). The bias/normal-bias/blur stay at the approved
+DEVLOG-120/121 values.
+
+**The night near-mountain film:** the near mountains are inside the
+terrain POM's range (<90 m), the far ones are not — the film = the POM's
+view-dependent texture slide. Three tightenings in terrain.gdshader:
+pom_scale 0.05→0.04, the angle fade smoothstep(0.12,0.45)→(0.25,0.55),
+the distance fade (30,90)→(25,70), PLUS a dominance-margin damp: the
+runner-up mask weight measures the argmax ambiguity, and the shift is
+multiplied by smoothstep(0.05, 0.3, wmax - w2) — at the layer boundaries
+the march no longer jumps between the layers' height fields (the
+shimmer), in the decisive areas the relief is unchanged.
+
+**State:** headless boot 0 errors, the world built 8.5 s, the terrain
+per tile, the spawn ok. NO display runs (the standing ban).
+
+**Pending:** the user's screenshots at ~08:30/~14:30 (the shadow fix)
+and at night (the POM tightening). If the all-shadow persists in the
+ORTHOGONAL mode, the next levers: shadow_blur 1.4→1.0, then the
+bias/normal-bias (the DEVLOG-120 temple values — the PWM risk assessed
+before touching).
+
+## DEVLOG-132 — 2026-11-21: the shadow path REVERTED to the old code (the defaults, PSSM4) per the user's order; the two A/B diagnostic flags (L2_SUN_NOSHADOW, L2_TERRAIN_FLATNORM)
+
+**The user's order:** "трава так и не получила солнце. сравнивай со
+старым кодом. освещение совсем недавно сломано. либо тогда когда ты
+игралcя с освещением луны и солнца, но изменение поздно применилось."
+
+**The diff vs the old code (git HEAD = the last committed state, the
+whole lighting stage is uncommitted):** the lighting deltas are exactly
+four: (1) the sun energy 5.0 static → 2.8 dynamic (the user's overcast
+order); (2) the sun direction static NE-33° → the clock path (the
+user's day/night order); (3) the shadow params the Godot defaults →
+0.25/4.0/1.4 (the DEVLOG-120 temple PWM band-aid) → +ORTHOGONAL (my
+DEVLOG-131 guess); (4) the ground fog removed (the user's DEVLOG-122
+order). The ambient day value, the terrain shader's lighting terms
+(ROUGHNESS 0.95, SPECULAR 0.0 since DEVLOG-125) and the terrain mesh
+(except the DEVLOG-130 smooth normals) match the old code. NO hidden
+change found in the diff — the 08:47 all-shadow-within-range defect has
+no smoking gun at the code level.
+
+**The revert (the user's directive):** the shadow setup = EXACTLY the
+old working code — no bias/normal-bias/blur overrides (the defaults
+0.1/2.0/1.0), PSSM4 (the DEVLOG-131 ORTHOGONAL guess dropped). The
+DEVLOG-120 overrides were the temple PWM band-aid; the PWM's root (the
+moon's moving shadows) is OFF since DEVLOG-125, so the defaults are safe
+again. The overcast energy 2.8 and the dynamic sun path stay (the
+user's own weather/day-night orders).
+
+**The A/B diagnostics (one build, two launches localize the defect):**
+- `L2_SUN_NOSHADOW=1` — the sun's shadows OFF. If the grass lights up:
+  the shadow map is the culprit. If still black: the lighting path is.
+- `L2_TERRAIN_FLATNORM=1` — the terrain rebuilt with the OLD per-face
+  flat normals (generate_normals(), the DEVLOG-130 path reverted) while
+  everything else stays. Localizes whether the missing sun follows the
+  normals change.
+
+**State:** headless boot 0 errors, the world built 8.7 s. NO display
+runs.
+
+**Pending:** the user's two A/B launches (any daytime hour, e.g.
+L2_TIME=8.78 for the repro). The bisect: (a) both flags off = the
+current state; (b) L2_SUN_NOSHADOW=1; (c) L2_SUN_NOSHADOW=1 +
+L2_TERRAIN_FLATNORM=1 if (b) is still black.
+
+## DEVLOG-133 — 2026-11-21: the shadow revert did NOT fix the black ground; the measured albedo at the spot is BRIGHT sand (0.38) — the terrain receives ~nothing; the light-path canvas diagnostic (L2_TERRAIN_LIGHTDEBUG)
+
+**The user:** "не помогло. ищем дальше" (the shadow params revert to the
+old code did not restore the sun on the ground).
+
+**New measurements:**
+- The exact albedo blend at the 08:47 player position (23427,8380): ALL
+  masks = 0, the base layer only = Obase (0.42, 0.40, 0.32) — BRIGHT
+  sand. The predictions: the ambient-only 76/255, the sun-lit 229/255.
+  The MEASURED ground = 10/255 — the terrain receives ~1/8 of even the
+  ambient-only level.
+- The trees at 42-45 = the AMBIENT-only on their darker foliage (the
+  user's "light on the trees" = the pale moss against the black ground).
+  The trees receive the ambient; THE TERRAIN DOES NOT.
+- The 15:24 screenshot (the DEVLOG-129 build, BEFORE the smooth
+  normals): the ground = 110/255 = the light factor ~0.5 (a partial sun
+  contribution). The 08:47 (the DEVLOG-131/132 builds) = 0.03. The
+  terrain-specific light loss appeared between those builds; the only
+  terrain delta = the smooth normals (+ the POM tightening).
+- The rock-vs-sky separated re-measurement of the 08:47 peaks: the warm
+  pixels (R > B+8) reach 180-251 — the sun IS on for the geometry
+  beyond the ~100-m shadow range. The all-shadow-within-range picture
+  holds.
+
+**The new diagnostic (assets/shaders/terrain_lightdebug.gdshader):**
+`L2_TERRAIN_LIGHTDEBUG=1` swaps the terrain material to a light-path
+canvas: the albedo forced WHITE, the diffuse = the plain Lambert read of
+LIGHT_COLOR x ATTENUATION (the shadow factor included). One screenshot
+reads directly: the base gray level = whether the AMBIENT reaches the
+terrain (~126 = yes on white); the bright regions = where the SUN
+reaches; the boundary = the shadow map's reach; uniform black = the
+terrain pipeline (the normals path) receives nothing at all. The real
+shader stays untouched without the flag.
+
+**The bisect plan for the user (L2_TIME=8.78 pins the repro hour):**
+1. `L2_TERRAIN_LIGHTDEBUG=1` — the canvas.
+2. Uniform black canvas → add `L2_TERRAIN_FLATNORM=1` (the old faceted
+   normals): the canvas lights up = the smooth normals are the culprit.
+3. The ambient-gray canvas but no sun → add `L2_SUN_NOSHADOW=1`: the sun
+   appears = the shadow map is the culprit.
+
+**State:** headless boot 0 errors; the clean reimport done. NO display
+runs.
+
+## DEVLOG-134 — 2026-11-21: the rebuild cache ruled out end-to-end (the nuclear clean + the runtime-level proof); the terrain material prints added
+
+**The user:** "ничего не изменилось. проверяй кеш пересборки."
+
+**The cache audit results:**
+- assets/shaders/terrain.gdshader does NOT exist — the terrain shader
+  lives at scripts/terrain.gdshader and LOADS DIRECTLY (no .import, no
+  imported cache — it cannot go stale). The l2_* shaders likewise have
+  no .import files (only the .uid stamps).
+- .godot held no shader_cache; the only caches = imported/ (the
+  textures/glTFs), uid_cache, the script class cache.
+- NUCLEAR CLEAN EXECUTED: rm -rf .godot + the full headless reimport
+  (235 MB, 5292 entries regenerated), import rc=0, 0 unexpected errors.
+- RUNTIME-LEVEL PROOF: world.gd now prints the terrain material's
+  assigned shader per tile. Headless with L2_TERRAIN_LIGHTDEBUG=1: every
+  tile reports "LIGHTDEBUG canvas ... terrain_lightdebug.gdshader";
+  without the flag: "shader=res://scripts/terrain.gdshader". The
+  routing reaches the runtime on the CURRENT cache.
+
+**The remaining explanation space:** the scripts (world.gd) load fresh
+every launch — the 132/133 changes (the shadow defaults, the A/B flags)
+WILL be active on the user's next launch. If the plain launch still
+shows the black ground, the L2_TERRAIN_LIGHTDEBUG canvas launch is the
+decisive evidence (its three possible readings = the DEVLOG-133 plan).
+
+**State:** the cache fully regenerated; the boot 0 errors; the terrain
+material prints verified for both modes. NO display runs.
+
+## DEVLOG-135 — 2026-11-21: the ROOT CAUSE class found — the terrain was the ONLY default-light() shader and the compatibility renderer's default light path leaves it light-blind; the explicit Lambert light() added (the proven SPOM term)
+
+**The user's two screenshots:** the day 15:03 — the sun falls on the
+character, the trees, the rocks, the small stones, the columns but NOT
+on the grass; the night 01:15 — the ground is PURE BLACK while the
+trees/temple are moonlit. The user's hunch: "будто бы ты изменял
+параметры цвета\света террейнов".
+
+**What the night shot decides:** the moon carries NO shadows (DEVLOG-125)
+— yet the ground is black → this is NOT the shadow map. The terrain
+receives NO direct light (the sun AND the moon) AND no ambient, while
+the identical-scene StandardMaterials (the foliage) and the
+custom-light() shader materials (the SPOM walls, the PBR statics) are
+lit normally.
+
+**The verified-healthy list (the runtime prints):** the cache ruled out
+(the DEVLOG-134 nuclear clean); the terrain material = the right shader
+per tile; the committed mesh carries 368-393k normals per tile with ZERO
+degenerate entries (the runtime print; the SurfaceTool set_normal→commit
+pipeline probed offline = the normals survive).
+
+**The pattern:** every material with an EXPLICIT light() override lights
+up; the only default-light() custom shader in the project — the terrain
+— is light-blind. The default light() path is broken for this material
+in this renderer config; it worked in the pre-day/night builds, which
+matches the user's "the lighting broke recently during the moon/sun
+work".
+
+**The fix:** terrain.gdshader gains the explicit light() — the EXACT
+proven SPOM diffuse term (cNdotL/PI x LIGHT_COLOR x ATTENUATION; Godot
+multiplies ALBEDO outside light(), as the approved SPOM shader shows).
+The env ambient stays stage-level on top. The shadows still apply via
+ATTENUATION. SPECULAR stays 0 (matte).
+
+**State:** headless boot 0 errors; the world built 8.7 s. The normal /
+material prints stay for one more verification round. NO display runs.
+
+**Pending:** the user's day + night screenshots. If the ground lights up
+— closed; the facet/film tuning continues from the earlier verdicts.
+
+## DEVLOG-136 — 2026-11-22: the 20_19 CONTROL map built (the default import, the static sun, the plain sky, the HEAD terrain shader); the respawn moved there; the per-tile weather system
+
+**The user's order:** "не помогло [the DEVLOG-135 Lambert light() did not
+restore the terrain sun]. давай создадим карту 20_19 с дефолтным
+импортом и дефолтным солнцем, небо без пасмурности, обычное. и сравним.
+точку респауна туда переносим."
+
+**The build:** the strict pipeline, the neighbors 20_18/19_19/21_19/20_20
+(+ 21_20 after the first pass clamped the SE corner). Two pipeline fixes
+made the map buildable:
+- tools/l2strict/stage.py: the staging category is now a PREFERENCE, not
+  a filter — Field_Deco_Artifact_s carries its MATERIALS inside the
+  StaticMesh package, so material staging requests the mesh name with
+  the Textures category; the fallback stages by the actual category
+  (PackageSet reads every category; the texture resolution pass still
+  catches real absences).
+- verify.py: the 20_19 gates registered (the map stats + the terrain:
+  65536 visible quads, 0 holes, edge_turn 11015, 0 clamped samples).
+VERIFY: status ok. 82 meshes, 172 textures, 1 PlayerStart
+(3536,55432,-3384).
+
+**The runtime (world.gd):**
+- TILES += 20_19 with "weather": "default"; the DE territory tiles =
+  "overcast". The weather survives _load_data's tile rebuild (the key
+  was initially dropped — caught by the material print, fixed).
+- The DEFAULT-weather tiles build with the OLD terrain path: the flat
+  per-face normals (generate_normals), no POM heights, and the HEAD
+  default shader (scripts/terrain_default.gdshader = the git HEAD copy).
+- _update_daynight reads the CAMERA's tile: the default tiles render the
+  pre-lighting-stage state — the static NSun0 sun (energy 5.0, the
+  fixed direction), the plain ProceduralSky, the client depth fog
+  (24,29,35 @ 1..100 m), the zone ambient — no clock, no dome, no moon;
+  the overcast tiles reset the fog OFF and the dome visible per frame
+  (the border crossing flips the mode live).
+- The respawn = 20_19's own PlayerStart0; terrain_height/-_tile_at are
+  tile-aware so the cross-tile spawn samples the right heightfield.
+
+**State:** the import rc=0 (258 MB cache); the headless boot 0 errors,
+7 tiles, the spawn at (35.36,-33.75,554.32); the material prints: 20_18
+= terrain.gdshader, 20_19 = terrain_default.gdshader (the HEAD shader).
+
+**The comparison protocol for the user:** the spawn = on 20_19 under the
+default sun and sky. If 20_19's ground IS lit while 20_18's is not
+(the border crossing flips the sun/sky/shader live), the terrain light
+loss lives in the 20_18-overcast path (the current terrain shader /
+the day-night driver); if BOTH are dark, the loss is global and the
+default-light() vs custom-light() split (DEVLOG-135) narrows further.
+
+## DEVLOG-137 — 2026-11-22: the border shot CLOSED the case — the terrain triangles are wound front=DOWN; the DEVLOG-130 explicit UP normals were flipped DOWN on every visible fragment; the winding fixed + the 20_19 sky fog fixed
+
+**The user's border shot** (X=-25 Y=60096, 09:43 день, on the 19_19/20_19
+seam): the trees are lit on BOTH sides, the grass is lit on one side and
+pure black on the other, the boundary is EXACTLY the tile seam, and the
+sky is a flat dark navy ("в 20_19 неба вообще нету как и солнца, но трава
+со светом при этом").
+
+**The pixel measurements:** the sky = (24,29,35) — EXACTLY the client fog
+color of the default-weather branch (the fog_sky_affect omission); the
+lit grass lum 78 (with tree shadows = a real sun), the black side lum 9
+(= the flat ambient on the terrain albedo + a small fog lift). Both tiles
+were under the SAME env state (the default branch: the static NSun0 sun,
+energy 5.0) — so the sun demonstrably reaches 20_19's terrain and NOT
+19_19's.
+
+**The decisive evidence was already in the boot logs.** The DEVLOG-135
+normal print's "first=" value per tile:
+- 20_19 (the flat generate_normals path, LIT): first=(0.0197, -0.996982,
+  0.075084) — the normal points DOWN (Y negative);
+- 19_19 / 20_18 / all the DE tiles (the smooth ngrid path, BLACK):
+  first=(0.0, 1.0, …) / (-0.33, 0.89, -0.31) — UP.
+
+**The mechanism:** _build_terrain emitted the quad triangles as
+(0,2,1)/(0,3,2), which winds their FRONT faces DOWN (Godot's
+generate_normals measures the winding and printed exactly that on 20_19).
+With render_mode cull_disabled Godot flips the normal for back-face
+fragments (two-sided lighting). Pre-130 the normals came from
+generate_normals() — DOWN, matching the winding — so the visible-from-above
+fragments (back faces) got the flip -> UP -> LIT (with the facet film).
+DEVLOG-130 replaced them with the explicit UP normals on the SAME
+down-wound triangles -> the flip turned them DOWN for every visible
+fragment -> dot(NORMAL, LIGHT) <= 0 for any overhead sun/moon -> NO
+directional light at all, flat ambient only. That is the whole
+black-ground saga since DEVLOG-130, and it matches the user's "освещение
+сломалось недавно": the 15:24 shot (the DEVLOG-129 build, pre-smooth) had
+the partial sun 110/255; the 08:47 build (post-130) = 10/255. DEVLOG-135's
+"default light() is blind" was a MISDIAGNOSIS (20_19's HEAD shader with
+the down normals + flip lights fine); the SPOM-convention light() added
+there is kept — it is the proven SPOM term and costs nothing.
+
+**The fixes:**
+1. scripts/world.gd _build_terrain: the emit order swapped to
+   (0,1,2)/(0,2,3) — the front faces now point UP, so the smooth UP
+   normals are used as-is with NO flip dependency. The placeholder-corner
+   (real[]) case already emitted UP-front triples — unchanged. The POM is
+   unaffected (its ngeo/vt.z are FRONT_FACING-adjusted and abs()-guarded;
+   T/B and the derivatives are identical). 20_19's effective normals are
+   unchanged too (down + flip == up + no flip).
+2. The default-weather branch in _update_daynight: fog_depth_curve = 1.0
+   and fog_sky_affect = 0.0 restored (the HEAD code had them; without
+   fog_sky_affect the plain ProceduralSky renders 100% fogged to
+   (24,29,35) = the user's "неба вообще нету" in 20_19).
+
+**Gate A:** the headless boot 0 shader/parse errors; the normals print now
+shows 20_19 first=(-0.0197, +0.996982, -0.075085) — the exact negation,
+UP — and the DE tiles unchanged UP. NO display runs.
+
+**Verification request to the user:** the same border spot (X=-25
+Y=60096) — the grass must be lit on BOTH sides with the smooth look kept;
+the 20_19 spawn — the plain sky visible (not the fog); the usual
+day/night checks on the DE territory (the night ground must lift off
+pure black via the moon + ambient).
+
+## DEVLOG-138 — 2026-11-22: the location transitions — the GLOBAL sun/moon/ambient; the sky/fog regions follow the terrain-change edge (the meadow contour inside 20_19), never the tile seam; 20_19 moved to the standard terrain path
+
+**The user's verdict + the new stage:** "трава наконец вернулась" (the
+DEVLOG-137 winding fix confirmed). The new task: the location transitions —
+(1) the sky and the light must change not at the tile seam but at the
+terrain-change edge ("иначе пользователь успевает видеть траву разных
+цветов"); (2) the sun is GLOBAL — in 20_19 and 19_19 it shone at different
+angles and the shadow angle snapped at the border.
+
+**The terrain analysis (offline):** the built world's landscape structure
+(tmp/terrain_mosaic_albedo.png + _height.png): the bright yellow-green
+meadow = a distinct basin landscape INSIDE 20_19 (its east/north; the
+texmeans OG_53 0.50 / OG_45 0.52 / OG_58 0.44 vs the dark olive grasses
+0.20-0.28 of 19_19/20_18). 20_19's SOUTH-WEST corner = the same dark
+plateau as 19_19 — the terrain does NOT change at the x=0 seam there (the
+user's shot spot). The meadow edge = the REAL terrain-change edge, running
+diagonally inside 20_19, touching the seam only near the shot latitude
+(the bright grass starts ~5-10 m east of the path) and at the far north
+(where 19_19's dark plateau meets the meadow — the seam = the terrain
+change there). Mask rows run south→north (row 0 = the tile's south edge).
+
+**The region mechanism:**
+- assets/maps/20_19/terrain/region_weather.png (64×64): white = the tile's
+  OWN weather ("default" — the plain sky) inside the meadow coverage
+  (baked offline: the bright-grass mask sum OG_53+OG_45+OG_58 > 0.7 per
+  64-cell; 73% of the tile); black = the world-base overcast. Regenerable
+  from the tile's own layer masks; no file = the tile is uniform.
+- world.gd _load_data loads the optional mask per tile (the boot print
+  "WEATHER REGION [...]: 64x64 mask loaded"); the new _region_weather()
+  resolves the camera's weather: the tile's own weather inside the mask,
+  the base overcast outside.
+- _update_daynight RESTRUCTURED: the sun/moon/ambient = GLOBAL (one
+  day/night cycle for every region — the energy 2.8 cap, the warm-to-white
+  color, the moon 0.18, the night-ambient floor 12%) — the shadow angle
+  cannot change across the borders anymore. Only the SKY and the fog are
+  regional: the meadow = the plain ProceduralSky + the client depth fog
+  (24,29,35 @ 1..100 m, fog_sky_affect 0); the DE territory = the overcast
+  dome, no fog. The static NSun0 sun (energy 5.0, the fixed direction) is
+  RETIRED — the DEVLOG-136 control state ends; the spawn keeps its plain
+  sky (the spawn cell sits inside the meadow, bright=2.62).
+
+**20_19 = the standard terrain path:** the DEVLOG-136 control split (the
+flat generate_normals + the HEAD terrain_default.gdshader + the POM skip)
+retired — ONE terrain path for every tile (the smooth ngrid normals, the
+current terrain.gdshader, the POM heights). This removes the shader/normal
+look difference at the borders; the remaining grass color difference =
+the authentic per-tile textures (also in the client).
+terrain_default.gdshader stays on disk unused (the control artifact).
+
+**The region sampling (the offline simulation of _region_weather):** the
+spawn (3536,55432) = default; the shot spot (x=-120) = overcast (19_19);
+the seam-adjacent 20_19 strip at the shot latitude = overcast (the dark
+SW corner), the meadow from ~x 500-1000 east = default; the far north
+20_19 = default, 19_19 = overcast (the switch = the terrain change at the
+seam there).
+
+**Gate A:** the headless boot 0 errors; all the tiles print
+shader=terrain.gdshader; 20_19 first=(-0.027, +0.998, -0.054) (the smooth
+UP normals); the region mask loaded. NO display runs.
+
+**Verification request to the user:** (1) at the border spot — crossing
+the path the shadow ANGLE must not change and the grass brightness must
+not snap at the seam; (2) walking east into the bright meadow the sky
+switches to the plain blue AT the grass change (~5-10 m east of the path);
+(3) the spawn view = the plain sky with the dynamic sun; (4) the usual
+day/night checks on both sides.
+
+## DEVLOG-139 — 2026-11-22: ONE world sky dome — the clouds are a geographic field, the sun works with the clouds, the fog removed everywhere (the user's architecture order)
+
+**The user's verdict on the DEVLOG-138 regions:** in 20_19 the sun looked
+"behind fog", and the 20_19 textures looked brighter VIEWED FROM 19_19 —
+i.e. the sun was effectively brighter in the overcast 19_19 than in the
+clear 20_19. The measurement agreed: it was the MEADOW's depth fog
+(24,29,35 @ 1..100 m) dimming everything the camera saw from inside it
+(the distant mountains = the navy silhouettes), while the fog-free
+overcast side rendered at full brightness. "Fog is not needed there — the
+territories are always bright." And the architecture order: "across the
+whole map there must be ONE common dome/sky, as in real life, with the
+only difference being the clouds over different maps; the sun works with
+the clouds and the weather, not with baked light — then the eternal
+transition tuning goes away."
+
+**The new architecture (implemented as ordered):**
+- ONE sky dome (l2_sky_clouds.gdshader reworked) for EVERY tile and
+  region — always visible, camera-following, fog_disabled. No region sky
+  switches remain in world.gd (the DEVLOG-138 branch machinery removed:
+  _region_weather, the region_img loads, the fog toggling).
+- The clouds are a GEOGRAPHIC FIELD: assets/textures/sky/world_clouds.png
+  (256×192, 512 game units/texel, the world rect x[-65536,65536]
+  y[-32768,65536] — CLOUD_ATLAS_RECT), baked by
+  tmp/bake_cloud_atlas.py from the tiles' own weather region masks (the
+  tile's own weather = 0.0 clear, the base overcast = 1.0, the unbuilt =
+  the nearest built tile, then the gaussian blur sigma 2.5 texels ≈ 13 m
+  godot so nothing ever steps at an edge). The dome fragment projects the
+  view direction onto the cloud plane (600 m above the camera), reads the
+  atlas at that world point and blends the clear/overcast palettes +
+  cloud coverage per fragment: gray and dense over the village, blue with
+  sparse white clouds over the meadow, the transition in the SKY exactly
+  where the terrain changes below.
+- The sun works with the weather: world.gd samples the SAME atlas
+  bilinearly above the camera (_cloud_at) and the sun energy =
+  lerp(3.4, 2.8, cloudiness) × the elevation cycle — the clear sky = the
+  stronger direct sun, the full overcast = the approved 2.8. The dome
+  draws the sun disc (the warm core + the halo) masked by the clouds, so
+  the disc appears in the clear sky and hides under the cover — the
+  light and the sky can never disagree.
+- NO FOG anywhere (env.fog_enabled = false; the client's ZoneInfo
+  DistanceFog stays recorded in _build_environment for the restore). The
+  moon disc/moonlight unchanged; the ambient unchanged (one for the
+  world).
+- The clear-sky palettes: the day pair = the approved DEVLOG-136 control
+  look (0.2,0.3,0.5 top / 0.45,0.5,0.55 horizon); the clear dusk/night =
+  clean-room values; the overcast palettes = the DEVLOG-122 approved ones.
+
+**The atlas landmarks:** the spawn (3536,55432) = 0.086 (clear), the
+meadow center = 0.0, the village = 1.0, the user's shot spot
+(-372,64260) = 0.703 (19_19, near the meadow edge — the blurred field),
+the far north 20_19 = 0.134. The sun energies: the meadow 3.35, the shot
+spot 2.98, the village 2.8 (at the same elevation).
+
+**Gate A:** the full headless import rc=0 (the new PNG's .import created —
+the first boot139 caught "No loader found" for the unimported atlas: the
+dome would have sampled an empty texture); the boot 0 script errors, the
+atlas loads, world built 9.9 s. fog_disabled verified valid in the Godot
+4.7 spatial render modes (the docs). NO display runs.
+
+**Verification request to the user:** (1) the same border spot — the sun
+must look CLEAN (no fog veil) in the clear sky, the distant mountains
+un-fogged; (2) standing at the border the sky must READ as one sky: the
+gray cover over the village side, the blue with sparse clouds over the
+meadow side, blending across the sky; (3) the sun brightness: the clear
+meadow slightly brighter than the overcast village side (3.35 vs 2.8 at
+the zenith); (4) the sun disc hides under the cloud cover and shows in
+the gaps; (5) the usual day/night checks.
+
+## DEVLOG-140 — 2026-11-22: the sky SIMPLIFIED per the user's flat-world spec — one palette for the whole world, the clouds = the world-anchored overhead field driven by ONE cloudiness value above the camera, the semi-transparent DE veil; the wedge artifact dead
+
+**The user's verdict on the DEVLOG-139 dome:** it failed — the sky showed
+hard straight-edged WEDGES (the bright blue triangle in the first shot,
+the sharp radial seams in the second). The cause: the per-fragment
+geographic atlas lookup projected the region field onto the cloud plane —
+near the zenith the footprint is tiny and near the horizon it explodes,
+so every region edge in the atlas became a straight wedge radiating
+across the sky. The user simplified the task: "плоский мир, небо без
+изгиба; везде одинаковое по цвету небо, солнце один источник на весь мир,
+а сверху, именно над картой, то тучи, то нету туч, то очень густые — в
+зависимости от карты; над территориями тёмных эльфов средний показатель,
+пасмурность: туч много, всё небо затянуто, но облака полупрозрачные, а не
+тёмные и толстые".
+
+**The new dome (l2_sky_clouds.gdshader rewritten):**
+- ONE sky palette for the whole world (the day = the approved control
+  blue 0.2/0.3/0.5 — 0.45/0.5/0.55; the clean-room dusk/night). No
+  per-fragment palette blending.
+- NO geographic lookup per fragment (the wedge cause removed). The cloud
+  pattern = the world-anchored fbm: the direction projected onto the
+  cloud plane gives the WORLD point (cam_ws.xz + dir.xz * (600 m /
+  dir.y)), the fbm reads that point × 0.005 + the clock drift — the
+  clouds stay over the map as the player walks, and the smooth pattern
+  cannot seam.
+- The coverage + the opacity come from ONE uniform (cloud_local) — the
+  cloudiness ABOVE THE CAMERA, which world.gd bilinearly reads from the
+  same world atlas per frame. cov = mix(0.78, 0.30, c); op =
+  mix(0.50, 0.85, c). The clouds fade in overhead (smoothstep 0.02..0.12
+  of dir.y) — "если смотреть вверх".
+- The DE veil = the semi-transparent light gray (cloud_day 0.84/0.87/0.92,
+  the opacity 0.745 at c=0.7), covering ~90% of the sky with the blue
+  showing through — "затянуто, но полупрозрачные, а не тёмные и толстые".
+  The dusk/night cloud bodies ride their own palettes.
+- The sun disc + the halo glow through the veil (× (1 - mask*op)).
+- The atlas REBAKED: the DE overcast = 0.7 (the MEDIUM indicator per the
+  user's scale — the 1.0 headroom stays for a future denser territory),
+  the meadow = 0.0. The landmarks: the village 0.700, the spawn 0.060,
+  the shot spot 0.492. The sun = lerp(3.4, 2.8, c) → the DE 2.98, the
+  clear 3.35 (the thin veil passes more light than the old full cover —
+  the requested lighter look).
+
+**world.gd:** the dome's cloud_atlas/atlas_rect uniforms removed (the
+shader has no geographic lookup anymore); cloud_local added per frame;
+the CPU atlas (_cloud_img/_cloud_at) stays as the single source for both
+the sun energy and the sky's cloud_local — the sky and the light can
+never disagree, and no transition tuning remains (the atlas field does
+it).
+
+**Gate A:** the rebake + the full import rc=0; the boot 0 script errors,
+no loader errors, world built 9.9 s. NO display runs.
+
+**Verification request to the user:** (1) NO wedges/seams in the sky at
+the border — one smooth sky; (2) the same sky color everywhere; looking
+up: the blue with the sparse clouds over the meadow, the semi-transparent
+light-gray full veil over the DE territory, changing smoothly as you walk
+the border; (3) the sun disc visible in the clear sky, glowing faintly
+through the veil; (4) the distant mountains with NO fog; (5) the usual
+day/night checks.
+
+## DEVLOG-141 — 2026-11-22: the clouds are GLOBAL and belong to the territories (the user's correction of the DEVLOG-140 model); the geographic atlas restored per-fragment with the soft-front bake — the DEVLOG-139 wedges stay dead
+
+**The user's correction:** the DEVLOG-140 "one cloudiness above the
+camera" made the WHOLE sky's cloud amount change at the border crossing —
+exactly the effect to avoid. The real model: "небо одинаковое по цвету и
+синеве везде, но количество туч на картах разное; тучи видны глобально, а
+не при переходе; тучи именно сверху над картой, поэтому видны даже с
+соседней карты" — the clouds are fixed over the territories, the
+neighbor's weather is visible in its direction of the sky, and crossing
+the border changes nothing (you walk UNDER the clouds).
+
+**The implementation:** the per-fragment geographic atlas lookup on the
+cloud plane (the DEVLOG-139 mechanism) is RESTORED — the coverage and
+the opacity are the functions of the FRAGMENT's local density
+(cov = mix(0.78, 0.55, c), op = mix(0.50, 0.85, c)), so the semi-
+transparent light veil sits over the DE territory and the sparse light
+clouds over the clear one, both visible from across the border. The
+DEVLOG-139 wedge artifact does NOT return because the atlas is now
+baked with sigma 10 texels ≈ 51 m godot (the σ=20 experiment flooded
+the clear cores: the meadow center 0.18, the spawn 0.36 — rejected; the
+σ=10 keeps the cores: the meadow center 0.043, the village 0.700, the
+spawn 0.305, the far-north meadow 0.276): the territory edges read as
+soft fronts ~200 m wide in the sky instead of razor straight lines. The
+sky palette stays ONE for the whole world; the pattern stays
+world-anchored; the sun disc glows through the veil. The sun light
+samples the same atlas above the camera (lerp(3.4, 2.8, c)) — walking
+the border changes the light smoothly, nothing snaps.
+
+**world.gd:** the dome's cloud_atlas/atlas_rect uniforms restored; the
+cloud_local uniform removed (the density is per-fragment now); the CPU
+atlas read (_cloud_at) stays for the sun only.
+
+**Gate A:** the rebake + the full import rc=0; the boot 0 script errors,
+no loader errors, world built 9.9 s. NO display runs.
+
+**Verification request to the user:** (1) no wedges/seams; (2) standing
+in the DE territory: the semi-transparent gray veil overhead AND the
+clear blue sky visible in the direction of the meadow (the neighbor's
+weather seen from afar); (3) from the meadow: the sparse clouds overhead
+and the gray cover visible over the DE side; (4) crossing the border:
+the clouds do NOT change amount abruptly — the front passes overhead
+softly; (5) the sun disc clean in the clear sky, glowing through the
+veil; (6) the usual day/night checks.
+
+## DEVLOG-142 — 2026-11-22: "the cloud amount is the same everywhere" — two root causes fixed: the atlas exhausted below 42 deg of elevation (the clamped-constant low sky) and the too-flat density→coverage mapping
+
+**The user's verdict on the DEVLOG-141 build:** "ничего не изменилось.
+количество туч везде одинаковое" — the clouds render but the SAME amount
+everywhere.
+
+**The root causes (both mine, both fixed):**
+1. THE ATLAS EXHAUSTION: the cloud-plane projection (600 m / dir.y) puts
+   a direction below ~42 deg of elevation beyond the old atlas (±655 m
+   godot) — more than half the visible sky clamped to the atlas EDGE
+   texels = one constant. Only the narrow zenith cone read the real
+   field. FIX: the atlas now extends 1500 m godot beyond the built world
+   in every direction (841×777 texels at 512 game/texel; the unbuilt =
+   the nearest-tile fill) AND the projection SATURATES the distance at
+   1500 m (dist = min(600/dir.y, 1500)) — the whole sky above the cloud
+   fade floor (dir.y 0.02..0.12) lands INSIDE the field. The kink of the
+   saturating mapping is invisible on a continuous field (no seam).
+2. THE FLAT MAPPING: cov was mix(0.78, 0.55, c) — a 0.23 threshold range,
+   barely visible. FIX: cov = mix(0.85, 0.30, c), op = mix(0.45, 0.85, c)
+   — the clear core = the near-cloudless sky (the coverage 0.82, the
+   opacity 0.47), the DE core = the full semi-transparent veil (the
+   coverage 0.45, the opacity 0.73), the strong visible contrast between
+   the territories.
+
+**The atlas landmarks (the σ=10 texels = 51 m soft fronts kept):** the
+village 0.700, the meadow center 0.056, the spawn 0.305, the border shot
+spot 0.388, the far-north meadow 0.276. The sun = lerp(3.4, 2.8, c) above
+the camera (unchanged).
+
+**Gate A:** the rebake + the full import rc=0; the boot 0 script errors;
+**CLOUD ATLAS: 841x777 bound** (the new boot print proves the texture
+binds — the DEVLOG-139 "No loader" class is closed). NO display runs.
+
+**Verification request to the user:** (1) the clouds differ STRONGLY
+between the territories now: the near-cloudless blue over the meadow, the
+full semi-transparent veil over the DE side; (2) both visible from across
+the border (the neighbor's weather in the sky, incl. the low directions);
+(3) no wedges/seams; crossing the border nothing snaps; (4) the sun disc
+clean in the clear sky, glowing through the veil.
+
+## DEVLOG-143 — 2026-11-22: the clouds = the ceiling only (the user: "облака не должны скатываться по краям карты как по стенам")
+
+**The user's verdict on the DEVLOG-142 build:** "почти хорошо" — the
+territory weather works — but the clouds ran down to the horizon as
+vertical curtain-like walls.
+
+**The cause:** the cloud mask's horizon fade started at dir.y = 0.02 (1
+deg of elevation) — exactly where the saturating projection (1500 m cap)
+stretches the pattern patches into narrow angular slivers along the
+horizon; the fade band rendered them as vertical curtains ("walls").
+
+**The fix:** the mask now fades in from dir.y 0.22 (12.7 deg) and is full
+above 0.45 (26.6 deg) — the clouds exist only on the ceiling; the low sky
+is the clean gradient. The sun disc at the low elevations (the sunrise/
+sunset) is now always unmasked (clear horizon sun).
+
+**Gate A:** the boot 0 script errors, CLOUD ATLAS bound, world built.
+NO display runs.
+
+**Verification request:** the sky near the horizon = the clean gradient
+(no curtains) on BOTH the DE and the clear sides; the clouds = the
+ceiling patches overhead; the rest of the DEVLOG-142 behavior unchanged.
+
+## DEVLOG-144 — 2026-11-22: the respawn returns to the DE village; the village artificial lighting removed except the tunnels; the street lanterns (the blue plafonds) become the light sources
+
+**The user's order:** "меняем точку респауна на деревню тёмных эльфов.
+убираем внутри деревни искуственное освещение, кроме туннелей. и делаем
+из фонарей в деревне источники освещения. там у фонарей есть синие
+плафоны, они будут источниками."
+
+**The spawn:** back to the village — the map's own authored PlayerStart0
+(9383,16440,-4478), the west plaza inside the lantern cluster. The cell
+is a terrain-hole cell → the deck-height spawn path (the boot proof:
+"player spawned at (93.83, -43.88, 164.4)").
+
+**The light audit (the data-driven rules):**
+- The village region = the terrain-hole bbox (x 5888..14976, y
+  11904..21504 — the connected hole region #1 computed offline). The
+  Light actors inside it: 91 (20 of them already carry the map's own
+  deleted flag → 71 actually skipped at the runtime).
+- The tunnels keep their lights AUTOMATICALLY: everything outside the
+  village bbox stays — the kept 13 = exactly the tunnel corridor cluster
+  (Light119-129, x 15084..16788) + the approach. The temple region skip
+  (DEVLOG-129) unchanged: 30.
+
+**The lantern lights:** O_DE_Lamp01 ×22 + O_DE_Lamp02 ×9 (the village
+street lamps, the pivots z -4473..-4498) + O_DE_Center_obj (the village
+centerpiece — it carries the same blue glass). The plafond = the
+DE_V_cube_deco3 texture (mean RGB 0.49/0.74/0.80 — the blue glass); the
+plafond surface's AABB center = the omni anchor — the client's own
+Light actors sat at exactly this offset (the pivot +13..15 game units,
+verified Light141 z=-4458 vs the Lamp01 pivot -4473). 32 omnis total:
+the blue Color(0.6, 0.75, 1.0), the energy 2.6, the range 7.0, the
+attenuation 0.25, no shadows, registered for the same 250-m proximity
+gate as the map lights.
+
+**The plafond emission:** l2_surface_pbr.gdshader gains the
+emission_energy uniform (0 = every texture inert) writing
+EMISSION = albedo * energy; l2_proc_tex._pbr_material sets it to 1.6 for
+DE_V_cube_deco3 only. The glass glows with its own blue pattern day and
+night (the client's lamps are always-on).
+
+**Gate A:** the full import rc=0; the boot 0 script errors; 20_18 prints
+"placed 11 map lights (43 registered; 30 temple + 71 village skipped)"
+(the 43 = 11 map + 32 lantern); the spawn proof above. NO display runs.
+
+**Verification request to the user:** (1) the spawn view = the village
+plaza; (2) the night shot: the streets lit by the BLUE pools at the
+lanterns, the glass glowing, NO other artificial light in the village;
+(3) the tunnel keeps its lights; (4) the day shot: the glass glows subtly
+under the sun; (5) the lamp light tuning (the color/energy/range) on the
+user's screenshots.
+
+## DEVLOG-145 — 2026-11-22: the respawn moved to the road between the village and the Shillien Temple (the old route-profile spot) — the village PlayerStart0 spawned inside a building
+
+**The user's verdict:** the village PlayerStart0 (9383,16440) = inside a
+building. The new point = the OLD documented spawn (the temple-stage
+session): (21109, 12819, ground -36.66), the road between the DE village
+and the Shillien Temple, the yaw -1.2313 facing the temple entrance (the
+default already in the code). The terrain probe: present=1, the spawn
+logic picks the ground height. The village lantern lighting (DEVLOG-144)
+is unaffected — the lanterns sit in the village; the road spot has no
+lanterns (the client lights there = the pre-existing map lights outside
+the village bbox, unchanged).
+
+**Gate A:** the boot 0 script errors. NO display runs.
+
+## DEVLOG-146 — 2026-11-22: the village lantern lights de-gated — they burn ALWAYS; the angle-dependent light-selection lottery in the compat renderer fixed
+
+**The user's verdict on the dark-plaza shot (X=12563 Y=16623, 17:31 день,
+the blue plafond dots glowing, NO light pools on the ground):** "при таком
+ракурсе камеры в этом гео, отрубаются все источники... отруби вообще
+зависимость от камеры. они должны гореть всегда когда персонаж внутри
+локации, сразу как выходит из туннель в деревню. условия простые."
+
+**Two camera-dependence channels found and cut:**
+
+1. **The 0.5 s proximity gate** (DEVLOG-144 registered the 32 lantern
+   omnis into `_lamps` with LAMP_ACTIVE_DIST=250): the lanterns now leave
+   the gate array — created `visible = true` and NEVER toggled. They burn
+   from the boot onward, at every camera angle, day and night (the user's
+   "условия простые"). The 19_18/other tiles' map lights keep the gate
+   (1755 Light actors — the per-frame compat light-list cost, out of
+   scope).
+2. **The compat renderer's light-limit lottery** (the REAL mechanism
+   behind "at this camera angle the sources disconnect"):
+   `rendering/limits/opengl/max_lights_per_object` = 8 and
+   `max_renderable_lights` = 32 (the Godot defaults). The village's big
+   meshes (the tile terrain and the BSP road/deck objects) have AABBs
+   overlapping dozens of lights; the 8 slots were filled from the
+   frustum-culled light set in cull order, and WHICH lights won the slots
+   flipped with the camera angle — at whole viewing angles every pool in
+   the frame vanished. Raised in project.godot: max_renderable_lights
+   32→256, max_lights_per_object 8→64 (covers the full village set: 32
+   lanterns + the tunnel map lights; the gate keeps the 19_18 register
+   low, so the per-frame list cost stays bounded).
+
+**Dead end documented:** `VisualInstance3D.extra_cull_margin` does NOT
+exist for lights in Godot 4 (the property lives on GeometryInstance3D;
+Light3D extends VisualInstance3D directly) — the runtime assignment
+errors out ("Invalid assignment ... OmniLight3D", the first Gate A run
+caught it). Not needed anyway: the frustum culling of the light
+INSTANCES drops only the pools on unseen ground (behind the camera); the
+visible pools come from in-view lanterns, and those were killed by the
+8-slot lottery, now gone.
+
+**Gate A:** the boot 0 script errors; "player spawned at (211.09,
+-35.76044, 128.19) terrain_height=-36.6604357337952" (the DEVLOG-145
+road spawn intact); all tile light placements unchanged (30 temple + 71
+village skipped). NO display runs.
+
+**Verification request to the user:** the SAME plaza camera as the dark
+shot — the blue pools must be on the ground at EVERY angle now; plus the
+night shot through the tunnel → village (the lanterns must already be
+burning at the tunnel exit).
+
+## DEVLOG-147 — 2026-11-22: the lantern pools moved INTO the shader — the angle-dependent light lottery defeated for good
+
+**The user's verdict after DEVLOG-146** (the plaza shot X=13426 Y=16490,
+15:59 день, plafonds glowing, no pools): "всё равно есть отключения от
+ракурса".
+
+**The audit (new diagnostic `L2_LIGHT_CAP_AUDIT=1`, world.gd) proved the
+real mechanism with numbers** (run headless, spawn forced to the user's
+plaza point via L2_SPAWN):
+- 615 visible omni lights at the plaza (the DEVLOG-110 LAMP_ACTIVE_DIST=250
+  gate spans 250 m in a 7-tile world — 1954 registered lights, 615 pass);
+- 4430 mesh instances, **314 overlap more than 8 lights**; the plaza floor
+  alone (`aabb pos=(82.6,-48.4,143.3) size=(64.5,2.4,60.0)`) overlapped
+  **32** lights, the centerpiece **43**;
+- the compat renderer lights each object with at most **8** lights — a
+  COMPILE-TIME cap (`MAX_LIGHTS_PER_OBJECT`); the
+  `rendering/limits/opengl/max_lights_per_object` project setting (raised
+  to 64 in DEVLOG-146) does NOT lift it — so WHICH 8 lights each big mesh
+  received flipped with the frustum-cull order = the camera angle. The
+  DEVLOG-146 limit raise was insufficient; it stays (harmless headroom).
+
+**The fix — the pools render in l2_surface_pbr.gdshader itself,
+bypassing the renderer's light lists entirely:**
+- the 32 OmniLight3D lanterns are GONE; `_build_meshes` registers each
+  plafond center into `L2ProcTex.register_lantern()`;
+- the shader accumulates the pools per fragment from
+  `uniform vec3 lantern_pos[64]` + `lantern_count` (world-space VERTEX,
+  the Gate-E screen-Jacobian normal ngeo; falloff = the retired omni's
+  parameters: range 7, the wide 0.25-exponent curve, geometric N*L so the
+  bright spot sits at the lantern base; `EMISSION += albedo *
+  lantern_color * 2.6 * sum`);
+- `L2ProcTex.apply_lanterns()` pushes the uniforms into every cached PBR
+  material at the end of _ready; materials created later (later tiles, the
+  character body in player.gd) receive them at creation — the character
+  shares this shader, so the pools light the body too;
+- ZERO renderer light lists involved => zero camera dependence, the pools
+  burn at every angle the moment the position array is fed (the boot, i.e.
+  "сразу как выходишь из туннеля"). lantern_count=0 outside the village =>
+  the road/temple materials are bit-identical (the golden baseline safe).
+
+**Known accepted trade-offs:** the hair's StandardMaterial3D override and
+the rare non-PBR fallback surfaces do not receive the shader pools; the
+tunnel map lights keep their renderer-driven (lottery-prone, pre-existing)
+pools — out of scope.
+
+**Gate A:** the full reimport after the shader edit (the .import trap
+protocol: shader .import deleted + .godot/imported wiped) rc=0 — the only
+"errors" are the known benign ones (1400 × glTF zero-accessor, 4 × temple
+SPOM textures). The boot: 0 SCRIPT ERROR, 0 shader parse errors,
+"lantern pools: 32 positions pushed to the PBR materials", the audit
+counts only the map lights now (583). NO display runs.
+
+**Verification request to the user:** the SAME plaza camera as the dark
+shot — the blue pools must be on the ground at EVERY angle; the character
+body brightens near the lanterns; the pool look (energy 2.6 / range 7 /
+wide curve) is uniform-tunable on the user's screenshots.
+
+**DEVLOG-147 rev2 (the same day, the user's "теперь освещение вообще не
+работает"):** the first rev pushed the uniforms only into the
+`L2ProcTex._cache` materials — but `_bsp_material` (the route of ALL the
+village BSP floors: the roads, the plaza — everything the user looks at)
+DUPLICATES the cached material (`pm.duplicate()`) and a duplicate holds
+only the parameters set before it was made; the push happens at the end
+of _ready, after every duplicate exists. So the floors never received
+`lantern_count` and the pools were dead on the whole village ground.
+Fix: `L2ProcTex.track_pbr_material()` — a static list of EVERY live PBR
+ShaderMaterial (the cache originals tracked in `_pbr_material`, the BSP
+duplicates tracked in `_bsp_material` right after `duplicate()`),
+`apply_lanterns()` walks it. Boot proof: "lantern pools: 32 positions ->
+192 tracked PBR materials" (rev1 reached only the cache), 0 script /
+shader errors, the spawn intact. NO display runs.
+
+**DEVLOG-147 rev3 (the user's "не помогло. значит сломали в прошлой
+итерации"): the pools were dead ON ARRIVAL — a Gate-E violation.** The
+pool math read the lantern distance from FRAGMENT `VERTEX`, but fragment
+VERTEX is VIEW-space (the Godot 4 spatial shader docs, verbatim: fragment
+VERTEX is "transformed into view space"; `world_vertex_coords` changes
+only the VERTEX stage). world lantern positions minus view-space fragment
+positions = hundreds of meters → every lantern skipped by the
+`ld >= lantern_range` guard → lant_sum = 0 everywhere → no pools at all
+("освещение вообще не работает"). The project's own Gate E (2026-11-14,
+AGENTS.md) prescribes exactly the cure; the SPOM shader had already
+documented the same trap (its lines 276-280: the fragment Jacobian basis
+is VIEW-space). The shader's own line-171 comment ("VERTEX in fragment =
+view space, its length = the camera distance") was right all along; the
+POM's "world step" comments are misleading-but-harmless (the POM math is
+consistent entirely in view space and pom_scale=0 everywhere anyway).
+
+**The fix (the Gate-E prescription verbatim):** `varying vec3 wpos;` +
+`void vertex() { wpos = VERTEX; }` (the vertex-stage VERTEX IS world with
+world_vertex_coords); the pool block reads `lantern_pos[li] - wpos` and
+the normal is `normalize(cross(dFdx(wpos), dFdy(wpos))) * ff` (the world
+Jacobian; `ff` flips it for the two-sided BSP back faces). ngeo stays
+untouched (the POM's view-space basis).
+
+**Gate A — the FULL protocol this time (the earlier revs ran only the
+headless parser, which cannot catch driver-level failures):**
+- the .import trap protocol (shader .import deleted + .godot/imported
+  wiped + full headless import) rc=0;
+- the headless boot: 0 SCRIPT ERROR, "lantern pools: 32 positions -> 192
+  tracked PBR materials", the spawn intact;
+- **the REAL-display compile check (DISPLAY=:0, --rendering-driver
+  opengl3, stderr captured, NO screenshot): 0 "shader error|compile"
+  lines** — the wpos shader compiles on the real driver. The compile
+  check is now a standing part of the shader-edit protocol (the headless
+  parser alone is insufficient — Gate A's own rule, followed late here).
+
+**Numeric expectation (offline replication):** a floor point directly
+under a plafond (the plafond ~4.5 m above the floor): att=(1-4.5/7)^0.25
+≈ 0.77, N·L ≈ 1 → the pool adds albedo × blue × ~2.0 — a strong visible
+pool. NO display renders by the agent; verification = the user's
+screenshot of the SAME plaza camera.
+
+**DEVLOG-147 rev4 — the FINAL split of labor (the user's screenshot: "освещение
+на домах но не касается других поверхностей"). THREE root facts, all
+established by numeric probes (L2_TRACE_BOX + a Gate D debug-render series):**
+
+1. **The ground the user looks at is NOT pool-capable material.** The
+   trace at the user's plaza point: ~50% of the visible ground =
+   `BSP:Polys3993/Polys348` brush faces with `surf=-1 tex=?` — the GREY
+   StandardMaterial3D placeholder (no texture record in bsp.json); the
+   walls/houses = `DE_V_wall01/02` — ALSO placeholders (no staged PBR
+   sets; the oren_dev_t package stages 62 sets — statues/deco/capets/
+   plafond — but NOT the floors/walls... EXCEPT DE_V_floor01/02, DE_V_m12,
+   O_dark_01 DO have sets — the first "no PBR sets" probe verdict was a
+   CASE bug in the probe itself, corrected). The shader pools fired only
+   on the PBR deco/lamp pieces — "lighting on the houses".
+2. **The position space truth table (Gate D probes 3-5):** the VERTEX-STAGE
+   VERTEX with `world_vertex_coords` = WORLD (probe 3: the buildings fired
+   at the world lantern distances; probe 4: the fract decode consistent
+   with the world meters) — the varying wpos = VERTEX in vertex() is the
+   CORRECT world position. The FRAGMENT VERTEX = VIEW-space (probe 5:
+   switching the pool to it extinguished every pool; the docs' fragment
+   line is right). (An intermediate "wpos = model space" reading of probe
+   4 was a fract-mod-20 misdecoding — retracted.)
+3. **The normal sign:** the GLES3 y-down dFdy convention + the BSP's
+   front-DOWN winding (DEVLOG-137) make `cross(dFdx,dFdy) * ff` point DOWN
+   on the floor back faces (probe 4: wn.y = -1 on the ground) — the walls
+   lit, the ground could never. Fixed with the sign-proof two-sided form
+   **abs(N·L)** in both shaders (the undersides it would reach are void in
+   the village). A compile break (the wpos varying deleted while the pool
+   still used it — the neutral-gray fallback frame) caught by the Gate D
+   series and fixed.
+
+**The final architecture (the "conditions simple" the user ordered):**
+- **Layer 1 (all ShaderMaterial surfaces — the PBR floors, the roads, the
+  deco, the character):** lit EXCLUSIVELY by the deterministic shader
+  pools (l2_surface_pbr + l2_procedural, wpos + abs(N·L), the uniforms fed
+  by L2ProcTex.apply_lanterns(), 32 positions → 192 tracked materials).
+  Zero renderer light lists => zero camera dependence.
+- **Layer 2 (the StandardMaterial3D placeholders — the grey BSP ground
+  faces + the placeholder walls/houses):** lit EXCLUSIVELY by the restored
+  lantern OmniLight3D nodes (the DEVLOG-144 look: energy 2.6, range 7,
+  attenuation 0.25, the blue color) with `light_cull_mask = 2` — they
+  CANNOT double-light anything on layer 1. Always on, no gate. The
+  placeholder carriers are small pieces (the brush grey surfaces SPLIT
+  into their own MeshInstance — the three-way grate/grey/textured
+  partition in _build_bsp_brushes; the statics: all-placeholder keys move
+  whole (395 keys), mixed keys split per key into main+grey twins (5
+  keys) — the boot print "layer routing: 395 all-placeholder keys, 5
+  mixed keys split"). No per-object 8-light lottery (small carriers).
+- No omni on the character: its body = l2_surface_pbr (the shader pools
+  light it).
+
+**Gate D verification (the debug render, camera parked AT a lantern,
+spawn 9815,17994):** after the wpos restoration — bottom-center ground
+99.5% magenta-ratio px, the mid-left road 100%, the mid-right ground 100%,
+the center building 100%, the distant buildings 83% magenta / 17% yellow
+(beyond the 7 m radius = the correct zero). Earlier Gate D lessons: the
+RGB-threshold classifiers false-negative on the night-dimmed albedo (use
+the channel RATIOS); one intermediate all-neutral-gray frame = the compile
+break above (the fallback look).
+
+**Gate A (the full protocol):** the reimport rc=0; the boot 0 script
+errors, "layer routing: 395 ... 5 mixed", "lantern pools: 32 positions →
+192 tracked", the DEVLOG-145 road spawn intact; the REAL-display compile
+check 0 shader errors. NO screenshot verification by the agent of the
+final look — the user's screenshot decides.
+
+## DEVLOG-148 — 2026-11-22: the omni shadows ON + the character moved to layer 2; the plaza lattice diagnosed as the LOST BSP SURF RECORDS (pending extraction task)
+
+**The user's verdict on rev4 (works) + four items:** (1) half the body in
+shadow / wrong light; (2) no shadows from the character; (3) between two
+lanterns there should physically be TWO weak shadows; (4) the center-plaza
+lattice lost its grid transparency.
+
+**Items 1-3 — fixed:**
+- **The character renders on LAYER 2** (player.gd: all the part
+  MeshInstances layers = 2): lit exclusively by the lantern omnis (the
+  DEVLOG-144 lamp-lit look restored — the omni reaches the dark suit,
+  which the albedo-modulated shader pool could not make readable) and
+  casts the omni shadows. The shader pools are OFF on the body
+  (lantern_count defaults to 0 — the uniform push removed): the omni
+  replaces them 1:1, no double-lighting. The sun/moon (cull_mask = all)
+  still lights and shadows the character.
+- **The omni shadows are ON** (shadow_enabled = true): the character
+  standing between two lanterns casts TWO weak shadows on the layer-2
+  ground — exactly the physics the user described. NO glass-blob risk:
+  the plafond glass is on LAYER 1 and the omni's shadow pass sees only
+  layer 2 (its cull_mask) — the glass never enters the shadow map. The
+  layer-1 pool-lit surfaces stay unshadowed (the shader math) — a known
+  limitation, the shadows read on the placeholder ground.
+- The pools on the character were ALSO the "half body" suspect: the pool
+  is albedo-modulated — the black suit (albedo ≈ 0.05) stays black under
+  any pool energy; the omni's 2.6 gives it the blue sheen instead.
+
+**Item 4 — DIAGNOSED, the fix is a separate extraction task (PENDING):**
+- the visible plaza "grid" = the `O_DE_Btm` slab's `DE_V_wall01` paint —
+  and that texture is RGB, NO alpha channel (the grid is PAINT, the
+  transparency is impossible through it);
+- the TRUE lattice texture = `Iron_net` (RGBA, 59% holes; the pbr_albedo A
+  = the staged mask, verified identical) — but **NO mesh in materials.json
+  references Iron_net**: in the client the plaza lattice = the BSP surf
+  material, and OUR extraction lost those surf records — the plaza's
+  brush tops trace as `BSP:Polys377/348 surf=-1 tex=?` (the grey
+  placeholders). The client reference shot (the user's): the statue
+  visible THROUGH the grid holes.
+- the fix = recover the lost surf→texture records for the surf=-1 faces in
+  tools/l2strict (the fnd_13/14 surf mapping gap) — a tools-level RE task,
+  NOT a shader/material patch. PENDING (the next session's candidate).
+- the Iron_net fences DO render (the ALPHA_CUTOUT path) — only the plaza
+  floor surf records are lost.
+
+**Gate A:** the boot 0 script errors, the layer routing intact (395
+all-placeholder + 5 mixed), "lantern pools: 32 positions → 192 tracked",
+the DEVLOG-145 road spawn intact. No shader edits (no reimport). NO
+display verification by the agent — the user's screenshots decide.
+
+**The perf note:** 32 shadowed omnis in the compatibility renderer (cube
+maps) — the frustum culling keeps only the in-view lights' shadows; if
+the FPS dips, the next lever = the shadow distance gating per lantern.
+
+**DEVLOG-148 rev2 — the probe series on the black body + the shadow atlas
+gate + the step-up assist:**
+
+**The black body (probe 6 series, L2_TIME=22, the camera at lantern[0]):**
+- the omni shadows OFF → the body STILL black (the acne hypothesis
+  refuted); the omni cull_mask = ALL → STILL black. The REAL mechanism:
+  **the plafond sits at KNEE height (~0.3-0.5 m up — the short DE posts)
+  and the character standing at the post puts the omni INSIDE the body
+  volume — every outward face has N·L ≤ 0** (the light inside a mesh
+  lights only the backfaces, which are culled). The black suit albedo
+  (≈ 0.05) makes the moon/pool contributions unreadable on the torso
+  (the face and the leggings = the light albedo — lit ✓ the user's first
+  close-up: the legs lit, the torso black).
+- **the fix: the lantern pools RETURN to the body** (the player
+  materials' lantern uniforms restored): the pool's abs(N·L) works from
+  inside the volume too, it is deterministic and identical to the ground
+  pools the user approved ("пересечение света фонарей работает"). The
+  layers = 2 stay (the omni shadows).
+- the omni stays for the GROUND placeholders + the shadows; inside the
+  body it contributes ~nothing (harmless).
+
+**The shadow atlas gate (the user's item 2: "фонари посередине судя по
+теням не работают"):** 32 cube-shadow omnis overflow the compatibility
+renderer's shadow atlas — SOME lights silently lose their shadows (the
+inconsistent shadows between the lanterns). Fix: the shadow distance gate
+in _process's 0.5 s tick — `shadow_enabled = distance < 25 m` per lantern;
+the omni lighting and the pools are unaffected (always on). The gate is
+also the FPS lever if the cube shadows get heavy.
+
+**The step-up assist (the user's item 3: the character cannot walk over
+the curbs/steps):** after move_and_slide, when walking into a low
+obstacle on the floor: the ankle-height forward ray blocked + the
+knee-height forward ray clear + the down-cast ahead lands a floor with
+the rise ≤ 0.45 m → the position steps onto it (velocity.y reset). The
+body origin = the capsule center 0.9 m above the floor.
+
+**Item 4 (the plaza lattice) = unchanged, PENDING:** the lost surf
+records on the plaza brush tops (DEVLOG-148 above) — the
+tools/l2strict extraction recovery task.
+
+**Gate A:** the boot 0 script errors; the spawn intact. The night
+verification render (22:01, the camera at lantern[0]): the body region
+mean RGB (88.6, 101.3, 114.6) — the blue-pool tone, the bright
+highlights present (max 255). NO eyeball verdicts — the user's
+screenshots decide.
+
+**DEVLOG-148 rev3 — the user's follow-up (half the body black at night;
+the house door black; the middle lanterns unfixed; no curb step-over):**
+
+- **The layer-2 placeholders STOP casting omni shadows** (the
+  all-placeholder statics, the grey twins, the brush grey insts —
+  cast_shadow OFF): only the CHARACTER casts now. The client's lamps are
+  shadowless — our building shadows were blacking out the door recesses
+  ("дверь дома чёрная"); with the walls out of the shadow pass the
+  recesses receive the omni again (the client look), the two weak
+  character shadows remain, and the shadow map contains a single caster
+  (no atlas pressure from the buildings).
+- **The shadow distance gate tightened 25 → 12 m** (the plaza's whole
+  lantern set fit the 25 m radius and re-overflowed the atlas).
+- **The body pool: energy 4.0 + lantern_ndl_soft 0.5** (a new shader
+  uniform, mix(abs(N·L), 1, soft)) — the black suit (albedo ≈ 0.05)
+  becomes readable at night; the ground pools keep the approved 2.6 /
+  full N·L.
+- **The step-up assist: the is_on_wall() condition dropped** — a low curb
+  can register as a floor contact (the slope under the floor_max_angle),
+  not a wall, so the assist never fired; now the ankle/knee/down probes
+  decide whenever the character walks on the floor.
+
+**Gate A:** the reimport rc=0 (the shader edit), the boot 0 script
+errors, the DEVLOG-145 spawn intact, the real-display compile check 0
+shader errors.
+
+**DEVLOG-148 rev4 — the "half body" ROOT CAUSE FOUND: the upper-body part
+was on a POOL-LESS material.** CHAR_MAT_MAP routes the alpha-cutout parts
+(the bodice `FDarkElf_m001_u`, the gloves `_g` — the binary strap/plate
+alpha) to a StandardMaterial3D override (the old scissor fix, 2026-11-15)
+— the override has NO lantern pool, so the whole UPPER body rendered pitch
+black at night while the legs (the `_l` part, the plain ShaderMaterial)
+were pool-lit — EXACTLY the user's screenshot split at the belt. Fix: the
+alpha-cutout parts STAY on l2_surface_pbr with use_alpha (the shader cuts
+the binary mask with the same 0.4 scissor) + the pool uniforms + energy
+4.0 / ndl_soft 0.5. The verification render (22:01, at lantern[0]): the
+body region mean RGB (114.2, 124.7, 135.8) vs (88.6, 101.3, 114.6) before
+— the torso pool-lit. Gate A: the boot 0 script errors.
+
+**DEVLOG-148 rev5 — the plaza darkness root cause: the 7 m omni range.
+The user's items (the multiple-source shadows, the middle lanterns, the
+curb climb):**
+
+- **The lantern range 7 → 22 m** (the omnis in world.gd + the
+  `lantern_range` uniform in BOTH pool shaders). The diagnosis: the plaza
+  center sits 10-15 m from every lantern — the 7 m hand-set range
+  (DEVLOG-144) left the whole plaza grid beyond every light (the moon is
+  blocked by the sunken rim's own shadow) — "фонари посередине
+  нерабочие". With 22 m the omni pools cover the octagon wall-to-wall
+  (the verification render 23:01 at the plaza: the whole grid lit, the
+  client-like wash). The client's own Light records for the lamp posts
+  (Light6 at (9815,17978,-4435) = exactly lantern[0], brightness 200/255,
+  radius 70) were extracted for the record — the UE2 radius units do not
+  translate 1:1 (the client's plaza wash is the BAKED lightmap, not the
+  runtime radius), so the range stays the hand-tuned 22 m.
+- **The shadow gate restored to 25 m** (the real "middle lanterns" cause
+  was the range, not the atlas overflow).
+- **The step-up assist: the single 0.55 m down-cast flew PAST the 10-30
+  cm wide curbs** (the landing = the flat ground behind, rise ≈ 0 → a
+  no-op teleport → "no step-over"). Now THREE down casts at 0.40/0.50/
+  0.65 m, the first valid rise (0.02..0.45) steps onto the curb.
+
+**Gate A:** the reimport rc=0 (the shader edits), the boot 0 script
+errors, the spawn intact, the plaza verification render lit.
+
+## DEVLOG-149 — 2026-11-22: the PHYSICAL lanterns (the user's "делаем фонари по полной физике а не фиксим колхозно")
+
+**The user's verdict on rev5:** (1) the village OVERLIT — even the roofs
+lit (the shot = 07:40 ДЕНЬ — the omnis burned at full power at DAY);
+(2) the steps STILL not climbed; (3) no shadows possible at that
+lighting; (4) the FULL physics: the occlusion by the obstacles, the
+lamp's 4 corner ledges + the cap eating their share of the light, and
+the crystals must GLOW (not the static texture).
+
+**The day flood root cause:** the 32 omnis + the shader pools burned at
+full power around the clock — at day they added on top of the sun
+(the blowout). Fix: the lantern day/night curve in _update_daynight —
+`lamp_f = 1.0 - smoothstep(-0.05, 0.10, sun_elevation)`; the omnis'
+energy = 1.8 × lamp_f, the pools ride the same factor through the new
+`lantern_night` shader uniform (updated on the tracked materials only
+when it moves by >0.004). The lamps are night/dusk-only now, the client
+way.
+
+**The pool sum clamp:** with the 22 m range, 6-10 lanterns overlapped at
+one fragment and the unbounded sum blew the render white. Both pool
+shaders clamp `lant_sum = min(lant_sum, 1.2)` — the overlapping pools
+SATURATE, they do not stack.
+
+**The physical occlusion:** the rev3's cast-OFF on the layer-2
+placeholders REVERTED — every surface casts into the omni shadow maps
+(the walls block the light: "у нас освещает даже те места, которые не в
+зоне видимости фонаря" — fixed). The lamp statics' own metal (the 4
+corner ledges, the cap) casts — the light is physically clipped: the
+cap eats the upward cone (the roofs stay dark), the ledges clip the
+sides. **The translucent glass does NOT cast**: the lamp statics' split
+gains a third partition — the DE_V_cube_deco3 surface (tagged
+`l2_plafond` in l2_proc_tex) renders as its own cast-OFF inst, or its
+shadow would blob the ground under the lamp.
+
+**The crystal glow:** the plafond glass materials (1 shared material)
+pulse in _process — `emission_energy = 1.35 + 0.45 * sin(t * 1.7)` — the
+crystals breathe ("кристаллы должны хотя бы светиться").
+
+**The step-up assist — the headless L2_STEP_TEST probe built**
+(`L2_STEP_TEST="x,z"` = the scripted click-to-move target,
+`L2_STEP_DEBUG=1` = the probe prints). The probe walked the character
+into the plaza rim and caught the REAL obstacle: the rim ledge is
+**0.53 m tall** — the knee-height probe (the feet + 0.60) was BLOCKED
+(the obstacle is taller than the old 0.45 m limit) — the assist never
+fired. Fixed: the knee probe at the feet + 1.15, the rise limit 1.05.
+The re-probe: `knee_clear=true, dist=0.4 rise=0.53` → the character
+steps onto the rim. (The L2 client walks over such ledges by design —
+the geodata-driven movement; the 1.05 m limit matches.)
+
+**Gate A:** the reimport rc=0 (the shader edits), the boot 0 script
+errors, "lantern crystals: 1 glass materials", the DEVLOG-145 spawn
+intact; the day AND night verification renders (the real display): the
+day = the normal sun look (the flood gone), the night = the pools wash
+the plaza grid, 0 shader compile errors.
+
+**PENDING (unchanged):** the plaza lattice = the lost BSP surf records
+(the tools/l2strict extraction recovery).
+
+**DEVLOG-149 rev2 — the CAVE model (the user's: "солнце не должно влиять,
+локация в пещере"):**
+- The sun and the moon fade to ZERO across a 15 m feathered boundary of
+  the village bbox (_update_daynight): inside the cave no directional
+  light reaches anything — the lanterns own the cave lighting.
+- INSIDE THE CAVE THERE IS NO DAY: `lamp_f = max(lamp_f, cave_f)` — the
+  lanterns (the omnis + the shader pools) burn around the clock. This is
+  also the fix for "фонари посередине не работают" daytime reports: they
+  were night-only by the old curve.
+- The hop fallback in the step-up assist: the knee clear but no landing
+  matched (the odd obstacle shapes) => velocity.y = 4.5 (the apex
+  ~0.5 m), repeated while blocked => climbs.
+
+**Gate A:** the boot 0 script errors; the cave-day verification render at
+the user's point (07:43): the sun off, the village lit by the lanterns
+(the readable textures, no white blowout); the night render = the pools
+wash the plaza.
+
+**DEVLOG-150 — the iteration the user scored ZERO ("снова переосвещение.
+теней нету. персонаж ступеньки не перебегает. результат итерации
+нулевой") — and all three complaints were TRUE BY CONSTRUCTION:**
+
+1. **"теней нету" — shadows were architecturally impossible.** The pools
+   are pure fragment math (a fixed lantern-position array + distance
+   falloff): a shader pool CANNOT know about occluders, so the ground and
+   the body could never receive a shadow from it. The omnis were
+   cull_mask = 2 (the placeholders only) — layer 1 (all the PBR ground +
+   the character) received NO real lights at all. The rev2 report's
+   "тени персонажа в заливках" was a false claim — nothing in that build
+   could produce a shadow.
+2. **"переосвещение" — the falloff was not physics.** The pool curve
+   pow(1-d/r, 0.25) is nearly FLAT (75% strength at 15 m) and the omnis
+   ran attenuation 0.25 (Godot: decay ~0 = almost no decay) — everything
+   washed. The cave model then made this wash 24/7 inside the village.
+3. **"ступеньки не перебегает" — three stacked bugs** (the new STEPPOS
+   cadence print in the probe located them):
+   a. the knee veto stalled every STAIRWAY (the stair mass 4+ steps up
+      blocked the knee ray while the very next tread was a valid landing;
+      the probe measured a 0.35 m/s average crawl, rc=timeout);
+   b. low lips (5-12 cm) pass UNDER the ankle ray (feet+0.12) — the body
+      is pressed but the assist never fires (the down-casts are gated on
+      the ankle hit);
+   c. the sunken plaza rim: a >45° drop reads as a wall for
+      move_and_slide, and the 0.9 m down-casts (bottom = feet-0.2) cannot
+      see the plaza floor 0.53 m BELOW the feet — rv=0.00 + the
+      blocked-target killer = the character stands FOREVER (the user's
+      exact "не перебегает").
+
+**The fixes:**
+
+- **The physical falloff, one function everywhere** (both pool shaders +
+  every lantern omni): Godot's own get_omni_attenuation (decay = 2.0),
+  i.e. the range window (1-(d/range)^4)^2 times the TRUE inverse square
+  1/d^2. The omni_attenuation 0.25 -> 2.0 on the 32 lantern omnis; the
+  pool energy 2.6 -> 10.0 (the body 4.0 -> 12.0, the sum clamp 1.2 ->
+  1.3) rebalances the ~25x faster falloff. The roofs and the far plaza go
+  dark (the user's "у фонарей нету такого градуса, чтобы крыши осветить").
+- **The shadow carriers** (world.gd): TWO real shadow-casting omnis
+  parked every frame at the TWO registered lanterns nearest to the
+  player (cull mask 3 = layers 1|2, range 22, attenuation 2.0, energy
+  10 x lamp_f). The pools SKIP those two indices (the new
+  lantern_shadow0/1 uniforms, pushed via L2ProcTex.set_lantern_shadow
+  only on change): the light at those lanterns arrives through the real
+  omnis WITH their shadow maps -> the character casts a shadow on the
+  ground. Because the omni sits at the same plafond position with the
+  SAME curve and energy as the pool, the retarget swap is invisible —
+  only the shadow map presence changes. The compat 8-light cap is safe
+  (2 omnis per object); the shadow atlas is safe (2 carriers + the
+  player-distance-gated lantern omnis). L2_NO_CARRIER_SHADOW=1 = the
+  numeric A/B diagnostic (no effect on the normal scene).
+- **The body back on LAYER 1** (the DEVLOG-148 layer-2 leftover): with
+  the pools AND the 32 omnis (cull 2) both lighting it, the body was
+  double-lit AND the omni side rolled the per-object 8-light lottery —
+  an angle-dependent body light. Layer 1 = the pools (with the carrier
+  skip) + the two carriers = exactly the light the ground gets, so the
+  cast shadows land on consistently-lit ground. The body materials are
+  now tracked (the skip + the night factor reach them; untracked, the
+  body kept its own pool from the two skipped lanterns ON TOP of the
+  carrier omnis).
+- **The step assist rework** (player.gd): the knee veto DROPPED as a
+  climb condition — the LANDING decides (a real tread has an UP normal;
+  the wall-interior garbage the veto guarded against is filtered by
+  normal.y > 0.55); the assist runs on the actual PRESS (rv < 0.5 = the
+  killer's own threshold — never mid-stride on slopes) not only on an
+  ankle hit; the STEP-DOWN search (deeper casts to feet-1.7, dy in
+  -0.02..-1.15) carries the body over the sunken-rim drops; the hop
+  fallback only on a real ankle hit with the knee clear (no bunny-hopping
+  at walls).
+
+**The probe tooling:** L2_STEP_TEST="x1,z1,x2,z2" (a start teleport by
+the down-cast) / "x1,z1,y1,x2,z2" (an explicit start height — the
+down-cast from y=50 lands on the O_DE_MT_Out shell ~58 m above the
+plaza: the village is INSIDE the mountain, the roofs cover the roads) +
+the STEPPOS print (the position/speed/target every 0.5 s — the
+time-sink locator).
+
+**Evidence (numbers):**
+- The probe (140.05,157.23,-44.5 -> the plaza center 134.26,164.9): the
+  road stairways climb (rise 0.06/0.08/0.13/0.25/0.33/0.46 — including
+  the previously-vetoed 0.25 at knee_clear=false), the rim crossing
+  completes at rv 6.4 and the run ARRIVES (tgt=false at rv 3.15 = the
+  ARRIVE_DIST, NOT the killer). The one remaining stall = the
+  straight-line route's O_DE_inlet canyon wall (the floor profile: ny
+  0.06-0.27 = 75-86 degrees) — correctly unclimbable, the killer's
+  designed drop.
+- The plaza structure (the floor profile at the user's point): the
+  plaza = the BSP Polys348/3993 tops at y -46.0..-46.2 UNDER the
+  MT_Out/MT_In shells (+12..15 / -3..-6) — the village physically sits
+  inside the mountain (the cave model is also the literal geometry); the
+  road (O_DE_Pir01) at -45.47, the rim drop ~0.55 m.
+- The wash metrics (the ground region of the verification frames):
+  the cave-day plaza mean 0.130 / p50 0.075 / p95 0.425 / frac>0.6
+  2.2%; the night 0.170 / 0.154 / 0.452 / 2.3% — a dark plaza with
+  LOCAL pools, no wash.
+- Gate A: the probe and render boots 0 SCRIPT ERROR, 0 shader compile
+  lines; "shadow carriers parked at (133.2,-44.6,167.9) and
+  (138.1,-44.6,166.9)" — the two nearest lanterns flank the plaza spawn.
+
+**PENDING:** the pixel A/B of the carrier shadows (the render pass was
+interrupted — the user verifies visually); the plaza lattice = the lost
+BSP surf records (the tools/l2strict extraction recovery), unchanged.
+
+**DEVLOG-151 — the user's pass on DEVLOG-150 ("свет натуральнее, но
+непонятно откуда блики... теней так и нету... ступени опять не может
+перейти") + the very old bug opened: "опоры деревни не на своих местах —
+в оригинале они стоят в пещере, и от них цепи идут к деревне".**
+
+1. **The mystery view-dependent glints** — the two carrier omnis are REAL
+   lights: their Schlick-GGX specular hotspot on the POM floor is
+   view-dependent (the pools' emission is not) and read as "window
+   glints". `light_specular = 0.15` on the carriers.
+2. **The shadows still absent** — the ~10-15 lantern omnis shadowed by
+   the 25 m player gate were filling the compat shadow ATLAS and could
+   evict the carriers' own atlas slots. The lantern omnis are now
+   shadowless entirely (they only light the layer-2 placeholders);
+   the TWO CARRIERS own all the character shadows with guaranteed
+   atlas slots. The shadow gate loop removed from _process.
+3. **THE FEET BUG (the root of every step failure since DEVLOG-148)** —
+   the capsule is radius 0.3 / height 1.7 with the shape node at local
+   +0.85, so THE BODY ORIGIN IS THE FEET. Every assist formula assumed
+   the origin 0.9 m above the floor:
+   - `feet_y = body - 0.9` inflated every rise by +0.9 — the 1.05 climb
+     limit passed only rises <= 0.15 (the plaza rim ~0.55-0.65 and every
+     stair riser NEVER climbed);
+   - the step-down window shifted (only drops >= 0.92 fired);
+   - the teleports popped the body 0.92 m into the air (the probes'
+     "climbs" were pops);
+   - the ankle ray ran 0.78 m UNDERGROUND (hit_from_inside = false =>
+     garbage/no hits) and the "knee" ray actually ran at feet+0.25
+     (ankle height — the stair faces blocked it, stalling stairways).
+   REWRITE: feet_y = global_position.y; the ankle ray at feet+0.15; the
+   knee ray at feet+1.15; ONE unified deep landing cast per distance
+   (feet+1.15 down to feet-1.25) that serves the climb (dy 0.02..1.05)
+   AND the step-down (dy -0.02..-1.15), the teleport puts the FEET ON
+   the landing, everything gated on the actual press (rv < 0.5).
+   **Evidence** (the headless probes): the user's spot ledge
+   (11995,16533: the O_DE_Btm deck lip -46.218 -> -46.115, a TRUE 0.103
+   m): `dy=0.10 n_y=1.00` climbs on the FIRST press frame and the run
+   ARRIVES; the plaza rim descent arrives (rv 6.4 at the drop, the
+   target reached). The true rim rise is now measurable (~0.55-0.65 m —
+   inside the 1.05 limit, where the old math saw 1.45).
+4. **THE PYLONS (the user's old-bug order)** — the per-axis
+   `draw_scale3d` was IGNORED (the placement applied only the uniform
+   draw_scale). UE2 mirrors the mesh in its OWN axes, THEN rotates; 3 of
+   the 8 village pylon actors carry negative scale3d. The O_DE_Pir02
+   mesh is an 84.5 m composite: the thin bands at the pivot (mesh y ~0)
+   = the CHAINS (their village anchor = the actor Location), the wide
+   bands (y -48 base, +8..+32 body/crown) = the pylon tower. With the
+   mirror dropped, the tower body rendered on the WRONG SIDE of the
+   pivot — the numeric proof: Pir02 (12458,14809) s3=[1,-1,1]: the OLD
+   body center lands 591 units (6 m) from the plaza center — ON THE
+   SQUARE (exactly the user's screenshot); the NEW (mirrored) lands
+   3896 units (39 m) out in the cave with the chains reaching back to
+   the village. The 5 unmirrored pylon actors and every [1,1,1] actor
+   move by 0 units (nothing breaks).
+   - The scale is baked INTO the basis (R*S — the mesh-space scale);
+     the Node3D.scale property is unreliable for negatives.
+   - The mirrored winding flips a backface-culled StandardMaterial3D
+     surface inside-out: the mirrored insts (+ the grey/plafond twins)
+     get their placeholder surfaces duplicated with CULL_FRONT
+     (_flip_cull_for_mirrored). The PBR/analytic shaders are
+     cull_disabled and need nothing.
+   - The trimesh collider bodies inherit the full mirrored basis
+     (the body.scale property line removed).
+   - The same combined scale in the foliage MultiMesh path.
+   The other mirrored keys that unwrap correctly now: O_DE_H02/H03
+   (the houses), O_DE_Btm_Obj02/03, O_DE_CH_side/sidestair,
+   interior_B_delf_store_28/32, sylentemple_deco09/10,
+   sylentemple_sidedoor02.
+5. The probe start-teleport now lands the FEET exactly on the cast floor
+   (the +0.92 pop removed); the 5-value format "x1,z1,y1,x2,z2" is the
+   reliable way to probe under the mountain shell.
+
+**Gate A:** the boot 0 script errors, the world built 10.0 s, "lantern
+pools: 32 positions -> 192 tracked materials", "shadow carriers: 2
+omnis ready" + parked, the player spawn intact. The det==0 invert
+errors in the log pre-date these edits (no zero scale3d components in
+the map data — the census: only -1.0/1.0).
+
+**PENDING:** the user's visual check (the glints, the two shadows, the
+stairs at their spot, the pylons/chains); the plaza lattice = the lost
+BSP surf records (the tools/l2strict extraction recovery), unchanged.

@@ -1,0 +1,528 @@
+{
+  "schema": 1,
+  "map": "19_19",
+  "meshes": {
+    "FX_E_S:darkfallwater": {
+      "package": "fx_e_s",
+      "gltf": "res://assets/maps/19_19/meshes/fx_e_s/StaticMesh/darkfallwater.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Field_Deco_Artifact_S:DElf_Guard_1": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/DElf_Guard_1.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "Field_Deco_Artifact_S:DElf_TombTower": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/DElf_TombTower.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "Field_Deco_Artifact_S:DElf_TombTower_Btm": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/DElf_TombTower_Btm.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj17": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj17.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj18": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj18.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj19": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj19.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj20": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj20.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj21": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj21.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        6
+      ]
+    },
+    "Field_Deco_Artifact_S:world_obj22": {
+      "package": "field_deco_artifact_s",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_artifact_s/StaticMesh/world_obj22.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree02": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree03": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree03.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree04": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree04.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree05": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree05.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree07": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree07.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree08": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree08.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree09": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree09.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree10": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree10.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree11": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree11.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_Darkelf_tree12": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_Darkelf_tree12.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree01": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree01.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree02": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree02.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree03": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree03.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree04": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree04.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree05": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree05.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree07": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree07.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree09": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree09.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree10": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree10.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree12": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree12.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree13": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree13.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree14": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree14.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Oren_tree_S:Oren_elf_tree15": {
+      "package": "Oren_tree_S",
+      "gltf": "res://assets/maps/19_19/meshes/Oren_tree_S/StaticMesh/Oren_elf_tree15.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "Waterfall:Waterfall": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/Waterfall.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2,
+        5,
+        6,
+        8,
+        9
+      ]
+    },
+    "Waterfall:waterfall_D": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_D.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_1": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_1.gltf",
+      "primitive_material_indices": [
+        0,
+        2,
+        3,
+        5
+      ]
+    },
+    "Waterfall:waterfall_rock_10": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_10.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_11": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_11.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_12": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_12.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_13": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_13.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_2": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_2.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "Waterfall:waterfall_rock_3": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_3.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        3
+      ]
+    },
+    "Waterfall:waterfall_rock_4": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_4.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Waterfall:waterfall_rock_5": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_5.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Waterfall:waterfall_rock_6": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_6.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "Waterfall:waterfall_rock_9": {
+      "package": "waterfall",
+      "gltf": "res://assets/maps/19_19/meshes/waterfall/StaticMesh/waterfall_rock_9.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:O_DEF_F_obj1": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/O_DEF_F_obj1.gltf",
+      "primitive_material_indices": [
+        0,
+        1,
+        2
+      ]
+    },
+    "field_deco_S:O_DEF_F_obj7": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/O_DEF_F_obj7.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:deco_Doren_stone001": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone001.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:deco_Doren_stone002": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone002.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:deco_Doren_stone003": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone003.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:deco_Doren_stone004": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone004.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:deco_Doren_stone005": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone005.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:deco_Doren_stone006": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone006.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:deco_Doren_stone007": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone007.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:deco_Doren_stone008": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone008.gltf",
+      "primitive_material_indices": [
+        0,
+        1
+      ]
+    },
+    "field_deco_S:deco_Doren_stone009": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone009.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:deco_Doren_stone010": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/deco_Doren_stone010.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    },
+    "field_deco_S:grass_darkelf007": {
+      "package": "field_deco_S",
+      "gltf": "res://assets/maps/19_19/meshes/field_deco_S/StaticMesh/grass_darkelf007.gltf",
+      "primitive_material_indices": [
+        0
+      ]
+    }
+  }
+}

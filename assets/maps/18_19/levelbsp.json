@@ -1,0 +1,75 @@
+{
+ "schema": 1,
+ "surfaces": [
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_001_1"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_006"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_020"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_021"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_022"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_029"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_111"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_ded_t",
+    "dark_dgn_119"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "oren_dev_t",
+    "DE_V_roof"
+   ],
+   "texel_uvs": false
+  },
+  {
+   "tex": [
+    "texture",
+    "g_01"
+   ],
+   "texel_uvs": false
+  }
+ ]
+}

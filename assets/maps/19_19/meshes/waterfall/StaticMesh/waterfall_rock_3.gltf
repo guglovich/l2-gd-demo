@@ -1,0 +1,341 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "waterfall_rock_3",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "dwaterfall_side01",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "dwaterfall_side02",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "DWaterFall_f",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.9,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "dwaterfall_g",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.9,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        },
+        {
+          "attributes": {
+            "POSITION": 11,
+            "NORMAL": 12,
+            "TANGENT": 13,
+            "TEXCOORD_0": 14
+          },
+          "indices": 10,
+          "material": 3
+        }
+      ],
+      "name": "waterfall_rock_3"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "waterfall_rock_3.bin",
+      "byteLength": 7756
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 488
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 488,
+      "byteLength": 1020
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1508,
+      "byteLength": 1020
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2528,
+      "byteLength": 1360
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3888,
+      "byteLength": 680
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4568,
+      "byteLength": 224
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 4792,
+      "byteLength": 420
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5212,
+      "byteLength": 420
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 5632,
+      "byteLength": 560
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6192,
+      "byteLength": 280
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 0
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 0
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 0
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 0
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 0
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6472,
+      "byteLength": 180
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6652,
+      "byteLength": 276
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6928,
+      "byteLength": 276
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7204,
+      "byteLength": 368
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7572,
+      "byteLength": 184
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 243,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -5.57924,
+        -1.73704,
+        -3.91077
+      ],
+      "max": [
+        5.33858,
+        3.4134,
+        5.178
+      ],
+      "componentType": 5126,
+      "count": 85,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 85,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 85,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 85,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 111,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -5.48324,
+        -4.78092,
+        -1.22214
+      ],
+      "max": [
+        4.63003,
+        -1.68277,
+        5.27581
+      ],
+      "componentType": 5126,
+      "count": 35,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 35,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 35,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 35,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 15,
+      "componentType": 5123,
+      "count": 90,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 16,
+      "min": [
+        -5.03925,
+        2.93822,
+        -3.60389
+      ],
+      "max": [
+        3.94261,
+        3.76505,
+        5.178
+      ],
+      "componentType": 5126,
+      "count": 23,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 17,
+      "componentType": 5126,
+      "count": 23,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 18,
+      "componentType": 5126,
+      "count": 23,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 19,
+      "componentType": 5126,
+      "count": 23,
+      "type": "VEC2"
+    }
+  ]
+}

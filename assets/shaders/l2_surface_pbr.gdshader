@@ -22,12 +22,72 @@ uniform float pom_scale = 0.05;  // visual depth, meters
 uniform int pom_steps : hint_range(4, 32) = 16;
 uniform float relief_gain = 1.0; // extra normal strength multiplier
 uniform float rough_gain : hint_range(0.0, 1.0) = 0.9;
+// The direct/indirect specular strength. The DEFAULT 0.5 = Godot's own —
+// the approved village look is untouched. The Shillien Temple keys are set
+// to 0.0 by l2_proc_tex.gd (the 2026-11-21 "the temple protrusions get the
+// gloss in the sun" report — the stone is matte).
+uniform float specular_strength : hint_range(0.0, 1.0) = 0.5;
 uniform float detail = 0.0;      // optional world-space grain (0 = pure client)
 uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // DE_V_fence — the lattice grates). NOT set
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
+// DEVLOG-144: the emissive surfaces — the DE village lantern plafonds
+// (DE_V_cube_deco3) glow as the lamp's own light; 0 = every other
+// texture inert (the village look is untouched).
+uniform float emission_energy : hint_range(0.0, 8.0) = 0.0;
+// DEVLOG-147: the village lantern POOLS rendered IN THE SHADER. The audit
+// (L2_LIGHT_CAP_AUDIT=1, world.gd) proved the mechanism: the compat
+// renderer lights each object with at most 8 lights (a compile-time cap;
+// the max_lights_per_object project setting does not raise it) chosen from
+// the frustum-culled set — the plaza floor alone overlapped 32 lanterns,
+// so WHICH pools survived flipped with the camera angle ("отрубаются все
+// источники"). The omnis are gone; every PBR surface (the BSP floors, the
+// statics, the character body — all share this shader) accumulates the
+// pools from the fixed lantern-position array fed by world.gd. Zero
+// renderer light lists involved => zero camera dependence, always on.
+// lantern_count = 0 everywhere outside the village => inert there.
+uniform vec3 lantern_pos[64];       // world-space plafond centers, meters
+uniform int lantern_count = 0;
+uniform vec3 lantern_color = vec3(0.6, 0.75, 1.0);
+// DEVLOG-150: the physical falloff (inverse square, see the pool loop)
+// dims ~25x faster than the old (1-d/r)^0.25 — the energy is rebalanced
+// so a single lamp's pool at 2-3 m matches the old brightness and the
+// far field finally dies (the roofs, the far plaza stay dark).
+uniform float lantern_energy = 10.0;
+uniform float lantern_range = 22.0;
+// DEVLOG-148 rev3: the N*L softening for the BODY materials (the player
+// sets 0.5 + energy 4.0): half-flat diffuse makes the black suit readable
+// at night. 0 = the approved full-N*L ground pools everywhere else.
+uniform float lantern_ndl_soft : hint_range(0.0, 1.0) = 0.0;
+// DEVLOG-149: the day/night factor (world.gd, 0 at day — the lamps are
+// off at noon; 1 at night) — the pools ride it like the omnis do.
+uniform float lantern_night : hint_range(0.0, 1.0) = 1.0;
+// DEVLOG-150: the lantern indices currently carried by REAL shadow-casting
+// omnis (world.gd's shadow carriers = the two nearest registered lanterns
+// to the player). The pool SKIPS them: their light arrives through the
+// omnis instead, so the character's shadow finally falls on the ground
+// (a shader pool cannot cast one — the user's "теней нету" was true by
+// construction). The carrier omni sits at the same plafond position with
+// the same range, the SAME curve (Godot's get_omni_attenuation, decay=2)
+// and the same energy as the pool => the retarget swap is invisible.
+uniform int lantern_shadow0 = -1;
+uniform int lantern_shadow1 = -1;
+
+// DEVLOG-147 rev3/rev4 probe trail (kept for the record): the WORLD
+// position for the pools = the VERTEX-STAGE VERTEX (world with
+// world_vertex_coords — probe 3: the buildings fired with these positions;
+// probe 4: the fract decode consistent with the world meters). The
+// FRAGMENT VERTEX is VIEW-space (probe 5: switching the pool to it
+// extinguished every pool — the docs' fragment line is right; the Gate E
+// rule stands). The varying below carries the world position; the normal
+// sign is handled by abs(N*L) (see the pool comment).
+varying vec3 wpos;
+
+void vertex() {
+	wpos = VERTEX;
+}
 // DEVLOG-90 baked-mesh route: the *_baked.glTF variants carry UV2 + the
 // Blender-baked tangent-space normal and AO (from the displaced high-poly).
 // Sampled at UV2 — zero UV shift (no swimming), correct from any angle.
@@ -194,6 +254,7 @@ void fragment() {
 		AO_LIGHT_AFFECT = 0.7;
 	} else {
 		ROUGHNESS = clamp(rough * rough_gain, 0.0, 1.0);
+		SPECULAR = specular_strength;
 		NORMAL_MAP = nrm * 0.5 + 0.5;
 		NORMAL_MAP_DEPTH = relief_gain;
 		// crevice shading from the height channel — scaled by the POM depth
@@ -208,4 +269,50 @@ void fragment() {
 		}
 		AO_LIGHT_AFFECT = 0.6;
 	}
+	// DEVLOG-147 rev4: the lantern pools — shader-side, deterministic, on
+	// the world position varying wpos (the vertex-stage VERTEX = world
+	// with world_vertex_coords — Gate D probe 4 verified) and the screen-
+	// Jacobian world normal. abs(N*L): the GLES3 dFdy convention + the
+	// BSP's front-DOWN winding (DEVLOG-137) make the naive max(dot) sign
+	// INVERTED on the floor back faces (the walls lit, the ground never
+	// did — the probe-4 decode: wn.y = -1 on the floors). abs() is the
+	// sign-proof two-sided form; the pool is a local glow, and the
+	// undersides it would reach are void in the village.
+	float lant_sum = 0.0;
+	vec3 wn = normalize(cross(dFdx(wpos), dFdy(wpos))) * ff;
+	for (int li = 0; li < lantern_count; li++) {
+		// DEVLOG-150: the shadow-carrier lanterns are skipped — their
+		// light comes through the real omnis (with the shadow maps).
+		if (li == lantern_shadow0 || li == lantern_shadow1) {
+			continue;
+		}
+		vec3 tol = lantern_pos[li] - wpos;
+		float ld = length(tol);
+		if (ld >= lantern_range) {
+			continue;
+		}
+		// DEVLOG-150: the PHYSICAL falloff — exactly Godot's own omni
+		// curve (scene_forward_lights_inc.glsl get_omni_attenuation,
+		// decay = 2.0): the range window (1-(d/range)^4)^2 times the true
+		// inverse square 1/d^2. The old (1-d/r)^0.25 was nearly flat
+		// (75% strength at 15 m!) — that WAS the "переосвещение" and the
+		// lit roofs. Godot's omni_attenuation is set to 2.0 on every
+		// lantern/carrier light, so pool and omni are the same function.
+		float nd = ld / lantern_range;
+		nd *= nd; nd *= nd;            // (d/range)^4
+		nd = max(1.0 - nd, 0.0);
+		nd *= nd;                      // window^2
+		float latt = nd * pow(max(ld, 0.05), -2.0);
+		float lndl = mix(abs(dot(wn, tol / max(ld, 1e-4))), 1.0,
+				lantern_ndl_soft);
+		lant_sum += latt * lndl;
+	}
+	// DEVLOG-150: the overlap guard stays (2-3 lamps within a few meters
+	// still sum up); with the physical falloff it only bites close-in.
+	lant_sum = min(lant_sum, 1.3);
+	// DEVLOG-144: the lamp glass glows with its own blue (the albedo
+	// pattern carries the plafond's glass/frame detail)
+	EMISSION = alb.rgb * emission_energy
+			+ alb.rgb * lantern_color
+			* (lantern_energy * lantern_night * lant_sum);
 }

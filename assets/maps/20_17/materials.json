@@ -1,0 +1,3607 @@
+{
+  "schema": 1,
+  "meshes": {
+    "FX_E_S": {
+      "20_17_WATER01": [
+        {
+          "package": "FX_E_T",
+          "owner": "FX_E_T",
+          "object": "anghel_fall_w011",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 6
+        }
+      ]
+    },
+    "Innadrill_tree_S": {
+      "inna_Spalmtree01": [
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "inna_Spalmtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "inna_Spalmtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "innadrill_tree_t",
+          "object": "inna_Spalmtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "inna_Spalmtree02": [
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "inna_Spalmtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "inna_Spalmtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "innadrill_tree_t",
+          "object": "inna_Spalmtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "inna_Stree01": [
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "coconutpark31",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -6
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "Innadrill_tree_T",
+          "object": "coconutpark32",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "tree",
+            "Innadrill_tree_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "innadrill_tree_t",
+          "owner": "innadrill_tree_t",
+          "object": "coconuttreeleaf2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 2
+        }
+      ]
+    },
+    "Primitive_FieldOBJ_S": {
+      "PM_Plain_OBJ_02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        }
+      ],
+      "PM_Plain_OBJ_03": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        }
+      ],
+      "PM_Plain_OBJ_al_01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_OBJ_al_02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_SetOBJ": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_SetOBJ_01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_SetOBJ_02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_SetOBJ_03": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_al2",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PM_Plain_SetOBJ_04": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -18
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -10
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark03_top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark04_side",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -9
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree01_in",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -17
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_SetTree02_al",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 19
+        }
+      ],
+      "PriMT_Boss001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -51
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001up",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -52
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_grass003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -53
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic003top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -49
+        }
+      ],
+      "PriMT_BossTree01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INBDtree_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Landmarktree1Leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 23
+        }
+      ],
+      "PriMT_Boss_Obj01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -51
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001up",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -52
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_grass003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -53
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic003top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -49
+        }
+      ],
+      "PriMT_Boss_Obj02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -50
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -51
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic001up",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -52
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_grass003",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -53
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_basic003top",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -49
+        }
+      ],
+      "PriMT_Boss_dome": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_Top",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 10
+        }
+      ],
+      "PriMT_LandMark1_tree01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -38
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Landmarktree1Leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark3",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -37
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        }
+      ],
+      "PriMT_LandMark2_tree02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -38
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Landmarktree1Leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_Bird01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -87
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark3",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -37
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        }
+      ],
+      "PriMT_LandMark3_Saurs001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Saurs_bone001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -85
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Saurs_bone002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -83
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_DecoLeaf001",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -82
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_DecoLeaf002",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -81
+        }
+      ],
+      "PriMT_LandMark3_Saurs_Deco": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_DecoLeaf001",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 31
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_Boss_DecoLeaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 32
+        }
+      ],
+      "PriMT_LandMark4_Statue01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_sylen_statue_basic01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -84
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_sylen_statue_basic",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -64
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_sylen_statue_Face",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -86
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_sylen_statue_basic",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -64
+        }
+      ],
+      "PriMT_Tunnel001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -39
+        }
+      ],
+      "PriMT_Tunnel002": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -39
+        }
+      ],
+      "PriMT_Tunnel003": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -39
+        }
+      ],
+      "PriMT_Tunnel_Entrance01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treebody02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -78
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treebody01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -77
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic01_1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -75
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMark_boneTex01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -74
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Port_LMtree1Leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 41
+        }
+      ],
+      "PriMT_Tunnel_Entrance_Deco": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treeDeco01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 13
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treeDeco02",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 12
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treeDeco03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 26
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treeDeco04",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 11
+        }
+      ],
+      "PriMT_Tunnel_stone01": [
+        null,
+        null,
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -70
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_basic00",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -39
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Port_LMtree1Leaf01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -69
+        }
+      ],
+      "PriMT_port_Box01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_box01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -67
+        }
+      ],
+      "PriMT_port_Box_set": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_box01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -67
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Port_rope01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 22
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -32
+        }
+      ],
+      "PriMT_port_Bridge01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -35
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -32
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -76
+        }
+      ],
+      "PriMT_port_drum02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_drum02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -62
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_drum01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -68
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -32
+        }
+      ],
+      "PriMT_port_drum_set": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_drum02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -62
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_drum01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -68
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Port_rope01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 22
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -34
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -32
+        }
+      ],
+      "PriMT_port_hou01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_hut_wall01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -99
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_hut_wall02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -100
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -35
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -60
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_hut_wall03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -101
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_hut_roof01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -102
+        }
+      ],
+      "PriMT_port_ship": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_ship_inside01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -97
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_ship_inside02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -98
+        }
+      ],
+      "PriMT_port_tent01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -35
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood_x",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -56
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_tent01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -63
+        }
+      ],
+      "PriMT_port_wood_x": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_woodtile01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -35
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_wood_x",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -56
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_port_tent01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -63
+        }
+      ],
+      "PriPlain_LandMark1_tree01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -45
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -46
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treeLeaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treeBody03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "PriPlain_stone01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone03_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -42
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "PriPlain_stone02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -95
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "PriPlain_stone03": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone03_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -42
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "PriPlain_stone04": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone03_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -42
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_stone04_",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "Deco_T",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -8
+        }
+      ],
+      "PriPlain_tree01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -45
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treebark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -46
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treeLeaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 21
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Plain_treeBody03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 20
+        }
+      ],
+      "Primitive_Bigtree001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark2",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -38
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark3",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -37
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_Bigtree1Leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 16
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        }
+      ],
+      "Primitive_INDeco000": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLeaf_001",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 25
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf001",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 24
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        }
+      ],
+      "Primitive_INDeco_Long001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf003",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 30
+        }
+      ],
+      "Primitive_INDeco_Long002": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        }
+      ],
+      "Primitive_INDeco_Long003": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf003",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 30
+        }
+      ],
+      "Primitive_INDeco_Long004": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        }
+      ],
+      "Primitive_INDeco_Long005": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf003",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 30
+        }
+      ],
+      "Primitive_INDeco_Long006": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_BigLong_Leaf002",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 33
+        }
+      ],
+      "Primitive_INtree001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_leaf03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 29
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 28
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_leaf02",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 27
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_tunnel_treeDeco03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 26
+        }
+      ],
+      "Primitive_INtree002": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INBDtree_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -90
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INBDtree_02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -61
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INBDtree_03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 14
+        }
+      ],
+      "Primitive_InDecotree001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INDecotree_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -36
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INDecotree_03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 34
+        }
+      ],
+      "Primitive_InDecotree002": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INDecotree_01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -36
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INDecotree_03",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 34
+        }
+      ],
+      "Primitive_InDecotree003": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INDecotree_02",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 35
+        }
+      ],
+      "Primitive_MDtree001": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_MDtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        }
+      ],
+      "Primitive_MDtree003": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_MDtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        }
+      ],
+      "Primitive_MDtree004S": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -15
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_INtree_bark02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -12
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "PM_LandMarktree2_bark4",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -7
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_MDtree_leaf01",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        }
+      ],
+      "Primitive_codex_stone": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "Primitive_codex_stone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -88
+        }
+      ],
+      "pm_landmark_camp01": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -24
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp09",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -31
+        }
+      ],
+      "pm_landmark_camp02": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -24
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp09",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -31
+        }
+      ],
+      "pm_landmark_camp03": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -24
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp09",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -31
+        }
+      ],
+      "pm_landmark_camp04": [
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -33
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -23
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp03",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -24
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp04",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -25
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp05",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -26
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp06",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -27
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp07",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -28
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp08",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -29
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp09",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -30
+        },
+        {
+          "package": "Primitive_FieldOBJ_T",
+          "owner": "Primitive_FieldOBJ_T",
+          "object": "pm_landmark_camp10",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "LandMark",
+            "Primitive_FieldOBJ_T"
+          ],
+          "raw": -31
+        }
+      ]
+    },
+    "Rune_stakatonest_S": {
+      "stakato_A_obj01": [
+        {
+          "package": "rune_stakatonest_t",
+          "owner": "rune_stakatonest_t",
+          "object": "stakato_a_jungle",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 8
+        }
+      ],
+      "stakato_A_obj02": [
+        {
+          "package": "rune_stakatonest_t",
+          "owner": "rune_stakatonest_t",
+          "object": "stakato_a_jungle",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 8
+        }
+      ]
+    },
+    "field_deco_S": {
+      "Inna_underwater_clam": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Inna_underwater_clam",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadril_grass",
+            "field_deco_T"
+          ],
+          "raw": -299
+        }
+      ],
+      "beachBossstone": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "beachBstone1": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "beachBstone2": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "beachBstone3": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "beachBstone4": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "beachBstone5": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -55
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "beachstone1",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -54
+        }
+      ],
+      "inna_underwater_star": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "inna_underwater_star",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadril_grass",
+            "field_deco_T"
+          ],
+          "raw": -309
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "Inna_Smallclam",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 15
+        }
+      ],
+      "innastone03": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "innadestone01",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -40
+        },
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "innadestone02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadrilstone",
+            "field_deco_T"
+          ],
+          "raw": -44
+        }
+      ],
+      "sea_object06": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sea_te02",
+          "class": "Texture",
+          "kind": "export",
+          "outer_chain": [],
+          "raw": 8
+        }
+      ],
+      "sea_sora01": [
+        {
+          "package": "field_deco_T",
+          "owner": "field_deco_T",
+          "object": "sea_te02",
+          "class": "Texture",
+          "kind": "import",
+          "outer_chain": [
+            "innadril_fish",
+            "field_deco_T"
+          ],
+          "raw": -137
+        }
+      ]
+    }
+  },
+  "material_packages": {
+    "FX_E_T": [
+      "anghel_fall_w011",
+      "evil_fallwater01_pan",
+      "evil_fallwater_sh"
+    ],
+    "Innadrill_tree_T": [
+      "coconutpark31",
+      "coconutpark32",
+      "coconutreeleaf2_1",
+      "inna_Spalmtree_bark01",
+      "inna_Spalmtree_bark02",
+      "inna_Spalmtree_leaf01_1"
+    ],
+    "Primitive_FieldOBJ_T": [
+      "PM_Bigtree1Leaf01",
+      "PM_Bigtree1Leaf01_1",
+      "PM_LandMark_boneTex01",
+      "PM_LandMarktree2_Bird01",
+      "PM_LandMarktree2_bark1",
+      "PM_LandMarktree2_bark2",
+      "PM_LandMarktree2_bark3",
+      "PM_LandMarktree2_bark4",
+      "PM_Landmarktree1Leaf01",
+      "PM_Landmarktree1Leaf01_1",
+      "PM_Plain_SetTree01",
+      "PM_Plain_SetTree01_al",
+      "PM_Plain_SetTree01_al2",
+      "PM_Plain_SetTree01_al2_1",
+      "PM_Plain_SetTree01_al_1",
+      "PM_Plain_SetTree01_in",
+      "PM_Plain_SetTree02",
+      "PM_Plain_SetTree02_al",
+      "PM_Plain_SetTree02_al_1",
+      "PM_Plain_stone03",
+      "PM_Plain_stone03_",
+      "PM_Plain_stone04_",
+      "PM_Plain_treeBody03",
+      "PM_Plain_treeBody03_1",
+      "PM_Plain_treeLeaf01",
+      "PM_Plain_treeLeaf01_1",
+      "PM_Plain_treebark01",
+      "PM_Plain_treebark02",
+      "PM_Plain_treebark03_top",
+      "PM_Plain_treebark04_side",
+      "PM_Port_LMtree1Leaf01",
+      "PM_Port_LMtree1Leaf01_1",
+      "PM_Port_rope01",
+      "PM_Port_rope01_1",
+      "PM_port_box01",
+      "PM_port_drum01",
+      "PM_port_drum02",
+      "PM_port_hut_roof01",
+      "PM_port_hut_wall01",
+      "PM_port_hut_wall02",
+      "PM_port_hut_wall03",
+      "PM_port_ship_inside01",
+      "PM_port_ship_inside02",
+      "PM_port_tent01",
+      "PM_port_wood01",
+      "PM_port_wood02",
+      "PM_port_wood03",
+      "PM_port_wood_x",
+      "PM_port_woodtile01",
+      "PM_port_woodtile02",
+      "PM_port_woodtile03",
+      "Primitive_BigLeaf_001",
+      "Primitive_BigLeaf_001_1",
+      "Primitive_BigLong_Leaf001",
+      "Primitive_BigLong_Leaf001_1",
+      "Primitive_BigLong_Leaf002",
+      "Primitive_BigLong_Leaf002_1",
+      "Primitive_BigLong_Leaf003",
+      "Primitive_BigLong_Leaf003_1",
+      "Primitive_Boss_DecoLeaf001",
+      "Primitive_Boss_DecoLeaf001_1",
+      "Primitive_Boss_DecoLeaf002",
+      "Primitive_Boss_DecoLeaf002_1",
+      "Primitive_Boss_Top",
+      "Primitive_Boss_Top_1",
+      "Primitive_Boss_basic001_",
+      "Primitive_Boss_basic001up",
+      "Primitive_Boss_basic002",
+      "Primitive_Boss_basic003top",
+      "Primitive_Boss_grass003",
+      "Primitive_INBDtree_01",
+      "Primitive_INBDtree_02",
+      "Primitive_INBDtree_03",
+      "Primitive_INBDtree_03_1",
+      "Primitive_INDecotree_01",
+      "Primitive_INDecotree_02",
+      "Primitive_INDecotree_02_1",
+      "Primitive_INDecotree_03",
+      "Primitive_INDecotree_03_1",
+      "Primitive_INtree_bark01",
+      "Primitive_INtree_bark02",
+      "Primitive_INtree_leaf01",
+      "Primitive_INtree_leaf01_1",
+      "Primitive_INtree_leaf02",
+      "Primitive_INtree_leaf02_1",
+      "Primitive_INtree_leaf03",
+      "Primitive_INtree_leaf03_1",
+      "Primitive_MDtree_leaf01",
+      "Primitive_MDtree_leaf01_1",
+      "Primitive_Saurs_bone001",
+      "Primitive_Saurs_bone002",
+      "Primitive_codex_stone",
+      "Primitive_sylen_statue_Face",
+      "Primitive_sylen_statue_basic",
+      "Primitive_sylen_statue_basic01",
+      "Primitive_tunnel_basic00",
+      "Primitive_tunnel_basic01",
+      "Primitive_tunnel_basic01_1",
+      "Primitive_tunnel_treeDeco01",
+      "Primitive_tunnel_treeDeco01_1",
+      "Primitive_tunnel_treeDeco02",
+      "Primitive_tunnel_treeDeco02_1",
+      "Primitive_tunnel_treeDeco03",
+      "Primitive_tunnel_treeDeco03_1",
+      "Primitive_tunnel_treeDeco04",
+      "Primitive_tunnel_treeDeco04_1",
+      "Primitive_tunnel_treebody01",
+      "Primitive_tunnel_treebody02",
+      "pm_landmark_camp01",
+      "pm_landmark_camp02",
+      "pm_landmark_camp03",
+      "pm_landmark_camp04",
+      "pm_landmark_camp05",
+      "pm_landmark_camp06",
+      "pm_landmark_camp07",
+      "pm_landmark_camp08",
+      "pm_landmark_camp09",
+      "pm_landmark_camp10"
+    ],
+    "Rune_stakatonest_T": [
+      "stakato_jungle_M"
+    ],
+    "field_deco_T": [
+      "Inna_Smallclam",
+      "Inna_Smallclam_1",
+      "Inna_underwater_clam",
+      "beachstone",
+      "beachstone1",
+      "inna_underwater_star",
+      "innadestone01",
+      "innadestone02",
+      "sea_te02",
+      "sea_te02_1"
+    ],
+    "innadrill_tree_t": [
+      "coconutpark31",
+      "coconutpark32",
+      "coconutreeleaf2_1",
+      "coconuttreeleaf2",
+      "inna_Spalmtree_bark01",
+      "inna_Spalmtree_bark02",
+      "inna_Spalmtree_leaf01",
+      "inna_Spalmtree_leaf01_1"
+    ],
+    "rune_stakatonest_t": [
+      "stakato_a_jungle",
+      "stakato_jungle_M"
+    ]
+  },
+  "texture_packages": {
+    "FX_E_T": [
+      "anghel_fall_w011"
+    ],
+    "Primitive_FieldOBJ_T": [
+      "PM_Bigtree1Leaf01",
+      "PM_LandMark_boneTex01",
+      "PM_LandMarktree2_Bird01",
+      "PM_LandMarktree2_bark1",
+      "PM_LandMarktree2_bark2",
+      "PM_LandMarktree2_bark3",
+      "PM_LandMarktree2_bark4",
+      "PM_Landmarktree1Leaf01",
+      "PM_Plain_SetTree01",
+      "PM_Plain_SetTree01_al",
+      "PM_Plain_SetTree01_al2",
+      "PM_Plain_SetTree01_in",
+      "PM_Plain_SetTree02",
+      "PM_Plain_SetTree02_al",
+      "PM_Plain_stone03",
+      "PM_Plain_stone03_",
+      "PM_Plain_stone04_",
+      "PM_Plain_treeBody03",
+      "PM_Plain_treeLeaf01",
+      "PM_Plain_treebark01",
+      "PM_Plain_treebark02",
+      "PM_Plain_treebark03_top",
+      "PM_Plain_treebark04_side",
+      "PM_Port_LMtree1Leaf01",
+      "PM_Port_rope01",
+      "PM_port_box01",
+      "PM_port_drum01",
+      "PM_port_drum02",
+      "PM_port_hut_roof01",
+      "PM_port_hut_wall01",
+      "PM_port_hut_wall02",
+      "PM_port_hut_wall03",
+      "PM_port_ship_inside01",
+      "PM_port_ship_inside02",
+      "PM_port_tent01",
+      "PM_port_wood01",
+      "PM_port_wood02",
+      "PM_port_wood03",
+      "PM_port_wood_x",
+      "PM_port_woodtile01",
+      "PM_port_woodtile02",
+      "PM_port_woodtile03",
+      "Primitive_BigLeaf_001",
+      "Primitive_BigLong_Leaf001",
+      "Primitive_BigLong_Leaf002",
+      "Primitive_BigLong_Leaf003",
+      "Primitive_Boss_DecoLeaf001",
+      "Primitive_Boss_DecoLeaf002",
+      "Primitive_Boss_Top",
+      "Primitive_Boss_basic001_",
+      "Primitive_Boss_basic001up",
+      "Primitive_Boss_basic002",
+      "Primitive_Boss_basic003top",
+      "Primitive_Boss_grass003",
+      "Primitive_INBDtree_01",
+      "Primitive_INBDtree_02",
+      "Primitive_INBDtree_03",
+      "Primitive_INDecotree_01",
+      "Primitive_INDecotree_02",
+      "Primitive_INDecotree_03",
+      "Primitive_INtree_bark01",
+      "Primitive_INtree_bark02",
+      "Primitive_INtree_leaf01",
+      "Primitive_INtree_leaf02",
+      "Primitive_INtree_leaf03",
+      "Primitive_MDtree_leaf01",
+      "Primitive_Saurs_bone001",
+      "Primitive_Saurs_bone002",
+      "Primitive_codex_stone",
+      "Primitive_sylen_statue_Face",
+      "Primitive_sylen_statue_basic",
+      "Primitive_sylen_statue_basic01",
+      "Primitive_tunnel_basic00",
+      "Primitive_tunnel_basic01",
+      "Primitive_tunnel_basic01_1",
+      "Primitive_tunnel_treeDeco01",
+      "Primitive_tunnel_treeDeco02",
+      "Primitive_tunnel_treeDeco03",
+      "Primitive_tunnel_treeDeco04",
+      "Primitive_tunnel_treebody01",
+      "Primitive_tunnel_treebody02",
+      "pm_landmark_camp01",
+      "pm_landmark_camp02",
+      "pm_landmark_camp03",
+      "pm_landmark_camp04",
+      "pm_landmark_camp05",
+      "pm_landmark_camp06",
+      "pm_landmark_camp07",
+      "pm_landmark_camp08",
+      "pm_landmark_camp09",
+      "pm_landmark_camp10"
+    ],
+    "field_deco_T": [
+      "Inna_Smallclam",
+      "Inna_underwater_clam",
+      "beachstone",
+      "beachstone1",
+      "inna_underwater_star",
+      "innadestone01",
+      "innadestone02",
+      "sea_te02"
+    ],
+    "innadrill_tree_t": [
+      "coconutpark31",
+      "coconutpark32",
+      "coconuttreeleaf2",
+      "inna_Spalmtree_bark01",
+      "inna_Spalmtree_bark02",
+      "inna_Spalmtree_leaf01"
+    ],
+    "rune_stakatonest_t": [
+      "stakato_a_jungle"
+    ]
+  },
+  "unresolved": []
+}

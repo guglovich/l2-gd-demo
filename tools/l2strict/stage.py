@@ -87,13 +87,21 @@ class Stager:
                 self.entries[key] = entry
 
     def stage(self, name: str, *, category: str | None = None) -> str:
-        source = self.index.find(name, category)
+        try:
+            source = self.index.find(name, category)
+        except StageError:
+            if category is None:
+                raise
+            # DEVLOG-136 (the 20_19 build): some L2 mesh packages carry
+            # their MATERIALS inside the StaticMesh package itself
+            # (Field_Deco_Artifact_s), so material staging requests the
+            # mesh name with the Textures category. The category is a
+            # PREFERENCE, not a filter: fall back to the package's actual
+            # category — PackageSet reads every staged category, and the
+            # texture-resolution pass still catches real absences.
+            source = self.index.find(name)
         ext = os.path.splitext(source)[1].lower()
         actual_category = CATEGORIES[ext]
-        if category is not None and actual_category != category:
-            raise StageError(
-                f"{name}: expected {category} package, found {actual_category}"
-            )
         relative = os.path.join(actual_category, os.path.basename(source))
         output = os.path.join(self.destination_root, relative)
 

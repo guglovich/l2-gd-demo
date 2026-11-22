@@ -25,6 +25,29 @@ uniform vec2 tile_px = vec2(256.0, 256.0);
 uniform float relief = 1.0;      // normal bump strength
 uniform float detail = 1.0;      // world-space grain amount
 uniform float roughness_f : hint_range(0.0, 1.0) = 0.92;
+// DEVLOG-147 rev4: the village lantern POOLS — the SAME block as in
+// l2_surface_pbr.gdshader. The position = the vertex-stage VERTEX varying
+// (wpos — WORLD with world_vertex_coords, Gate D probe 4 verified); the
+// fragment VERTEX here is VIEW-space (probe 5: switching the pool to it
+// extinguished every pool). Uniforms are pushed by
+// L2ProcTex.apply_lanterns(); lantern_count=0 outside the village => inert.
+uniform vec3 lantern_pos[64];       // world-space plafond centers, meters
+uniform int lantern_count = 0;
+uniform vec3 lantern_color = vec3(0.6, 0.75, 1.0);
+// DEVLOG-150: the physical falloff (inverse square — see the pool loop)
+// rebalances the energy; the shadow-carrier skip + the night factor match
+// the pbr shader (the analytic/BSP surfaces dim with the same lamp curve).
+uniform float lantern_energy = 10.0;
+uniform float lantern_range = 22.0;
+uniform int lantern_shadow0 = -1;
+uniform int lantern_shadow1 = -1;
+uniform float lantern_night : hint_range(0.0, 1.0) = 1.0;
+
+varying vec3 wpos;
+
+void vertex() {
+	wpos = VERTEX;
+}
 
 // ---- noise (Ashima public-domain simplex; card-hashes ours) ----
 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -354,4 +377,37 @@ void fragment() {
 	ALBEDO = alb;
 	ROUGHNESS = roughness_f;
 	AO = clamp(1.0 - 0.35 * max(0.0, -h0), 0.0, 1.0);
+	// DEVLOG-147 rev4: the lantern pools on the village ground. The
+	// position = wpos (world); the normal = the wpos world-Jacobian (no ff
+	// flip — abs() makes the sign irrelevant). abs(N*L) = the sign-proof
+	// two-sided form (the GLES3 dFdy convention + the BSP front-DOWN
+	// winding invert the naive max(dot) on the floor back faces — see the
+	// pbr shader's comment).
+	float lant_sum = 0.0;
+	vec3 lwn = normalize(cross(dFdx(wpos), dFdy(wpos)));
+	for (int li = 0; li < lantern_count; li++) {
+		// DEVLOG-150: the shadow-carrier lanterns are skipped — their
+		// light comes through the real omnis (with the shadow maps).
+		if (li == lantern_shadow0 || li == lantern_shadow1) {
+			continue;
+		}
+		vec3 tol = lantern_pos[li] - wpos;
+		float ld = length(tol);
+		if (ld >= lantern_range) {
+			continue;
+		}
+		// DEVLOG-150: the PHYSICAL falloff = Godot's own omni curve
+		// (get_omni_attenuation, decay 2.0): window (1-(d/range)^4)^2
+		// times true inverse square. Same as the pbr shader and the
+		// carrier omnis — one function everywhere.
+		float nd = ld / lantern_range;
+		nd *= nd; nd *= nd;            // (d/range)^4
+		nd = max(1.0 - nd, 0.0);
+		nd *= nd;                      // window^2
+		float latt = nd * pow(max(ld, 0.05), -2.0);
+		lant_sum += latt * abs(dot(lwn, tol / max(ld, 1e-4)));
+	}
+	lant_sum = min(lant_sum, 1.3);
+	EMISSION = alb * lantern_color
+			* (lantern_energy * lantern_night * lant_sum);
 }

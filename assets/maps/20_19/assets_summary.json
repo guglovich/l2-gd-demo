@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "map": "20_19",
+  "meshes": 82,
+  "textures": 172,
+  "terrain_files": [
+    "edge_turn_u8.raw",
+    "height_source_g16.raw",
+    "height_world_f32.raw",
+    "heightmap_preview.png",
+    "heightmap_preview.png.import",
+    "surface_present_u8.raw",
+    "terrain.json"
+  ],
+  "umodel_log": "/home/jinseoyeon/Projects/Lineage 2 Godot/tmp/l2/20_19/umodel.log"
+}

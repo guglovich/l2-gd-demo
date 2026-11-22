@@ -34,3 +34,11 @@ godot_ai=true
 [rendering]
 
 anti_aliasing/quality/msaa_3d=2
+; DEVLOG-146: the compat renderer's defaults (32 total / 8 per object) made
+; the light selection on the big tile meshes an ANGLE-DEPENDENT lottery —
+; the village lantern pools popped out at whole camera angles. Raised to
+; cover the full village set (32 lanterns + tunnel map lights); the
+; LAMP_ACTIVE_DIST gate keeps the 19_18 register low, so the list cost stays
+; bounded.
+limits/opengl/max_renderable_lights=256
+limits/opengl/max_lights_per_object=64

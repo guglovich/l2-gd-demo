@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "ringdown",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "oren_hdt_t005",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "oren_hdtp2_t003",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "ringdown"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "ringdown.bin",
+      "byteLength": 3468
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 60
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 60,
+      "byteLength": 240
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 300,
+      "byteLength": 240
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 540,
+      "byteLength": 320
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 860,
+      "byteLength": 160
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1020,
+      "byteLength": 144
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1164,
+      "byteLength": 576
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 1740,
+      "byteLength": 576
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2316,
+      "byteLength": 768
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3084,
+      "byteLength": 384
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 30,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -1.39443,
+        -0.694996,
+        -0.475212
+      ],
+      "max": [
+        1.39443,
+        -0.065257,
+        0.475211
+      ],
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 20,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 72,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -0.907616,
+        -0.275012,
+        -0.17325
+      ],
+      "max": [
+        0.907616,
+        0.694997,
+        0.17325
+      ],
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 48,
+      "type": "VEC2"
+    }
+  ]
+}

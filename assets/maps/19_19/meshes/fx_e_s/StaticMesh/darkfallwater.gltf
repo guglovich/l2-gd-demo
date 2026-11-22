@@ -1,0 +1,127 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "darkfallwater",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "darkfallwater01_sh",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        }
+      ],
+      "name": "darkfallwater"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "darkfallwater.bin",
+      "byteLength": 20792
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 3608
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 3608,
+      "byteLength": 4296
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 7904,
+      "byteLength": 4296
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 12200,
+      "byteLength": 5728
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 17928,
+      "byteLength": 2864
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 1803,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -19.4744,
+        -12.1364,
+        -12.9991
+      ],
+      "max": [
+        -9.01658,
+        13.1539,
+        0.073809
+      ],
+      "componentType": 5126,
+      "count": 358,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 358,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 358,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 358,
+      "type": "VEC2"
+    }
+  ]
+}

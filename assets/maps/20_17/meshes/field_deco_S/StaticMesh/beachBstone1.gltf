@@ -1,0 +1,215 @@
+{
+  "asset": {
+    "generator": "UE Viewer (umodel) build 1573",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "beachBstone1",
+      "mesh": 0
+    }
+  ],
+  "materials": [
+    {
+      "name": "beachstone",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    },
+    {
+      "name": "beachstone1",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.9,
+          0.3,
+          0.3,
+          1.0
+        ],
+        "metallicFactor": 0.1,
+        "roughnessFactor": 0.5
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1,
+            "NORMAL": 2,
+            "TANGENT": 3,
+            "TEXCOORD_0": 4
+          },
+          "indices": 0,
+          "material": 0
+        },
+        {
+          "attributes": {
+            "POSITION": 6,
+            "NORMAL": 7,
+            "TANGENT": 8,
+            "TEXCOORD_0": 9
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ],
+      "name": "beachBstone1"
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "beachBstone1.bin",
+      "byteLength": 22332
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 2844
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 2844,
+      "byteLength": 3792
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 6636,
+      "byteLength": 3792
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 10428,
+      "byteLength": 5056
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 15484,
+      "byteLength": 2528
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 18012,
+      "byteLength": 624
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 18636,
+      "byteLength": 924
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 19560,
+      "byteLength": 924
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 20484,
+      "byteLength": 1232
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 21716,
+      "byteLength": 616
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5123,
+      "count": 1422,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 1,
+      "min": [
+        -6.71681,
+        -0.246508,
+        -3.76545
+      ],
+      "max": [
+        6.47717,
+        4.85771,
+        5.1452
+      ],
+      "componentType": 5126,
+      "count": 316,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 316,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 316,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 316,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 312,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 6,
+      "min": [
+        -3.14568,
+        4.85771,
+        -0.484993
+      ],
+      "max": [
+        3.24321,
+        6.24619,
+        2.18661
+      ],
+      "componentType": 5126,
+      "count": 77,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 7,
+      "componentType": 5126,
+      "count": 77,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 8,
+      "componentType": 5126,
+      "count": 77,
+      "type": "VEC4"
+    },
+    {
+      "bufferView": 9,
+      "componentType": 5126,
+      "count": 77,
+      "type": "VEC2"
+    }
+  ]
+}
