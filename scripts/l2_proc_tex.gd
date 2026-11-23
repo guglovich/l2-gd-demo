@@ -159,6 +159,11 @@ static func apply_lanterns() -> void:
 const ALPHA_CUTOUT := [
 	"oren_dev_t:Iron_net",
 	"oren_dev_t:DE_V_fence",
+	# the Shirai statue spike surface (De_Statue004): the client texture is
+	# RGBA with the real spike mask (62.5% transparent); the staged
+	# pbr_albedo A now carries it (texgen: source-alpha, 2026-11-23,
+	# DEVLOG-154)
+	"oren_dev_t:De_Statue004",
 	# DEVLOG-130 (the user's "шапка над статуей не пропала"): the Shillien
 	# statue's PF_Masked atlases — the palette-0 texels are transparent in
 	# the client. The statics scissor branch in world.gd NEVER fired for

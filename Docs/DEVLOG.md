@@ -9971,3 +9971,43 @@ body/pit visible through it. The reference comparison is pending the user's look
 gate is now only meaningful against a FIXED L2_TIME (the day/night default is
 RANDOM — the baseline was captured pre-day/night, so a time-blind diff is noise).
 L2_BSP_2SIDED reproduces the old look on demand for A/B.
+
+## DEVLOG-154 — the Shirai statue spikes are alpha again (De_Statue004, 2026-11-23)
+
+**The user:** the spikes poking out of the Shirai statue head sit inside
+rectangles that in the original have no alpha channel (the spikes are the
+original; no opaque rectangles around them).
+
+**Diagnosis:** the client De_Statue004 (the O_De_02 "head" surface) is
+**RGBA (64×128), alpha=0 share 0.625** (verified: umodel export of the
+package texture). Our staged main PNG `De_Statue004.png` matches the client
+(64×128 RGBA, same RGB, same 62.5% alpha) — so the main PNG was fine all
+along. The staged `De_Statue004.pbr_albedo.png` was **opaque** (alpha=0) and
+the sidecar `De_Statue004.pbr.json` had **no `alpha_mask` key** — the staging
+(2026-11-13) ran when the source was RGB; the alpha in the main PNG came
+later (or via another path). The runtime cutout path (`l2_surface_pbr`
+line 231: `if (use_alpha && alb.a < alpha_scissor) discard;`) samples the
+albedo's A, so alpha = the albedo A channel, not the main PNG.
+
+**Fix:**
+1. `python3 tools/l2strict/texgen.py assets/maps/20_18/textures oren_dev_t
+   De_Statue004` — the PRESERVE-the-source-alpha block (texgen.py:87-130):
+   source has mask (sa.min()<0.98) → `achan = src_a` → the new albedo A =
+   the 62.5% source mask, sidecar `alpha_mask: true` (the Iron_net/fence
+   precedent). The normal/height are unchanged (derived from the same RGB).
+2. `scripts/l2_proc_tex.gd`: `oren_dev_t:De_Statue004` added to ALPHA_CUTOUT
+   (the generic PVR path `_pbr_material` sets `use_alpha` via the whitelist —
+   same as the temple statues / the fence).
+3. Reimport (deleted `De_Statue004.pbr_albedo.png.import` + `rm -rf
+   .godot/imported` + headless import; the 1404 "Invalid accessor count 0"
+   errors are the pre-existing UModel quirk in other territories).
+
+**Plaza screenshot (L2_TIME=12, spawn 11620,17120,-4470):** plaza_after vs
+plaza_statue: 5106 px>8 / 4084 px>30, mask bbox y657-889 x796-1099 (the
+statue region). Gate A: 0 shader/script errors.
+
+**Pylon note (still PENDING):** the user sees one tower at UE
+(13311,15770,-4601.3) "inside the house". Our 4 Pir02 towers: (9546,15457),
+(12458,14808), (13160,18687), (10915,19200) (all UE z≈-4198) — none matches
+(13311,15770,-4601.3). The deco decode (staticobject-e.dat, Ver413 RSA,
+wine+l2encdec path) is still pending — the user's note recorded.
