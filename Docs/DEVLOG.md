@@ -10016,3 +10016,36 @@ its building are NOT in our map (the client-side world has them). The
 deco decode (staticobject-e.dat, Ver413 RSA, wine+l2encdec path) is still
 pending — it gives the true client tower positions (the deco-layer-override
 hypothesis for the 4 Pir02 towers); the user's observations recorded.
+
+## DEVLOG-155 — 2026-11-24: staticobject-e.dat decode — the tower-position hypothesis is NOT confirmed
+
+- Acquired the l2encdec binary (`l2encdec_2.10.1.7z` from
+  `/Media/Games/Lineage_2/l2_other/Edit Files Lineage 2/l2crypt share/` →
+  `tmp/encdec/l2encdec_2.10.1/`).
+- Decoded: `wine l2encdec.exe -d /Games/ElmoreX3/system/staticobject-e.dat`
+  → `tmp/encdec/staticobject-e.dec.dat` (17153 B; header
+  "Lineage2Ver413", RSA pair #0).
+- The decoded stream begins with a UTF-16 string table — the town structure
+  names (Clan Hall Door, Castle Wall, Arena Sign, Village Map Bulletin,
+  Outer Castle Gate, Inner Castle Gate, …). **No tower names, no tower
+  coordinates** — no "Pir*" strings anywhere, and no float/int values near
+  the tower points (9546/15457/−4198, 12458/14808, 13160/18687,
+  10915/19200, or 9001/16731/−4601.3). The file is the 2018 town's static
+  object list — NOT the Interlude village's tower data.
+- Our towers (20_18 map.json, UE): (9546,15457,−4198) ds3[−1,−1,1];
+  (12458,14808,−4198) ds3[1,−1,1]; (13160,18687,−4198) ds3[1,1,1];
+  (10915,19200,−4198) ds3[−1,1,1].
+- The user's "second tower inside another building at x=9001 y=16731
+  z=−4601.3": **not present in our maps** (no actors near that point;
+  nothing in 20_18 or 20_17; the closest town structures: H02 at
+  (10336,16350,−4470), H03 at (9623,18375,−4467)).
+- The user's "first tower" is consistent with one of our four (the
+  positions above).
+- PENDING (revised): the true client tower positions are NOT in
+  staticobject-e.dat — they are either in the .unr actor list itself (the
+  current placements — i.e. "on the spot" is correct, and the user's
+  second-tower observation needs a building+tower added at UE
+  (9001,16731,−4601.3) — a new actor, needs the user's go-ahead) or in a
+  data source not yet identified. Questions for the user: (a) is the first
+  tower = one of the four? (b) for the second — should a Pir02 tower be
+  added at UE (9001,16731,−4601.3)?
