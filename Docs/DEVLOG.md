@@ -10006,8 +10006,13 @@ albedo's A, so alpha = the albedo A channel, not the main PNG.
 plaza_statue: 5106 px>8 / 4084 px>30, mask bbox y657-889 x796-1099 (the
 statue region). Gate A: 0 shader/script errors.
 
-**Pylon note (still PENDING):** the user sees one tower at UE
-(13311,15770,-4601.3) "inside the house". Our 4 Pir02 towers: (9546,15457),
-(12458,14808), (13160,18687), (10915,19200) (all UE z≈-4198) — none matches
-(13311,15770,-4601.3). The deco decode (staticobject-e.dat, Ver413 RSA,
-wine+l2encdec path) is still pending — the user's note recorded.
+**Pylon notes (still PENDING):** the user sees towers "on the spot, inside
+houses": one at UE (13311,15770,-4601.3) [recorded 2026-11-23]; the second —
+"one tower inside another building at x=9001 y=16731 z=-4601.3". Our 4
+Pir02 towers: (9546,15457), (12458,14808), (13160,18687), (10915,19200)
+(all UE z≈-4198). Near (9001,16731,-4601.3): 0 actors (no building, no
+tower); the nearest O_De_03 actor is 2504 UE away — so the second tower +
+its building are NOT in our map (the client-side world has them). The
+deco decode (staticobject-e.dat, Ver413 RSA, wine+l2encdec path) is still
+pending — it gives the true client tower positions (the deco-layer-override
+hypothesis for the 4 Pir02 towers); the user's observations recorded.
