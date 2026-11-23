@@ -207,9 +207,23 @@ def write_gltf(path, name, prims, prim_idx_of, tex_of=None, texroot=None):
             u = sum((v[k] - ubase[k]) * U[k] for k in range(3))
             w = sum((v[k] - ubase[k]) * V[k] for k in range(3))
             uvs.extend([u, w])
+        # One-sided BSP (the client rule, DEVLOG-82 rev2 / DEVLOG-153):
+        # the emitted FRONT face must match the authored poly normal.
+        # The Godot axes (x,z,y) mirror UE space, so the reversed fan
+        # [0,k+1,k] fronts +normal exactly when Newell(UE)·normal > 0
+        # (verified on Polys377: all 10 polys positive). Guard anyway.
+        nrm = prim["normal"]
+        nx = ny = nz = 0.0
+        for k in range(len(pts)):
+            a = pts[k]
+            b = pts[(k + 1) % len(pts)]
+            nx += (a[1] - b[1]) * (a[2] + b[2])
+            ny += (a[2] - b[2]) * (a[0] + b[0])
+            nz += (a[0] - b[0]) * (a[1] + b[1])
+        keep = (nx * nrm[0] + ny * nrm[1] + nz * nrm[2]) > 0
         idx = []
         for k in range(1, len(pts) - 1):
-            idx.extend([0, k + 1, k])
+            idx.extend([0, k + 1, k] if keep else [0, k, k + 1])
         if len(idx) < 3:
             continue
         pb = struct.pack(f"<{len(pos)}f", *pos)
@@ -231,9 +245,14 @@ def write_gltf(path, name, prims, prim_idx_of, tex_of=None, texroot=None):
                           "count": len(idx), "type": "SCALAR"})
         while len(blob) % 4:
             blob.append(0)
+        # PF_TwoSided = 0x100 (Cruma Bsp.BspPolygonFlags): the client
+        # culls backfaces on every other face — the plaza lattice plate's
+        # floor01 UNDERSIDE (Polys377 poly9, normal down) must NOT plug
+        # the Iron_net holes when seen from above (DEVLOG-153).
         materials.append({"name": f"m{prim['i']}", "pbrMetallicRoughness":
                           {"baseColorFactor": [0.4, 0.4, 0.4, 1.0]},
-                          "doubleSided": True})
+                          "doubleSided": prim.get("two_sided",
+                                                 bool(prim["flags"] & 0x100))})
         # displaced-prim bookkeeping (REAL polygon relief, disp.py): same
         # prim order as the flat mesh. Heights are sampled from the texture
         # tile at the CANONICAL world-aligned UVs, so adjacent displaced
@@ -571,6 +590,9 @@ def main():
             })
             if axes is not None:
                 pr["uv_axes"] = axes
+            # the SURF PolyFlags are authoritative (the client renders the
+            # node's surf, not the raw FPoly) — PF_TwoSided 0x100
+            pr["two_sided"] = bool(surf_flags.get(k, pr["flags"]) & 0x100)
         brushes.append({"polys": pname, "location": origin, "faces": faces,
                         "csg": csg})
 

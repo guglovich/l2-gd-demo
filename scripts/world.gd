@@ -439,8 +439,42 @@ func _trace_color_flow() -> void:
 	get_tree().quit()
 
 
+## DEVLOG-153: load the BSP collision mesh for the trace helpers (the BSP
+## colliders carry mesh_key "BSP:<Polys>" / "LevelBSP" but live outside
+## asset_map, so _get_mesh cannot see them). Same _D preference as the
+## builder — the collision trimesh comes from the rendered variant.
+var _bsp_trace_mesh_cache := {}
+
+func _bsp_trace_mesh(mesh_key: String) -> Mesh:
+	if _bsp_trace_mesh_cache.has(mesh_key):
+		return _bsp_trace_mesh_cache[mesh_key]
+	var gp := ""
+	if mesh_key.begins_with("BSP:"):
+		gp = "%s/meshes_bsp/BSP_%s.gltf" % [active_dir, mesh_key.substr(4)]
+	elif mesh_key == "LevelBSP":
+		gp = "%s/meshes_bsp/LevelBSP.gltf" % active_dir
+	var mesh: Mesh = null
+	if gp != "":
+		var gdp := gp.replace(".gltf", "_D.gltf")
+		if ResourceLoader.exists(gdp):
+			gp = gdp
+		if ResourceLoader.exists(gp):
+			var scene: PackedScene = load(gp)
+			if scene != null:
+				var root := scene.instantiate()
+				for c in root.get_children():
+					if c is MeshInstance3D:
+						mesh = c.mesh
+						break
+				root.free()
+	_bsp_trace_mesh_cache[mesh_key] = mesh
+	return mesh
+
+
 func _surface_for_face(mesh_key: String, fid: int) -> int:
 	var mesh := _get_mesh(mesh_key)
+	if mesh == null:
+		mesh = _bsp_trace_mesh(mesh_key)
 	if mesh == null or fid < 0:
 		return -1
 	var acc := 0
@@ -456,6 +490,23 @@ func _surface_for_face(mesh_key: String, fid: int) -> int:
 
 func _texture_for_surface(mesh_key: String, surf: int) -> String:
 	if surf < 0:
+		return "?"
+	# DEVLOG-153: the BSP brush / LevelBSP colliders are NOT in asset_map —
+	# the old helper returned surf=-1 tex=? for EVERY BSP hit, which masqueraded
+	# as "lost surf records" in the DEVLOG-148 plaza diagnosis. Map them here.
+	if mesh_key.begins_with("BSP:"):
+		var polys := mesh_key.substr(4)
+		for br in bsp_data.get("brushes", []):
+			if br.get("polys") == polys:
+				for f in br.get("faces", []):
+					if f.get("prim") == surf and f.get("tex") != null:
+						return "%s:%s" % [f["tex"][0], f["tex"][1]]
+		return "?"
+	if mesh_key == "LevelBSP":
+		var lb := _load_json(active_dir + "/levelbsp.json")
+		var ss: Array = lb.get("surfaces", [])
+		if surf < ss.size() and ss[surf].get("tex") != null:
+			return "%s:%s" % [ss[surf]["tex"][0], ss[surf]["tex"][1]]
 		return "?"
 	var parts := mesh_key.split(":")
 	var texs: Array = materials_data.get("meshes", {}).get(parts[0], {}).get(parts[1], [])
@@ -1256,9 +1307,16 @@ func _build_bsp_brushes() -> void:
 		var pos := Vector3(float(loc[0]) * UNIT_SCALE, float(loc[2]) * UNIT_SCALE, float(loc[1]) * UNIT_SCALE)
 		# per-face materials: prim index -> texture (null prim = not rendered)
 		var prim_tex := {}
+		var prim_2s := {}
+		var force2s := OS.get_environment("L2_BSP_2SIDED") != ""
 		for f in faces:
 			if f.get("prim") != null and f.get("tex") != null:
 				prim_tex[int(f["prim"])] = f["tex"]
+				# DEVLOG-153: the client culls BSP backfaces unless the surf
+				# carries PF_TwoSided (0x100) — the lattice plate's floor01
+				# underside must not plug the Iron_net holes from above.
+				# L2_BSP_2SIDED = the A/B diagnostic (the old double-sided look).
+				prim_2s[int(f["prim"])] = force2s or (int(f.get("flags", 0)) & 0x100) != 0
 		# build the material list first, then SPLIT the alpha-cutout surfaces
 		# (the lattice grates) into their OWN MeshInstance with shadow casting
 		# OFF: the thin grate sits ~3 mm above the plate below, and its
@@ -1275,7 +1333,8 @@ func _build_bsp_brushes() -> void:
 				print("BRUSH: ", polys, " surf ", si, " hue=", bhue)
 				continue
 			if prim_tex.has(si):
-				mats.append(_bsp_material(prim_tex[si], mat_cache))
+				mats.append(_bsp_material(prim_tex[si], mat_cache, true,
+						prim_2s.get(si, true)))
 			else:
 				mats.append(m)
 		var grate_idx: Array[int] = []

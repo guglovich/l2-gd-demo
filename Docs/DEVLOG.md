@@ -9897,3 +9897,77 @@ pushed) + the follow-up fixes + the PYLON DECO SYSTEM investigation.**
 plaza lattice = the lost BSP surf records (the tools/l2strict surf
 extraction — the user's explicit order); the user's visual check of the
 glint cap + the crystal glow.
+
+## DEVLOG-153 — the plaza lattice: the "lost surf records" were a trace-helper artifact (the one-sided fix)
+
+**Correction of the DEVLOG-148 diagnosis:** the plaza lattice surf records were NOT
+lost — `bsp2` never dropped them (Polys377 face 8 of the plaza brush = Iron_net,
+staged since DEVLOG-148's dates; the cutout shader path + the verified 52%-holes
+alpha mask + the ALPHA_CUTOUT whitelist for Iron_net were all in place). What made
+the plaza read as a solid painted surface:
+
+1. The trace helpers were blind to BSP colliders: `_surface_for_face`/`_texture_for_surface`
+   call `_get_mesh(mesh_key)`, which looks the key up in asset_map — `BSP:Polys377`
+   is not there → null → the "TRACE_RAY … surf=-1 tex=?" placeholder for EVERY BSP
+   hit (the DEVLOG-148 symptom, but it masked the real state). Fixed in world.gd
+   (`_bsp_trace_mesh` + BSP/LevelBSP branches; L2_TRACE_RAY at the center now prints
+   `BSP:Polys377 face=19 surf=8 tex=oren_dev_t:Iron_net`).
+2. The real bug: BSP brushes are double-sided in our renderer, so the
+   floor01 UNDERSIDE of the 3 cm lattice plate (Polys377 poly 9 — the very face
+   under the Iron_net lattice) plugs the holes when seen from above. The CLIENT
+   renders BSP one-sided (DEVLOG-82 rev2) unless the surf carries PF_TwoSided
+   (0x100; the village brush plates are not two-sided).
+
+**The fix (the user's "go ahead"):**
+- `tools/l2strict/bsp2.py`: emit the glTF materials `doubleSided` from the surf
+  PolyFlags (0x100) and add a winding-orientation guard (fan order by
+  Newell·normal in Godot axes — verified: all 1237 village polys have
+  Newell·normal > 0, so no winding flips anywhere; the winding was already
+  correct).
+- `scripts/world.gd`: `_build_bsp_brushes` passes `two_sided` per prim from the
+  bsp.json face flags (the L2ProcTex dup flips `cull_back`; the StandardMaterial
+  fallback flips `cull_mode`); `L2_BSP_2SIDED` = the A/B diagnostic (the old
+  double-sided look, the golden-baseline escape hatch).
+- Regenerated `assets/maps/20_18/meshes_bsp/*.gltf` (45 files; the material diff
+  is `doubleSided: true → false` per prim) + the stale-cache reimport
+  (rm *.import + rm -rf .godot/imported + `godot --headless --import`). Import
+  rc 0; the 1400 "Invalid accessor count 0" errors are the known UModel quirk in
+  OTHER territories' meshes (Rune/SSQ/fortress/Old_War) — pre-existing.
+
+**A/B at L2_TIME=12 (real display, L2_TIME_SCALE=0):** 5 views × 2 runs
+(upper_street, entrance_road, descent, stairway_plaza, spawn_plaza):
+- descent: A vs B = 1 px — identical.
+- upper_street: A vs B = 228 px > 8 (131 > 30), mean 0.011 — road patch, B = the
+  client-faithful side (A was showing the road-plate BACKFACE lit through
+  doubleSided; the client hides it).
+- entrance_road: A vs B = 831 px > 8 (609 > 30), mean 0.044 — the same road
+  backface class (y363-385 x741-847, A mean 97 vs B mean 18 — the removal of the
+  phantom backface; B is the client-faithful side).
+- Run-to-run noise at the same mode (L2_TIME=12): upper_street A vs A2 = 1 px
+  (> 8, 0 > 30), B vs B2 = 27 px; entrance_road A vs A2 = 7 px, B vs B2 = 3 px —
+  the street A/B deltas sit above the noise floor but are the physics of the
+  one-sided rule, not the plaza change.
+- stairway_plaza: A vs B = 64782 px > 8, mask bbox y511-899 x0-803, centroid
+  (714, 254) — the plaza region.
+- spawn_plaza: A vs B = 83592 px > 8, mask bbox y474-899 x0-689, centroid
+  (694, 308) — the plaza region.
+- Gate A: 0 shader/script errors in all 10 logs.
+
+**Trace proof (B mode, the plaza):** center ray — `Oren_DEV_S:O_De_01 face=406`
+(statue arm above), `BSP:Polys377 face=19 surf=8 tex=oren_dev_t:Iron_net`
+at −46.89 (the lattice), then `Oren_DEV_S:O_De_01 face=1` at −47.45 (the statue
+body below the lattice).
+Through-lattice rays in B: (11500,16872) hits `O_De_02` at −5033 below the
+lattice; (11350,16872) reaches the floor01 underside plane −4692 with no
+Iron_net hit in between. The Iron_net face is the TOP face of the plate
+(local y −0.45; the floor01 bottom = poly 9, local y −0.48).
+
+**User gate:** the plaza screenshot (L2_SPAWN=11620,17120,−4470, yaw 0.78,
+pitch −0.55, zoom 0.7, L2_TIME=12, real display) shows the sunken octagonal
+plaza with the Iron_net lattice open through its holes and the statue's lower
+body/pit visible through it. The reference comparison is pending the user's look.
+
+**Notes for the verification workflow (AGENTS.md):** the golden-baseline pixel
+gate is now only meaningful against a FIXED L2_TIME (the day/night default is
+RANDOM — the baseline was captured pre-day/night, so a time-blind diff is noise).
+L2_BSP_2SIDED reproduces the old look on demand for A/B.
