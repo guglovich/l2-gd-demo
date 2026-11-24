@@ -10249,3 +10249,26 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   the statue stands inside the ring); with the openwork mask the old "face on
   the hand" artifact should be gone — needs the user's eye on the hand close-up.
 - **Status:** awaiting the user's visual confirmation on the central lanterns.
+
+### DEVLOG-158 rev4a — the lost ALPHA_CUTOUT entry (the "булыжники без кристаллов" report)
+
+- **The user's report after rev4:** the central lantern frames render as solid
+  cobblestones with NO crystals visible inside — "видимо нету альфа канала на
+  вырезы". Exactly right: the rev4 commit (c3c5110) carried the world.gd
+  un-hide and the masked albedo, but the `ALPHA_CUTOUT` entry and the
+  `alpha_mask` sidecar were LOST — the A/B preparation had run
+  `git checkout HEAD -- scripts/l2_proc_tex.gd <textures>` (reverting to the
+  pre-rev4 state) and the files were never restored before the commit. The
+  masked albedo's A channel was therefore ignored (use_alpha=false) and the
+  band rendered its own window RGB — the solid cobblestone look.
+- **Fix:** the `oren_dev_t:DE_V_new_deco3` ALPHA_CUTOUT entry restored and
+  committed together with the sidecar (`alpha_mask: true`, texgen re-run —
+  the albedo bytes identical, md5 verified against the staged masked copy).
+- **Verification (the user's vantage, `L2_SPAWN=11250,17000,-4600`, yaw
+  -0.68, pitch -0.19):** cutout OFF (the c3c5110 state) vs ON: 7381 px
+  changed; the changed pixels go from 16.9/20.6/29.0 (the solid band) to
+  **127.1/129.1/134.0 — the glowing crystal seen through the openwork
+  windows.**
+- **Plaza baseline:** 1857 px >8 (0.13%) vs the pre-rev4 render — the
+  platform ring only; zero shader errors.
+- Shots: `tmp/verify_158rev4a/` (`center_vantage_cutout.png`, `plaza.png`).

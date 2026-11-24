@@ -167,6 +167,16 @@ static func apply_lanterns() -> void:
 const ALPHA_CUTOUT := [
 	"oren_dev_t:Iron_net",
 	"oren_dev_t:DE_V_fence",
+	# the central platform lantern frames (DEVLOG-158 rev4, the user's
+	# "оправа" on the CENTER village lanterns — NOT the street lamps):
+	# the client DE_V_new_deco3 is RGBA with a real openwork mask (36.4%
+	# alpha-0, the window lattice band wrapping the O_DE_Center_obj
+	# crystals); the staged pbr_albedo A was a stale height field until
+	# the 2026-11-24 texgen re-run (A == source alpha, verified 1.0).
+	# rev4a: this entry was LOST between the A/B checkouts and never
+	# reached the c3c5110 commit — the band rendered opaque ("булыжники
+	# без кристаллов", the user's report). Restored + committed now.
+	"oren_dev_t:DE_V_new_deco3",
 	# the Shirai statue spike surface (De_Statue004): the client texture is
 	# RGBA with the real spike mask (62.5% transparent); the staged
 	# pbr_albedo A now carries it (texgen: source-alpha, 2026-11-23,
