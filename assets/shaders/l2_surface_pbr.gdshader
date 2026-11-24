@@ -78,6 +78,13 @@ uniform float lantern_night : hint_range(0.0, 1.0) = 1.0;
 // and the same energy as the pool => the retarget swap is invisible.
 uniform int lantern_shadow0 = -1;
 uniform int lantern_shadow1 = -1;
+// DEVLOG-158 rev2: the per-material pool gain (default 1.0 = the exact
+// approved look). The lamp frame/socket clones (world.gd, the two
+// O_DE_Lamp keys) raise it: the collar band sits under the DEVLOG-151
+// near-field cap (latt <= 0.18) and read unlit against the glowing
+// crystal — the user's "нет оправы". GAIN > 1 brightens only surfaces
+// whose material explicitly sets it.
+uniform float lantern_pool_gain : hint_range(0.25, 32.0) = 1.0;
 
 // DEVLOG-147 rev3/rev4 probe trail (kept for the record): the WORLD
 // position for the pools = the VERTEX-STAGE VERTEX (world with
@@ -313,7 +320,7 @@ void fragment() {
 		float latt = min(nd * pow(max(ld, 0.05), -2.0), 0.18);
 		float lndl = mix(abs(dot(wn, tol / max(ld, 1e-4))), 1.0,
 				lantern_ndl_soft);
-		lant_sum += latt * lndl;
+		lant_sum += latt * lndl * lantern_pool_gain;
 	}
 	// DEVLOG-150: the overlap guard stays (2-3 lamps within a few meters
 	// still sum up); with the physical falloff it only bites close-in.

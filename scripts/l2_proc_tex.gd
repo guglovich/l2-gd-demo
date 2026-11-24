@@ -128,6 +128,14 @@ static func set_lantern_shadow(i0: int, i1: int) -> void:
 	_shadow_pair = pair
 	for m in _tracked:
 		if is_instance_valid(m):
+			# DEVLOG-158 rev2: the lamp frame clones (l2_frame_pool meta)
+			# never skip their own lantern — at the two player-nearest
+			# lanterns the skip + the carrier trapped inside the hood is
+			# exactly what blackened the collar ("нет оправы").
+			if m.has_meta("l2_frame_pool"):
+				m.set_shader_parameter("lantern_shadow0", -1)
+				m.set_shader_parameter("lantern_shadow1", -1)
+				continue
 			m.set_shader_parameter("lantern_shadow0", i0)
 			m.set_shader_parameter("lantern_shadow1", i1)
 

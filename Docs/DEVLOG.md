@@ -10139,3 +10139,61 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Root cause:** the `else` arrival branch cleared `has_target` but did not clear `moving`/horizontal velocity. During the earlier edit, the `if not moving` damping line was also accidentally joined to a comment and became inactive.
 - **Fix:** on arrival explicitly set `moving=false`, `velocity.x/z=0`; restored the damping block on its own line.
 - **Verification:** `L2_STEP_TEST="112.79,185.50,-44.5,112.79,187.20"` reaches the stepped landing and reports `tgt=false`, `rv=0.00` on subsequent frames.
+
+## DEVLOG-158 rev2 — 2026-11-24 (GLM): the lantern frame redo (the plaza-shadow-preserving path)
+
+- **The rev1 (the delegated model's commit 04da970) verified and REJECTED.** Its
+  mechanism was sound for the frames (the layer-2 StandardMaterial twins became
+  omni-lit) but the side effect was global: the twins replaced the full-lamp
+  layer-1 instances in the shadow carriers' cube maps, the lamp hoods stopped
+  clipping the carrier light, and the whole plaza floor brightened ~2x
+  (measured: `O_DE_Btm_Obj01` slab region 23.7 -> 49.8 RGB mean; full-frame
+  296684 px >8 changed = 20.6% of the frame). Isolation proof: with
+  `L2_NO_CARRIER_SHADOW=1` the before/after delta collapsed to 7690 px (0.53%)
+  and the slab region became byte-identical — the 96% of the delta was the
+  carriers' shadow maps, not the lamp materials.
+- **The cave context (why the lamps matter at noon):** `_update_daynight` sets
+  `lamp_f = maxf(lamp_f, cave_f)` — inside the village bbox the lanterns burn
+  around the clock and the sun/moon fade out. At `L2_TIME=12` the plaza is lit
+  by the in-shader pools + the two shadow carriers; the carrier omni sits at the
+  plafond center INSIDE the lamp hood, so the full-lamp shadow casting is what
+  shaped the approved plaza look.
+- **The rev2 fix (this commit):**
+  1. The rev1 material rerouting REVERTED — the lamps are one full PBR instance
+     again (cast_shadow ON), the plaza floor and shadows byte-identical to the
+     approved state (floor sample region 24.1/23.0/25.5 == PRE; 30/34 traced
+     hood pixels exactly 0 delta, the 4 others are collar-edge AA pixels).
+  2. New per-material `lantern_pool_gain` uniform (default 1.0 — a no-op for
+     every existing material) in the pool loop of `l2_surface_pbr.gdshader`.
+  3. The lamp HEAD hardware textures only (`DE_V_deco10` the collar/socket,
+     `DE_V_roof_deco` the cage arch over the crystal — NOT the hood/pole, they
+     keep the approved look) get per-key CLONES with `lantern_ndl_soft 0.5`,
+     `lantern_pool_gain 3.0` (env-tunable `L2_FRAME_POOL_GAIN`) and the
+     `l2_frame_pool` meta: `set_lantern_shadow` pushes them `-1/-1` — their own
+     lantern's pool is never skipped (at the two player-nearest lanterns the
+     pool skip + the carrier trapped in the hood is what blackened the collar).
+- **Verification (fixed cameras, real GPU):**
+  - Plaza baseline (`L2_SPAWN=10741,16930,-4628.9`, yaw 16384, `L2_TIME=12`):
+    9362 px >8 (0.65%) changed vs the approved state — lamp-local; the traced
+    collar `surf8` 152->255 (foreground lamp, saturated), the cage arch
+    `surf5` 25->146; the hood/pole/tip/base/crystal all byte-equal.
+  - Lamp close-up (`L2_SPAWN=12318,17015,-4473`, pitch 0.2, `L2_TIME=15.93`):
+    collar 44/47/53 -> 128/131/138, arch 28/31/34 -> 98/105/105, crystal
+    160/163/168 UNCHANGED (rev1 had pushed it to 236), hood 26->29 (AA edges).
+  - Gain sweep: 3 chosen (the arch reads 146; at 6 it blows to 212).
+  - `L2_MAT_AUDIT=1` (new env-gated diagnostic): `lantern_omnis=32`, the slab
+    all-ShaderMaterial, the lamps unsplit — the routing facts for both states.
+  - The spawn screenshot: `tmp/glm_final/spawn/`; the close-up:
+    `tmp/glm_final/close/`; the plaza verification: `tmp/glm_cal2/g3/`.
+  - Step regression suite re-run at HEAD: the H02 climb test still passes
+    (`dy=0.71` landing, `tgt=false`, `rv=0.00` after arrival).
+- **Incidental tool defect fixed (it was blocking the verification):**
+  `L2_TRACE_BOX` printed its totals and called `get_tree().quit()` INSIDE the
+  row loop — the box tracer only ever sampled the first 8-px row of any region
+  (why the collar surface never appeared in earlier traces). The totals+quit
+  moved out of the loop; the per-key print cap raised 4 -> 400 for surface
+  mapping. `world_backup.gd` (a stale copy) still has the old behavior — not
+  touched.
+- **Status:** user retest pending (the central eight lanterns: the collar and
+  the cage arch now catch their own lantern's light at any distance, including
+  the two nearest to the camera).

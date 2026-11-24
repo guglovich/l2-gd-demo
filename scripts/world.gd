@@ -106,6 +106,14 @@ var _static_split := {}
 # distance gate below (32 cube-shadow omnis overflow the compat shadow
 # atlas: the middle lanterns' shadows were silently dropped).
 var _lantern_omnis: Array[OmniLight3D] = []
+# DEVLOG-158 rev2: the lamp frame/socket pool gain — the collar band sits
+# ~0.15 m under the plafond center where the DEVLOG-151 near-field cap
+# (latt <= 0.18) pins the pool; the gain lifts it for the frame clones
+# ONLY (every other material keeps 1.0). L2_FRAME_POOL_GAIN overrides for
+# the calibration sweep.
+var _frame_pool_gain := 3.0 \
+		if OS.get_environment("L2_FRAME_POOL_GAIN") == "" \
+		else float(OS.get_environment("L2_FRAME_POOL_GAIN"))
 # DEVLOG-150: the shadow carriers — two REAL shadow-casting omnis parked
 # at the two registered lanterns nearest to the player. Their light
 # replaces the pools at those two indices (lantern_shadow0/1 skip), so
@@ -292,13 +300,13 @@ func _trace_box_flow() -> void:
 			var fid := int(hit.get("face_index", -1))
 			var k := owner_name
 			counts[k] = counts.get(k, 0) + 1
-			if counts[k] <= 4:
+			if counts[k] <= 400:
 				var surf := _surface_for_face(owner_name, fid)
 				print("TRACE_BOX px(%d,%d) %s face=%d surf=%d tex=%s n=%v" % [
 					px, py, owner_name, fid, surf,
 					_texture_for_surface(owner_name, surf), hit.get("normal")])
-		print("TRACE_BOX totals:", counts)
-		get_tree().quit()
+	print("TRACE_BOX totals:", counts)
+	get_tree().quit()
 
 
 ## Single-ray probe: L2_TRACE_RAY="ux1,uy1,z1,ux2,uy2,z2" (game units: UE x,
@@ -1705,6 +1713,29 @@ func _build_meshes() -> void:
 			ph_keys += 1
 	print("layer routing: ", ph_keys, " all-placeholder keys, ",
 			_static_split.size(), " mixed keys split")
+	# DEVLOG-158 rev2 (the GLM audit): L2_MAT_AUDIT=1 — the actual runtime
+	# material routing for the plaza suspect keys + the light counts (the
+	# floor-brightening investigation: same lights, same uniforms, yet the
+	# slab rendered 2.4x brighter after the lamp frame rerouting).
+	if OS.get_environment("L2_MAT_AUDIT") != "":
+		print("MAT AUDIT lantern_omnis=", _lantern_omnis.size(),
+				" carriers=", _carrier_lights.size())
+		for key in ["Oren_DEV_S:O_DE_Btm_Obj01", "Oren_DEV_S:O_DE_Bank",
+				"Oren_DEV_S:O_DE_Bank_Set", "Oren_DEV_S:O_DE_Btm",
+				"Oren_DEV_S:O_DE_Center_obj",
+				"Oren_DEV_S:O_DE_Lamp01", "Oren_DEV_S:O_DE_Lamp02"]:
+			var mk: Mesh = _mesh_cache.get(key)
+			if mk == null:
+				continue
+			var kinds := []
+			for si in range(mk.get_surface_count()):
+				var mm: Material = mk.surface_get_material(si)
+				kinds.append(("SH" if mm is ShaderMaterial else "ST")
+						+ str(si))
+			print("MAT AUDIT ", key, " placeholder=",
+					_placeholder_keys.get(key, false),
+					" split=", _static_split.has(key),
+					" surf_mats=", kinds)
 	# DEVLOG-86: build the foliage MultiMeshes (one per mesh key) + physics.
 	# Grass/bushes are NOT solid in the client (walk-through decoration —
 	# the legacy full-trimesh bodies blocked the player with invisible
@@ -1986,18 +2017,34 @@ func _get_mesh(key: String) -> Mesh:
 		# needs the alpha-scissor StandardMaterial3D path below (the PBR
 		# shader has no alpha support).
 		var is_foliage_pkg := _is_foliage_key(key)
-		# DEVLOG-158: the lamp frame/socket surfaces are authored as dark
-		# metal, but must stay on the existing layer-2 StandardMaterial path.
-		# Sending them through the generic PBR pool leaves the narrow frame
-		# unlit at the plaza, while the crystal surface remains the PBR
-		# plafond. Keep this scoped to the two lamp mesh keys.
-		var is_lamp_frame := key in [
-			"Oren_DEV_S:O_DE_Lamp01", "Oren_DEV_S:O_DE_Lamp02"
-		] and tobj != "DE_V_cube_deco3"
 		var pm: Material = null
-		if not is_foliage_pkg and not is_lamp_frame:
+		if not is_foliage_pkg:
 			pm = L2ProcTex.material_for(tpkg, tobj, false)
 		if pm != null:
+			# DEVLOG-158 rev2 (GLM): the lamp frame/socket surfaces keep the
+			# PBR pool path (layer 1, cast_shadow ON — the approved plaza
+			# shadow look depends on it; the DEVLOG-158 rerouting to
+			# layer-2 StandardMaterial twins wiped the carriers' lamp
+			# shadows and brightened the whole plaza floor 2x). Instead the
+			# head hardware textures (the collar/socket ring + the cage
+			# arch over the crystal) get per-key CLONES of the same cached
+			# material with a softened pool N*L and a raised pool gain:
+			# the collar reads as lit metal, the hood/pole/houses untouched.
+			var is_lamp_head := key in [
+				"Oren_DEV_S:O_DE_Lamp01", "Oren_DEV_S:O_DE_Lamp02"
+			] and tobj in ["DE_V_deco10", "DE_V_roof_deco"]
+			if is_lamp_head and pm is ShaderMaterial:
+				var frame_m: ShaderMaterial = (pm as ShaderMaterial).duplicate()
+				frame_m.set_shader_parameter("lantern_ndl_soft", 0.5)
+				frame_m.set_shader_parameter("lantern_pool_gain", _frame_pool_gain)
+				# The frame's own lantern pool must never be skipped: at the
+				# two player-nearest lanterns the pool skip + the carrier
+				# trapped inside the hood left the collar black (the
+				# user's "нет оправы" on the central eight).
+				frame_m.set_meta("l2_frame_pool", true)
+				L2ProcTex.track_pbr_material(frame_m)
+				mesh.surface_set_material(si, frame_m)
+				continue
 			mesh.surface_set_material(si, pm)
 			continue
 		var tp: String = "%s/textures/%s/Texture/%s.png" % [active_dir, tpkg, tobj]
