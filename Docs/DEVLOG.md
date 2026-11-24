@@ -10083,10 +10083,10 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   between `O_DE_MT_Btm` (below, ~−74 m) and `O_DE_MT_In`/`O_DE_MT_Out` (above),
   no surface-house intersection. Above-view renders saved:
   `tmp/tower_ab/above_{178,189,181,194}/shot1.png`.
-- **Status:** axis fix verified numerically; committed separately for rollback.
-  The user's reference pylon ("rises to ceiling") at the cave camera needs
-  visual confirmation — I cannot view PNGs in this environment; the trace at
-  yaw −3.03 did not hit Pir02/MT_In in the lower screen, so the exact object in
-  the user's ref must be identified by the user or by a targeted trace once the
-  screen region is named. Do not treat as closed without the user's spawn-point
-  screenshot confirmation.
+- **Status:** user confirmed towers are in place (2026-11-24). Axis fix
+  committed separately for rollback.
+- **Side effect (user-reported):** Shillien Temple texture/appearance bug also
+  resolved incidentally. This is consistent with the same global permutation:
+  20_17 has 88 non-uniform DrawScale3D actors with `sy!=sz` (0 with `sy<0`)
+  now scaled on the correct glTF axis; 19_18 has 6 (1 `sy<0`), 21_18 37, 18_19
+  2, 19_19 1. Not separately verified here beyond the user's confirmation.
