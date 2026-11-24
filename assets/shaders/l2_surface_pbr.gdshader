@@ -91,6 +91,8 @@ uniform float lantern_pool_gain : hint_range(0.25, 32.0) = 1.0;
 // the door-panel UVs (world.gd), never synthetic actors.
 uniform vec3 candle_pos[64];
 uniform int candle_count = 0;
+uniform int candle_shadow0 = -1;
+uniform int candle_shadow1 = -1;
 uniform vec3 candle_color = vec3(1.0, 0.58, 0.22);
 uniform float candle_energy : hint_range(0.0, 8.0) = 0.75;
 uniform float candle_range : hint_range(0.5, 8.0) = 2.5;
@@ -345,6 +347,12 @@ void fragment() {
 	// a per-source uniform array; TIME gives the natural low+high tremor.
 	float cand_sum = 0.0;
 	for (int ci = 0; ci < candle_count; ci++) {
+		// The two player-nearest candles are carried by real shadowed
+		// omnis (world.gd); skip their pool contribution to avoid double
+		// light and, more importantly, to stop light leaking through walls.
+		if (ci == candle_shadow0 || ci == candle_shadow1) {
+			continue;
+		}
 		vec3 toc = candle_pos[ci] - wpos;
 		float cd = length(toc);
 		if (cd >= candle_range) {

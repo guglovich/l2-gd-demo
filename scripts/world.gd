@@ -140,6 +140,13 @@ var _static_split := {}
 # distance gate below (32 cube-shadow omnis overflow the compat shadow
 # atlas: the middle lanterns' shadows were silently dropped).
 var _lantern_omnis: Array[OmniLight3D] = []
+# DEVLOG-162: two real shadow-casting candle omnis track the player-nearest
+# candles. The shader pool skips those two indices, so nearby candle light is
+# occluded by walls instead of leaking through them.
+var _candle_carriers: Array[OmniLight3D] = []
+# DEVLOG-163: one billboard transform per candle for the client's five-frame
+# flame animation (FX_E_T flame_a01..a05).
+var _candle_flame_transforms: Array[Transform3D] = []
 # DEVLOG-158 rev2: the lamp frame/socket pool gain — the collar band sits
 # ~0.15 m under the plafond center where the DEVLOG-151 near-field cap
 # (latt <= 0.18) pins the pool; the gain lifts it for the frame clones
@@ -223,6 +230,38 @@ func _process(delta: float) -> void:
 		else:
 			c1.light_energy = 0.0
 		L2ProcTex.set_lantern_shadow(b0, b1)
+	# DEVLOG-162: candle carriers — same nearest-two swap, warm and short
+	# range. Their shadow maps occlude walls; the shader pool skips them.
+	if _player != null and _candle_carriers.size() == 2:
+		var cps := L2ProcTex.candle_positions()
+		var cb0 := -1
+		var cb1 := -1
+		var cd0 := 1e12
+		var cd1 := 1e12
+		var ppc := _player.global_position
+		for i in cps.size():
+			var dd := cps[i].distance_squared_to(ppc)
+			if dd < cd0:
+				cd1 = cd0
+				cb1 = cb0
+				cd0 = dd
+				cb0 = i
+			elif dd < cd1:
+				cd1 = dd
+				cb1 = i
+		var cc0: OmniLight3D = _candle_carriers[0]
+		var cc1: OmniLight3D = _candle_carriers[1]
+		if cb0 >= 0:
+			cc0.position = cps[cb0]
+			cc0.light_energy = 0.35
+		else:
+			cc0.light_energy = 0.0
+		if cb1 >= 0:
+			cc1.position = cps[cb1]
+			cc1.light_energy = 0.35
+		else:
+			cc1.light_energy = 0.0
+		L2ProcTex.set_candle_shadow(cb0, cb1)
 	_lamp_timer += delta
 	if _lamp_timer < 0.5 or _player == null:
 		return
@@ -256,6 +295,22 @@ func _ready() -> void:
 	# count).
 	L2ProcTex.apply_lanterns()
 	L2ProcTex.apply_candles()
+	# DEVLOG-162: two nearest candles become real shadowed omnis. Their pool
+	# indices are skipped in l2_surface_pbr, so the warm light near the player
+	# is occluded by walls instead of leaking through them.
+	if L2ProcTex.candles_size() > 0 and OS.get_environment("L2_NO_CANDLE_CARRIERS") == "":
+		for i in range(2):
+			var cl := OmniLight3D.new()
+			cl.light_color = Color(1.0, 0.58, 0.22)
+			cl.light_energy = 0.35
+			cl.omni_range = 2.5
+			cl.omni_attenuation = 2.0
+			cl.shadow_enabled = OS.get_environment("L2_NO_CANDLE_SHADOW") == ""
+			cl.light_cull_mask = 3
+			world.add_child(cl)
+			_candle_carriers.append(cl)
+		print("candle carriers: ", _candle_carriers.size(), " shadowed omnis ready")
+	_build_candle_flames()
 	for m in L2ProcTex.tracked_materials():
 		if m.has_meta("l2_plafond"):
 			_plafond_mats.append(m)
@@ -1535,6 +1590,56 @@ func _road_pt(origin: Vector2, dir: Vector2, right: Vector2, lx: float, w: float
 	return Vector3(g.x * UNIT_SCALE, z * UNIT_SCALE, g.y * UNIT_SCALE)
 
 
+## DEVLOG-163: all candle flames in one camera-facing MultiMesh. The five
+## source images are the client's original FX_E_T flame_a01..a05 frames; no
+## synthetic fire texture/actor is used. The shader billboards each quad and
+## cycles the frame array with an individual position-derived phase.
+func _build_candle_flames() -> void:
+	if OS.get_environment("L2_CANDLE_FIRE_OFF") != "" \
+			or _candle_flame_transforms.is_empty():
+		return
+	var imgs: Array[Image] = []
+	for i in range(1, 6):
+		var img := Image.new()
+		var p := "res://assets/maps/20_18/textures/fx_e_t/Texture/flame_a%02d.png" % i
+		if img.load(p) != OK:
+			push_error("candle flame frame missing: " + p)
+			return
+		imgs.append(img)
+	var frames := Texture2DArray.new()
+	frames.create_from_images(imgs)
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://assets/shaders/l2_candle_flame.gdshader")
+	mat.set_shader_parameter("flame_frames", frames)
+	var verts := PackedVector3Array([
+		Vector3(-0.5, -0.5, 0), Vector3(0.5, -0.5, 0),
+		Vector3(0.5, 0.5, 0), Vector3(-0.5, 0.5, 0),
+	])
+	var uvs := PackedVector2Array([
+		Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 1),
+	])
+	var idx := PackedInt32Array([0, 1, 2, 0, 2, 3])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var quad := ArrayMesh.new()
+	quad.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = quad
+	mm.instance_count = _candle_flame_transforms.size()
+	for i in range(_candle_flame_transforms.size()):
+		mm.set_instance_transform(i, _candle_flame_transforms[i])
+	var mmi := MultiMeshInstance3D.new()
+	mmi.multimesh = mm
+	mmi.material_override = mat
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	world.add_child(mmi)
+	print("candle flames: ", _candle_flame_transforms.size(),
+			" client-frame billboards (5 frames)")
+
 func _build_meshes() -> void:
 	var placed := 0
 	var skipped: Array[String] = []
@@ -1654,7 +1759,14 @@ func _build_meshes() -> void:
 		if OS.get_environment("L2_CANDLES_OFF") == "" \
 				and _candle_local_positions.has(key):
 			for cp in _candle_local_positions[key]:
-				L2ProcTex.register_candle(inst.transform * cp)
+				var wp: Vector3 = inst.transform * cp
+				L2ProcTex.register_candle(wp)
+				var fh := 0.28 if key.ends_with("store_17") \
+						else (0.24 if key.ends_with("store_15") else 0.18)
+				var fw := fh * 0.6
+				_candle_flame_transforms.append(Transform3D(
+						Basis.from_scale(Vector3(fw, fh, 1.0)),
+						wp + Vector3(0, fh * 0.5 + 0.005, 0)))
 		if is_placeholder:
 			inst.layers = 2
 		world.add_child(inst)

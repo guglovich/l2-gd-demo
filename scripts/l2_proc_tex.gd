@@ -100,6 +100,9 @@ static func register_candle(p: Vector3) -> void:
 static func candles_size() -> int:
 	return _candles.size()
 
+static func candle_positions() -> PackedVector3Array:
+	return _candles
+
 static func candle_uniform() -> PackedVector3Array:
 	var arr := PackedVector3Array(_candles)
 	while arr.size() < CANDLE_ARRAY_MAX:
@@ -195,6 +198,19 @@ static func apply_candles() -> void:
 	print("candle pools: ", _candles.size(), " positions -> ", live,
 			" tracked materials")
 
+## DEVLOG-162: the two player-nearest candles are carried by real shadowed
+## omnis; skip their shader-pool indices so the light cannot leak through walls.
+static var _candle_shadow_pair := Vector2i(-1, -1)
+static func set_candle_shadow(i0: int, i1: int) -> void:
+	var pair := Vector2i(i0, i1)
+	if pair == _candle_shadow_pair:
+		return
+	_candle_shadow_pair = pair
+	for m in _tracked:
+		if is_instance_valid(m):
+			m.set_shader_parameter("candle_shadow0", i0)
+			m.set_shader_parameter("candle_shadow1", i1)
+
 ## TRUE transparency-mask textures (the lattice grates — the center-plaza
 ## floor and the fences). NOT a blanket rule: most L2 alphas are
 ## specular/blend masks (the carpet family must stay opaque).
@@ -211,6 +227,11 @@ const ALPHA_CUTOUT := [
 	# reached the c3c5110 commit — the band rendered opaque ("булыжники
 	# без кристаллов", the user's report). Restored + committed now.
 	"oren_dev_t:DE_V_new_deco3",
+	# the house doorway arch/grate (DEVLOG-164): the client doordeco is
+	# RGBA with a real openwork mask (61.1% alpha-0). The staged PBR A was
+	# a stale height field, so the grate rendered as a solid black panel.
+	# Texgen re-run: A == source alpha (1.0), sidecar alpha_mask=true.
+	"interior_b_delf_t:interior_B_delf_doordeco",
 	# the Shirai statue spike surface (De_Statue004): the client texture is
 	# RGBA with the real spike mask (62.5% transparent); the staged
 	# pbr_albedo A now carries it (texgen: source-alpha, 2026-11-23,
@@ -397,7 +418,7 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	# L2_CANDLES_OFF=1 = the before-state A/B.
 	if OS.get_environment("L2_CANDLES_OFF") == "" \
 			and obj in ["interior_B_delf_candle01", "interior_B_delf_doordeco"]:
-		m.set_shader_parameter("candle_glow", 1.2)
+		m.set_shader_parameter("candle_glow", 0.35)
 	# DEVLOG-144: the DE village lantern plafonds glow (the lamp's own
 	# glass emission); every other texture stays inert (the energy 0)
 	if obj == "DE_V_cube_deco3":

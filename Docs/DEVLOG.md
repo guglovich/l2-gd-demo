@@ -10351,3 +10351,71 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   - The probe after the fix: dirs 9/10 open at torso/knee height.
   - Regression H02 stair test still reaches its target (`tgt=false`).
 - **Shots:** `tmp/verify_160/exit.png`, `spawn.png`.
+
+## DEVLOG-162 — 2026-11-24 (GLM): candle light no longer leaks through walls
+
+- **User report:** candle light exits the building everywhere, not only through
+  the doorway.
+- **Cause:** the DEVLOG-159 candle pool is distance-only (like the original
+  lantern shader pools), so it has no wall occlusion.
+- **Fix:** two player-nearest candles now become real warm `OmniLight3D`
+  carriers (`range 2.5 m`, decay 2, energy 0.35, cull_mask 3, shadows ON).
+  Their indices are skipped in the shader candle pool via new
+  `candle_shadow0/1` uniforms + `L2ProcTex.set_candle_shadow`, so the nearby
+  light is shadowed by the actual walls instead of leaking. Far candles keep
+  the cheap deterministic pool. `L2_NO_CANDLE_CARRIERS=1` = old pool-only A/B;
+  `L2_NO_CANDLE_SHADOW=1` = shadow-off diagnostic.
+- **Verification (door camera `L2_SPAWN=10315,17782,-4455`, yaw -1.344,
+  pitch -0.1244):** old pool-only vs shadow carriers: 52250 px >8 (3.63%),
+  7401 px >30 (0.51%), localized around the doorway/candles; whole-frame mean
+  24.5/22.9/22.5 -> 24.2/22.7/22.4 (no global darkening). Runtime reports
+  `candle carriers: 2 shadowed omnis ready`.
+
+## DEVLOG-163 — 2026-11-24 (GLM): real client fire on all 51 candles
+
+- **User request:** replace the painted candle tops with real fire; the alpha
+  around the old painted flame is not needed.
+- **Original asset:** UModel export from `/Games/ElmoreX3/Textures/FX_E_T.utx`:
+  `flame_a01..flame_a05`, five 128x256 RGBA frames (~30% alpha-0, warm orange).
+  Staged under `assets/maps/20_18/textures/fx_e_t/Texture/` — original client
+  art, not a synthetic texture.
+- **Implementation:** `l2_candle_flame.gdshader` samples a `Texture2DArray` of
+  the five frames at 8 fps, additive/unshaded, camera-facing per-instance
+  billboards with a position-derived phase and two-frequency flicker. All 51
+  candles share one `MultiMeshInstance3D` (one draw call); no shadow casting.
+  Door flames 0.28 m, tall store_15 flames 0.24 m, table flames 0.18 m. The old
+  painted candle emission is reduced 1.2 -> 0.35 so the sprite replaces the
+  bright rectangular top. `L2_CANDLE_FIRE_OFF=1` = A/B.
+- **Verification:** runtime `candle flames: 51 client-frame billboards
+  (5 frames)`. Door close-up (zoom 0.5) fire OFF/ON: 1085 px >8, 648 >30; two
+  main flame components 374 px and 259 px. Their bases sit at y=417 and tips
+  at y=391 — upright, not inverted. Other candles are visible through the
+  openwork doorway. Zero shader compile errors.
+
+## DEVLOG-164 — 2026-11-24 (GLM): the house doorway grate alpha restored
+
+- **User report:** the gate in the passage has no alpha (solid); original
+  screenshot attached; several houses have the same grate.
+- **Root cause:** the gate is part of `interior_B_delf_doordeco` on
+  `interior_B_delf_store_17` (8 actors). The client texture is RGBA with a
+  genuine openwork mask: **61.1% alpha-0**. The staged PBR albedo A was a stale
+  height field (50.4% zero) and the sidecar had no `alpha_mask` — the same
+  stale-texgen pattern as DEVLOG-154/158.
+- **Fix:** texgen re-run (`A == source alpha`, verified 1.0; sidecar
+  `alpha_mask: true`) and `interior_b_delf_t:interior_B_delf_doordeco` added to
+  `ALPHA_CUTOUT`. All eight door panels become openwork; the room is visible
+  through the grate and the candle/fire opaque parts remain.
+- **Verification:** the close-up door panel fills the frame, so restoring its
+  61% transparency changes 916709 px >8 vs the old solid state (expected and
+  panel-local). Isolating fire after the cutout still gives the same 1085/648
+  px flame delta. No shader errors.
+- **Shots:** `tmp/verify_candles2/door_fire_grate.png`, `door_no_fire.png`,
+  `spawn.png`.
+
+### Pending (not changed in this commit)
+
+- The building-floor "swimming/two layers" report is still under investigation.
+  Terrain/LevelBSP source A/B at the floor-heavy yaw showed almost no visible
+  contribution; POM is already 0 for the village PBR route; normal-map and
+  duplicate-triangle A/B were also visually inert at the tested cameras. No
+  unverified floor code is included here.
