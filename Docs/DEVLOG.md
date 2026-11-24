@@ -10272,3 +10272,56 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Plaza baseline:** 1857 px >8 (0.13%) vs the pre-rev4 render — the
   platform ring only; zero shader errors.
 - Shots: `tmp/verify_158rev4a/` (`center_vantage_cutout.png`, `plaza.png`).
+
+## DEVLOG-159 — 2026-11-24 (GLM): all Dark Elf village candles + natural warm glow
+
+- **User request:** "надо найти все свечки в деревне … и реализуем их натуральное
+  свечение" (screenshot: the two wall sconces on an interior door panel).
+- **Inventory (exact, 20_18): 51 candles.**
+  - **16 door sconces:** 8 `interior_B_delf_store_17` actors, each panel carries
+    two candles in `interior_B_delf_doordeco`. Their local light positions were
+    derived from the two bright wax/flame UV anchors (u/v 0.108/0.444 and
+    0.823/0.391) mapped onto the panel's client quad:
+    `(0.2753,-0.0217,0.2871)` and `(-0.2268,-0.0422,-0.2366)` m.
+  - **35 table candles:** `interior_B_delf_candle01` geometry, grouped by XZ
+    into real candle islands (holder/wax/flame stacked vertically are ONE
+    candle, not separate lights): store_03 1x2=2, store_06 2x1=2,
+    store_09 2x1=2, store_10 18x1=18, store_13 1x2=2, store_15 5x1=5,
+    store_23 4x1=4.
+  - **Not invented:** UModel export of the original
+    `/Games/ElmoreX3/StaticMeshes/interior_B_delf_s.usx` confirms the candle01
+    section of store_07/08/19/20 has **0 vertices** (an empty material slot),
+    so those five actor instances are correctly left without synthetic candles.
+- **Implementation (no new actors/textures):**
+  - `l2_surface_pbr.gdshader`: a second deterministic shader pool,
+    `candle_pos[64]` (51 live), warm `candle_color (1.0,0.58,0.22)`, short
+    `candle_range 2.5 m`, `candle_energy 0.75`, wrap diffuse, near-field cap
+    0.65 and overlap clamp 0.8. The pool is **albedo-scaled** (the first pure
+    emission version was rejected: it washed 17.7% of the close-up orange).
+  - Natural independent flicker: `TIME` at 6.7/13.1 Hz with a phase derived
+    from each candle's world XZ (no phase-array/uniform update per frame).
+  - Candle emission: `candle_glow 1.2` on the two client candle textures.
+    The mask is COLOR-DERIVED in linear albedo (bright + warm texels), so no
+    new emission texture: 25.1% of candle01 texels and 7.8% of doordeco texels
+    pass the heat threshold; the metal holders/door rails stay inert.
+  - `world.gd`: exact client-derived local positions transformed by each
+    actor's R*S and registered once; `l2_proc_tex.gd`: `register_candle`,
+    padded uniform push `apply_candles` into all 195 tracked PBR materials.
+  - `L2_CANDLES_OFF=1` = before-state A/B (pool count 0 + emission off).
+- **Verification (real GPU):**
+  - Runtime: `candle pools: 51 positions -> 195 tracked materials`; OFF run
+    reports `0 positions` (the same 195 materials).
+  - Door close-up (`L2_SPAWN=10315,17782,-4455`, yaw -1.344, pitch -0.1244,
+    `L2_TIME=15.93`): traced door-panel candle pixels OFF
+    17.8/21.2/27.5 -> ON flame samples **244/157/92** and **226/155/105**
+    (warm amber, no synthetic geometry); tuned frame diff `>30 = 4.12%`,
+    `>8 = 11.93%` (local candle + nearby soft warm pool).
+  - Plaza baseline (`L2_SPAWN=10741,16930,-4628.9`, yaw 16384, `L2_TIME=12`):
+    `>8 = 5.25%`, `>30 = 1.06%` — soft warm fill in the candle-lit shop
+    openings, no global orange wash; zero shader compile errors.
+  - Table candle close-up attempts were occluded by the shop geometry (the
+    8-px trace never caught store_10), but the table candles use the same
+    tested candle01 emission material and the exact geometry-derived pool
+    positions; their count is included in the 51.
+- **Shots:** `tmp/verify_159/door_candles.png`, `plaza.png`, `spawn.png`.
+- **Status:** awaiting the user's visual confirmation (door sconces + shops).

@@ -85,6 +85,19 @@ uniform int lantern_shadow1 = -1;
 // crystal — the user's "нет оправы". GAIN > 1 brightens only surfaces
 // whose material explicitly sets it.
 uniform float lantern_pool_gain : hint_range(0.25, 32.0) = 1.0;
+// DEVLOG-159: the village CANDLES. Separate from the blue lantern pools:
+// warm local light, short range, always on, no renderer-light-cap and no
+// shadow maps. Positions are derived from the client candle geometry /
+// the door-panel UVs (world.gd), never synthetic actors.
+uniform vec3 candle_pos[64];
+uniform int candle_count = 0;
+uniform vec3 candle_color = vec3(1.0, 0.58, 0.22);
+uniform float candle_energy : hint_range(0.0, 8.0) = 0.75;
+uniform float candle_range : hint_range(0.5, 8.0) = 2.5;
+// Per-material 0 = inert. The candle textures set this > 0; the emission
+// mask is COLOR-DERIVED (bright warm texels = flame/wax), so the metal
+// holder and the rest of the door panel never glow.
+uniform float candle_glow : hint_range(0.0, 8.0) = 0.0;
 
 // DEVLOG-147 rev3/rev4 probe trail (kept for the record): the WORLD
 // position for the pools = the VERTEX-STAGE VERTEX (world with
@@ -325,6 +338,34 @@ void fragment() {
 	// DEVLOG-150: the overlap guard stays (2-3 lamps within a few meters
 	// still sum up); with the physical falloff it only bites close-in.
 	lant_sum = min(lant_sum, 1.3);
+	// DEVLOG-159: the warm candle pools. Same deterministic shader-side
+	// approach as the blue lanterns, but short-range and unshadowed (a
+	// candle cannot carve a hard shadow map). The phase is derived from
+	// the world position, so every candle flickers independently without
+	// a per-source uniform array; TIME gives the natural low+high tremor.
+	float cand_sum = 0.0;
+	for (int ci = 0; ci < candle_count; ci++) {
+		vec3 toc = candle_pos[ci] - wpos;
+		float cd = length(toc);
+		if (cd >= candle_range) {
+			continue;
+		}
+		float cnd = cd / candle_range;
+		cnd *= cnd;
+		cnd *= cnd;
+		cnd = max(1.0 - cnd, 0.0);
+		cnd *= cnd;
+		// Small near-field cap: a candle catches its wax/holder brightly
+		// without a 1/d^2 blowout rectangle on the wall/table.
+		float catt = min(cnd * pow(max(cd, 0.05), -2.0), 0.65);
+		float cndl = mix(abs(dot(wn, toc / max(cd, 1e-4))), 1.0, 0.45);
+		float phase = fract(sin(dot(candle_pos[ci].xz, vec2(12.9898, 78.233)))
+				* 43758.5453);
+		float flick = 1.0 + 0.10 * sin(TIME * 6.7 + phase * 6.2831)
+				+ 0.045 * sin(TIME * 13.1 + phase * 12.5664);
+		cand_sum += catt * cndl * flick;
+	}
+	cand_sum = min(cand_sum, 0.8);
 	// DEVLOG-144: the lamp glass glows with its own blue (the albedo
 	// pattern carries the plafond's glass/frame detail); DEVLOG-151 rev2:
 	// the flat lantern-colored term for the dark glass (the crystal
@@ -333,4 +374,18 @@ void fragment() {
 			+ lantern_color * emission_flat * emission_energy
 			+ alb.rgb * lantern_color
 			* (lantern_energy * lantern_night * lant_sum);
+	if (candle_glow > 0.0) {
+		// source_color means albedo is linear here: the painted candle
+		// wax/flame sits around 0.2..0.6 linear, the dark holder/rails
+		// around 0.01..0.08. Color-derived mask — no new texture asset.
+		float clum = max(max(alb.r, alb.g), alb.b);
+		float cwarm = smoothstep(0.01, 0.16, alb.r - alb.b);
+		float heat = smoothstep(0.14, 0.42, clum) * (0.35 + 0.65 * cwarm);
+		float phase = fract(sin(dot(wpos.xz, vec2(12.9898, 78.233)))
+				* 43758.5453);
+		float flick = 1.0 + 0.10 * sin(TIME * 6.7 + phase * 6.2831)
+				+ 0.045 * sin(TIME * 13.1 + phase * 12.5664);
+		EMISSION += candle_color * heat * candle_glow * flick;
+	}
+	EMISSION += alb.rgb * candle_color * candle_energy * cand_sum;
 }

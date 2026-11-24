@@ -75,6 +75,11 @@ static var _cache := {}
 ## shader — padded with zeros; lantern_count carries the real length.
 const LANTERN_ARRAY_MAX := 64
 static var _lanterns := PackedVector3Array()
+## DEVLOG-159: the village candles (47 client-derived sources: 16 door
+## sconces + 31 table candles). Separate warm shader pool — always on,
+## short range, deterministic, no real-omni light-cap involvement.
+const CANDLE_ARRAY_MAX := 64
+static var _candles := PackedVector3Array()
 ## DEVLOG-147 rev2: EVERY live PBR ShaderMaterial — the _cache originals AND
 ## the per-BSP-surface duplicates. `_bsp_material` duplicates the cached
 ## material and a duplicate holds only the parameters set before it was
@@ -87,6 +92,19 @@ static var _tracked: Array[ShaderMaterial] = []
 static func register_lantern(p: Vector3) -> void:
 	if _lanterns.size() < LANTERN_ARRAY_MAX:
 		_lanterns.append(p)
+
+static func register_candle(p: Vector3) -> void:
+	if _candles.size() < CANDLE_ARRAY_MAX:
+		_candles.append(p)
+
+static func candles_size() -> int:
+	return _candles.size()
+
+static func candle_uniform() -> PackedVector3Array:
+	var arr := PackedVector3Array(_candles)
+	while arr.size() < CANDLE_ARRAY_MAX:
+		arr.append(Vector3.ZERO)
+	return arr
 
 static func track_pbr_material(m: ShaderMaterial) -> void:
 	_tracked.append(m)
@@ -160,6 +178,22 @@ static func apply_lanterns() -> void:
 				n_an += 1
 	print("lantern pools: ", _lanterns.size(), " positions -> ", live,
 			" tracked materials (pbr ", n_pbr, ", analytic ", n_an, ")")
+
+## DEVLOG-159: push the fixed candle positions into every live PBR material.
+## The flicker lives in the shader (TIME + a position-derived phase), so this
+## is a one-time push, exactly like the lantern pool bootstrap.
+static func apply_candles() -> void:
+	if _pbr_shader == null:
+		return
+	var arr := candle_uniform()
+	var live := 0
+	for m in _tracked:
+		if is_instance_valid(m):
+			m.set_shader_parameter("candle_pos", arr)
+			m.set_shader_parameter("candle_count", _candles.size())
+			live += 1
+	print("candle pools: ", _candles.size(), " positions -> ", live,
+			" tracked materials")
 
 ## TRUE transparency-mask textures (the lattice grates — the center-plaza
 ## floor and the fences). NOT a blanket rule: most L2 alphas are
@@ -357,6 +391,13 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
 	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
+	# DEVLOG-159: the two client candle textures glow on their bright warm
+	# texels only (the shader derives the mask from albedo color). The door
+	# panel's dark rails and the candle holders stay inert.
+	# L2_CANDLES_OFF=1 = the before-state A/B.
+	if OS.get_environment("L2_CANDLES_OFF") == "" \
+			and obj in ["interior_B_delf_candle01", "interior_B_delf_doordeco"]:
+		m.set_shader_parameter("candle_glow", 1.2)
 	# DEVLOG-144: the DE village lantern plafonds glow (the lamp's own
 	# glass emission); every other texture stays inert (the energy 0)
 	if obj == "DE_V_cube_deco3":

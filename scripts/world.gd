@@ -95,6 +95,40 @@ var _veg_batch := {}
 # center of the DE_V_cube_deco3 surface) — the omni anchors for the
 # lantern lights; keyed by the mesh key.
 var _plafond_center := {}
+# DEVLOG-159: exact client-derived candle light positions in mesh-local
+# glTF meters. Table candles = top-center of each candle's geometry island;
+# door candles = the two bright wax/flame UV anchors of doordeco mapped onto
+# its quad. UModel confirmed store_07/08/19/20 candle sections are empty
+# (0 verts) in the client, so they are NOT invented here.
+var _candle_local_positions := {
+	"interior_B_delf_s:interior_B_delf_store_17": [
+		Vector3(0.2753, -0.0217, 0.2871),
+		Vector3(-0.2268, -0.0422, -0.2366),
+	],
+	"interior_B_delf_s:interior_B_delf_store_03": [
+		Vector3(0.8455, -0.2605, 0.3655),
+		Vector3(-0.2175, -0.2605, -0.8775),
+	],
+	"interior_B_delf_s:interior_B_delf_store_06": [
+		Vector3(0.2807, -0.0562, 0.4187),
+	],
+	"interior_B_delf_s:interior_B_delf_store_09": [
+		Vector3(-0.4211, -0.1047, -0.5210),
+	],
+	"interior_B_delf_s:interior_B_delf_store_10": [
+		Vector3(0.0104, 0.1311, -0.0097),
+	],
+	"interior_B_delf_s:interior_B_delf_store_13": [
+		Vector3(0.8455, -0.2605, 0.3655),
+		Vector3(-0.2111, -0.2605, -0.8720),
+	],
+	"interior_B_delf_s:interior_B_delf_store_15": [
+		Vector3(0.0003, 0.2063, -0.0011),
+	],
+	"interior_B_delf_s:interior_B_delf_store_23": [
+		Vector3(-0.0420, -0.0562, 0.0195),
+	],
+}
 # DEVLOG-147 rev4: the static mesh keys whose surfaces are ALL
 # StandardMaterial3D placeholders (no staged PBR/analytic set) — they move
 # to RENDER LAYER 2, lit exclusively by the lantern omnis (cull_mask = 2);
@@ -221,6 +255,7 @@ func _ready() -> void:
 	# cache originals, the per-BSP duplicates; apply_lanterns prints the
 	# count).
 	L2ProcTex.apply_lanterns()
+	L2ProcTex.apply_candles()
 	for m in L2ProcTex.tracked_materials():
 		if m.has_meta("l2_plafond"):
 			_plafond_mats.append(m)
@@ -1613,6 +1648,13 @@ func _build_meshes() -> void:
 			ds *= Vector3(s3[0], s3[2], s3[1])
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2])) \
 				* Basis.from_scale(ds)
+		# DEVLOG-159: register the client-derived candle lights in world
+		# space (the actor's exact R*S transform, same as the mesh).
+		# L2_CANDLES_OFF=1 = the before-state A/B (both pool + emission).
+		if OS.get_environment("L2_CANDLES_OFF") == "" \
+				and _candle_local_positions.has(key):
+			for cp in _candle_local_positions[key]:
+				L2ProcTex.register_candle(inst.transform * cp)
 		if is_placeholder:
 			inst.layers = 2
 		world.add_child(inst)
