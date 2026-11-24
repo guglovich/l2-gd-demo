@@ -10104,3 +10104,10 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   - H04 O_DE_H04 (13174,15445): after fix, small dy=0.10 step climbs, but the chosen straight-line path then hits a 1.10m rise (above the 1.05m climb limit) and the blocked-target killer drops the target after grace. This path hit a wall/high edge, not a confirmed door; door approach angle not identified by automated test.
 - **Status:** step-assist regression fixed in code (killer ordering + landing placement). **Not fully user-verified.** The "can't enter houses" report may be fully explained by the loop/killer bug, but needs user retest at real doorways, especially the houses the user reported.
 - **Separate open issue (reported same message, not fixed here):** "у фонарей посередине нету оправы / цоколя" near the Shillien statue and transparent floor lattice. Geometry trace confirms `O_DE_Lamp01` surf8 `oren_dev_t:DE_V_deco10` exists at socket/collar height (trace hit at UE Z -4473). Visual cause not identified from code; screenshots saved at `tmp/lamp_check2/`, `tmp/lamp_close/` for user reference. Needs user clarification / visual confirmation of which part is missing.
+
+### DEVLOG-157 follow-up — target stop regression
+
+- **User report:** after the step-assist fix, click-to-move did not stop at the target and continued along the trajectory.
+- **Root cause:** the `else` arrival branch cleared `has_target` but did not clear `moving`/horizontal velocity. During the earlier edit, the `if not moving` damping line was also accidentally joined to a comment and became inactive.
+- **Fix:** on arrival explicitly set `moving=false`, `velocity.x/z=0`; restored the damping block on its own line.
+- **Verification:** `L2_STEP_TEST="112.79,185.50,-44.5,112.79,187.20"` reaches the stepped landing and reports `tgt=false`, `rv=0.00` on subsequent frames.

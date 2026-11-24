@@ -478,9 +478,13 @@ func _physics_process(delta: float) -> void:
 		else:
 			has_target = false
 			dest_marker.visible = false
+			moving = false
+			velocity.x = 0.0
+			velocity.z = 0.0
 		# DEVLOG (step regression): do NOT kill the target here — the step
 		# assist (after move_and_slide) needs a chance to climb. The
-		# blocked-target killer runs after the step assist below.	if not moving:
+		# blocked-target killer runs after the step assist below.
+	if not moving:
 		velocity.x = move_toward(velocity.x, 0, 20 * delta)
 		velocity.z = move_toward(velocity.z, 0, 20 * delta)
 	if is_on_floor():
