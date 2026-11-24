@@ -1517,8 +1517,9 @@ func _build_meshes() -> void:
 		if _is_foliage_key(key):
 			var f_ds := Vector3.ONE * float(actor.get("draw_scale", 1.0))
 			var f_s3: Array = actor.get("draw_scale3d", [1.0, 1.0, 1.0])
+			# DEVLOG-156: same mesh-axis permutation as the statics path.
 			if f_s3 != null and f_s3.size() == 3:
-				f_ds *= Vector3(f_s3[0], f_s3[1], f_s3[2])
+				f_ds *= Vector3(f_s3[0], f_s3[2], f_s3[1])
 			var vb := _ue_basis(int(rot[0]), int(rot[1]), int(rot[2])) \
 					* Basis.from_scale(f_ds)
 			if not _veg_batch.has(key):
@@ -1591,10 +1592,17 @@ func _build_meshes() -> void:
 		# mirrored houses/stairs (O_DE_H02/H03, O_DE_CH_sidestair...) were
 		# unwrapped. The scale is baked INTO the basis (R*S — the mesh-space
 		# scale): the Node3D.scale property is unreliable for negatives.
+		# DEVLOG-156: DrawScale3D is authored in the MESH's own axes (UE
+		# x,y,z), and the staged glTF maps them (x, z, y) — the vertical is
+		# glTF Y = UE z. So the per-axis scale must be permuted the same
+		# way: (sx, sz, sy). The old unswopped (sx, sy, sz) turned every
+		# sy=-1 actor into a VERTICAL flip (7 village actors, 2 of the 4
+		# Pir02 towers): the 84 m pylon's 51 m tail pointed UP through the
+		# surface houses instead of down into the cavern.
 		var ds := Vector3.ONE * float(actor.get("draw_scale", 1.0))
 		var s3: Array = actor.get("draw_scale3d", [1.0, 1.0, 1.0])
 		if s3 != null and s3.size() == 3:
-			ds *= Vector3(s3[0], s3[1], s3[2])
+			ds *= Vector3(s3[0], s3[2], s3[1])
 		inst.transform.basis = _ue_basis(int(rot[0]), int(rot[1]), int(rot[2])) \
 				* Basis.from_scale(ds)
 		if is_placeholder:

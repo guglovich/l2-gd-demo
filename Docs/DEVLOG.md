@@ -10049,3 +10049,44 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   data source not yet identified. Questions for the user: (a) is the first
   tower = one of the four? (b) for the second — should a Pir02 tower be
   added at UE (9001,16731,−4601.3)?
+
+## DEVLOG-156 — 2026-11-24: O_DE_Pir02 support towers — DrawScale3D axis permutation (glTF Y = UE z)
+
+- **Bug:** 7 village actors with `DrawScale3D.y = -1` (2 of the 4 `O_DE_Pir02`
+  towers + 5 others) were vertically flipped. The 84 m tower composite
+  (`O_DE_Pir02`, 10 prims: house/body prims 0,2-6 local Y −4.36..+33.40, support
+  column prims 7,8 local Y −51.08..+29.75, chain prim 1) had its 51 m column tail
+  pointing UP through the surface houses instead of down into the cavern.
+- **Root cause (axis proof, not heuristic):** `tools/l2strict/staticmesh.py:441`
+  emits glTF positions as `(ue_x*0.01, ue_z*0.01, ue_y*0.01)` — glTF vertical is
+  UE z. `DrawScale3D` is authored in mesh-local UE axes `(sx, sy, sz)`, so the
+  scale applied to the staged glTF must be permuted the same way:
+  `Vector3(s3[0], s3[2], s3[1])` = `(sx, sz, sy)`. The old code used
+  `(sx, sy, sz)`, turning `sy=-1` into a glTF-Y (vertical) mirror.
+- **Fix:** `scripts/world.gd` statics placement and foliage batch both use
+  `Vector3(s3[0], s3[2], s3[1])`. Commented with DEVLOG-156.
+- **Numeric verification (fixed camera, `L2_TIME=15.93`, real GPU
+  `--rendering-driver opengl3`):**
+  - Tower 178 view (`L2_SPAWN=12458,16808,-4601.3`, yaw 0, pitch 0.10): before vs
+    after `changed>8=99446  >30=8664  max=246  mean=4.349` (fix is real/large).
+  - User cave camera (`L2_SPAWN=12856,16004,-4601.3`, yaw 0.33, pitch 0.02):
+    before vs after `changed>8=268336 >30=47874 max=247 mean=4.774` (large; the
+    two sy=-1 towers 178/189 move into view/cast different shadows here).
+  - Checkpoint ref camera (`L2_SPAWN=12856,16004,-4601.3`, yaw −3.03): only 6 px
+    (>8) differ — the two flipped towers are not visible there; `L2_TRACE_BOX`
+    bottom half shows no `O_DE_Pir02`/`O_DE_MT_In` hits, only floors/lamp/player.
+  - Plaza baseline camera (`L2_SPAWN=10741,16930,-4628.9`, yaw 16384, zoom 1.0,
+    `L2_TIME=12`): before vs after `changed>8=10 >30=2 max=35 mean=0.0004` (noise).
+- **Geometry check (all 4 towers, fixed):** AABB max Y = −8.58 m (village
+  surface ~0). Old sy=-1 towers had max Y +9.10 m (column tail above houses).
+  Vertical bottom-up traces at each tower column XY confirm `O_DE_Pir02` sits
+  between `O_DE_MT_Btm` (below, ~−74 m) and `O_DE_MT_In`/`O_DE_MT_Out` (above),
+  no surface-house intersection. Above-view renders saved:
+  `tmp/tower_ab/above_{178,189,181,194}/shot1.png`.
+- **Status:** axis fix verified numerically; committed separately for rollback.
+  The user's reference pylon ("rises to ceiling") at the cave camera needs
+  visual confirmation — I cannot view PNGs in this environment; the trace at
+  yaw −3.03 did not hit Pir02/MT_In in the lower screen, so the exact object in
+  the user's ref must be identified by the user or by a targeted trace once the
+  screen region is named. Do not treat as closed without the user's spawn-point
+  screenshot confirmation.
