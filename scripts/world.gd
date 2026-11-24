@@ -682,7 +682,11 @@ func _floor_grid_flow() -> void:
 			var gx: float = lerpf(a.x, b.x, float(ix) / float(nx - 1))
 			# descend through overlying structures (canopy etc.) until the
 			# first walkable hit inside the road-deck band
-			var cur_y := -44.5 if OS.get_environment("L2_FLOOR_GRID_INTERIOR") != "" else 40.0
+			var cur_y := 40.0
+			if OS.get_environment("L2_FLOOR_GRID_INTERIOR") != "":
+				cur_y = -44.5
+			if OS.get_environment("L2_FLOOR_GRID_START_Y") != "":
+				cur_y = float(OS.get_environment("L2_FLOOR_GRID_START_Y"))
 			var best_y := NAN
 			var best_n := 0.0
 			var best_mesh := "NO-HIT"
@@ -1888,6 +1892,18 @@ func _build_meshes() -> void:
 			body.position = inst.position
 			body.transform.basis = inst.transform.basis
 			body.set_meta("mesh_key", key)
+			if key == "Oren_DEV_S:O_DE_inlet" \
+					and OS.get_environment("L2_INLET_COL_DEBUG") != "" \
+					and col.shape is ConcavePolygonShape3D:
+				var fs: PackedVector3Array = (col.shape as ConcavePolygonShape3D).get_faces()
+				var fmin := Vector3(INF, INF, INF)
+				var fmax := Vector3(-INF, -INF, -INF)
+				for fv in fs:
+					fmin = fmin.min(fv)
+					fmax = fmax.max(fv)
+				print("INLETCOL body_pos=", body.position, " basis=", body.basis,
+						" faces=", fs.size(), " local_aabb=", fmin, "..", fmax,
+						" floor_local=", body.transform.affine_inverse() * Vector3(166.27, -41.124, 149.85))
 			world.add_child(body)
 	# DEVLOG-147 rev4: the layer-routing stats (per tile, cumulative keys)
 	var ph_keys := 0
@@ -2088,6 +2104,36 @@ func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
 				pv.resize(verts.size() / 3)
 				for i in range(verts.size() / 3):
 					pv[i] = Vector3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2])
+				# DEVLOG-166: the inlet's authentic kDOP subset covers only
+				# the upper rock shell (Y -37.69..-27.27). Its rendered
+				# walkable tunnel floor (surf1 DE_V_m11, Y -41.124,
+				# ny 0.912) is absent, so the player fell through to terrain.
+				# Merge only horizontal render triangles for this one tunnel
+				# shell. Godot's glTF import reverses some windings relative
+				# to the raw UE indices, so abs(N.y) is required — the missing
+				# DE_V_m11 floor is wound DOWN in the imported ArrayMesh.
+				if key == "Oren_DEV_S:O_DE_inlet" \
+						and OS.get_environment("L2_INLET_FULL_FLOOR") != "0":
+					var added := 0
+					for si in range(mesh.get_surface_count()):
+						var arr: Array = mesh.surface_get_arrays(si)
+						var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+						var ids: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+						if ids.is_empty():
+							for i in vs.size():
+								ids.append(i)
+						for i in range(0, ids.size(), 3):
+							var a := vs[ids[i]]
+							var b := vs[ids[i + 1]]
+							var c := vs[ids[i + 2]]
+							var n := (b - a).cross(c - a)
+							if absf(n.y) > n.length() * 0.55:
+								pv.append(a)
+								pv.append(b)
+								pv.append(c)
+								added += 1
+					print("inlet collision: added ", added,
+							" horizontal render triangles to the kDOP subset")
 				shape.set_faces(pv)
 				return shape
 	return mesh.create_trimesh_shape()

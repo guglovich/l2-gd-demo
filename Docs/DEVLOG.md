@@ -10458,3 +10458,39 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Shots:** `tmp/verify_165/indoor_masked.png`, `indoor_unmasked.png`, `plaza.png`,
   `spawn.png`.
 - **Status:** awaiting the user's visual confirmation indoors.
+
+## DEVLOG-166 — 2026-11-25 (GLM): the canyon tunnel floor collision restored
+
+- **User report:** while running through the tunnel he fell through the textures;
+  check PBR, glTF and all geometry.
+- **Reproduction point:** the DEVLOG-85 live-client spot `(16627,14985)`, HUD Z
+  `-4108.6`. `L2_SPAWN` ignores Z and adds 0.9 m to terrain, so the honest test
+  uses `L2_STEP_TEST="166.27,149.85,-41.124,168.27,150.85"`.
+- **Render/PBR/glTF audit:** the visible tunnel is `O_DE_inlet`
+  (StaticMeshActor154, 16102/14776/-3550). Its rendered surf1 `DE_V_m11`
+  triangle covers the point at **Y -41.124**, normal `(0.306,0.912,0.273)` —
+  a walkable floor matching the user's HUD within 3.8 cm. The staged
+  `DE_V_m11` albedo/normal/PBR sidecar exist, source alpha is fully opaque.
+- **Collision root:** `O_DE_inlet.collision.json` has only 55 triangles,
+  Y **-37.687..-27.267** — the entire walkable floor is absent. Runtime rays
+  skipped the rendered floor and hit terrain at -43.70 (ny 0.195), so the
+  character fell through the visible texture.
+- **Winding detail:** raw glTF indices give the floor +Y, but Godot's imported
+  ArrayMesh reverses the winding. The first merge test (`n.y > 0.55`) added
+  375 triangles but the shape AABB still stopped at local Y -4.675, above the
+  floor at -5.62. Using **abs(n.y)** (UE2 collision is winding-agnostic) added
+  531 horizontal triangles and extended the shape over the floor.
+- **Fix:** `_collision_shape` merges only horizontal render triangles
+  (`abs(N.y) > 0.55`) into the authentic kDOP subset for `O_DE_inlet` only.
+  Decorative panels elsewhere remain non-solid. `L2_INLET_FULL_FLOOR=0` = A/B;
+  `L2_INLET_COL_DEBUG=1` prints body/shape diagnostics.
+- **Verification:**
+  - Runtime ray at the user's point now hits `O_DE_inlet` at **-41.11**,
+    ny 0.912, before terrain -43.70.
+  - 2 m tunnel run: fixed final `(167.81,-41.66,150.62)` on the inlet floor;
+    old subset final `(167.80,-42.55,150.61)` — a 0.89 m fall. Both stop at
+    the target (`tgt=false`).
+  - Zero shader errors. Tunnel/spawn shots: `tmp/verify_166/tunnel.png`,
+    `spawn.png`.
+- **Diagnostics added:** `L2_FLOOR_GRID_START_Y` (scan from below a roof without
+  hardcoding -44.5) and the inlet collision debug above.
