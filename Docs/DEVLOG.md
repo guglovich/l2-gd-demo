@@ -10494,3 +10494,24 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
     `spawn.png`.
 - **Diagnostics added:** `L2_FLOOR_GRID_START_Y` (scan from below a roof without
   hardcoding -44.5) and the inlet collision debug above.
+
+## DEVLOG-167 — 2026-11-25 (GLM): 2026 modernization roadmap
+
+- **User request:** after the tunnel fall fix, build a plan to migrate the
+  remaining legacy BSP/textures to PBR and other modern technology — an
+  iteration from crutches to 2026.
+- **Deliverable:** `Docs/MODERNIZATION_2026.md`, linked from `Docs/README.md`.
+- **Contents:** current architecture baseline; a named register of remaining
+  geometry/material/lighting/player/pipeline hacks (dual BSP overlap, native
+  floor mask, incomplete kDOP subsets, inlet/store_17 runtime exceptions,
+  fixed light pools/carriers, layer-2 twins, alpha/height overloading, stale
+  sidecars, teleport step assist, camera/CCD gaps); target architecture; six
+  phased roadmap with entry/exit gates; automated audits; immediate backlog.
+- **Priority order:** geometry/collision correctness -> PBR/material
+  normalization -> lighting -> character/camera -> renderer evaluation ->
+  cleanup. The first follow-up is to re-extract `O_DE_inlet` collision so the
+  DEVLOG-166 runtime merge can be deleted, then audit all static subsets for
+  missing walkable floors.
+- **Scope:** documentation only in this commit; no engine/assets changed and
+  no render was required. The hard rules in `AGENTS.md` and
+  `Docs/REBUILD_RULES.md` remain the verification contract for every phase.

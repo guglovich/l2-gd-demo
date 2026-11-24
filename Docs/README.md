@@ -9,6 +9,7 @@ One location — Dark Elf Village, map `20_18` — one playable character
 | Document | Contents |
 |---|---|
 | `DEVLOG.md` | **Handoff journal — read first.** Current status, next steps, key facts. |
+| `MODERNIZATION_2026.md` | Phased plan to replace legacy BSP/texture/lighting/player hacks with a unified Godot 4 pipeline. |
 | `craft-anything.md` | Craft Anything MCP (RE toolkit): project wiring, `native` toolset (Ghidra analog), format limits. |
 | `strict-pipeline.md` | **Current pipeline.** `tools/l2strict`, strict gates, output layout, coordinates, verification. |
 | `asset-pipeline.md` | Legacy pipeline reference (kept for comparison). |
