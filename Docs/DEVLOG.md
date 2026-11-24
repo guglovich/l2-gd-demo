@@ -10588,3 +10588,20 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Trade-off:** the original two-floor swimming may return until the BSP floor
   sources are unified; this is preferable to holes/falls and is explicitly the
   next Phase-1 task in the modernization plan.
+
+## DEVLOG-172 — 2026-11-25 (GLM): central grate safety floor
+
+- **User report:** fell under the central village grate near the statue.
+- **Diagnosis:** the Polys377 octagon has full collision (258/260 interior
+  grid rays hit it; the other two hit the higher Center_obj rim) and a straight
+  run crosses at Y -46.89 without falling. The reported fall is therefore a
+  seam/high-speed/dynamic case; exact HUD coordinates were not supplied.
+- **Stopgap:** an invisible six-triangle safety floor follows the client
+  octagon at Y -46.950, 6.4 cm below the visible grate. Normal walking stays on
+  Polys377; a seam/high-speed fall lands on the safety floor instead of the
+  void. `L2_NO_PLAZA_SAFETY=1` = A/B. This is explicitly temporary until the
+  Phase-1 BSP collision unification.
+- **Verification (hidden gamescope):** with Polys377 disabled, 46/49 grid rays
+  inside/around the octagon hit `PlazaSafetyFloor`; the remaining three are
+  outside the polygon. Regular grate run still ends at -46.89, floor=true.
+  Spawn shot: `tmp/verify_172/spawn.png`.

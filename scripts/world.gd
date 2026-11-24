@@ -1316,6 +1316,8 @@ func _build_bsp() -> void:
 	if OS.get_environment("L2_NO_LEVELBSP") != "":
 		print("levelbsp: SKIPPED (L2_NO_LEVELBSP diagnostic)")
 		_build_bsp_brushes()
+		if active_dir == MAP_DIR:
+			_build_plaza_safety_floor()
 		return
 	var lb := _load_json(active_dir + "/levelbsp.json")
 	var gp := "%s/meshes_bsp/LevelBSP.gltf" % active_dir
@@ -1372,11 +1374,46 @@ func _build_bsp() -> void:
 	# temple court, the valley); the streets/buildings live in the Brush
 	# actors — render BOTH sources.
 	_build_bsp_brushes()
+	if active_dir == MAP_DIR:
+		_build_plaza_safety_floor()
 	# The Shillien Temple interior comes from the level BSP node walk
 	# (temple_bsp.py) — the client's own stone structure + the decoration
 	# static meshes. Its UVs = the client's baked section-stream tile
 	# coordinates (DEVLOG-82) — texel_uvs=false there.
 	_build_temple_native()
+
+func _build_plaza_safety_floor() -> void:
+	if OS.get_environment("L2_NO_PLAZA_SAFETY") != "":
+		return
+	# Client Polys377 octagon, 6.4 cm below the visible grate top
+	# (-46.886). The regular floor stays Polys377; this catches seam/high-speed
+	# falls without changing the render (DEVLOG-172, temporary until the
+	# BSP collision/source unification in MODERNIZATION_2026 Phase 1).
+	var pts := PackedVector3Array([
+		Vector3(112.971, -46.950, 173.108),
+		Vector3(109.939, -46.950, 171.194),
+		Vector3(109.137, -46.950, 167.669),
+		Vector3(111.060, -46.950, 164.672),
+		Vector3(114.563, -46.950, 163.897),
+		Vector3(117.594, -46.950, 165.798),
+		Vector3(118.390, -46.950, 169.286),
+		Vector3(116.474, -46.950, 172.333),
+	])
+	var faces := PackedVector3Array()
+	for i in range(1, 7):
+		faces.append(pts[0])
+		faces.append(pts[i])
+		faces.append(pts[i + 1])
+	var shape := ConcavePolygonShape3D.new()
+	shape.set_faces(faces)
+	shape.backface_collision = true
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	col.shape = shape
+	body.add_child(col)
+	body.set_meta("mesh_key", "PlazaSafetyFloor")
+	world.add_child(body)
+	print("plaza safety floor: ", faces.size() / 3, " triangles at Y -46.950")
 
 func _build_bsp_brushes() -> void:
 	var brushes: Array = bsp_data.get("brushes", [])
