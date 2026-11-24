@@ -554,8 +554,21 @@ func _physics_process(delta: float) -> void:
 							# Place feet ON the landing (not just lift Y at
 							# current XZ — that leaves the player floating
 							# above the old floor and they fall back into a
-							# step-assist loop).
+							# step-assist loop). Clamp forward advance so we
+							# don't overshoot the click target.
 							var lp: Vector3 = down_hit.get("position")
+							var step_fwd := Vector3(lp.x - global_position.x,
+									0.0, lp.z - global_position.z)
+							if has_target:
+								var to_tgt := move_target - Vector3(
+										global_position.x, 0.0, global_position.z)
+								var tgt_d := to_tgt.length()
+								if step_fwd.length() > maxf(tgt_d - ARRIVE_DIST * 0.5, 0.0):
+									var clamped := maxf(tgt_d - ARRIVE_DIST * 0.5, 0.0)
+									if step_fwd.length() > 0.001:
+										step_fwd = step_fwd.normalized() * clamped
+									lp.x = global_position.x + step_fwd.x
+									lp.z = global_position.z + step_fwd.z
 							global_position = Vector3(lp.x, floor_y2, lp.z)
 							velocity.y = 0.0
 							landed = true
@@ -578,6 +591,16 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0
 		velocity.z = 0
 		moving = false
+	# Re-check arrival after step assist teleport (may have advanced us).
+	if has_target:
+		var _to_t2 := move_target - Vector3(global_position.x, 0.0, global_position.z)
+		if _to_t2.length() <= ARRIVE_DIST:
+			has_target = false
+			_target_time = 0.0
+			dest_marker.visible = false
+			velocity.x = 0
+			velocity.z = 0
+			moving = false
 	# the real L2 run animation (Run_Hand_FDarkElf, rotation-only from the
 	# PSA); the procedural bob/lean is retired — the clip carries the gait
 	# the eye blink: swap the face albedo between the open (t00_f) and the
