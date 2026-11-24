@@ -10325,3 +10325,29 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
     positions; their count is included in the 51.
 - **Shots:** `tmp/verify_159/door_candles.png`, `plaza.png`, `spawn.png`.
 - **Status:** awaiting the user's visual confirmation (door sconces + shops).
+
+## DEVLOG-160 — 2026-11-24 (GLM): the shop exit — authentic static collision wired in
+
+- **User report:** the character can enter the building but has trouble leaving
+  (screenshot HUD `X=12204 Y=15945 Z=-4582.3`).
+- **Diagnosis:** `L2_EXIT_PROBE=1` (new env-gated 16-direction x 3-height ray
+  probe in player.gd) showed the real exit to the south-west (dirs 9/10):
+  ankle rays were open, but torso/knee rays hit `O_DE_SH_Set` — the shop's
+  decorative arch/lattice across the doorway. The direct east path was furniture
+  (`interior_B_delf_store_16`), not the door.
+- **Root cause:** `_collision_shape(key, mesh)` already existed and reads the
+  client's authentic kDOP-covered triangle subset (`<mesh>.collision.json`), but
+  the statics placement path never called it — it built a FULL render trimesh.
+  Decorative panels therefore became solid walls.
+- **Fix:**
+  1. Statics now use `_collision_shape(key, mesh)` (authentic subset when
+     present, full trimesh fallback otherwise; backface collision preserved).
+  2. `interior_B_delf_store_17` (the flat doordeco arch + candle panel) is
+     explicitly visual-only — no collider (it is not a door leaf).
+- **Verification:**
+  - The same shop, SW `L2_STEP_TEST` from `(122.04,159.45,-45.62)` to
+    `(119.27,158.30)`: the character crosses the doorway and reaches the target
+    (`tgt=false`, final ~119.9/158.6).
+  - The probe after the fix: dirs 9/10 open at torso/knee height.
+  - Regression H02 stair test still reaches its target (`tgt=false`).
+- **Shots:** `tmp/verify_160/exit.png`, `spawn.png`.

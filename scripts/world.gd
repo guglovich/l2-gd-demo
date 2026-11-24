@@ -1733,21 +1733,31 @@ func _build_meshes() -> void:
 			lantern.visible = true       # always on, no gate, no camera dependence
 			_lantern_omnis.append(lantern)
 			world.add_child(lantern)
-		if not _shape_cache.has(key):
-			var mshape := mesh.create_trimesh_shape()
-			# UE2 collision is winding-agnostic; many L2 deck faces point DOWN
-			# (inverted winding). Without backface collision the character
-			# falls through rendered floors — the "hollow second tier" bug.
-			mshape.backface_collision = true
-			_shape_cache[key] = mshape
-		var body := StaticBody3D.new()
-		var col := CollisionShape3D.new()
-		col.shape = _shape_cache[key]
-		body.add_child(col)
-		body.position = inst.position
-		body.transform.basis = inst.transform.basis
-		body.set_meta("mesh_key", key)
-		world.add_child(body)
+		# DEVLOG-160: the store_17 doordeco panel is a flat decorative
+		# overlay (the ornate arch + the two candles), NOT a door leaf. Its
+		# trimesh collider sat at chest height across the doorway: the ankle
+		# ray passed under it, the knee ray over it, and the capsule could
+		# enter but not leave (the user's report at 12204,15945). Visual only.
+		var no_collision := key == "interior_B_delf_s:interior_B_delf_store_17"
+		if not no_collision:
+			if not _shape_cache.has(key):
+				# DEVLOG-160: use the client's kDOP-covered triangle subset
+				# when <mesh>.collision.json exists. The old direct render
+				# trimesh made decorative arch/lattice panels solid — the
+				# player could enter the shop but not leave through the
+				# doorway (O_DE_SH_Set). Fallback stays the full trimesh.
+				var mshape: Shape3D = _collision_shape(key, mesh)
+				if mshape is ConcavePolygonShape3D:
+					(mshape as ConcavePolygonShape3D).backface_collision = true
+				_shape_cache[key] = mshape
+			var body := StaticBody3D.new()
+			var col := CollisionShape3D.new()
+			col.shape = _shape_cache[key]
+			body.add_child(col)
+			body.position = inst.position
+			body.transform.basis = inst.transform.basis
+			body.set_meta("mesh_key", key)
+			world.add_child(body)
 	# DEVLOG-147 rev4: the layer-routing stats (per tile, cumulative keys)
 	var ph_keys := 0
 	for k in _placeholder_keys:

@@ -312,6 +312,35 @@ func _load_character() -> void:
 		move_target = Vector3(float(sp[sp.size() - 2]), 0.0,
 				float(sp[sp.size() - 1]))
 		print("STEP TEST: target=", move_target, " start=", position)
+	if OS.get_environment("L2_EXIT_PROBE") != "":
+		_exit_probe_flow()
+
+## DEVLOG-160 diagnostic: L2_EXIT_PROBE=1 — 16 horizontal rays at ankle,
+## torso and knee height from the player. Prints the first collider + mesh
+## key + distance; finds the real doorway when click-to-move is blocked.
+func _exit_probe_flow() -> void:
+	for i in 10:
+		await get_tree().process_frame
+	var space := get_world_3d().direct_space_state
+	for h in [0.15, 0.60, 1.15]:
+		for i in range(16):
+			var ang := float(i) * TAU / 16.0
+			var d := Vector3(cos(ang), 0.0, sin(ang))
+			var from := global_position + Vector3(0, h, 0)
+			var q := PhysicsRayQueryParameters3D.create(from, from + d * 6.0)
+			q.exclude = [get_rid()]
+			var hit := space.intersect_ray(q)
+			if hit.is_empty():
+				print("EXITPROBE h=%.2f dir=%02d OPEN" % [h, i])
+				continue
+			var col: Variant = hit.get("collider")
+			var owner := "unknown"
+			if col is Node:
+				owner = str((col as Node).get_meta("mesh_key", (col as Node).name))
+			print("EXITPROBE h=%.2f dir=%02d dist=%.2f owner=%s pos=%v" % [
+					h, i, from.distance_to(hit.get("position")), owner,
+					hit.get("position")])
+	get_tree().quit()
 
 func _attach_full_hair() -> void:
 	# the bh hair (its own 13-bone physics skeleton, bind in body space)
