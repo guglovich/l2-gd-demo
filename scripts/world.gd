@@ -2090,6 +2090,17 @@ func _ue_basis(pitch: int, yaw: int, roll: int) -> Basis:
 ## staged glTF frame) next to each glTF; meshes without it keep the full
 ## trimesh. This is what removes the non-walkable Bridge lower deck.
 func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
+	# DEVLOG-168: the inlet kDOP subset covers only the upper rock shell; both
+	# the walkable floor and the lower tunnel walls are absent. A horizontal-
+	# only merge fixed the floor but let the player run through the walls.
+	# The inlet is a closed tunnel shell, so use its complete render trimesh
+	# (winding-agnostic). L2_INLET_FULL_COLLISION=0 restores the old subset A/B.
+	if key == "Oren_DEV_S:O_DE_inlet" \
+			and OS.get_environment("L2_INLET_FULL_COLLISION") != "0":
+		var full := mesh.create_trimesh_shape()
+		full.backface_collision = true
+		print("inlet collision: full render trimesh (kDOP subset incomplete)")
+		return full
 	var info = asset_map_data.get("meshes", {}).get(key)
 	if info != null:
 		var gp: String = info["gltf"]
@@ -2104,36 +2115,6 @@ func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
 				pv.resize(verts.size() / 3)
 				for i in range(verts.size() / 3):
 					pv[i] = Vector3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2])
-				# DEVLOG-166: the inlet's authentic kDOP subset covers only
-				# the upper rock shell (Y -37.69..-27.27). Its rendered
-				# walkable tunnel floor (surf1 DE_V_m11, Y -41.124,
-				# ny 0.912) is absent, so the player fell through to terrain.
-				# Merge only horizontal render triangles for this one tunnel
-				# shell. Godot's glTF import reverses some windings relative
-				# to the raw UE indices, so abs(N.y) is required — the missing
-				# DE_V_m11 floor is wound DOWN in the imported ArrayMesh.
-				if key == "Oren_DEV_S:O_DE_inlet" \
-						and OS.get_environment("L2_INLET_FULL_FLOOR") != "0":
-					var added := 0
-					for si in range(mesh.get_surface_count()):
-						var arr: Array = mesh.surface_get_arrays(si)
-						var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-						var ids: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
-						if ids.is_empty():
-							for i in vs.size():
-								ids.append(i)
-						for i in range(0, ids.size(), 3):
-							var a := vs[ids[i]]
-							var b := vs[ids[i + 1]]
-							var c := vs[ids[i + 2]]
-							var n := (b - a).cross(c - a)
-							if absf(n.y) > n.length() * 0.55:
-								pv.append(a)
-								pv.append(b)
-								pv.append(c)
-								added += 1
-					print("inlet collision: added ", added,
-							" horizontal render triangles to the kDOP subset")
 				shape.set_faces(pv)
 				return shape
 	return mesh.create_trimesh_shape()

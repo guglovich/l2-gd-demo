@@ -10515,3 +10515,22 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Scope:** documentation only in this commit; no engine/assets changed and
   no render was required. The hard rules in `AGENTS.md` and
   `Docs/REBUILD_RULES.md` remain the verification contract for every phase.
+
+## DEVLOG-168 — 2026-11-25 (GLM): tunnel wall regression — full inlet collision
+
+- **User report:** after DEVLOG-166 he ran through a tunnel wall; the bug did
+  not exist before the floor fix.
+- **Cause:** the DEVLOG-166 horizontal-only merge restored the floor but the
+  kDOP subset also omitted the lower tunnel walls. `L2_EXIT_PROBE` at
+  `(166.27,149.85,-41.124)` showed OPEN at torso/knee height in dirs 1..7 and
+  10..11 — the player could now reach and cross the previously hidden holes.
+- **Fix:** `O_DE_inlet` is a closed tunnel shell; use its complete render
+  trimesh for collision (backface/winding-agnostic) instead of the incomplete
+  subset or a partial merge. `L2_INLET_FULL_COLLISION=0` restores the old
+  subset A/B. Other statics keep their authentic subsets.
+- **Verification (hidden `gamescope --backend headless`, no visible window):**
+  - 16-direction probe: every side direction now hits `O_DE_inlet`; only the
+    tunnel axis (dir3) remains OPEN.
+  - Floor run unchanged: final `(167.81,-41.66,150.62)`, `floor=true`,
+    `tgt=false` — no fall-through.
+  - Shots: `tmp/verify_168/tunnel.png`, `spawn.png`.
