@@ -10090,3 +10090,17 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   20_17 has 88 non-uniform DrawScale3D actors with `sy!=sz` (0 with `sy<0`)
   now scaled on the correct glTF axis; 19_18 has 6 (1 `sy<0`), 21_18 37, 18_19
   2, 19_19 1. Not separately verified here beyond the user's confirmation.
+
+## DEVLOG-157 — 2026-11-24: step assist regression (house entry / stairs)
+
+- **User report:** "персонаж не может забегать в дома, снова проблема перешагивания ступенек" (all DE village houses except the topmost by the stairs) + "ступеньки".
+- **Root causes found:**
+  1. **Blocked-target killer preempted the step assist.** The killer ran before `move_and_slide()` and set `moving=false` when `rv < 0.5` for >0.5s, so the post-`move_and_slide()` step assist (`if moving and is_on_floor()`) never fired. Moved killer to after the step assist; it now skips if the assist landed this frame and has a 3s escape hatch to avoid loops.
+  2. **Step assist lift-fall loop.** The assist teleported only `global_position.y = floor_y2` at the current XZ; for a forward landing the player was left floating above the old floor, fell back next frame, and re-triggered the assist (observed as repeating `STEP dist=... dy=0.06..0.10` with constant body pos, `rv~0`). Fix: place feet on the landing XZ+Y (`global_position = landing_pos`).
+- **Files:** `scripts/player.gd`.
+- **Automated checks (headless xvfb, `L2_STEP_TEST` + `L2_STEP_DEBUG=1`):**
+  - H02 O_DE_H02 (11279,18634): climbs dy=0.71, reaches target (passes). Before/after fix: pass.
+  - H01 O_DE_H01 (11441,19405, "topmost by stairs", user said works): before fix looped on dy=0.06; after fix climbs and reaches target.
+  - H04 O_DE_H04 (13174,15445): after fix, small dy=0.10 step climbs, but the chosen straight-line path then hits a 1.10m rise (above the 1.05m climb limit) and the blocked-target killer drops the target after grace. This path hit a wall/high edge, not a confirmed door; door approach angle not identified by automated test.
+- **Status:** step-assist regression fixed in code (killer ordering + landing placement). **Not fully user-verified.** The "can't enter houses" report may be fully explained by the loop/killer bug, but needs user retest at real doorways, especially the houses the user reported.
+- **Separate open issue (reported same message, not fixed here):** "у фонарей посередине нету оправы / цоколя" near the Shillien statue and transparent floor lattice. Geometry trace confirms `O_DE_Lamp01` surf8 `oren_dev_t:DE_V_deco10` exists at socket/collar height (trace hit at UE Z -4473). Visual cause not identified from code; screenshots saved at `tmp/lamp_check2/`, `tmp/lamp_close/` for user reference. Needs user clarification / visual confirmation of which part is missing.

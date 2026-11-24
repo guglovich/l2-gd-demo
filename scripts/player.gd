@@ -478,19 +478,9 @@ func _physics_process(delta: float) -> void:
 		else:
 			has_target = false
 			dest_marker.visible = false
-		# blocked (a wall/house between): the real displacement is ~zero while
-		# the run animation plays — drop the target and stand. The 0.5 s grace
-		# period is REQUIRED: on the first frames get_real_velocity() still
-		# returns the previous frame's zero and the check would kill every
-		# fresh target instantly (the "character does not move" bug, 2026-11-15)
-		if moving and _target_time > 0.5 and get_real_velocity().length() < 0.5:
-			has_target = false
-			_target_time = 0.0
-			dest_marker.visible = false
-			velocity.x = 0
-			velocity.z = 0
-			moving = false
-	if not moving:
+		# DEVLOG (step regression): do NOT kill the target here — the step
+		# assist (after move_and_slide) needs a chance to climb. The
+		# blocked-target killer runs after the step assist below.	if not moving:
 		velocity.x = move_toward(velocity.x, 0, 20 * delta)
 		velocity.z = move_toward(velocity.z, 0, 20 * delta)
 	if is_on_floor():
@@ -509,6 +499,7 @@ func _physics_process(delta: float) -> void:
 	# false => garbage/no hits) while the "knee" ray actually ran at
 	# feet+0.25 (ankle height — the stair faces blocked it, the veto
 	# stalled every stairway).
+	var step_landed := false
 	if moving and is_on_floor():
 		var fwd2 := Vector3(dir.x, 0.0, dir.z)
 		if fwd2.length_squared() > 0.01:
@@ -560,15 +551,33 @@ func _physics_process(delta: float) -> void:
 						var climb := dy > 0.02 and dy <= 1.05
 						var descend := dy < -0.02 and dy >= -1.15
 						if climb or descend:
-							global_position.y = floor_y2
+							# Place feet ON the landing (not just lift Y at
+							# current XZ — that leaves the player floating
+							# above the old floor and they fall back into a
+							# step-assist loop).
+							var lp: Vector3 = down_hit.get("position")
+							global_position = Vector3(lp.x, floor_y2, lp.z)
 							velocity.y = 0.0
 							landed = true
+							step_landed = true
 							break
 				# DEVLOG-149 rev2: the hop fallback — a genuinely low
 				# odd-shaped face (the ankle hit at feet+0.15, the knee
 				# clear at feet+1.15) with no usable landing.
 				if not landed and ankle_hit and knee_hit.is_empty():
 					velocity.y = 4.5
+	# DEVLOG (step regression): blocked-target killer moved here so the step
+	# assist above gets a chance to climb. If we are still blocked after the
+	# assist (and it didn't land us), drop the target.
+	var still_blocked := get_real_velocity().length() < 0.5
+	if moving and _target_time > 0.5 and still_blocked \
+			and (not step_landed or _target_time > 3.0):
+		has_target = false
+		_target_time = 0.0
+		dest_marker.visible = false
+		velocity.x = 0
+		velocity.z = 0
+		moving = false
 	# the real L2 run animation (Run_Hand_FDarkElf, rotation-only from the
 	# PSA); the procedural bob/lean is retired — the clip carries the gait
 	# the eye blink: swap the face albedo between the open (t00_f) and the
