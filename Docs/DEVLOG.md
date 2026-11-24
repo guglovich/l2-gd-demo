@@ -10684,3 +10684,11 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   the openwork branch fires. Since the user still sees a solid grate, the
   exact kiosk HUD/camera is required to identify whether another surface or
   actor is being mistaken for the already-masked wall08/walldeco panels.
+
+## DEVLOG-175 — 2026-11-25 (GLM): combined spawn verification
+
+- Both fixes active at HEAD `5e9c77a`: exact floor unification rebuilt the five
+  affected brushes and all 51 client-frame candle billboards were present.
+- Mandatory spawn capture after the full 720-tick settle:
+  `tmp/verify_174/spawn.png` (shot2 also retained). Zero shader compile errors
+  (excluding xkbcomp's unrelated status line).
