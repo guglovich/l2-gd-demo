@@ -10605,3 +10605,53 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   inside/around the octagon hit `PlazaSafetyFloor`; the remaining three are
   outside the polygon. Regular grate run still ends at -46.89, floor=true.
   Spawn shot: `tmp/verify_172/spawn.png`.
+
+## DEVLOG-173 — 2026-11-25 (GLM): exact BSP floor unification
+
+- **User pass:** tunnel fixed; kiosk grates, painted-fire duplicate, two floors,
+  and house exit still failed. The old raster floor mask had been disabled, so
+  the lower common village floor was visible again.
+- **Root cause:** `DE_V_floor01` and native `DE_V_floor02` overlap only
+  partially at triangle level (151 common triangles; 59 partial intersections;
+  zero fully covered triangles). Whole-triangle skipping and the old raster
+  mask therefore either left the duplicate or opened holes at house edges.
+- **Fix:** new `tools/l2strict/unify_bsp_floors.py` subtracts the higher native
+  floor footprints from each lower common triangle in XZ, constrained-
+  triangulates the remainder, and interpolates the authored height/UVs. The
+  generated `bsp_floor_unification.json` rebuilds only affected brush surfaces
+  before both rendering and collision creation. `L2_NO_FLOOR_UNIFICATION=1`
+  restores the old split-floor state. The disabled raster mask remains for
+  historical A/B only and is no longer the fix path.
+- **Generated geometry:** 60 native triangles; 151 common triangles -> 505
+  remainder triangles across 24 surfaces; 568.355645 m2 of lower-floor overlap
+  removed. Runtime rebuilt Polys350/353/345/348/372 (6/6/6/4/2 surfaces).
+- **Verification (hidden gamescope, fixed indoor camera):** split vs unified
+  changes 83,426 px >8 (5.793%) and 20,347 px >30 (1.413%), bbox
+  x0..592/y471..899 — the lower-floor region only. The native floor remains.
+- **Collision gate:** a 49x49 grid over the village floor bounds produced
+  exactly the same top-surface result before/after: 1,689 hits, 712 no-hits,
+  and an identical owner histogram. No new fall hole was introduced.
+- **Road gate:** the five approved camera positions were A/B rendered with
+  candles off and time frozen. Descent and spawn plaza are byte-stable within
+  raster noise (0 px >8). Upper street/stairway changes are exclusively on
+  `BSP:Polys350/353`; tracing 1,134 changed samples attributed 946 to Polys350,
+  186 to Polys353, and only two to non-floor objects. No static road mesh
+  changed. The checked-in golden PNGs already differ by tens of percent from
+  current HEAD even with both new branches disabled, so current-HEAD A/B is
+  the valid regression gate for this iteration.
+- **Movement regressions:** shop exit `(122.04,159.45,-45.823) ->
+  (119.27,158.30)` reaches `(119.91,-45.83,159.14)`, floor=true, tgt=false;
+  H02 stair reaches `(113.19,-45.87,186.88)`; tunnel reaches
+  `(167.81,-41.66,150.62)`. Zero shader compile errors (excluding xkbcomp's
+  unrelated status line).
+- **Shots:** `tmp/trace_173/indoor_livefixed_split.png`,
+  `indoor_livefixed_unified2.png`; road A/B under `tmp/trace_173/road_ab/` and
+  `tmp/trace_173/road_frozen/`.
+- **Pending:** the user still reports a different house where entry works but
+  exit does not. The old HUD `12204/15945` now passes both the 16-direction
+  probe and the scripted run. All eight `store_17` doors were audited; several
+  alternate straight paths hit furniture/other static subsets, so the exact
+  failing house HUD is required rather than guessing. A 0.5 m capsule A/B
+  improved two alternate paths but was not adopted: the visible character is
+  ~0.44 m while the movement/camera system is calibrated around the existing
+  1.7 m capsule, and changing it globally needs a separate approved pass.
