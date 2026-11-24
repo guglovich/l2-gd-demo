@@ -1986,8 +1986,16 @@ func _get_mesh(key: String) -> Mesh:
 		# needs the alpha-scissor StandardMaterial3D path below (the PBR
 		# shader has no alpha support).
 		var is_foliage_pkg := _is_foliage_key(key)
+		# DEVLOG-158: the lamp frame/socket surfaces are authored as dark
+		# metal, but must stay on the existing layer-2 StandardMaterial path.
+		# Sending them through the generic PBR pool leaves the narrow frame
+		# unlit at the plaza, while the crystal surface remains the PBR
+		# plafond. Keep this scoped to the two lamp mesh keys.
+		var is_lamp_frame := key in [
+			"Oren_DEV_S:O_DE_Lamp01", "Oren_DEV_S:O_DE_Lamp02"
+		] and tobj != "DE_V_cube_deco3"
 		var pm: Material = null
-		if not is_foliage_pkg:
+		if not is_foliage_pkg and not is_lamp_frame:
 			pm = L2ProcTex.material_for(tpkg, tobj, false)
 		if pm != null:
 			mesh.surface_set_material(si, pm)

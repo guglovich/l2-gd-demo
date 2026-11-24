@@ -10105,6 +10105,34 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Status:** step-assist regression fixed in code (killer ordering + landing placement). **Not fully user-verified.** The "can't enter houses" report may be fully explained by the loop/killer bug, but needs user retest at real doorways, especially the houses the user reported.
 - **Separate open issue (reported same message, not fixed here):** "у фонарей посередине нету оправы / цоколя" near the Shillien statue and transparent floor lattice. Geometry trace confirms `O_DE_Lamp01` surf8 `oren_dev_t:DE_V_deco10` exists at socket/collar height (trace hit at UE Z -4473). Visual cause not identified from code; screenshots saved at `tmp/lamp_check2/`, `tmp/lamp_close/` for user reference. Needs user clarification / visual confirmation of which part is missing.
 
+## DEVLOG-158 — 2026-11-24: lantern frame/socket material routing
+
+- **Root cause:** the lamp meshes contain the complete frame geometry. `O_DE_Lamp01`
+  has 10 surfaces; the crystal is surface 9 (`DE_V_cube_deco3_c`) and the
+  socket/collar is surface 8 (`DE_V_deco10`, AABB local Y
+  `-0.030557..0.016984`, immediately below the crystal). `O_DE_Lamp02` has
+  8 surfaces; its crystal is surface 7. The static mesh `primitive_material_indices`
+  are identity and the trace hit `O_DE_Lamp01` surface 8 at UE Z `-4473`.
+  A forced `L2_FLAT_DEBUG=1` render showed all frame and crystal surfaces, so
+  this was not missing geometry or a bad map placement.
+- **Fix:** in `scripts/world.gd`, only the two lamp mesh keys route non-crystal
+  surfaces through the existing `StandardMaterial3D` fallback. The crystal
+  remains on the PBR plafond material/emission path. This makes the dark metal
+  frame/socket receive the existing layer-2 lamp omni without changing other
+  meshes or lighting parameters.
+- **Verification (same GPU plaza camera, `L2_SPAWN=10741,16930,-4628.9`,
+  yaw `16384`, `L2_TIME=12`, one settle tick):** before/after shot1 changed
+  `296684` pixels at `>8` (`144276` at `>30`, max `255`, mean `6.1694`);
+  shot2 was effectively identical (`296689`/`144275`, max `255`, mean
+  `6.1694`). The after boot log reports `2 mixed keys split` for the lamp
+  routing and the crystal count remains `1`; the frame is therefore on the
+  layer-2 StandardMaterial twin while the crystal stays on the plafond path.
+  Gate A: `0` lines matching `shader error|compile` in the full stderr.
+  The existing trace still names `Oren_DEV_S:O_DE_Lamp01` and its authored
+  surfaces; the earlier exact socket trace is recorded above. The only exit
+  diagnostics are Godot resource-leak messages after its intentional
+  screenshot quit, not shader compilation failures.
+
 ### DEVLOG-157 follow-up — target stop regression
 
 - **User report:** after the step-assist fix, click-to-move did not stop at the target and continued along the trajectory.
