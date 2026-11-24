@@ -232,6 +232,12 @@ const ALPHA_CUTOUT := [
 	# a stale height field, so the grate rendered as a solid black panel.
 	# Texgen re-run: A == source alpha (1.0), sidecar alpha_mask=true.
 	"interior_b_delf_t:interior_B_delf_doordeco",
+	# the kiosk/house grille panels (DEVLOG-169): wall08 is the large
+	# store_06/09/23 front grate (37.6% alpha-0), walldeco is the
+	# store_26/28 wall ornament (42.4%). Both staged PBR alphas were stale
+	# height fields; texgen re-run, A == source alpha verified 1.0.
+	"interior_b_delf_t:interior_B_delf_wall08",
+	"interior_b_delf_t:interior_B_delf_walldeco",
 	# the Shirai statue spike surface (De_Statue004): the client texture is
 	# RGBA with the real spike mask (62.5% transparent); the staged
 	# pbr_albedo A now carries it (texgen: source-alpha, 2026-11-23,
@@ -411,7 +417,13 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	m.set_shader_parameter("uv_is_texels", uv_is_texels)
 	m.set_shader_parameter("tile_px", Vector2(alb.get_width(), alb.get_height()))
 	m.set_shader_parameter("pom_scale", pom)
-	m.set_shader_parameter("use_alpha", key in ALPHA_CUTOUT)
+	var use_cutout := key in ALPHA_CUTOUT
+	if OS.get_environment("L2_NO_GRATE_ALPHA") != "" and key in [
+			"interior_b_delf_t:interior_B_delf_doordeco",
+			"interior_b_delf_t:interior_B_delf_wall08",
+			"interior_b_delf_t:interior_B_delf_walldeco"]:
+		use_cutout = false
+	m.set_shader_parameter("use_alpha", use_cutout)
 	# DEVLOG-159: the two client candle textures glow on their bright warm
 	# texels only (the shader derives the mask from albedo color). The door
 	# panel's dark rails and the candle holders stay inert.

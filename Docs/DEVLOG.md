@@ -10534,3 +10534,23 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   - Floor run unchanged: final `(167.81,-41.66,150.62)`, `floor=true`,
     `tgt=false` — no fall-through.
   - Shots: `tmp/verify_168/tunnel.png`, `spawn.png`.
+
+## DEVLOG-169 — 2026-11-25 (GLM): kiosk/house grille alpha restored
+
+- **User report:** the kiosks/houses also have grates without alpha.
+- **Audit:** `interior_B_delf_wall08` (store_06/09/23 front panel) is RGBA
+  with 37.6% alpha-0; `interior_B_delf_walldeco` (store_26/28 wall ornament)
+  has 42.4% alpha-0. Both staged PBR albedos were stale height fields and both
+  sidecars lacked `alpha_mask` — the same failure as DEVLOG-158/164.
+- **Fix:** texgen re-run for both (A == source alpha, verified 1.0), sidecars
+  `alpha_mask: true`, both keys added to `ALPHA_CUTOUT`. Carpet/candle/specular
+  alphas remain opaque by the permanent rule.
+- **Verification (hidden gamescope, diagnostic top-level camera):**
+  - `wall08` close-up: cutout OFF/ON changes 496316 px >8 (34.47%), 494073 >30
+    (34.31%) — the large kiosk front becomes openwork.
+  - `walldeco` close-up: 311675 px >8 (21.64%), 90256 >30 (6.27%).
+  - Zero shader errors. Shots: `tmp/verify_169/wall08.png`, `walldeco.png`,
+    `spawn.png`.
+- **Diagnostics added:** `L2_CAM_POS`/`L2_CAM_TARGET` (top-level camera in Godot
+  meters), `L2_NO_GRATE_ALPHA=1` (old opaque A/B), `L2_GRATE_DEBUG=1` (exact
+  store_06 panel world AABB), `L2_PLAZA_DEBUG=1` (Polys377 shape audit).

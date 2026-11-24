@@ -1517,6 +1517,16 @@ func _build_bsp_brushes() -> void:
 		var col := CollisionShape3D.new()
 		var shape := mesh.create_trimesh_shape()
 		shape.backface_collision = true
+		if polys == "Polys377" and OS.get_environment("L2_PLAZA_DEBUG") != "":
+			var pfs: PackedVector3Array = shape.get_faces()
+			var pmn := Vector3(INF, INF, INF)
+			var pmx := Vector3(-INF, -INF, -INF)
+			for pf in pfs:
+				pmn = pmn.min(pf)
+				pmx = pmx.max(pf)
+			print("PLAZA brush surfaces=", mesh.get_surface_count(),
+					" faces=", pfs.size(), " local_aabb=", pmn, "..", pmx,
+					" pos=", pos)
 		col.shape = shape
 		body.add_child(col)
 		body.position = pos
@@ -1790,6 +1800,19 @@ func _build_meshes() -> void:
 				_candle_flame_transforms.append(Transform3D(
 						Basis.from_scale(Vector3(fw, fh, 1.0)),
 						wp + Vector3(0, fh * 0.5 + 0.005, 0)))
+		if key == "interior_B_delf_s:interior_B_delf_store_06" \
+				and OS.get_environment("L2_GRATE_DEBUG") != "":
+			var ga := mesh.get_aabb()
+			var g0: Array = mesh.surface_get_arrays(0)
+			var gv: PackedVector3Array = g0[Mesh.ARRAY_VERTEX]
+			var gmin := Vector3(INF, INF, INF)
+			var gmax := Vector3(-INF, -INF, -INF)
+			for v in gv:
+				var wv: Vector3 = inst.transform * v
+				gmin = gmin.min(wv)
+				gmax = gmax.max(wv)
+			print("GRATE store06 mesh_aabb=", ga, " surf0_world=", gmin, "..", gmax,
+					" center=", (gmin + gmax) * 0.5, " basis=", inst.basis)
 		if is_placeholder:
 			inst.layers = 2
 		world.add_child(inst)

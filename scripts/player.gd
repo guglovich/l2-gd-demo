@@ -22,6 +22,12 @@ var rig: Node3D
 var dest_marker: MeshInstance3D
 
 func _init() -> void:
+	if OS.get_environment("L2_CAM_POS") != "" and OS.get_environment("L2_CAM_TARGET") != "":
+		var cp := OS.get_environment("L2_CAM_POS").split(",")
+		var ct := OS.get_environment("L2_CAM_TARGET").split(",")
+		_diag_cam_pos = Vector3(float(cp[0]), float(cp[1]), float(cp[2]))
+		_diag_cam_target = Vector3(float(ct[0]), float(ct[1]), float(ct[2]))
+		_diag_cam_active = true
 	if OS.get_environment("L2_VIEW_YAW") != "":
 		yaw = float(OS.get_environment("L2_VIEW_YAW"))
 	if OS.get_environment("L2_ZOOM") != "":
@@ -40,11 +46,16 @@ var input_locked := false
 var cam_zoom := 1.0
 var cam_pivot: Node3D
 var cam: Camera3D
+var _diag_cam_active := false
+var _diag_cam_pos := Vector3.ZERO
+var _diag_cam_target := Vector3.ZERO
 
 func _ready() -> void:
 	cam_pivot = Node3D.new()
 	add_child(cam_pivot)
 	cam = Camera3D.new()
+	if _diag_cam_active:
+		cam.top_level = true
 	if OS.get_environment("L2_DEBUG_CAM") != "":
 		if OS.get_environment("L2_DEBUG_CAM") == "down":
 			cam.position = Vector3(0, 6, 0.001)
@@ -462,7 +473,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			print("CHAR_SCALE %.2f (height ~%.2f m)" % [rig.scale.x, 0.444 * rig.scale.x])
 
 func _physics_process(delta: float) -> void:
-	if OS.get_environment("L2_DEBUG_CAM") == "":
+	if _diag_cam_active:
+		cam.global_position = _diag_cam_pos
+		cam.look_at(_diag_cam_target)
+	elif OS.get_environment("L2_DEBUG_CAM") == "":
 		cam_pivot.rotation = Vector3(pitch, yaw, 0)
 		cam.position = Vector3(0, 2.4, 4.4) * cam_zoom
 		# camera collision (the classic L2 behavior): zooming out must not
