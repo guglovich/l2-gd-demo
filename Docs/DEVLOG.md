@@ -10197,3 +10197,55 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Status:** user retest pending (the central eight lanterns: the collar and
   the cage arch now catch their own lantern's light at any distance, including
   the two nearest to the camera).
+
+## DEVLOG-158 rev4 — 2026-11-24 (GLM): the CENTER village lantern frames (the real "оправа")
+
+- **The user's clarification:** the missing оправа was never on the street
+  `O_DE_Lamp01/02` — it is on the central platform's own lanterns
+  (`O_DE_Center_obj`, the octagon at 11374,16847): the crystals are prims 6/7
+  (`DE_V_cube_deco3`) and the frame band wrapping them is prim 5
+  (`DE_V_new_deco3`, local Y 2.10..2.62, prim UV 0..1).
+- **Root cause 1 (why the frame is absent):** the 2026-11-10 (21) entry hid the
+  whole surface — "_get_mesh rebuilds the Center_obj mesh without surface 5"
+  — to cure "the face texture on the statue's raised hand". The traced pixel
+  evidence then (the hand = O_DE_01 correct + the foreign hit = Center_obj
+  surf5) is fully explained by root cause 2: the band rendered as an OPAQUE
+  sheet, so where it passed in front of the hand it read as a foreign textured
+  plane. Hiding it removed the entire оправа from the render (the collision body
+  and the tracer still saw it — which is why the surf5 traces kept reporting a
+  surface that no pixel responded to; verified empirically: a solid-red albedo
+  produced ZERO rendered change anywhere).
+- **Root cause 2 (why the band rendered opaque):** the client texture
+  `DE_V_new_deco3.png` is RGBA with a genuine openwork mask (36.4% alpha-0, the
+  window lattice; the ascii map: solid top/bottom rails, open middle). The
+  staged `pbr_albedo` A was a stale height field from the pre-alpha_mask texgen
+  run (Nov 13) and the sidecar had no `alpha_mask` — the DEVLOG-154 (statue
+  spikes) situation verbatim.
+- **Fix:**
+  1. texgen re-run for `DE_V_new_deco3` (A == the source alpha, verified 1.0
+     match; sidecar `alpha_mask: true`).
+  2. `ALPHA_CUTOUT` += `oren_dev_t:DE_V_new_deco3` (the runtime scissor).
+  3. The surface-5 hide REMOVED from `_get_mesh` — the оправа renders again,
+     now as an openwork frame (holes), which also dissolves the old
+     "texture on the hand" artifact into thin rails.
+- **Verification (real GPU, fixed cameras):**
+  - User's vantage (statue area, `L2_SPAWN=11250,17000,-4600`, yaw -0.68,
+    pitch -0.19, `L2_TIME=15.93`): the band appears — 12830 px changed vs the
+    hidden state; the changed pixels render as dark bluish metal with texture
+    structure (mean 27.8/32.9/44.2, std 23-34; the pool-tinted frame), where
+    before there was nothing of the frame.
+  - Plaza baseline (`L2_SPAWN=10741,16930,-4628.9`, yaw 16384, `L2_TIME=12`):
+    3314 px (>8, 0.23%) changed vs the pre-change render — compact clusters on
+    the platform's rim only; the rest of the frame (floor, lamps, houses,
+    statue) byte-stable.
+  - Zero-response negative tests on the way (documented for the record): an
+    all-transparent albedo and a solid-red albedo both changed NOTHING while
+    the surface was hidden — the smoking gun for the hide.
+  - `godot --headless --import` REQUIRED after texgen: non-editor runs load
+    `.godot/imported/*.ctex` and do not re-import (the first A/B pair was a
+    false zero-diff until the import ran; the md5 file records the new source).
+- **Pending (user check):** the statue's raised hand still crosses the
+  restored band geometry (the same intersection exists in the client data —
+  the statue stands inside the ring); with the openwork mask the old "face on
+  the hand" artifact should be gone — needs the user's eye on the hand close-up.
+- **Status:** awaiting the user's visual confirmation on the central lanterns.
