@@ -424,6 +424,9 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 			"interior_b_delf_t:interior_B_delf_walldeco"]:
 		use_cutout = false
 	m.set_shader_parameter("use_alpha", use_cutout)
+	if obj == "interior_B_delf_doordeco" \
+			and OS.get_environment("L2_PAINTED_FLAME_ERASE") != "0":
+		m.set_shader_parameter("erase_painted_flames", true)
 	# DEVLOG-159: the two client candle textures glow on their bright warm
 	# texels only (the shader derives the mask from albedo color). The door
 	# panel's dark rails and the candle holders stay inert.

@@ -33,6 +33,14 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
+// DEVLOG-173: the doordeco texture contains painted candle flames. The user
+// ordered the client's animated fire frames to replace them; erase only the
+// two source-derived flame footprints so the painted copy cannot duplicate
+// the real billboard. L2_PAINTED_FLAME_ERASE=0 restores the old A/B.
+uniform bool erase_painted_flames = false;
+uniform vec2 painted_flame_uv0 = vec2(0.108, 0.444);
+uniform vec2 painted_flame_uv1 = vec2(0.823, 0.391);
+uniform vec2 painted_flame_radius = vec2(0.045, 0.13);
 // DEVLOG-165: derived coverage mask for the native DE_V_floor02 interiors.
 // DE_V_floor01 materials set use_native_floor_mask=1; black mask pixels mean
 // "native floor above" and discard the lower common floor. World bounds are
@@ -268,6 +276,13 @@ void fragment() {
 	}
 	if (use_alpha && alb.a < alpha_scissor) {
 		discard;   // the grate holes are see-through
+	}
+	if (erase_painted_flames) {
+		vec2 fe0 = (uv - painted_flame_uv0) / painted_flame_radius;
+		vec2 fe1 = (uv - painted_flame_uv1) / painted_flame_radius;
+		if (dot(fe0, fe0) < 1.0 || dot(fe1, fe1) < 1.0) {
+			discard;
+		}
 	}
 	vec3 nrm = texture(normal_tex, uv_final).rgb * 2.0 - 1.0;
 	float rough = texture(normal_tex, uv_final).a;

@@ -10655,3 +10655,32 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   improved two alternate paths but was not adopted: the visible character is
   ~0.44 m while the movement/camera system is calibrated around the existing
   1.7 m capsule, and changing it globally needs a separate approved pass.
+
+## DEVLOG-174 — 2026-11-25 (GLM): remove the painted flame duplicate
+
+- **User report:** the duplicate flame on the passage grates remained after
+  DEVLOG-170.
+- **Root cause:** DEVLOG-170 disabled only the painted texels' emission. The
+  two painted flames in `interior_B_delf_doordeco` were still present in the
+  albedo underneath the real client-frame billboards, so they still read as a
+  second fire.
+- **Fix:** the PBR shader now discards only two source-derived UV ellipses
+  around the painted flame anchors `(0.108,0.444)` and `(0.823,0.391)` when the
+  material is doordeco. The grate rails, candle bodies, and all other textures
+  are untouched. `L2_PAINTED_FLAME_ERASE=0` restores the old painted copy A/B.
+- **Verification (hidden gamescope, fixed door camera):** with real fire off,
+  erase OFF/ON changes 558 px >8 and 424 px >30 in exactly two components
+  (307 px at x707..729/y419..441 and 229 px at x891..905/y422..447). With real
+  fire on, the final image differs from the no-fire image by 1,824 px >8 and
+  1,462 px >30; the two main client-fire components are 1,011 px and 621 px.
+  The painted-copy A/B with fire on remains localized to the same two flame
+  footprints (514 px >8). Zero shader compile errors (excluding xkbcomp).
+- **Shots:** `tmp/trace_173/flame_erase_off.png`, `flame_erase_on.png`,
+  `flame_fire_erase_on.png`.
+- **Kiosk-grate triage (no speculative change):** the imported runtime albedos
+  are masked and the correct surfaces have `use_alpha=true`:
+  doordeco 20,774 px <0.4, wall08 29,664, walldeco 29,405. A fixed store_06
+  front A/B changes 17,018 px >8 (16,937 >30), bbox x669..835/y178..420 —
+  the openwork branch fires. Since the user still sees a solid grate, the
+  exact kiosk HUD/camera is required to identify whether another surface or
+  actor is being mistaken for the already-masked wall08/walldeco panels.
