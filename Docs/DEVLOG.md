@@ -10554,3 +10554,18 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - **Diagnostics added:** `L2_CAM_POS`/`L2_CAM_TARGET` (top-level camera in Godot
   meters), `L2_NO_GRATE_ALPHA=1` (old opaque A/B), `L2_GRATE_DEBUG=1` (exact
   store_06 panel world AABB), `L2_PLAZA_DEBUG=1` (Polys377 shape audit).
+
+## DEVLOG-170 — 2026-11-25 (GLM): remove the painted duplicate flame on grates
+
+- **User report:** in passages the candle fire duplicates on the grates.
+- **Cause:** `interior_B_delf_doordeco` already contains painted flame texels.
+  DEVLOG-163 added real client-frame fire sprites, but DEVLOG-159 also kept
+  `candle_glow=0.35` on the door texture, so the painted flame glowed as a
+  second fire.
+- **Fix:** `candle_glow` stays 0.35 for real `interior_B_delf_candle01`
+  geometry, but defaults to 0 for `interior_B_delf_doordeco`.
+  `L2_DOORDECO_GLOW=1` restores the old duplicated look for A/B.
+- **Verification (hidden gamescope, exact door camera):** glow ON/OFF changes
+  1060 px >8 (0.07%), 528 px >30 (0.04%), bbox x378..859/y416..472 — exactly
+  the two painted flame areas; the real fire sprites are unchanged. Zero
+  shader errors. Shots: `tmp/verify_170/door_no_duplicate.png`, `spawn.png`.

@@ -430,7 +430,13 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	# L2_CANDLES_OFF=1 = the before-state A/B.
 	if OS.get_environment("L2_CANDLES_OFF") == "" \
 			and obj in ["interior_B_delf_candle01", "interior_B_delf_doordeco"]:
-		m.set_shader_parameter("candle_glow", 0.35)
+		var cg := 0.35
+		if obj == "interior_B_delf_doordeco":
+			# The door texture already contains painted flames. The real
+			# client-frame fire sprites replace them; glowing the painted
+			# texels too produced the user's duplicated flame on the grate.
+			cg = 0.35 if OS.get_environment("L2_DOORDECO_GLOW") != "" else 0.0
+		m.set_shader_parameter("candle_glow", cg)
 	# DEVLOG-144: the DE village lantern plafonds glow (the lamp's own
 	# glass emission); every other texture stays inert (the energy 0)
 	if obj == "DE_V_cube_deco3":
