@@ -10419,3 +10419,42 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   contribution; POM is already 0 for the village PBR route; normal-map and
   duplicate-triangle A/B were also visually inert at the tested cameras. No
   unverified floor code is included here.
+
+## DEVLOG-165 — 2026-11-24 (GLM): remove the common floor under native interiors
+
+- **User report:** the upper floor textures inside buildings swim/crawl with the
+  camera; there are two layers — a common location floor/ground and the native
+  interior floor. The user suggested removing the common layer.
+- **Correct reproduction note:** `L2_SPAWN` intentionally ignores its Z and uses
+  `terrain_height + 0.9 m`; at the reported shop this put the diagnostic player
+  inside/above the ceiling and invalidated several earlier floor A/Bs. The
+  honest indoor spawn is the 5-value `L2_STEP_TEST`
+  `122.04,159.45,-45.823,122.04,159.45` (player stays at -45.8195).
+- **Root cause:** both client floor families are visible indoors. Native
+  `DE_V_floor02` (Polys154 and 29 other brushes) is at -45.821; the lower common
+  `DE_V_floor01` (Polys348/353/3993...) is at -46.013/-46.12 and extends under
+  it. With the correct indoor camera, skipping Polys154 alone changes 18.85%
+  of the frame — proof that both layers are present.
+- **Fix:** a derived coverage mask, not synthetic art:
+  `tools/l2strict/native_floor_mask.py` rasterizes all 30 native floor02 brushes
+  (60 triangles) into `assets/maps/20_18/textures/oren_dev_t/native_floor_mask.png`
+  (2048x2048 over the 327.68 m tile; 11537 black pixels). `l2_surface_pbr`
+  discards `DE_V_floor01` fragments where the mask is black; outside the mask
+  the common floor remains. Collision is unchanged. `L2_NO_FLOOR_MASK=1` = A/B.
+- **Verification (correct indoor spawn, yaw pi, pitch -0.5, fixed time):**
+  masked vs unmasked: 126672 px >8 (8.80%), 6109 px >30 (0.42%), bbox
+  x511..1599/y466..899 — floor-local; mean brightness 28.5/29.7/33.1 ->
+  28.8/29.8/33.5 (the lower common copy is gone, native floor remains).
+  Plaza baseline: **0 px** changed — streets/plaza are outside the mask and
+  untouched. Shop-exit STEP_TEST and H02 stair regression still pass.
+- **Diagnostics kept:** `L2_SKIP_BRUSH=Polys...` (per-brush A/B) and
+  `L2_FLOOR_GRID_INTERIOR=1` (start floor-grid rays below the shop roof).
+- **Rejected hypotheses (no code committed):** terrain quads under the room are
+  holes (placeholder height -8821); village PBR POM is already 0; floor/carpet
+  normal, specular, pool-normal and 1 cm rug-lift A/Bs were visually inert or
+  negligible. The duplicate-LevelBSP and recursive floor-clip experiments were
+  also reverted. The mask is the first change that removes the actual second
+  floor while leaving the outside byte-identical.
+- **Shots:** `tmp/verify_165/indoor_masked.png`, `indoor_unmasked.png`, `plaza.png`,
+  `spawn.png`.
+- **Status:** awaiting the user's visual confirmation indoors.

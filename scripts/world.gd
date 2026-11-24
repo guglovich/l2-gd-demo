@@ -95,6 +95,8 @@ var _veg_batch := {}
 # center of the DE_V_cube_deco3 surface) — the omni anchors for the
 # lantern lights; keyed by the mesh key.
 var _plafond_center := {}
+# DEVLOG-165: derived native-floor coverage mask (client DE_V_floor02 geometry).
+var _native_floor_mask: Texture2D = null
 # DEVLOG-159: exact client-derived candle light positions in mesh-local
 # glTF meters. Table candles = top-center of each candle's geometry island;
 # door candles = the two bright wax/flame UV anchors of doordeco mapped onto
@@ -680,7 +682,7 @@ func _floor_grid_flow() -> void:
 			var gx: float = lerpf(a.x, b.x, float(ix) / float(nx - 1))
 			# descend through overlying structures (canopy etc.) until the
 			# first walkable hit inside the road-deck band
-			var cur_y := 40.0
+			var cur_y := -44.5 if OS.get_environment("L2_FLOOR_GRID_INTERIOR") != "" else 40.0
 			var best_y := NAN
 			var best_n := 0.0
 			var best_mesh := "NO-HIT"
@@ -1216,6 +1218,16 @@ func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true,
 		var dup: Material = pm.duplicate()
 		if dup is ShaderMaterial:
 			(dup as ShaderMaterial).set_shader_parameter("cull_back", not two_sided)
+			# DEVLOG-165: discard the lower common floor only where the
+			# client's native DE_V_floor02 exists above it. Outside the mask
+			# (streets/other tiles) the common floor stays unchanged.
+			if tex[1] == "DE_V_floor01" \
+					and OS.get_environment("L2_NO_FLOOR_MASK") == "":
+				if _native_floor_mask == null:
+					_native_floor_mask = load("res://assets/maps/20_18/textures/oren_dev_t/native_floor_mask.png")
+				if _native_floor_mask != null:
+					(dup as ShaderMaterial).set_shader_parameter("native_floor_mask", _native_floor_mask)
+					(dup as ShaderMaterial).set_shader_parameter("use_native_floor_mask", 1.0)
 			# DEVLOG-147: the duplicate must be tracked too — it holds only
 			# the parameters set before it was made, and the lantern push
 			# happens at the end of _ready (rev2: the BSP floors — all the
@@ -1365,10 +1377,17 @@ func _build_bsp_brushes() -> void:
 	var brushes: Array = bsp_data.get("brushes", [])
 	var built := 0
 	var skipped := 0
+	var skip_brushes: Array = []
+	var skip_env := OS.get_environment("L2_SKIP_BRUSH")
+	if skip_env != "":
+		skip_brushes = skip_env.split(",")
 	var m := _bsp_grey()
 	var mat_cache := {}
 	var textured_surfaces := 0
 	for br in brushes:
+		if br.get("polys", "") in skip_brushes:
+			skipped += 1
+			continue
 		var polys: String = br.get("polys", "")
 		var loc: Array = br.get("location", [0, 0, 0])
 		var faces: Array = br.get("faces", [])

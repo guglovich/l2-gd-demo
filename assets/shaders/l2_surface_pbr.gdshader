@@ -33,6 +33,14 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
+// DEVLOG-165: derived coverage mask for the native DE_V_floor02 interiors.
+// DE_V_floor01 materials set use_native_floor_mask=1; black mask pixels mean
+// "native floor above" and discard the lower common floor. World bounds are
+// meters (20_18 spans 0..327.68). No collision change.
+uniform sampler2D native_floor_mask : filter_linear, repeat_disable;
+uniform vec2 native_floor_mask_origin = vec2(0.0);
+uniform vec2 native_floor_mask_size = vec2(327.68);
+uniform float use_native_floor_mask = 0.0;
 // DEVLOG-144: the emissive surfaces — the DE village lantern plafonds
 // (DE_V_cube_deco3) glow as the lamp's own light; 0 = every other
 // texture inert (the village look is untouched). DEVLOG-151 rev2:
@@ -250,6 +258,14 @@ void fragment() {
 	}
 
 	vec4 alb = texture(albedo_tex, uv_final);
+	if (use_native_floor_mask > 0.5) {
+		vec2 muv = (wpos.xz - native_floor_mask_origin) / native_floor_mask_size;
+		if (all(greaterThanEqual(muv, vec2(0.0))) && all(lessThanEqual(muv, vec2(1.0)))) {
+			if (texture(native_floor_mask, muv).r < 0.5) {
+				discard;
+			}
+		}
+	}
 	if (use_alpha && alb.a < alpha_scissor) {
 		discard;   // the grate holes are see-through
 	}
