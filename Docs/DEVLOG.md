@@ -10569,3 +10569,22 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   1060 px >8 (0.07%), 528 px >30 (0.04%), bbox x378..859/y416..472 — exactly
   the two painted flame areas; the real fire sprites are unchanged. Zero
   shader errors. Shots: `tmp/verify_170/door_no_duplicate.png`, `spawn.png`.
+
+## DEVLOG-171 — 2026-11-25 (GLM): disable the floor mask that opened house holes
+
+- **User report:** the central village grate shows partially inside houses.
+- **Cause:** the DEVLOG-165 floor mask discarded the common `DE_V_floor01`
+  under native floor02, but at house edges/gaps it removed the only visible
+  floor and exposed the central `Iron_net`/void. The mask was a temporary
+  workaround, not a geometry fix.
+- **Fix:** mask disabled by default; `L2_USE_FLOOR_MASK=1` keeps the old
+  experiment for A/B. The generator/shader remain for the future source-level
+  BSP unification (MODERNIZATION_2026 Phase 1).
+- **Verification (correct indoor spawn, hidden gamescope):** default vs mask
+  changes 142770 px >8 (9.91%) — the house floor is restored. `Iron_net` hits
+  in the indoor view drop to 6 sampled pixels at x1032..1056/y300..308, a narrow
+  far-opening sightline rather than floor clipping. Zero shader errors.
+  Shots: `tmp/verify_171/indoor_floor_restored.png`, `spawn.png`.
+- **Trade-off:** the original two-floor swimming may return until the BSP floor
+  sources are unified; this is preferable to holes/falls and is explicitly the
+  next Phase-1 task in the modernization plan.

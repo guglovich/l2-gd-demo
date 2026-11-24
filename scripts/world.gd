@@ -1222,11 +1222,12 @@ func _bsp_material(tex: Array, cache: Dictionary, texel_uvs: bool = true,
 		var dup: Material = pm.duplicate()
 		if dup is ShaderMaterial:
 			(dup as ShaderMaterial).set_shader_parameter("cull_back", not two_sided)
-			# DEVLOG-165: discard the lower common floor only where the
-			# client's native DE_V_floor02 exists above it. Outside the mask
-			# (streets/other tiles) the common floor stays unchanged.
+			# DEVLOG-165/171: the derived floor mask is kept for future A/B,
+			# but DISABLED by default — it opened holes at house edges and
+			# let the central grate show through interiors. The real fix is
+			# source-level BSP floor unification (MODERNIZATION_2026 Phase 1).
 			if tex[1] == "DE_V_floor01" \
-					and OS.get_environment("L2_NO_FLOOR_MASK") == "":
+					and OS.get_environment("L2_USE_FLOOR_MASK") != "":
 				if _native_floor_mask == null:
 					_native_floor_mask = load("res://assets/maps/20_18/textures/oren_dev_t/native_floor_mask.png")
 				if _native_floor_mask != null:
