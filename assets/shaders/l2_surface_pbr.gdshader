@@ -33,10 +33,10 @@ uniform bool use_alpha = false;  // TRUE cutout textures only (Iron_net,
                                  // for the carpet family: their alpha is a
                                  // specular/blend mask.
 uniform float alpha_scissor : hint_range(0.0, 1.0) = 0.4;
-// DEVLOG-173: the doordeco texture contains painted candle flames. The user
-// ordered the client's animated fire frames to replace them; erase only the
-// two source-derived flame footprints so the painted copy cannot duplicate
-// the real billboard. L2_PAINTED_FLAME_ERASE=0 restores the old A/B.
+// DEVLOG-174/179: diagnostic-only erase for the old false painted-flame
+// hypothesis. The source doordeco is a metal spiderweb grate with no painted
+// flames, so this is OFF by default. L2_PAINTED_FLAME_ERASE=1 restores the
+// old two elliptical holes for A/B.
 uniform bool erase_painted_flames = false;
 uniform vec2 painted_flame_uv0 = vec2(0.108, 0.444);
 uniform vec2 painted_flame_uv1 = vec2(0.823, 0.391);

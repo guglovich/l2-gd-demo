@@ -429,19 +429,18 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 		use_cutout = false
 	m.set_shader_parameter("use_alpha", use_cutout)
 	if obj == "interior_B_delf_doordeco" \
-			and OS.get_environment("L2_PAINTED_FLAME_ERASE") != "0":
+			and OS.get_environment("L2_PAINTED_FLAME_ERASE") == "1":
 		m.set_shader_parameter("erase_painted_flames", true)
-	# DEVLOG-159: the two client candle textures glow on their bright warm
-	# texels only (the shader derives the mask from albedo color). The door
-	# panel's dark rails and the candle holders stay inert.
+	# DEVLOG-159: candle01 glows on its bright warm texels only. The doordeco
+	# spiderweb grate is metal-only and stays inert; L2_DOORDECO_GLOW=1 is the
+	# old erroneous glowing-grate A/B.
 	# L2_CANDLES_OFF=1 = the before-state A/B.
 	if OS.get_environment("L2_CANDLES_OFF") == "" \
 			and obj in ["interior_B_delf_candle01", "interior_B_delf_doordeco"]:
 		var cg := 0.35
 		if obj == "interior_B_delf_doordeco":
-			# The door texture already contains painted flames. The real
-			# client-frame fire sprites replace them; glowing the painted
-			# texels too produced the user's duplicated flame on the grate.
+			# Metal grate only: no painted flame texels exist in this source.
+			# L2_DOORDECO_GLOW=1 restores the old erroneous glow for A/B.
 			cg = 0.35 if OS.get_environment("L2_DOORDECO_GLOW") != "" else 0.0
 		m.set_shader_parameter("candle_glow", cg)
 	# DEVLOG-144: the DE village lantern plafonds glow (the lamp's own

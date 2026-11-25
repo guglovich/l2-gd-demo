@@ -10835,3 +10835,37 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   `tmp/trace_179/indoor_floor_old/shot1.png`,
   `tmp/trace_179/final_spawn2/shot1.png` (full 720-tick settle).
 - **Status:** awaiting the user's visual confirmation of the native floor.
+
+## DEVLOG-180 — 2026-11-25 (GLM): remove the false flames on the door grate
+
+- **User report:** “огни также на решётке остались”, same house camera HUD
+  `X=12115 Y=15951 Z=-4582.1`, `14:38`.
+- **Root cause:** `interior_B_delf_store_17` is only the flat spiderweb arch
+  grate (`interior_B_delf_doordeco`); its source texture contains no candles or
+  painted flames. The real wall sconces on the door jambs are separate
+  `store_10` meshes using `interior_B_delf_candle01`. DEVLOG-159 had assigned
+  two invented local positions to every one of the eight `store_17` actors,
+  spawning 16 extra fire billboards directly on the metalwork. The count was
+  51 instead of 35. DEVLOG-174's default elliptical erase also punched two
+  false holes in the grate.
+- **Fix:** removed `store_17` from the production candle table. The old two
+  sprites per grate are available only through `L2_DOOR_GRATE_FLAMES=1`, and
+  that diagnostic never registers a false candle light. Painted-flame erase is
+  now opt-in via `L2_PAINTED_FLAME_ERASE=1`; production leaves the real metal
+  texture intact. Added `L2_CANDLE_FIRE_FRAME=0..4` to pin one client frame and
+  matching flicker time for deterministic A/B; default remains live `TIME`.
+- **Verification (hidden gamescope, user camera `yaw=-1.55, pitch=-0.56,
+  zoom=0.65`, frozen client frame 2):**
+  - False grate sprites OFF/ON: **4,371 px >8**, **3,365 px >30**, bbox
+    `x639..976/y186..420`; two main flame components 2,116 px and 1,423 px.
+  - False painted-flame erase OFF/ON: **1,481 px >8**, **1,069 px >30**;
+    two main holes 772 px and 540 px.
+  - Runtime billboard count: **51 -> 35**; the real `store_10` sconces remain.
+  - Fixed frame vs the user's old frame: 494 SIFT inliers, RMSE `0.91 px`.
+  - Zero shader compile errors excluding xkbcomp; road sweep remains 0/26.
+- **Shots:** `tmp/trace_179/freeze_fixed/shot1.png`,
+  `tmp/trace_179/freeze_sprites_old/shot1.png`,
+  `tmp/trace_179/freeze_erase_old/shot1.png`,
+  `tmp/trace_179/final_spawn3/shot1.png` (full 720-tick settle).
+- **Status:** awaiting the user's visual confirmation of the grate and the
+  previously blocked kiosk/floor/flame fixes.

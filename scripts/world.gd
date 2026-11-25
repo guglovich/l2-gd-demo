@@ -102,15 +102,10 @@ var _plafond_center := {}
 # DEVLOG-165: derived native-floor coverage mask (client DE_V_floor02 geometry).
 var _native_floor_mask: Texture2D = null
 # DEVLOG-159: exact client-derived candle light positions in mesh-local
-# glTF meters. Table candles = top-center of each candle's geometry island;
-# door candles = the two bright wax/flame UV anchors of doordeco mapped onto
-# its quad. UModel confirmed store_07/08/19/20 candle sections are empty
-# (0 verts) in the client, so they are NOT invented here.
+# glTF meters. Table candles = top-center of each candle's geometry island.
+# The doorway sconces are store_10 (interior_B_delf_candle01); store_17 is
+# only the spiderweb arch grate and has no candles.
 var _candle_local_positions := {
-	"interior_B_delf_s:interior_B_delf_store_17": [
-		Vector3(0.2753, -0.0217, 0.2871),
-		Vector3(-0.2268, -0.0422, -0.2366),
-	],
 	"interior_B_delf_s:interior_B_delf_store_03": [
 		Vector3(0.8455, -0.2605, 0.3655),
 		Vector3(-0.2175, -0.2605, -0.8775),
@@ -1734,6 +1729,11 @@ func _build_candle_flames() -> void:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://assets/shaders/l2_candle_flame.gdshader")
 	mat.set_shader_parameter("flame_frames", frames)
+	var frame_env := OS.get_environment("L2_CANDLE_FIRE_FRAME")
+	if frame_env != "":
+		var frame := clampi(int(frame_env), 0, 4)
+		mat.set_shader_parameter("frame_override", frame)
+		mat.set_shader_parameter("time_override", float(frame) / 8.0)
 	var verts := PackedVector3Array([
 		Vector3(-0.5, -0.5, 0), Vector3(0.5, -0.5, 0),
 		Vector3(0.5, 0.5, 0), Vector3(-0.5, 0.5, 0),
@@ -1879,11 +1879,23 @@ func _build_meshes() -> void:
 		# DEVLOG-159: register the client-derived candle lights in world
 		# space (the actor's exact R*S transform, same as the mesh).
 		# L2_CANDLES_OFF=1 = the before-state A/B (both pool + emission).
+		# DEVLOG-179: store_17 is only the spiderweb doorway arch grate.
+		# L2_DOOR_GRATE_FLAMES=1 restores the old erroneous two fire sprites
+		# per grate for A/B; production never registers candles on store_17.
 		if OS.get_environment("L2_CANDLES_OFF") == "" \
-				and _candle_local_positions.has(key):
-			for cp in _candle_local_positions[key]:
+				and (_candle_local_positions.has(key) \
+				or (key.ends_with("store_17") \
+				and OS.get_environment("L2_DOOR_GRATE_FLAMES") != "")):
+			var local_candles: Array = _candle_local_positions.get(key, [])
+			if key.ends_with("store_17"):
+				local_candles = [Vector3(0.2753, -0.0217, 0.2871),
+						Vector3(-0.2268, -0.0422, -0.2366)]
+			for cp in local_candles:
 				var wp: Vector3 = inst.transform * cp
-				L2ProcTex.register_candle(wp)
+				# store_17 exists only in the opt-in visual A/B; never register
+				# its false candle light in production or in that isolated A/B.
+				if not key.ends_with("store_17"):
+					L2ProcTex.register_candle(wp)
 				var fh := 0.28 if key.ends_with("store_17") \
 						else (0.24 if key.ends_with("store_15") else 0.18)
 				var fw := fh * 0.6
@@ -1982,10 +1994,10 @@ func _build_meshes() -> void:
 			_lantern_omnis.append(lantern)
 			world.add_child(lantern)
 		# DEVLOG-160: the store_17 doordeco panel is a flat decorative
-		# overlay (the ornate arch + the two candles), NOT a door leaf. Its
-		# trimesh collider sat at chest height across the doorway: the ankle
-		# ray passed under it, the knee ray over it, and the capsule could
-		# enter but not leave (the user's report at 12204,15945). Visual only.
+		# spiderweb arch/grate overlay, NOT a door leaf. Its trimesh collider
+		# sat at chest height across the doorway: the ankle ray passed under
+		# it, the knee ray over it, and the capsule could enter but not leave
+		# (the user's report at 12204,15945). Visual only.
 		var no_collision := key == "interior_B_delf_s:interior_B_delf_store_17"
 		if not no_collision:
 			if not _shape_cache.has(key):
