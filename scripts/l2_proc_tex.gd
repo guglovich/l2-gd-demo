@@ -238,6 +238,9 @@ const ALPHA_CUTOUT := [
 	# height fields; texgen re-run, A == source alpha verified 1.0.
 	"interior_b_delf_t:interior_B_delf_wall08",
 	"interior_b_delf_t:interior_B_delf_walldeco",
+	# the kiosk arabesque grille (DEVLOG-177): desk_deco is RGBA with
+	# 81.6% alpha-0; its staged PBR A was a stale height field.
+	"interior_b_delf_t:interior_B_delf_desk_deco",
 	# the Shirai statue spike surface (De_Statue004): the client texture is
 	# RGBA with the real spike mask (62.5% transparent); the staged
 	# pbr_albedo A now carries it (texgen: source-alpha, 2026-11-23,
@@ -421,7 +424,8 @@ static func _pbr_material(pkg_l: String, obj: String, key: String,
 	if OS.get_environment("L2_NO_GRATE_ALPHA") != "" and key in [
 			"interior_b_delf_t:interior_B_delf_doordeco",
 			"interior_b_delf_t:interior_B_delf_wall08",
-			"interior_b_delf_t:interior_B_delf_walldeco"]:
+			"interior_b_delf_t:interior_B_delf_walldeco",
+			"interior_b_delf_t:interior_B_delf_desk_deco"]:
 		use_cutout = false
 	m.set_shader_parameter("use_alpha", use_cutout)
 	if obj == "interior_B_delf_doordeco" \

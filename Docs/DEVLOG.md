@@ -10722,3 +10722,30 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
     `(112.79,-45.87,186.67)`; tunnel reaches `(167.81,-41.66,150.62)`;
     central grate crossing ends at `(116.47,-46.89,168.50)`, floor=true.
 - **Shot:** `tmp/verify_177/user_point.png` at the user's HUD coordinates.
+
+## DEVLOG-177 — 2026-11-25 (GLM): the real kiosk grille alpha
+
+- **User screenshot:** the solid kiosk arabesque is not `wall08/walldeco`.
+  Surface tracing and flat-debug hues identify it as
+  `interior_B_delf_desk_deco` (used by store_03 and the other kiosk stalls).
+- **Root cause:** the client texture is RGBA with **25,174 alpha-0 pixels
+  (81.6%)**. The staged `pbr_albedo` A was a stale height field (23,581 zero
+  pixels, only two fully opaque) and the sidecar had no `alpha_mask` — the same
+  stale-texgen failure as DEVLOG-154/158/164/169.
+- **Fix:** texgen re-run for `interior_B_delf_desk_deco`; PBR A now equals the
+  source alpha byte-for-byte and `alpha_mask=true`. Added the key to
+  `ALPHA_CUTOUT` and to `L2_NO_GRATE_ALPHA` A/B.
+- **Rejected hypothesis:** luminance-derived cutouts on deco13/bookshelf_01
+  were tested first and produced no useful change. Those surfaces sample bright
+  texels in the visible UV crop; inventing a luma mask would have punched holes
+  in metal rather than restoring the client's real grille. That experiment was
+  fully reverted.
+- **Runtime audit:** imported albedo has 25,841 pixels <0.4 and the material
+  reports `use_alpha=true`.
+- **Verification (hidden gamescope, user HUD camera):** cutout OFF/ON changes
+  **47,749 px >8 (3.316%)** and **27,130 px >30 (1.884%)**, bbox
+  x92..839/y446..621. The largest openwork components are 22,127 px and 11,913
+  px; changed pixels go from near-black `(9,12,18)` to the lit interior
+  `(42,47,56)`. Zero shader compile errors (excluding xkbcomp).
+- **Shots:** `tmp/trace_173/kiosk_alpha_off.png`, `kiosk_alpha_on.png`,
+  `tmp/verify_177/user_point.png`; final spawn `tmp/verify_177/spawn.png`.
