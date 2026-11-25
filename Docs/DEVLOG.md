@@ -10749,3 +10749,46 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   `(42,47,56)`. Zero shader compile errors (excluding xkbcomp).
 - **Shots:** `tmp/trace_173/kiosk_alpha_off.png`, `kiosk_alpha_on.png`,
   `tmp/verify_177/user_point.png`; final spawn `tmp/verify_177/spawn.png`.
+
+## DEVLOG-178 — 2026-11-25 (GLM): main-road fall — close the open Btm_Obj01 riser
+
+- **User report:** “теперь провалы на главной дороге в деревне”, HUD
+  `X=14825 Y=16123 Z=-4781.4`, time `04:23`. The attached frame is saved as
+  `tmp/trace_178/user_road.png`.
+- **Correct level:** the HUD point is already UNDER the road. A vertical ray
+  hits `O_DE_Btm_Obj01` at `-44.491`, `BSP:Polys3995` at `-44.507/-44.608`,
+  then terrain at `-47.825`. The character is standing on that lower terrain.
+- **Camera reconstruction:** yaw `1.570796`, pitch `0.20`, zoom `1.0` gives
+  175 SIFT inliers against the user's frame. A `1600`-sample trace box over
+  the dark central “hole” hits `BSP:Polys3995` 1600/1600 times: it is the
+  unlit underside, not missing render geometry.
+- **Root cause:** the visible character's new 0.50 m capsule can fit under
+  the raised west end of the open `O_DE_Btm_Obj01` road ribbon. Its kDOP
+  subset has 18 horizontal triangles but no end face at local X `-17.625`,
+  where the road rises 0.64 m above the approach. The old 1.7 m capsule hit
+  the lip and the step assist climbed it; the short capsule passed beneath
+  the ribbon and fell to terrain. Radius is not the cause: `r=0.12` fails at
+  `h=0.50` and passes at `h=0.60`; `r=0.30,h=0.50` still fails.
+- **Dynamic reproduction:** a 26-path capsule sweep (both directions, 13
+  lanes) failed on the five westbound lanes `Z=159.5..160.5`, around
+  `X=149..151`. The real player test `(158,160,-44.32) -> (146,160)` ended
+  at `Y=-48.85`; the old capsule ended at `-44.86`.
+- **Fix:** `_collision_shape` now appends one collision-only end cap (two
+  triangles) across the real `O_DE_Btm_Obj01` AABB at its raised west end.
+  The 18 authentic kDOP triangles are unchanged; runtime total is 20.
+  `L2_BTM_FULL_COLLISION=0` restores the old subset-only A/B. No render mesh,
+  material, texture, actor, or player size changed.
+- **Verification (hidden gamescope / headless physics):**
+  - Road sweep: **5/26 failures -> 0/26**; the A/B flag restores exactly five.
+  - Real player seam run now ends `(146.58,-44.86,160.00)`, floor=true,
+    tgt=false; assist logs the 0.64 m rise and lands at `-44.045`.
+  - Second `O_DE_Btm_Obj01` actor passes in both directions.
+  - User house exit `(117.46,-46.01,160.52)`, shop `(119.77,-45.82,158.51)`,
+    H02 `(112.79,-45.87,186.67)`, tunnel `(167.81,-41.66,150.62)`, and
+    central grate `(116.47,-46.89,168.50)` all remain floor=true/tgt=false.
+  - User-camera render A/B: 1 px >8, 0 px >30 (raster noise); collision-only
+    fix is visually invariant. Zero shader compile errors excluding xkbcomp.
+- **Shots:** `tmp/trace_178/user_fixed/shot1.png`,
+  `tmp/trace_178/spawn/shot1.png` (full 720-tick settle).
+- **Status:** awaiting the user's road retest and visual confirmation of the
+  previously blocked house/kiosk/floor/flame fixes.

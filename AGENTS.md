@@ -119,6 +119,11 @@ Reimport trap (both bit us): after regenerating glTFs delete
 `assets/shaders/*.import`, then `rm -rf .godot/imported` + a full
 `godot --headless --import` — the cache does not reliably refresh.
 
+Diagnostic coordinate units: `L2_STEP_TEST` uses Godot meters, but
+`L2_FLOOR_GRID`, `L2_FLOOR_PROFILE`, and `L2_TRACE_RAY` take raw L2 game
+units (for example `14825,16123`, not `148.25,161.23`). Mixing them silently
+probes the world origin and produces plausible but irrelevant terrain hits.
+
 ## Tool peculiarities (discovered the hard way)
 
 - L2 `.unr`/`.usx` here are `Lineage2Ver111` (XOR 0xAC after a 28-byte

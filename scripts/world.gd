@@ -2203,6 +2203,12 @@ func _ue_basis(pitch: int, yaw: int, roll: int) -> Basis:
 ## staged glTF frame) next to each glTF; meshes without it keep the full
 ## trimesh. This is what removes the non-walkable Bridge lower deck.
 func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
+	# DEVLOG-178: the road ribbon's kDOP subset has no face at its raised
+	# west end. A 0.50 m capsule can slip under the 0.64 m riser; close that
+	# collision-only end cap from the real mesh AABB. The subset keeps the
+	# authored middle ramp. L2_BTM_FULL_COLLISION=0 restores the old A/B.
+	var btm_closed := key == "Oren_DEV_S:O_DE_Btm_Obj01" \
+			and OS.get_environment("L2_BTM_FULL_COLLISION") != "0"
 	# DEVLOG-168: the inlet kDOP subset covers only the upper rock shell; both
 	# the walkable floor and the lower tunnel walls are absent. A horizontal-
 	# only merge fixed the floor but let the player run through the walls.
@@ -2225,10 +2231,29 @@ func _collision_shape(key: String, mesh: Mesh) -> Shape3D:
 			if verts is Array and verts.size() >= 9:
 				var shape := ConcavePolygonShape3D.new()
 				var pv := PackedVector3Array()
-				pv.resize(verts.size() / 3)
-				for i in range(verts.size() / 3):
-					pv[i] = Vector3(verts[i * 3], verts[i * 3 + 1], verts[i * 3 + 2])
+				var subset_count: int = verts.size() / 3
+				pv.resize(pv.size() + subset_count)
+				for i in range(subset_count):
+					pv[pv.size() - subset_count + i] = Vector3(verts[i * 3], verts[i * 3 + 1],
+							verts[i * 3 + 2])
+				if btm_closed:
+					# The authored ribbon is open at its raised west end. Close
+					# that collision-only end cap across the real mesh AABB so a
+					# short capsule cannot enter underneath the 0.64 m riser.
+					var aabb := mesh.get_aabb()
+					var x0: float = aabb.position.x
+					var y0: float = aabb.position.y
+					var y1: float = aabb.end.y
+					var z0: float = aabb.position.z
+					var z1: float = aabb.end.z
+					pv.append_array(PackedVector3Array([
+						Vector3(x0, y0, z0), Vector3(x0, y1, z0), Vector3(x0, y1, z1),
+						Vector3(x0, y0, z0), Vector3(x0, y1, z1), Vector3(x0, y0, z1),
+					]))
 				shape.set_faces(pv)
+				if btm_closed:
+					print("road collision: Btm_Obj01 kDOP subset + west end cap, ",
+							pv.size() / 3, " triangles")
 				return shape
 	return mesh.create_trimesh_shape()
 
