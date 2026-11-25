@@ -17,7 +17,7 @@ var _probe_t := 0.0
 var _coord_label: Label
 var move_target: Vector3
 var has_target := false
-var _target_time := 0.0  # seconds since the current click-to-move target was set
+var _target_time := 0.0  # seconds since target set or last assisted progress
 var rig: Node3D
 var dest_marker: MeshInstance3D
 
@@ -35,6 +35,7 @@ func _init() -> void:
 	if OS.get_environment("L2_VIEW_PITCH") != "":
 		pitch = float(OS.get_environment("L2_VIEW_PITCH"))
 var pitch := -0.35
+var _capsule_height := 0.5
 # The diagnostic runs (L2_SCREENSHOT/L2_BURST) run on the REAL display where
 # the mouse/keyboard belong to the user working in parallel — a right-drag
 # rotated the camera mid-render and contaminated the captures (DEVLOG-111).
@@ -89,10 +90,17 @@ func _ready() -> void:
 	cam_pivot.rotation = Vector3(pitch, yaw, 0)
 	var body := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
-	cap.radius = 0.3
-	cap.height = 1.7
+	# Match the ~0.44 m visible character. The old 1.7 m capsule could not
+	# clear the village door lintels and made entry/exit asymmetric.
+	var cap_radius := 0.12
+	if OS.get_environment("L2_CAPSULE_HEIGHT") != "":
+		_capsule_height = float(OS.get_environment("L2_CAPSULE_HEIGHT"))
+	if OS.get_environment("L2_CAPSULE_RADIUS") != "":
+		cap_radius = float(OS.get_environment("L2_CAPSULE_RADIUS"))
+	cap.radius = cap_radius
+	cap.height = _capsule_height
 	body.shape = cap
-	body.position = Vector3(0, 0.85, 0)
+	body.position = Vector3(0, _capsule_height * 0.5, 0)
 	add_child(body)
 	_load_character()
 	# on-screen coordinates (visible in screenshots)
@@ -558,12 +566,12 @@ func _physics_process(delta: float) -> void:
 			# blocked-target killer's own threshold) — never mid-stride on
 			# slopes (a free-running slope crossing would teleport-pop).
 			var blocked := get_real_velocity().length() < 0.5
-			var ankle_from := global_position + Vector3(0, 0.15, 0)
+			var ankle_from := global_position + Vector3(0, _capsule_height * 0.30, 0)
 			var ankle_q := PhysicsRayQueryParameters3D.create(
 					ankle_from, ankle_from + fwd2 * 0.55)
 			ankle_q.exclude = [get_rid()]
 			var ankle_hit := space.intersect_ray(ankle_q)
-			var knee_from := global_position + Vector3(0, 1.15, 0)
+			var knee_from := global_position + Vector3(0, _capsule_height * 0.70, 0)
 			var knee_q := PhysicsRayQueryParameters3D.create(
 					knee_from, knee_from + fwd2 * 0.55)
 			knee_q.exclude = [get_rid()]
@@ -616,14 +624,30 @@ func _physics_process(delta: float) -> void:
 										step_fwd = step_fwd.normalized() * clamped
 									lp.x = global_position.x + step_fwd.x
 									lp.z = global_position.z + step_fwd.z
+							# The clearance ray runs above the rise, so a stair
+							# riser remains climbable while a full-height wall
+							# vetoes the teleport.
+							var clearance := maxf(_capsule_height * 0.70,
+									dy + _capsule_height * 0.70)
+							var clear_from := global_position + Vector3(0, clearance, 0)
+							var clear_to := Vector3(lp.x, floor_y2 + clearance, lp.z)
+							var clear_q := PhysicsRayQueryParameters3D.create(clear_from, clear_to)
+							clear_q.exclude = [get_rid()]
+							var clear_hit := space.intersect_ray(clear_q)
+							if clear_hit and clear_hit.get("normal").y < 0.55:
+								continue
 							global_position = Vector3(lp.x, floor_y2, lp.z)
 							velocity.y = 0.0
 							landed = true
 							step_landed = true
+							# DEVLOG-176: assisted forward progress is not a
+							# stuck target. Reset the killer timer so a long
+							# sequence of 4 cm rises cannot cancel the exit.
+							_target_time = 0.0
 							break
 				# DEVLOG-149 rev2: the hop fallback — a genuinely low
-				# odd-shaped face (the ankle hit at feet+0.15, the knee
-				# clear at feet+1.15) with no usable landing.
+				# odd-shaped face (ankle probe at 30% capsule height, knee
+				# clear at 70%) with no usable landing.
 				if not landed and ankle_hit and knee_hit.is_empty():
 					velocity.y = 4.5
 	# DEVLOG (step regression): blocked-target killer moved here so the step

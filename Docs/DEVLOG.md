@@ -10692,3 +10692,33 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
 - Mandatory spawn capture after the full 720-tick settle:
   `tmp/verify_174/spawn.png` (shot2 also retained). Zero shader compile errors
   (excluding xkbcomp's unrelated status line).
+
+## DEVLOG-176 — 2026-11-25 (GLM): house exit capsule + safe step assist
+
+- **User reproduction:** HUD `X=12063 Y=15855 Z=-4586.5`, with the kiosk and
+  doorway visible in the attached frame. The old `12204/15945` shop already
+  passed; this was the missing exact point.
+- **Root cause 1 — collision size:** the visible character is ~0.44 m, but the
+  capsule was 1.7 m tall and 0.6 m wide. It could not clear the village door
+  lintels/gaps; entry through the step assist worked while exit did not.
+- **Root cause 2 — assist timer:** long sequences of 4 cm rises advanced only
+  through the step assist, but the 3 s blocked-target escape hatch still fired
+  because `_target_time` measured total target age, not time without progress.
+- **Root cause 3 — unsafe teleport:** the assist could place the player beyond
+  a thin vertical wall because only the landing point and a low knee ray were
+  tested. A due-east wall test crossed `O_DE_SH` at x=122.32.
+- **Fix:** capsule now matches the visible body (height 0.50 m, radius 0.12 m;
+  `L2_CAPSULE_HEIGHT` / `L2_CAPSULE_RADIUS` retain A/B). Ankle/knee probes scale
+  with capsule height. Before an assisted landing, a clearance ray runs above
+  the rise (`max(0.70*h, dy+0.70*h)`): stairs remain climbable, full-height
+  walls veto the teleport. Real assisted progress resets the blocked timer.
+- **Verification (hidden gamescope):**
+  - User door `(120.63,158.55,-45.865) -> (117.00,160.80)` reaches
+    `(117.46,-46.01,160.52)`, floor=true, tgt=false.
+  - Alternate safe exits reach `(123.05,-46.01,160.19)` and
+    `(114.87,-45.82,155.94)`.
+  - Due-east wall target stops at `(122.00,-45.82,158.55)` — no wall crossing.
+  - Old shop reaches `(119.77,-45.82,158.51)`; H02 stair reaches
+    `(112.79,-45.87,186.67)`; tunnel reaches `(167.81,-41.66,150.62)`;
+    central grate crossing ends at `(116.47,-46.89,168.50)`, floor=true.
+- **Shot:** `tmp/verify_177/user_point.png` at the user's HUD coordinates.
