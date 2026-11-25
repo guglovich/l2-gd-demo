@@ -123,6 +123,11 @@ Diagnostic coordinate units: `L2_STEP_TEST` uses Godot meters, but
 `L2_FLOOR_GRID`, `L2_FLOOR_PROFILE`, and `L2_TRACE_RAY` take raw L2 game
 units (for example `14825,16123`, not `148.25,161.23`). Mixing them silently
 probes the world origin and produces plausible but irrelevant terrain hits.
+- `FBspSurf.idx[4]` is `iBrushPoly`, NOT an index into `Model.Nodes`. The
+  legacy `levelbsp.py` used it as a node index and stamped stale CSG floor
+  records onto native interiors. The corrected generator drops
+  `DE_V_floor01`/`Iron_net` entries when the node authority is `DE_V_floor02`,
+  after canonical UV selection so surviving road UVs stay unchanged.
 
 ## Tool peculiarities (discovered the hard way)
 

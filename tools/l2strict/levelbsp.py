@@ -279,7 +279,9 @@ def main():
 
     # group the renderable surfs by resolved texture; each group = a surface
     groups = {}          # tex_key -> list of polygons [(verts3d, uvs)]
-    stats = {"hidden": 0, "marker": 0, "span": 0, "nomat": 0, "drawn": 0}
+    stale_entries = {}   # tex_key -> set(entry indices) dropped after UV canon
+    stats = {"hidden": 0, "marker": 0, "span": 0, "nomat": 0, "drawn": 0,
+             "stale_floor": 0}
     surf_tex_of_group = {}
     for s in M["surfs"]:
         tex = resolve_tex(pkg, s["mat"], shaders)
@@ -311,6 +313,16 @@ def main():
         if 0 <= asi < len(M["surfs"]) and M["surfs"][asi]["flags"] & 0x1:
             stats["hidden"] += 1
             continue
+        # DEVLOG-179: surf.idx[4] is iBrushPoly, not a node index. The legacy
+        # loop therefore stamped stale lower-floor CSG records onto the native
+        # floor nodes. Mark them here, but keep them through canonical UV
+        # selection so the remaining road triangles retain their old mapping.
+        stale_floor = False
+        if 0 <= asi < len(M["surfs"]) and tex[1] in ("DE_V_floor01", "Iron_net"):
+            auth_tex = resolve_tex(pkg, M["surfs"][asi]["mat"], shaders)
+            if auth_tex and auth_tex[1] == "DE_V_floor02":
+                stale_floor = True
+                stats["stale_floor"] += 1
         pool, cnt = nd["cs"][0], nd["nvert"]
         if cnt < 3 or pool + cnt > len(verts):
             stats["nomat"] += 1
@@ -339,11 +351,15 @@ def main():
             uvs.append((sum((v[k] - base[k]) * U[k] for k in range(3)),
                         sum((v[k] - base[k]) * V[k] for k in range(3))))
         key = tuple(tex)
-        groups.setdefault(key, []).append((poly, uvs, base, U, V))
+        entry_index = len(groups.setdefault(key, []))
+        groups[key].append((poly, uvs, base, U, V))
+        if stale_floor:
+            stale_entries.setdefault(key, set()).add(entry_index)
         surf_tex_of_group[key] = tex
         stats["drawn"] += 1
-    print("surfs: drawn %d, hidden %d, marker %d, no-material %d, huge-span %d"
-          % (stats["drawn"], stats["hidden"], stats["marker"], stats["nomat"], stats["span"]))
+    print("surfs: drawn %d, hidden %d, marker %d, no-material %d, huge-span %d, "
+          "stale-floor %d" % (stats["drawn"], stats["hidden"], stats["marker"],
+                              stats["nomat"], stats["span"], stats["stale_floor"]))
 
     def _face_normal(verts):
         """Newell's method — robust for polygon fans where the first three
@@ -430,6 +446,11 @@ def main():
                              sum(v[k] * Vc[k] for k in range(3))))
             new_entries.append((poly, nuvs, (0.0, 0.0, 0.0), Uc, Vc))
         groups[key] = new_entries
+
+    # Drop stale lower-floor records only after canonical UV selection. This
+    # keeps every surviving triangle's authored/canonical mapping unchanged.
+    for key, dropped in stale_entries.items():
+        groups[key] = [entry for i, entry in enumerate(groups[key]) if i not in dropped]
 
     # build the glTF: one primitive per texture group
     blob = bytearray()

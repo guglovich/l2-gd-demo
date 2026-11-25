@@ -10792,3 +10792,46 @@ hypothesis for the 4 Pir02 towers); the user's observations recorded.
   `tmp/trace_178/spawn/shot1.png` (full 720-tick settle).
 - **Status:** awaiting the user's road retest and visual confirmation of the
   previously blocked house/kiosk/floor/flame fixes.
+
+## DEVLOG-179 — 2026-11-25 (GLM): native house floor restored at source
+
+- **User report:** “пол не исправлен”, HUD `X=12115 Y=15951 Z=-4582.1`,
+  `14:38`. The full `1604x936` frame was recovered from the session and saved
+  as `tmp/trace_179/user_indoor_full.jpg`.
+- **Camera reconstruction:** `yaw=-1.55, pitch=-0.56, zoom=0.65` gives 722
+  SIFT inliers against the old frame (RMSE `0.98 px`); the fixed frame keeps
+  494 inliers (RMSE `0.91 px`).
+- **Root cause:** `tools/l2strict/levelbsp.py` treated `FBspSurf.idx[4]`
+  (`iBrushPoly`, values `0..18`) as an index into `Model.Nodes`. It therefore
+  stamped stale lower-floor CSG records onto `node[8..14]`, the native
+  `DE_V_floor02` house floor at `Y=-45.8208`: 75 `DE_V_floor01` triangles plus
+  3 `Iron_net` triangles, coplanar with the real floor. The cobblestone won
+  the depth fight and covered the native hexagonal floor.
+- **Source fix:** the generator now marks `DE_V_floor01`/`Iron_net` records as
+  stale when the node's authoritative material is `DE_V_floor02`. They remain
+  through canonical UV selection, then are dropped, preserving every surviving
+  road triangle's UV mapping. 26 stale surf records -> 78 triangles removed;
+  `LevelBSP` shrinks from 9 surfaces / 28,248 B to 8 / 24,712 B. The sidecar
+  drops the now-empty `Iron_net` surface. All 37 surviving `floor01` polygon
+  records are an exact ordered subsequence of the old output; every other
+  surface is geometry+UV identical.
+- **Verification (hidden gamescope):**
+  - Vertical ray at the user's point now hits only `BSP:Polys154`
+    (`DE_V_floor02`) at `Y=-45.821`, normal `(0,1,0)`; no `LevelBSP` duplicate.
+  - User-camera trace box over the lower room: 5,759 sampled rays hit
+    `BSP:Polys154`; zero hit `LevelBSP`.
+  - Old floor vs source-fixed at the user camera: **244,808 px >8**,
+    **67,706 px >30**, bbox `x0..1599/y255..899`; the main floor component is
+    232,486 px at `x0/y492/w1600/h408`.
+  - Five approved road cameras after 720 ticks, source-fixed vs old LevelBSP:
+    `6/14/0/17/0` changed px >8 (upper street / entrance / descent / stairway /
+    spawn plaza), all within raster noise.
+  - Road sweep remains 0/26 failures. House point stands at
+    `(121.15,-45.82,159.51)`; user door, alternate exits, wall block, shop,
+    H02, tunnel and central grate all remain floor=true/tgt=false.
+  - Zero shader compile errors excluding xkbcomp. Temple BSP still builds
+    10/10 surfaces.
+- **Shots:** `tmp/trace_179/source_indoor_fixed/shot1.png`,
+  `tmp/trace_179/indoor_floor_old/shot1.png`,
+  `tmp/trace_179/final_spawn2/shot1.png` (full 720-tick settle).
+- **Status:** awaiting the user's visual confirmation of the native floor.
